@@ -22,6 +22,10 @@ public final class GameMap extends BaseMap {
 
     private final transient Pos[] gameSpawns = new Pos[GameConfig.MAX_PLAYERS];
 
+    public GameMap() {
+        super("", Pos.ZERO, "");
+    }
+
     public GameMap(@NotNull String name, Pos spawn, @NotNull Pos bomberInitialSpawn, @NotNull Pos leftSurvivorSpawn) {
         super(name, spawn, "Team");
         this.bomberInitialSpawn = bomberInitialSpawn;
