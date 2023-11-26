@@ -19,15 +19,22 @@ import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.event.player.PlayerSwapItemEvent;
 import net.minestom.server.extensions.Extension;
-import net.minestom.server.instance.Instance;
+import net.minestom.server.instance.InstanceContainer;
+import net.minestom.server.utils.PropertyUtils;
 import net.theevilreaper.tamias.commands.TestCommand;
 import net.theevilreaper.tamias.config.GameConfig;
 import net.theevilreaper.tamias.listener.PlayerQuitListener;
+import net.theevilreaper.tamias.map.MapProvider;
 import net.theevilreaper.tamias.phase.LobbyPhase;
 import net.theevilreaper.tamias.phase.MapBuildPhase;
 import net.theevilreaper.tamias.phase.PlayingPhase;
 import net.theevilreaper.tamias.phase.RestartPhase;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.nio.file.Files;
 
 import static de.icevizion.aves.inventory.util.InventoryConstants.CANCELLABLE_EVENT;
 
@@ -38,8 +45,12 @@ import static de.icevizion.aves.inventory.util.InventoryConstants.CANCELLABLE_EV
  **/
 public class Tamias extends Extension {
 
+    public static final Logger LOGGER = LoggerFactory.getLogger(Tamias.class);
+    private static final boolean SETUP_MODE = PropertyUtils.getBoolean("tamias.setup", false);
+
     private final LinearPhaseSeries<GamePhase> phaseSeries;
     private final TeamService<Team> teamService;
+    private MapProvider mapProvider;
 
     public Tamias() {
         this.phaseSeries = new LinearPhaseSeries<>();
@@ -49,7 +60,11 @@ public class Tamias extends Extension {
 
     @Override
     public void initialize() {
-        Instance instance = MinecraftServer.getInstanceManager().createInstanceContainer();
+        checkMapDirectory();
+        InstanceContainer instance = MinecraftServer.getInstanceManager().createInstanceContainer();
+
+        this.mapProvider = new MapProvider(getDataDirectory(), instance);
+
         MinecraftServer.getInstanceManager().registerInstance(instance);
         MinecraftServer.getGlobalEventHandler().addListener(PlayerLoginEvent.class, event -> {
             event.setSpawningInstance(instance);
@@ -73,13 +88,32 @@ public class Tamias extends Extension {
 
     private void createPhaseStructure() {
         this.phaseSeries.add(new LobbyPhase());
-
         var gamePhaseSeries = new CyclicPhaseSeries<GamePhase>("game");
         gamePhaseSeries.add(new MapBuildPhase());
         gamePhaseSeries.add(new PlayingPhase());
         gamePhaseSeries.setMaxIterations(GameConfig.GAME_ROUNDS);
         this.phaseSeries.addAll(gamePhaseSeries);
         this.phaseSeries.add(new RestartPhase());
+    }
+
+    private void checkMapDirectory() {
+        var dataDirectory = getDataDirectory();
+        var mapDirectory = dataDirectory.resolve(GameConfig.MAP_PATH_NAME);
+        if (!Files.exists(dataDirectory)) {
+            try {
+                Files.createDirectory(getDataDirectory());
+            } catch (IOException exception) {
+                LOGGER.error("Unable to create extension directory", exception);
+            }
+        }
+
+        if (!Files.exists(mapDirectory)) {
+            try {
+                Files.createDirectory(mapDirectory);
+            } catch (IOException exception) {
+                LOGGER.error("Unable to create the map folder", exception);
+            }
+        }
     }
 
     private void initTeams() {
