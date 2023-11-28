@@ -23,6 +23,7 @@ import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.utils.PropertyUtils;
 import net.theevilreaper.tamias.commands.TestCommand;
 import net.theevilreaper.tamias.config.GameConfig;
+import net.theevilreaper.tamias.listener.PlayerJoinListener;
 import net.theevilreaper.tamias.listener.PlayerQuitListener;
 import net.theevilreaper.tamias.map.MapProvider;
 import net.theevilreaper.tamias.phase.LobbyPhase;
@@ -123,6 +124,7 @@ public class Tamias extends Extension {
     }
 
     void registerListener(@NotNull EventNode<Event> eventNode) {
+        eventNode.addListener(PlayerLoginEvent.class, new PlayerJoinListener(this.phaseSeries));
         eventNode.addListener(PlayerDisconnectEvent.class, new PlayerQuitListener(this.phaseSeries));
     }
 
