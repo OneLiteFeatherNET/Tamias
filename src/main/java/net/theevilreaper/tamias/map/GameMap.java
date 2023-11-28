@@ -2,6 +2,7 @@ package net.theevilreaper.tamias.map;
 
 import de.icevizion.aves.map.BaseMap;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.utils.Direction;
 import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.tamias.config.GameConfig;
 import org.jetbrains.annotations.NotNull;
@@ -19,6 +20,8 @@ public final class GameMap extends BaseMap {
     private Pos bomberInitialSpawn;
 
     private Pos leftSurvivorSpawn;
+
+    private Direction direction;
 
     private final transient Pos[] gameSpawns = new Pos[GameConfig.MAX_PLAYERS];
 
@@ -38,6 +41,10 @@ public final class GameMap extends BaseMap {
         for (int i = 1; i < GameConfig.MAX_PLAYERS; i++) {
             this.gameSpawns[i] = leftSurvivorSpawn.add(0, 0, i);
         }
+    }
+
+    public void setDirection(@NotNull Direction direction) {
+        this.direction = direction;
     }
 
     public void setBomberInitialSpawn(Pos bomberInitialSpawn) {
