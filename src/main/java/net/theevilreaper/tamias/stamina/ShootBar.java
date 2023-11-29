@@ -7,6 +7,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.item.ThrownEggMeta;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.utils.time.TimeUnit;
+import net.theevilreaper.tamias.util.ProjectileHelper;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
@@ -47,7 +48,7 @@ public final class ShootBar extends StaminaBar {
 
     @Override
     public void consume() {
-        if (status != Status.REGENERATING ) return;
+        if (status != Status.REGENERATING) return;
         if (currentTime == MAX_TIME) {
             status = Status.READY;
             return;
@@ -58,12 +59,15 @@ public final class ShootBar extends StaminaBar {
     public void handleShoot() {
         this.currentTime = 0;
         this.status = Status.REGENERATING;
+        ProjectileHelper.spawnProjectile(player, this::createProjectile);
+    }
 
+    private @NotNull EntityProjectile createProjectile(@NotNull Player player) {
         var projectile = new EntityProjectile(player, EntityType.EGG);
         var eggMeta = (ThrownEggMeta) projectile.getEntityMeta();
         eggMeta.setOnFire(true);
 
         projectile.scheduleRemove(Duration.of(100, TimeUnit.SERVER_TICK));
+        return projectile;
     }
-
 }
