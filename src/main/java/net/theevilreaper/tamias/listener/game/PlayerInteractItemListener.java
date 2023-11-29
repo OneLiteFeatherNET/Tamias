@@ -2,6 +2,7 @@ package net.theevilreaper.tamias.listener.game;
 
 import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.theevilreaper.tamias.stamina.ExplodeBar;
+import net.theevilreaper.tamias.stamina.ShootBar;
 import net.theevilreaper.tamias.stamina.StaminaBar;
 
 import java.util.function.Consumer;
@@ -27,6 +28,10 @@ public class PlayerInteractItemListener implements Consumer<PlayerUseItemEvent> 
 
         if (stamina instanceof ExplodeBar explodeBar) {
             explodeBar.start();
+        }
+
+        if (stamina instanceof ShootBar shootBar) {
+            shootBar.handleShoot();
         }
     }
 }
