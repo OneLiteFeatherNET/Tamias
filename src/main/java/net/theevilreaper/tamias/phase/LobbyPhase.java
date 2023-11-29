@@ -21,6 +21,7 @@ public final class LobbyPhase extends TimedPhase {
     public LobbyPhase() {
         super("Lobby", ChronoUnit.SECONDS, 1);
         this.setPaused(true);
+        this.setCurrentTicks(LOBBY_PHASE_TIME);
         this.setTickDirection(TickDirection.DOWN);
         this.setEndTicks(-5);
     }
