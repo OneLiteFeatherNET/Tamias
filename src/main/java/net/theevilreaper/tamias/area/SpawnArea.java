@@ -2,6 +2,7 @@ package net.theevilreaper.tamias.area;
 
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.Direction;
@@ -9,18 +10,31 @@ import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.tamias.config.GameConfig;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * The class holds the data about the spawn area where each player will be spawned when the map is in the build phase.
  * @author theEvilReaper
  * @version 1.0.0
  * @since 1.0.0
  **/
+@SuppressWarnings("java:S3252")
 public final class SpawnArea {
 
+    private static final Vec Y_VEC = new Vec(0, 1,0);
     private final Instance instance;
     private final Pos[] positions;
     private final Runnable resetBlocks;
 
+    /**
+     * Creates a new object reference from {@link SpawnArea} class with the given values.
+     * @param instance the involved instance to place the block
+     * @param startPosition the first spawn which is the start position for the position calculation
+     * @param direction the direction to indicates in which direction the calculation should go
+     * @param maxPositions the maximum amount of possible positions
+     */
     public SpawnArea(@NotNull Instance instance, @NotNull Pos startPosition, @NotNull Direction direction, int maxPositions) {
         Check.argCondition(direction == Direction.DOWN || direction == Direction.UP, "The direction must be horizontal");
         this.instance = instance;
@@ -36,6 +50,23 @@ public final class SpawnArea {
         this.calculatePositions(direction);
     }
 
+    /**
+     * Teleports a given amount of players to the positions.
+     * If the player amount is higher than the maximum of position it will throw a {@link IllegalArgumentException}.
+     * @param players the players to teleport
+     */
+    public void teleport(@NotNull List<Player> players) {
+        Check.argCondition(players.size() > this.positions.length, "The amount of online players is higher then the maximum position count");
+        Collections.shuffle(players);
+        for (int i = 0; i < players.size(); i++) {
+            players.get(i).teleport(positions[i].add(Y_VEC));
+        }
+    }
+
+    /**
+     * Calculates the spawn position for the area on the given {@link Direction}.
+     * @param direction the direction to use for the calculation
+     */
     private void calculatePositions(@NotNull Direction direction) {
         var vec = switch (direction) {
             case NORTH -> new Vec(0, 0, -1);
@@ -49,12 +80,18 @@ public final class SpawnArea {
         }
     }
 
+    /**
+     * Places for each spawn position a specific block.
+     */
     public void spawnBlocks() {
         for (Pos position : positions) {
             instance.setBlock(position, GameConfig.SPAWN_BLOCK);
         }
     }
 
+    /**
+     * Resets all blocks in the spawn area.
+     */
     public void resetBlocks() {
         resetBlocks.run();
     }
