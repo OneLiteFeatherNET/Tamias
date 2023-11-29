@@ -10,6 +10,8 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.entity.projectile.ProjectileCollideWithBlockEvent;
+import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEvent;
 import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockInteractEvent;
@@ -25,6 +27,8 @@ import net.theevilreaper.tamias.commands.TestCommand;
 import net.theevilreaper.tamias.config.GameConfig;
 import net.theevilreaper.tamias.listener.PlayerJoinListener;
 import net.theevilreaper.tamias.listener.PlayerQuitListener;
+import net.theevilreaper.tamias.listener.game.ProjectileBlockListener;
+import net.theevilreaper.tamias.listener.game.ProjectileEntityListener;
 import net.theevilreaper.tamias.map.MapProvider;
 import net.theevilreaper.tamias.phase.LobbyPhase;
 import net.theevilreaper.tamias.phase.MapBuildPhase;
@@ -126,6 +130,8 @@ public class Tamias extends Extension {
     void registerListener(@NotNull EventNode<Event> eventNode) {
         eventNode.addListener(PlayerLoginEvent.class, new PlayerJoinListener(this.phaseSeries));
         eventNode.addListener(PlayerDisconnectEvent.class, new PlayerQuitListener(this.phaseSeries));
+        eventNode.addListener(ProjectileCollideWithBlockEvent.class, new ProjectileBlockListener());
+        eventNode.addListener(ProjectileCollideWithEntityEvent.class, new ProjectileEntityListener(this.teamService));
     }
 
 
