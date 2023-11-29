@@ -3,6 +3,7 @@ package net.theevilreaper.tamias.util;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,9 +16,11 @@ public final class Messages {
 
     public static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
     private static final Component PREFIX;
+    private static final Component SEPARATOR;
 
     static {
         PREFIX = Component.text("");
+        SEPARATOR = Component.space().append(Component.text(">>")).append(Component.space());
     }
 
     private Messages() { }
@@ -55,5 +58,10 @@ public final class Messages {
     public static @NotNull Component getTimeComponent(int time) {
         var secondString = time > 1 ? "seconds" : "second";
         return withMiniPrefix("<gray>Restart in <red>" + time + " <gray>" + secondString);
+    }
+
+    @Contract
+    public static @NotNull Component buildChatLayout(@NotNull Player player, @NotNull Component message) {
+        return player.getDisplayName().append(SEPARATOR).append(message);
     }
 }
