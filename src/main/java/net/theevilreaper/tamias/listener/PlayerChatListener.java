@@ -13,6 +13,6 @@ public final class PlayerChatListener implements Consumer<PlayerChatEvent> {
     public void accept(@NotNull PlayerChatEvent event) {
         var player = event.getPlayer();
 
-        event.setChatFormat(chatEvent -> Messages.buildChatLayou(player, Component.text(event.getMessage())));
+        event.setChatFormat(chatEvent -> Messages.buildChatLayout(player, Component.text(event.getMessage())));
     }
 }
