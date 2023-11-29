@@ -16,6 +16,7 @@ import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockInteractEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
+import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
@@ -25,6 +26,7 @@ import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.utils.PropertyUtils;
 import net.theevilreaper.tamias.commands.TestCommand;
 import net.theevilreaper.tamias.config.GameConfig;
+import net.theevilreaper.tamias.listener.PlayerChatListener;
 import net.theevilreaper.tamias.listener.PlayerJoinListener;
 import net.theevilreaper.tamias.listener.PlayerQuitListener;
 import net.theevilreaper.tamias.listener.game.ProjectileBlockListener;
@@ -34,6 +36,7 @@ import net.theevilreaper.tamias.phase.LobbyPhase;
 import net.theevilreaper.tamias.phase.MapBuildPhase;
 import net.theevilreaper.tamias.phase.PlayingPhase;
 import net.theevilreaper.tamias.phase.RestartPhase;
+import net.theevilreaper.tamias.team.TamiasTeamCreator;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,7 +78,7 @@ public class Tamias extends Extension {
             event.setSpawningInstance(instance);
         });
         MinecraftServer.getGlobalEventHandler().addListener(PlayerSpawnEvent.class, event -> {
-           event.getPlayer().teleport(new Pos(0, 150, 0));
+            event.getPlayer().teleport(new Pos(0, 150, 0));
         });
 
         MinecraftServer.getCommandManager().register(new TestCommand());
@@ -122,9 +125,9 @@ public class Tamias extends Extension {
     }
 
     private void initTeams() {
-      /*  var teamCreator = new TamiasTeamCreator();
+        var teamCreator = new TamiasTeamCreator();
         this.teamService.add(Team.builder(teamCreator).name("Survivor").capacity(16).build());
-        this.teamService.add(Team.builder(teamCreator).name("Bomber").capacity(16).build());*/
+        this.teamService.add(Team.builder(teamCreator).name("Bomber").capacity(16).build());
     }
 
     void registerListener(@NotNull EventNode<Event> eventNode) {
@@ -132,6 +135,7 @@ public class Tamias extends Extension {
         eventNode.addListener(PlayerDisconnectEvent.class, new PlayerQuitListener(this.phaseSeries));
         eventNode.addListener(ProjectileCollideWithBlockEvent.class, new ProjectileBlockListener());
         eventNode.addListener(ProjectileCollideWithEntityEvent.class, new ProjectileEntityListener(this.teamService));
+        eventNode.addListener(PlayerChatEvent.class, new PlayerChatListener());
     }
 
 
