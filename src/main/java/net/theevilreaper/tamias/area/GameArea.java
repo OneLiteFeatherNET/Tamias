@@ -1,8 +1,12 @@
 package net.theevilreaper.tamias.area;
 
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.metadata.other.FallingBlockMeta;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.timer.Task;
@@ -75,6 +79,7 @@ public final class GameArea {
             for (Vec pos : positions) {
                 if (specialBlocks.contains(pos)) {
                     instance.setBlock(pos, SPEED_BOOST_BLOCK);
+                    spawnTnt(pos);
                 } else {
                     instance.setBlock(pos, GROUND_BLOCK);
                 }
@@ -85,6 +90,23 @@ public final class GameArea {
                 onlinePlayer.setExp(1 - progress);
             }
         }).repeat(5, ChronoUnit.MILLIS).schedule();
+    }
+
+    private void spawnTnt(Vec pos) {
+        var tntEntity = new Entity(EntityType.FALLING_BLOCK);
+        FallingBlockMeta fallingBlockMeta = (FallingBlockMeta) tntEntity.getEntityMeta();
+        fallingBlockMeta.setBlock(Block.TNT);
+        tntEntity.setInstance(instance, pos.withY(pos.y() + 20));
+        tntEntity.scheduleNextTick(entity -> checkIfStillFalling(entity, instance));
+    }
+
+    private void checkIfStillFalling(Entity entity, Instance instance) {
+        if (entity.isOnGround()) {
+            entity.remove();
+            instance.setBlock(Pos.fromPoint(entity.getPosition()), Block.TNT);
+        } else {
+            entity.scheduleNextTick(entity1 -> checkIfStillFalling(entity1, instance));
+        }
     }
 
     private void calculateSpecialBlockPositions(List<Vec> posList) {
