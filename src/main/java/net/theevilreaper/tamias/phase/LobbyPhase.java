@@ -4,6 +4,8 @@ import de.icevizion.xerus.api.phase.TickDirection;
 import de.icevizion.xerus.api.phase.TimedPhase;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
+import net.theevilreaper.tamias.util.Messages;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.temporal.ChronoUnit;
 
@@ -41,10 +43,26 @@ public final class LobbyPhase extends TimedPhase {
     @Override
     public void onUpdate() {
         setLevel();
+
+        switch (getCurrentTicks()) {
+            case 30, 20, 10, 3, 2, 1 -> broadcastTime();
+            case 0 -> {
+            }
+            default -> {
+                // Nothing to do here
+            }
+        }
+
     }
 
     private void setLevel() {
         this.setLevel(getCurrentTicks());
+    }
+
+    private void broadcastTime() {
+        for (Player onlinePlayer : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+            onlinePlayer.sendMessage(Messages.getTimeComponent(getCurrentTicks()));
+        }
     }
 
     private void setLevel(int amount) {
@@ -54,6 +72,12 @@ public final class LobbyPhase extends TimedPhase {
             onlinePlayer.setLevel(amount);
             onlinePlayer.setExp(currentExpCount);
         }
+    }
+
+    public void updatePlayerValues(@NotNull Player player) {
+        player.setLevel(getCurrentTicks());
+        float currentExpCount = (float) this.getCurrentTicks() / (isForceStarted() ? FORCE_START_TIME : LOBBY_PHASE_TIME);
+        player.setExp(currentExpCount);
     }
 
     public void setForceStarted(boolean forceStarted) {
