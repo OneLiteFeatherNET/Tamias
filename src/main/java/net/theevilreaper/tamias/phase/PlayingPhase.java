@@ -1,8 +1,16 @@
 package net.theevilreaper.tamias.phase;
 
+import de.icevizion.aves.util.Strings;
+import de.icevizion.aves.util.TimeFormat;
 import de.icevizion.xerus.api.phase.TimedPhase;
+import net.kyori.adventure.text.Component;
+import net.minestom.server.command.builder.Command;
+import net.theevilreaper.tamias.util.Messages;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.temporal.ChronoUnit;
+import java.util.function.Consumer;
 
 /**
  * @author theEvilReaper
@@ -12,8 +20,12 @@ import java.time.temporal.ChronoUnit;
 
 public final class PlayingPhase extends TimedPhase {
 
-    public PlayingPhase() {
+    private final Consumer<@NotNull Component> scoreboardTitle;
+
+
+    public PlayingPhase(@NotNull Consumer<@NotNull Component> scoreboardTitle) {
         super("GamePhase", ChronoUnit.SECONDS, 1);
+        this.scoreboardTitle = scoreboardTitle;
     }
 
     @Override
@@ -23,6 +35,11 @@ public final class PlayingPhase extends TimedPhase {
 
     @Override
     public void onUpdate() {
+        this.scoreboardTitle.accept(getTimeDisplay());
+    }
 
+    @Contract(pure = true)
+    private @NotNull Component getTimeDisplay() {
+        return Messages.withMini("<gold>Time: " + Strings.getTimeString(TimeFormat.MM_SS, getCurrentTicks()));
     }
 }
