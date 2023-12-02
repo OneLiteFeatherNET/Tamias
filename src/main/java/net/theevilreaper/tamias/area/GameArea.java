@@ -4,6 +4,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.instance.block.Block;
 import net.minestom.server.timer.Task;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
@@ -12,15 +13,20 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.LinkedBlockingDeque;
 
 public final class GameArea {
+    private static final Block GROUND_BLOCK = Block.STONE;
+    private static final Block SPEED_BOOST_BLOCK = Block.REDSTONE_BLOCK;
 
     private final Instance instance;
     private final Vec start;
     private final Vec end;
 
     private final List<Vec> areaPositions;
+    private final List<Vec> specialBlocks;
+    private final Random random = new Random();
 
 
     public GameArea(@NotNull Instance instance, @NotNull Vec start, @NotNull Vec end) {
@@ -30,8 +36,9 @@ public final class GameArea {
         this.start = start;
         this.end = end;
         this.areaPositions = new ArrayList<>();
+        this.specialBlocks = new ArrayList<>();
         calculatePositions();
-
+        calculateSpecialBlockPositions(areaPositions);
     }
 
     void calculatePositions() {
@@ -44,7 +51,7 @@ public final class GameArea {
         }
     }
 
-    private Task build() {
+    public Task build() {
         var posList = new ArrayList<>(areaPositions);
         posList.sort(Comparator.comparing(pos -> {
             var x = pos.x();
@@ -58,9 +65,19 @@ public final class GameArea {
 
         var queue = new LinkedBlockingDeque<>(posList);
         return MinecraftServer.getSchedulerManager().buildTask(() -> {
-            var pos = queue.poll();
-            if (pos == null) {
+            List<Vec> positions = new ArrayList<>();
+            for (int i = 0; !queue.isEmpty() && i < 20; i++) {
+                positions.add(queue.poll());
+            }
+            if (positions.isEmpty()) {
                 return;
+            }
+            for (Vec pos : positions) {
+                if (specialBlocks.contains(pos)) {
+                    instance.setBlock(pos, SPEED_BOOST_BLOCK);
+                } else {
+                    instance.setBlock(pos, GROUND_BLOCK);
+                }
             }
             for (Player onlinePlayer : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
                 float progress = (float) queue.size() / posList.size();
@@ -68,6 +85,16 @@ public final class GameArea {
                 onlinePlayer.setExp(1 - progress);
             }
         }).repeat(5, ChronoUnit.MILLIS).schedule();
+    }
+
+    private void calculateSpecialBlockPositions(List<Vec> posList) {
+        var amountOfSpecialBlocks = (int) Math.ceil((double) posList.size() / 100);
+        var blocks = new ArrayList<Vec>();
+        for (int i = 0; i < amountOfSpecialBlocks; i++) {
+            var randomPos = posList.get(random.nextInt(posList.size()));
+            blocks.add(randomPos);
+        }
+        this.specialBlocks.addAll(blocks);
     }
 
 }
