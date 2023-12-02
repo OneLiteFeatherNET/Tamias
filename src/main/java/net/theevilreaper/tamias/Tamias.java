@@ -29,6 +29,7 @@ import net.theevilreaper.tamias.config.GameConfig;
 import net.theevilreaper.tamias.listener.PlayerChatListener;
 import net.theevilreaper.tamias.listener.PlayerJoinListener;
 import net.theevilreaper.tamias.listener.PlayerQuitListener;
+import net.theevilreaper.tamias.listener.PlayerSpawnListener;
 import net.theevilreaper.tamias.listener.game.ProjectileBlockListener;
 import net.theevilreaper.tamias.listener.game.ProjectileEntityListener;
 import net.theevilreaper.tamias.map.MapProvider;
@@ -37,6 +38,8 @@ import net.theevilreaper.tamias.phase.MapBuildPhase;
 import net.theevilreaper.tamias.phase.PlayingPhase;
 import net.theevilreaper.tamias.phase.RestartPhase;
 import net.theevilreaper.tamias.team.TamiasTeamCreator;
+import net.theevilreaper.tamias.team.TeamDistributor;
+import net.theevilreaper.tamias.util.BoardHelper;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,19 +58,22 @@ public class Tamias extends Extension {
 
     public static final Logger LOGGER = LoggerFactory.getLogger(Tamias.class);
     private static final boolean SETUP_MODE = PropertyUtils.getBoolean("tamias.setup", false);
-
     private final LinearPhaseSeries<GamePhase> phaseSeries;
     private final TeamService<Team> teamService;
+    private final BoardHelper boardHelper;
     private MapProvider mapProvider;
+    private TeamDistributor teamDistributor;
 
     public Tamias() {
         this.phaseSeries = new LinearPhaseSeries<>();
         this.teamService = new TeamServiceImpl<>();
         this.initTeams();
+        this.boardHelper = new BoardHelper();
     }
 
     @Override
     public void initialize() {
+        this.teamDistributor = new TeamDistributor(null, null, this.teamService.getTeams()::get);
         checkMapDirectory();
         InstanceContainer instance = MinecraftServer.getInstanceManager().createInstanceContainer();
 
@@ -86,6 +92,7 @@ public class Tamias extends Extension {
 
         this.createPhaseStructure();
 
+        registerListener(MinecraftServer.getGlobalEventHandler());
         registerCancelListener(MinecraftServer.getGlobalEventHandler());
     }
 
@@ -98,7 +105,7 @@ public class Tamias extends Extension {
         this.phaseSeries.add(new LobbyPhase());
         var gamePhaseSeries = new CyclicPhaseSeries<GamePhase>("game");
         gamePhaseSeries.add(new MapBuildPhase());
-        gamePhaseSeries.add(new PlayingPhase());
+        gamePhaseSeries.add(new PlayingPhase(this.boardHelper::updateTitle));
         gamePhaseSeries.setMaxIterations(GameConfig.GAME_ROUNDS);
         this.phaseSeries.addAll(gamePhaseSeries);
         this.phaseSeries.add(new RestartPhase());
@@ -132,6 +139,7 @@ public class Tamias extends Extension {
 
     void registerListener(@NotNull EventNode<Event> eventNode) {
         eventNode.addListener(PlayerLoginEvent.class, new PlayerJoinListener(this.phaseSeries));
+        eventNode.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(this.phaseSeries));
         eventNode.addListener(PlayerDisconnectEvent.class, new PlayerQuitListener(this.phaseSeries));
         eventNode.addListener(ProjectileCollideWithBlockEvent.class, new ProjectileBlockListener());
         eventNode.addListener(ProjectileCollideWithEntityEvent.class, new ProjectileEntityListener(this.teamService));
