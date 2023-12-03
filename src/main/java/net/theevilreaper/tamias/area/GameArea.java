@@ -46,11 +46,9 @@ public final class GameArea {
     }
 
     void calculatePositions() {
-        for (int x = (int) start.x(); x < end.x(); x++) {
-            for (int y = (int) start.y(); y < end.y(); y++) {
-                for (int z = (int) start.z(); z < end.z(); z++) {
-                    areaPositions.add(new Vec(x, y, z));
-                }
+        for (int x = start.blockX(); x < end.blockX(); x++) {
+            for (int z = start.blockZ(); z < end.blockZ(); z++) {
+                areaPositions.add(new Vec(x, start.blockY(), z));
             }
         }
     }
@@ -65,6 +63,7 @@ public final class GameArea {
         }));
         return buildFromQueue(posList);
     }
+
     private Task buildFromQueue(List<Vec> posList) {
 
         var queue = new LinkedBlockingDeque<>(posList);
