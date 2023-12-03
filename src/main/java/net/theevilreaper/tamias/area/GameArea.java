@@ -11,6 +11,7 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.timer.Task;
 import net.minestom.server.utils.validate.Check;
+import net.theevilreaper.tamias.util.Helper;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.temporal.ChronoUnit;
@@ -55,12 +56,7 @@ public final class GameArea {
 
     public Task build() {
         var posList = new ArrayList<>(areaPositions);
-        posList.sort(Comparator.comparing(pos -> {
-            var x = pos.x();
-            var z = pos.z();
-            var y = pos.y();
-            return Math.sqrt(x * x + z * z + y * y);
-        }));
+        posList.sort(Helper.getComparator());
         return buildFromQueue(posList);
     }
 
