@@ -20,7 +20,6 @@ public final class GameMap extends BaseMap {
     private Pos bomberInitialSpawn;
 
     private Pos leftSurvivorSpawn;
-
     private Direction direction;
 
     private final transient Pos[] gameSpawns = new Pos[GameConfig.MAX_PLAYERS];
