@@ -54,14 +54,15 @@ public final class GameArea {
         }
     }
 
+    @NotNull
     public Task build() {
         var posList = new ArrayList<>(areaPositions);
         posList.sort(Helper.getComparator());
         return buildFromQueue(posList);
     }
 
-    private Task buildFromQueue(List<Vec> posList) {
-
+    @NotNull
+    private Task buildFromQueue(@NotNull List<Vec> posList) {
         var queue = new LinkedBlockingDeque<>(posList);
         return MinecraftServer.getSchedulerManager().buildTask(() -> {
             List<Vec> positions = new ArrayList<>();
@@ -87,24 +88,24 @@ public final class GameArea {
         }).repeat(5, ChronoUnit.MILLIS).schedule();
     }
 
-    private void spawnTnt(Vec pos) {
+    private void spawnTnt(@NotNull Vec pos) {
         var tntEntity = new Entity(EntityType.FALLING_BLOCK);
         FallingBlockMeta fallingBlockMeta = (FallingBlockMeta) tntEntity.getEntityMeta();
         fallingBlockMeta.setBlock(Block.TNT);
         tntEntity.setInstance(instance, pos.withY(pos.y() + 20));
-        tntEntity.scheduleNextTick(entity -> checkIfStillFalling(entity, instance));
+        tntEntity.scheduleNextTick(entity -> checkIfStillFalling(entity));
     }
 
-    private void checkIfStillFalling(Entity entity, Instance instance) {
+    private void checkIfStillFalling(@NotNull Entity entity) {
         if (entity.isOnGround()) {
             entity.remove();
             instance.setBlock(Pos.fromPoint(entity.getPosition()), Block.TNT);
         } else {
-            entity.scheduleNextTick(entity1 -> checkIfStillFalling(entity1, instance));
+            entity.scheduleNextTick(entity1 -> checkIfStillFalling(entity1));
         }
     }
 
-    private void calculateSpecialBlockPositions(List<Vec> posList) {
+    private void calculateSpecialBlockPositions(@NotNull List<Vec> posList) {
         var amountOfSpecialBlocks = (int) Math.ceil((double) posList.size() / 100);
         var blocks = new ArrayList<Vec>();
         for (int i = 0; i < amountOfSpecialBlocks; i++) {
