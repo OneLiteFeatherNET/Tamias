@@ -11,6 +11,7 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.timer.Task;
 import net.minestom.server.utils.validate.Check;
+import net.theevilreaper.tamias.event.FinishBuildEvent;
 import net.theevilreaper.tamias.util.Helper;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,6 +27,10 @@ public final class GameArea {
     private static final Block SPEED_BOOST_BLOCK = Block.REDSTONE_BLOCK;
     private static final int BLOCKS_PER_STEP = 20;
     private static final int TNT_SPAWN_HEIGHT = 20;
+    private static final int MIN_TNT_AMOUNT = 10;
+    private static final int MAX_TNT_AMOUNT = 20;
+    private static final int MIN_SPEED_BOOST_AMOUNT = 10;
+    private static final int MAX_SPEED_BOOST_AMOUNT = 20;
 
     private final Instance instance;
     private final Vec start;
@@ -33,6 +38,7 @@ public final class GameArea {
 
     private final List<Vec> areaPositions;
     private final List<Vec> specialBlocks;
+    private final List<Vec> tntPositions;
     private final Random random = new Random();
 
 
@@ -44,13 +50,19 @@ public final class GameArea {
         this.end = end;
         this.areaPositions = new ArrayList<>();
         this.specialBlocks = new ArrayList<>();
+        this.tntPositions = new ArrayList<>();
         calculatePositions();
         calculateSpecialBlockPositions(areaPositions);
+        calculateTntPositions();
     }
 
     void calculatePositions() {
-        for (int x = start.blockX(); x < end.blockX(); x++) {
-            for (int z = start.blockZ(); z < end.blockZ(); z++) {
+        var startBlockX = start.blockX();
+        var startBlockZ = start.blockZ();
+        var endBlockX = end.blockX();
+        var endBlockZ = end.blockZ();
+        for (int x = startBlockX; x < endBlockX; x++) {
+            for (int z = startBlockZ; z < endBlockZ; z++) {
                 areaPositions.add(new Vec(x, start.blockY(), z));
             }
         }
@@ -72,15 +84,11 @@ public final class GameArea {
                 positions.add(queue.poll());
             }
             if (positions.isEmpty()) {
+                MinecraftServer.getGlobalEventHandler().call(new FinishBuildEvent());
                 return;
             }
             for (Vec pos : positions) {
-                if (specialBlocks.contains(pos)) {
-                    instance.setBlock(pos, SPEED_BOOST_BLOCK);
-                    spawnTnt(pos);
-                } else {
-                    instance.setBlock(pos, GROUND_BLOCK);
-                }
+                placeAtPos(pos);
             }
             for (Player onlinePlayer : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
                 float progress = (float) queue.size() / posList.size();
@@ -88,6 +96,18 @@ public final class GameArea {
                 onlinePlayer.setExp(1 - progress);
             }
         }).repeat(5, ChronoUnit.MILLIS).schedule();
+    }
+
+    private void placeAtPos(@NotNull Vec pos) {
+        if (specialBlocks.contains(pos)) {
+            instance.setBlock(pos, SPEED_BOOST_BLOCK);
+            spawnTnt(pos);
+        } else {
+            instance.setBlock(pos, GROUND_BLOCK);
+        }
+        if (tntPositions.contains(pos)) {
+            spawnTnt(pos);
+        }
     }
 
     private void spawnTnt(@NotNull Vec pos) {
@@ -108,13 +128,19 @@ public final class GameArea {
     }
 
     private void calculateSpecialBlockPositions(@NotNull List<Vec> posList) {
-        var amountOfSpecialBlocks = (int) Math.ceil((double) posList.size() / 100);
-        var blocks = new ArrayList<Vec>();
-        for (int i = 0; i < amountOfSpecialBlocks; i++) {
+        var amountOfSpeedBoost = random.nextInt(MAX_SPEED_BOOST_AMOUNT - MIN_SPEED_BOOST_AMOUNT) + MIN_SPEED_BOOST_AMOUNT;
+        for (int i = 0; i < amountOfSpeedBoost; i++) {
             var randomPos = posList.get(random.nextInt(posList.size()));
-            blocks.add(randomPos);
+            specialBlocks.add(randomPos);
         }
-        this.specialBlocks.addAll(blocks);
+    }
+
+    private void calculateTntPositions() {
+        var amountOfTnt = random.nextInt(MAX_TNT_AMOUNT - MIN_TNT_AMOUNT) + MIN_TNT_AMOUNT;
+        for (int i = 0; i < amountOfTnt; i++) {
+            var randomPos = areaPositions.get(random.nextInt(areaPositions.size()));
+            tntPositions.add(randomPos);
+        }
     }
 
 }
