@@ -8,6 +8,7 @@ import de.icevizion.xerus.api.team.TeamService;
 import de.icevizion.xerus.api.team.TeamServiceImpl;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithBlockEvent;
@@ -24,6 +25,7 @@ import net.minestom.server.event.player.PlayerSwapItemEvent;
 import net.minestom.server.extensions.Extension;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.utils.PropertyUtils;
+import net.theevilreaper.tamias.area.GameArea;
 import net.theevilreaper.tamias.commands.TestCommand;
 import net.theevilreaper.tamias.config.GameConfig;
 import net.theevilreaper.tamias.listener.PlayerChatListener;
@@ -59,6 +61,7 @@ public class Tamias extends Extension {
     private final LinearPhaseSeries<GamePhase> phaseSeries;
     private final TeamService<Team> teamService;
     private MapProvider mapProvider;
+    private GameArea gameArea;
 
     public Tamias() {
         this.phaseSeries = new LinearPhaseSeries<>();
@@ -81,6 +84,8 @@ public class Tamias extends Extension {
             event.getPlayer().teleport(new Pos(0, 150, 0));
         });
 
+        this.gameArea = new GameArea(instance, new Vec(0, 150, 0), new Vec(100, 150, 100));
+
         MinecraftServer.getCommandManager().register(new TestCommand());
 
 
@@ -97,7 +102,7 @@ public class Tamias extends Extension {
     private void createPhaseStructure() {
         this.phaseSeries.add(new LobbyPhase());
         var gamePhaseSeries = new CyclicPhaseSeries<GamePhase>("game");
-        gamePhaseSeries.add(new MapBuildPhase());
+        gamePhaseSeries.add(new MapBuildPhase(this.gameArea));
         gamePhaseSeries.add(new PlayingPhase());
         gamePhaseSeries.setMaxIterations(GameConfig.GAME_ROUNDS);
         this.phaseSeries.addAll(gamePhaseSeries);
