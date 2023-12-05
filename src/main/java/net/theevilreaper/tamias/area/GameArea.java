@@ -16,11 +16,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.LinkedBlockingDeque;
 
+@SuppressWarnings("java:S3252")
 public final class GameArea {
     private static final Block GROUND_BLOCK = Block.STONE;
     private static final Block SPEED_BOOST_BLOCK = Block.REDSTONE_BLOCK;
@@ -95,7 +95,7 @@ public final class GameArea {
         FallingBlockMeta fallingBlockMeta = (FallingBlockMeta) tntEntity.getEntityMeta();
         fallingBlockMeta.setBlock(Block.TNT);
         tntEntity.setInstance(instance, pos.withY(pos.y() + TNT_SPAWN_HEIGHT));
-        tntEntity.scheduleNextTick(entity -> checkIfStillFalling(entity));
+        tntEntity.scheduleNextTick(this::checkIfStillFalling);
     }
 
     private void checkIfStillFalling(@NotNull Entity entity) {
@@ -103,7 +103,7 @@ public final class GameArea {
             entity.remove();
             instance.setBlock(Pos.fromPoint(entity.getPosition()), Block.TNT);
         } else {
-            entity.scheduleNextTick(entity1 -> checkIfStillFalling(entity1));
+            entity.scheduleNextTick(this::checkIfStillFalling);
         }
     }
 
