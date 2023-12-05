@@ -12,6 +12,7 @@ import net.minestom.server.instance.AnvilLoader;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.tamias.config.GameConfig;
+import net.theevilreaper.tamias.explosion.ExplosionCreator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,8 +20,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 
 public final class MapProvider {
@@ -30,8 +35,9 @@ public final class MapProvider {
     private final FileHandler fileHandler;
 
     private BaseMap lobbyMap;
-
     private GameMap gameMap;
+
+    private InstanceContainer gameMapInstance;
 
     private List<Path> maps;
 
@@ -82,6 +88,35 @@ public final class MapProvider {
 
         // We need to remove the lobby path from the maps to prevent that the lobby map is a candidate for the game
         this.maps.remove(lobbyPath);
+    }
+
+    public @NotNull InstanceContainer loadGameMap() {
+        if (this.gameMapInstance != null) return gameMapInstance;
+        Check.argCondition(this.maps.size() < 2, "NOPE");
+        Path path;
+        Collections.shuffle(this.maps);
+        if (this.maps.size() == 1) {
+            path = this.maps.get(0);
+        } else {
+            path = this.maps.get(ThreadLocalRandom.current().nextInt(this.maps.size()));
+        }
+
+        Check.argCondition(path == null, "Unable to load game map");
+
+        var loader = new AnvilLoader(path);
+
+        var mapOptional = fileHandler.load(path, GameMap.class);
+
+        Check.argCondition(mapOptional.isEmpty(), "Something went wrong during map load");
+
+        this.gameMap = mapOptional.get();
+
+        InstanceContainer container = MinecraftServer.getInstanceManager().createInstanceContainer();
+        container.setChunkLoader(loader);
+        container.setExplosionSupplier(new ExplosionCreator());
+        container.setTimeRate(0);
+        container.setTimeUpdate(null);
+        return container;
     }
 
     public <T extends BaseMap> @Nullable Optional<T> loadMap(@NotNull Path path, @NotNull Class<T> mapObject) {
