@@ -24,6 +24,8 @@ import java.util.concurrent.LinkedBlockingDeque;
 public final class GameArea {
     private static final Block GROUND_BLOCK = Block.STONE;
     private static final Block SPEED_BOOST_BLOCK = Block.REDSTONE_BLOCK;
+    private static final int BLOCKS_PER_STEP = 20;
+    private static final int TNT_SPAWN_HEIGHT = 20;
 
     private final Instance instance;
     private final Vec start;
@@ -66,7 +68,7 @@ public final class GameArea {
         var queue = new LinkedBlockingDeque<>(posList);
         return MinecraftServer.getSchedulerManager().buildTask(() -> {
             List<Vec> positions = new ArrayList<>();
-            for (int i = 0; !queue.isEmpty() && i < 20; i++) {
+            for (int i = 0; !queue.isEmpty() && i < BLOCKS_PER_STEP; i++) {
                 positions.add(queue.poll());
             }
             if (positions.isEmpty()) {
@@ -92,7 +94,7 @@ public final class GameArea {
         var tntEntity = new Entity(EntityType.FALLING_BLOCK);
         FallingBlockMeta fallingBlockMeta = (FallingBlockMeta) tntEntity.getEntityMeta();
         fallingBlockMeta.setBlock(Block.TNT);
-        tntEntity.setInstance(instance, pos.withY(pos.y() + 20));
+        tntEntity.setInstance(instance, pos.withY(pos.y() + TNT_SPAWN_HEIGHT));
         tntEntity.scheduleNextTick(entity -> checkIfStillFalling(entity));
     }
 
