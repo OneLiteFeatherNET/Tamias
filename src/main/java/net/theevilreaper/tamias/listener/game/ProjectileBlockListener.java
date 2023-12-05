@@ -16,8 +16,7 @@ public final class ProjectileBlockListener implements Consumer<ProjectileCollide
 
     @Override
     public void accept(@NotNull ProjectileCollideWithBlockEvent event) {
-        if (event.getEntity().hasTag(Tags.SHOOTER_ID)) {
-            event.getEntity().remove();
-        }
+        if (event.getEntity().hasTag(Tags.SHOOTER_ID)) return;
+        event.getEntity().remove();
     }
 }
