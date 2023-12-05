@@ -32,13 +32,15 @@ import net.theevilreaper.tamias.listener.PlayerQuitListener;
 import net.theevilreaper.tamias.listener.PlayerSpawnListener;
 import net.theevilreaper.tamias.listener.game.ProjectileBlockListener;
 import net.theevilreaper.tamias.listener.game.ProjectileEntityListener;
+import net.theevilreaper.tamias.listener.game.RoundFinishListener;
 import net.theevilreaper.tamias.map.MapProvider;
 import net.theevilreaper.tamias.phase.LobbyPhase;
 import net.theevilreaper.tamias.phase.MapBuildPhase;
 import net.theevilreaper.tamias.phase.PlayingPhase;
 import net.theevilreaper.tamias.phase.RestartPhase;
+import net.theevilreaper.tamias.round.events.RoundFinishEvent;
 import net.theevilreaper.tamias.team.TamiasTeamCreator;
-import net.theevilreaper.tamias.team.TeamDistributor;
+import net.theevilreaper.tamias.team.TeamHelper;
 import net.theevilreaper.tamias.util.BoardHelper;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -62,7 +64,7 @@ public class Tamias extends Extension {
     private final TeamService<Team> teamService;
     private final BoardHelper boardHelper;
     private MapProvider mapProvider;
-    private TeamDistributor teamDistributor;
+    private TeamHelper teamDistributor;
 
     public Tamias() {
         this.phaseSeries = new LinearPhaseSeries<>();
@@ -73,7 +75,7 @@ public class Tamias extends Extension {
 
     @Override
     public void initialize() {
-        this.teamDistributor = new TeamDistributor(null, null, this.teamService.getTeams()::get);
+        this.teamDistributor = new TeamHelper(null, null, this.teamService.getTeams()::get);
         checkMapDirectory();
         InstanceContainer instance = MinecraftServer.getInstanceManager().createInstanceContainer();
 
@@ -137,12 +139,16 @@ public class Tamias extends Extension {
         this.teamService.add(Team.builder(teamCreator).name("Bomber").capacity(16).build());
     }
 
+    void registerGameListener(@NotNull EventNode<Event> eventNode) {
+        eventNode.addListener(RoundFinishEvent.class, new RoundFinishListener(this.teamDistributor));
+    }
+
     void registerListener(@NotNull EventNode<Event> eventNode) {
         eventNode.addListener(PlayerLoginEvent.class, new PlayerJoinListener(this.phaseSeries));
         eventNode.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(this.phaseSeries));
         eventNode.addListener(PlayerDisconnectEvent.class, new PlayerQuitListener(this.phaseSeries));
         eventNode.addListener(ProjectileCollideWithBlockEvent.class, new ProjectileBlockListener());
-        eventNode.addListener(ProjectileCollideWithEntityEvent.class, new ProjectileEntityListener(this.teamService));
+        eventNode.addListener(ProjectileCollideWithEntityEvent.class, new ProjectileEntityListener(this.teamDistributor));
         eventNode.addListener(PlayerChatEvent.class, new PlayerChatListener());
     }
 
