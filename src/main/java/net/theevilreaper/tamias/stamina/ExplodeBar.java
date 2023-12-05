@@ -4,6 +4,7 @@ import net.kyori.adventure.sound.Sound;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.sound.SoundEvent;
+import net.theevilreaper.tamias.util.Tags;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.temporal.ChronoUnit;
@@ -59,6 +60,11 @@ public final class ExplodeBar extends StaminaBar {
 
         player.playSound(TICK_SOUND);
     }
+
+    public void explode() {
+        this.player.getInstance().explode(1,1,1, 1);
+    }
+
     private float normalize(float current) {
         if (current < 0) return 0;
         return (current) / MAX;
