@@ -16,6 +16,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
+import static net.theevilreaper.tamias.setup.TamiasSetup.SELECT_MAP_FIRST;
+
 public class SetupRoundSpawn extends Command {
 
     private final Function<CommandSender, BaseMap> mapFunction;
@@ -28,6 +30,14 @@ public class SetupRoundSpawn extends Command {
 
     private void onCommand(@NotNull CommandSender sender, @NotNull CommandContext commandContext) {
         var player = (Player) sender;
+        var gameMap = ((GameMap) this.mapFunction.apply(sender));
+
+        if (gameMap == null) {
+            sender.sendMessage(SELECT_MAP_FIRST);
+            return;
+        }
+
+
         var dir = player.getPosition().direction();
         var directionPitch = Math.toDegrees(-Math.atan2(dir.y(), Math.sqrt(dir.x() * dir.x() + dir.z() * dir.z())));
 
@@ -38,7 +48,7 @@ public class SetupRoundSpawn extends Command {
 
         var direction = MathUtils.getHorizontalDirection(player.getPosition().yaw());
 
-        var gameMap = ((GameMap) this.mapFunction.apply(sender));
+
 
         gameMap.setLeftSurvivorSpawn(Pos.fromPoint(player.getPosition()));
         gameMap.setDirection(direction);

@@ -15,6 +15,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
+import static net.theevilreaper.tamias.setup.TamiasSetup.SELECT_MAP_FIRST;
+
 /**
  * The command allows the set the creators of a map to a {@link de.icevizion.aves.map.BaseMap} reference.
  * @author theEvilReaper
@@ -31,6 +33,13 @@ public final class SetupBuildersCommand extends Command {
 
         addSyntax((sender, context) -> {
             String[] builders = context.get(buildersArray);
+
+            var map = mapFunction.apply(sender);
+
+            if (map == null) {
+                sender.sendMessage(SELECT_MAP_FIRST);
+                return;
+            }
 
             if (builders.length == 0) {
                 sender.sendMessage(Component.text("A map needs at least one builder", NamedTextColor.RED));
