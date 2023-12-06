@@ -45,7 +45,7 @@ public final class MapProvider {
                 .create();
         this.fileHandler = new GsonFileHandler(gson);
         this.loadMapPaths();
-        this.loadLobbyMap(instanceContainer);
+        //this.loadLobbyMap(instanceContainer);
     }
 
     private void loadMapPaths() {
