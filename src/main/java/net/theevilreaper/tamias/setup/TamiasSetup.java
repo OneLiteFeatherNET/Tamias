@@ -51,7 +51,7 @@ public class TamiasSetup {
         var manager = MinecraftServer.getGlobalEventHandler();
         var items = new SetupItems(SETUP_TAG);
         manager.addListener(PlayerUseItemEvent.class, new PlayerUseItemListener(SETUP_TAG, this.mapSelectionInventory::open));
-        manager.addListener(AddEntityToInstanceEvent.class, new EntityAddToInstanceListener(mainInstance.getUniqueId(), items::setOverViewItem));
+        manager.addListener(AddEntityToInstanceEvent.class, new EntityAddToInstanceListener(mainInstance.getUniqueId(), items));
     }
 
     private void registerCommands() {
