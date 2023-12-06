@@ -23,6 +23,7 @@ import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.event.player.PlayerSwapItemEvent;
 import net.minestom.server.extensions.Extension;
+import net.minestom.server.instance.AnvilLoader;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.utils.PropertyUtils;
 import net.theevilreaper.tamias.area.GameArea;
@@ -45,6 +46,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import static de.icevizion.aves.inventory.util.InventoryConstants.CANCELLABLE_EVENT;
 
@@ -74,6 +76,10 @@ public class Tamias extends Extension {
         checkMapDirectory();
         InstanceContainer instance = MinecraftServer.getInstanceManager().createInstanceContainer();
 
+        var path = Paths.get("C:\\Users\\Minny\\Desktop\\Test-Minestom\\maps\\suicide_tnt");
+        MinecraftServer.getInstanceManager().registerInstance(instance);
+        instance.setChunkLoader(new AnvilLoader(path));
+
         this.mapProvider = new MapProvider(getDataDirectory(), instance);
 
         MinecraftServer.getInstanceManager().registerInstance(instance);
@@ -81,7 +87,7 @@ public class Tamias extends Extension {
             event.setSpawningInstance(instance);
         });
         MinecraftServer.getGlobalEventHandler().addListener(PlayerSpawnEvent.class, event -> {
-            event.getPlayer().teleport(new Pos(0, 150, 0));
+            event.getPlayer().teleport(new Pos(-11, 130, 25));
         });
 
         this.gameArea = new GameArea(instance, new Vec(0, 150, 0), new Vec(100, 150, 100));
