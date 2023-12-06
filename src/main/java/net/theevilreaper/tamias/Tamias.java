@@ -1,5 +1,7 @@
 package net.theevilreaper.tamias;
 
+import com.google.gson.Gson;
+import de.icevizion.aves.file.gson.PositionGsonAdapter;
 import de.icevizion.xerus.api.phase.CyclicPhaseSeries;
 import de.icevizion.xerus.api.phase.GamePhase;
 import de.icevizion.xerus.api.phase.LinearPhaseSeries;
@@ -8,6 +10,7 @@ import de.icevizion.xerus.api.team.TeamService;
 import de.icevizion.xerus.api.team.TeamServiceImpl;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithBlockEvent;
@@ -24,6 +27,7 @@ import net.minestom.server.event.player.PlayerSwapItemEvent;
 import net.minestom.server.extensions.Extension;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.utils.PropertyUtils;
+import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.tamias.commands.TestCommand;
 import net.theevilreaper.tamias.config.GameConfig;
 import net.theevilreaper.tamias.listener.PlayerChatListener;
@@ -39,6 +43,7 @@ import net.theevilreaper.tamias.phase.MapBuildPhase;
 import net.theevilreaper.tamias.phase.PlayingPhase;
 import net.theevilreaper.tamias.phase.RestartPhase;
 import net.theevilreaper.tamias.round.events.RoundFinishEvent;
+import net.theevilreaper.tamias.setup.TamiasSetup;
 import net.theevilreaper.tamias.team.TamiasTeamCreator;
 import net.theevilreaper.tamias.team.TeamHelper;
 import net.theevilreaper.tamias.util.BoardHelper;
@@ -48,6 +53,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static de.icevizion.aves.inventory.util.InventoryConstants.CANCELLABLE_EVENT;
 
@@ -59,7 +69,8 @@ import static de.icevizion.aves.inventory.util.InventoryConstants.CANCELLABLE_EV
 public class Tamias extends Extension {
 
     public static final Logger LOGGER = LoggerFactory.getLogger(Tamias.class);
-    private static final boolean SETUP_MODE = PropertyUtils.getBoolean("tamias.setup", false);
+    private static final boolean SETUP_MODE = PropertyUtils.getBoolean("tamias.setup", true);
+    private final Gson gson;
     private final LinearPhaseSeries<GamePhase> phaseSeries;
     private final TeamService<Team> teamService;
     private final BoardHelper boardHelper;
@@ -71,15 +82,20 @@ public class Tamias extends Extension {
         this.teamService = new TeamServiceImpl<>();
         this.initTeams();
         this.boardHelper = new BoardHelper();
+        var posAdapter = new PositionGsonAdapter();
+        this.gson = new Gson().newBuilder()
+                .registerTypeAdapter(Pos.class, posAdapter)
+                .registerTypeAdapter(Vec.class, posAdapter)
+                .create();
     }
 
     @Override
     public void initialize() {
-        this.teamDistributor = new TeamHelper(null, null, this.teamService.getTeams()::get);
         checkMapDirectory();
         InstanceContainer instance = MinecraftServer.getInstanceManager().createInstanceContainer();
 
-        this.mapProvider = new MapProvider(getDataDirectory(), instance);
+        this.mapProvider = new MapProvider(this.gson, getDataDirectory(), instance);
+        this.teamDistributor = new TeamHelper(this.mapProvider, this.teamService.getTeams()::get);
 
         MinecraftServer.getInstanceManager().registerInstance(instance);
         MinecraftServer.getGlobalEventHandler().addListener(PlayerLoginEvent.class, event -> {
@@ -90,12 +106,24 @@ public class Tamias extends Extension {
         });
 
         MinecraftServer.getCommandManager().register(new TestCommand());
-
-
         this.createPhaseStructure();
+        registerCancelListener(MinecraftServer.getGlobalEventHandler());
+
+        if (SETUP_MODE) {
+            var dataDirectory = getDataDirectory();
+            var mapDirectory = dataDirectory.resolve(GameConfig.MAP_PATH_NAME);
+            List<Path> maps = new ArrayList<>();
+            try(Stream<Path> paths = Files.list(mapDirectory)) {
+                paths.filter(Files::isDirectory).forEach(maps::add);
+
+            } catch (IOException exception) {
+                throw new RuntimeException(exception);
+            }
+            new TamiasSetup(instance, this.gson, maps);
+            return;
+        }
 
         registerListener(MinecraftServer.getGlobalEventHandler());
-        registerCancelListener(MinecraftServer.getGlobalEventHandler());
     }
 
     @Override
@@ -148,7 +176,7 @@ public class Tamias extends Extension {
         eventNode.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(this.phaseSeries));
         eventNode.addListener(PlayerDisconnectEvent.class, new PlayerQuitListener(this.phaseSeries));
         eventNode.addListener(ProjectileCollideWithBlockEvent.class, new ProjectileBlockListener());
-        eventNode.addListener(ProjectileCollideWithEntityEvent.class, new ProjectileEntityListener(this.teamDistributor));
+        eventNode.addListener(ProjectileCollideWithEntityEvent.class, new ProjectileEntityListener(this.teamDistributor, null));
         eventNode.addListener(PlayerChatEvent.class, new PlayerChatListener());
     }
 
