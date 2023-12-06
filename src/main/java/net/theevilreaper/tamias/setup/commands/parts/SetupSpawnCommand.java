@@ -11,14 +11,19 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
 
+import static net.theevilreaper.tamias.setup.TamiasSetup.SELECT_MAP_FIRST;
+
 public final class SetupSpawnCommand extends Command {
 
     public SetupSpawnCommand(@NotNull Function<CommandSender, BaseMap> mapFunction) {
         super("spawn");
 
         addSyntax((sender, context) -> {
-            var map = mapFunction.apply(null);
-            if (map == null) return;
+            var map = mapFunction.apply(sender);
+            if (map == null) {
+                sender.sendMessage(SELECT_MAP_FIRST);
+                return;
+            }
             Pos position = Pos.fromPoint(((Player) sender).getPosition());
             map.setSpawn(position);
             var posAsComponent = ComponentHelper.convertPointToComponent(position);
