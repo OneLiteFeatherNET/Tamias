@@ -6,6 +6,8 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.tamias.config.GameConfig;
+import net.theevilreaper.tamias.map.GameMap;
+import net.theevilreaper.tamias.map.MapProvider;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -19,14 +21,12 @@ import java.util.function.Function;
  **/
 public final class TeamHelper {
 
-    private final Pos survivorSpawn;
-    private final Pos tntSpawn;
+    private final MapProvider mapProvider;
     private final Function<Byte, @NotNull Team> teamMapper;
     private final Team survivorTeam;
 
-    public TeamHelper(@NotNull Pos survivorSpawn, @NotNull Pos tntSpawn, @NotNull Function<Byte, @NotNull Team> teamMapper) {
-        this.survivorSpawn = survivorSpawn;
-        this.tntSpawn = tntSpawn;
+    public TeamHelper(@NotNull MapProvider mapProvider, @NotNull Function<Byte, @NotNull Team> teamMapper) {
+        this.mapProvider = mapProvider;
         this.teamMapper = teamMapper;
         this.survivorTeam = teamMapper.apply(GameConfig.SURVIVOR_ID);
     }
@@ -53,13 +53,16 @@ public final class TeamHelper {
     }
 
     public void teleport() {
+        if (mapProvider.getActiveMap() == null) return;
         var tntTeam = teamMapper.apply(GameConfig.TNT_ID);
         Check.argCondition(tntTeam.getPlayers().isEmpty(), "The tnt team cannot be empty");
         Check.argCondition(tntTeam.getPlayers().size() > 1, "The tnt team must contain only one player at start");
         Check.argCondition(survivorTeam.getPlayers().isEmpty(), "The survivor team cannot be empty");
 
-        tntTeam.getPlayers().forEach(player -> player.teleport(tntSpawn));
-        survivorTeam.getPlayers().forEach(player -> player.teleport(survivorSpawn));
+        var gameMap = ((GameMap)mapProvider.getActiveMap());
+
+        tntTeam.getPlayers().forEach(player -> player.teleport(gameMap.getBomberInitialSpawn()));
+        survivorTeam.getPlayers().forEach(player -> player.teleport(gameMap.getSpawn()));
     }
 
     public void clearTeams() {
