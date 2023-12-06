@@ -2,9 +2,8 @@ package net.theevilreaper.tamias.map;
 
 import de.icevizion.aves.map.BaseMap;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.utils.Direction;
-import net.minestom.server.utils.validate.Check;
-import net.theevilreaper.tamias.config.GameConfig;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -18,28 +17,31 @@ import org.jetbrains.annotations.UnknownNullability;
 public final class GameMap extends BaseMap {
 
     private Pos bomberInitialSpawn;
-
     private Pos leftSurvivorSpawn;
+    private Vec leftAreaPos;
+    private Vec rightAreaPos;
     private Direction direction;
 
-    private final transient Pos[] gameSpawns = new Pos[GameConfig.MAX_PLAYERS];
 
     public GameMap() {
         super("", Pos.ZERO, "");
     }
 
-    public GameMap(@NotNull String name, Pos spawn, @NotNull Pos bomberInitialSpawn, @NotNull Pos leftSurvivorSpawn) {
+    public GameMap(@NotNull String name, Pos spawn, @NotNull Pos bomberInitialSpawn, @NotNull Pos leftSurvivorSpawn, @NotNull Vec leftAreaPos, @NotNull Vec rightAreaPos, @NotNull Direction direction) {
         super(name, spawn, "Team");
         this.bomberInitialSpawn = bomberInitialSpawn;
         this.leftSurvivorSpawn = leftSurvivorSpawn;
+        this.leftAreaPos = leftAreaPos;
+        this.rightAreaPos = rightAreaPos;
+        this.direction = direction;
     }
 
-    public void calculateSpawns() {
-        Check.argCondition(this.leftSurvivorSpawn == null, "The calculation needs the initial spawn position!");
-        this.gameSpawns[0] = this.leftSurvivorSpawn;
-        for (int i = 1; i < GameConfig.MAX_PLAYERS; i++) {
-            this.gameSpawns[i] = leftSurvivorSpawn.add(0, 0, i);
-        }
+    public void setLeftAreaPos(@NotNull Vec vec) {
+       this.leftAreaPos = vec;
+    }
+
+    public void setRightArePos(@NotNull Vec vec) {
+        this.rightAreaPos = vec;
     }
 
     public void setDirection(@NotNull Direction direction) {
@@ -58,7 +60,15 @@ public final class GameMap extends BaseMap {
         return bomberInitialSpawn;
     }
 
-    public @NotNull Pos[] getGameSpawns() {
-        return gameSpawns;
+    public @NotNull Direction getDirection() {
+        return direction;
+    }
+
+    public @NotNull Vec getLeftAreaPos() {
+        return leftAreaPos;
+    }
+
+    public @NotNull Vec getRightAreaPos() {
+        return rightAreaPos;
     }
 }
