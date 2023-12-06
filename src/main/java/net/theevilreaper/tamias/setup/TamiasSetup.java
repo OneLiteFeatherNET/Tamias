@@ -63,7 +63,7 @@ public class TamiasSetup {
 
     }
 
-    private BaseMap handleNoMap(@NotNull CommandSender sender) {
+    private @Nullable BaseMap handleNoMap(@NotNull CommandSender sender) {
         if (!sender.hasTag(MAP_PATH_TAG)) {
             return null;
         }
