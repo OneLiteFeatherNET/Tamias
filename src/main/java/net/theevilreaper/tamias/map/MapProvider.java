@@ -40,7 +40,7 @@ public final class MapProvider {
         this.mapPath = originPath.resolve(GameConfig.MAP_PATH_NAME);
         this.fileHandler = new GsonFileHandler(gson);
         this.loadMapPaths();
-        this.loadLobbyMap(instanceContainer);
+        //this.loadLobbyMap(instanceContainer);
     }
 
     private void loadMapPaths() {
