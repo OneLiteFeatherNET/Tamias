@@ -3,8 +3,8 @@ package net.theevilreaper.tamias.listener;
 import de.icevizion.aves.util.Broadcaster;
 import de.icevizion.xerus.api.phase.GamePhase;
 import de.icevizion.xerus.api.phase.LinearPhaseSeries;
-import de.icevizion.xerus.api.phase.Phase;
-import net.minestom.server.event.player.PlayerDisconnectEvent;
+import net.kyori.adventure.text.Component;
+import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.theevilreaper.tamias.phase.LobbyPhase;
 import net.theevilreaper.tamias.util.Messages;
 import org.jetbrains.annotations.NotNull;
@@ -17,23 +17,25 @@ import java.util.function.Consumer;
  * @since
  **/
 
-public class PlayerQuitListener implements Consumer<PlayerDisconnectEvent> {
+public final class PlayerSpawnListener implements Consumer<PlayerSpawnEvent> {
 
     private final LinearPhaseSeries<GamePhase> phaseSeries;
 
-    public PlayerQuitListener(@NotNull LinearPhaseSeries<GamePhase> phaseSeries) {
+    public PlayerSpawnListener(@NotNull LinearPhaseSeries<GamePhase> phaseSeries) {
         this.phaseSeries = phaseSeries;
     }
 
     @Override
-    public void accept(@NotNull PlayerDisconnectEvent event) {
-        Phase phase = phaseSeries.getCurrentPhase();
+    public void accept(@NotNull PlayerSpawnEvent event) {
+        var player = event.getPlayer();
+        player.setDisplayName(Component.text(player.getUsername()));
 
-        if (phase == null) return;
+        var phase = phaseSeries.getCurrentPhase();
 
         if (phase instanceof LobbyPhase lobbyPhase) {
-            lobbyPhase.checkStopCondition();
-            Broadcaster.broadcast(Messages.getLeaveMessage(event.getPlayer()));
+            Broadcaster.broadcast(Messages.getJoinMessage(player));
+            lobbyPhase.updatePlayerValues(player);
+            return;
         }
     }
 }

@@ -38,8 +38,6 @@ repositories {
 }
 
 dependencies {
-    implementation("com.badlogicgames.gdx:gdx-bullet:1.12.0")
-    implementation("com.badlogicgames.gdx:gdx-bullet-platform:1.12.0:natives-desktop")
     implementation(libs.mini)
     compileOnly(libs.minestom)
     compileOnly(libs.aves)

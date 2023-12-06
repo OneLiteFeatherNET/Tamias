@@ -12,7 +12,7 @@ import java.util.function.Consumer;
  * @since
  **/
 
-public class PlayerMoveItemListener implements Consumer<InventoryPreClickEvent> {
+public final class PlayerMoveItemListener implements Consumer<InventoryPreClickEvent> {
     @Override
     public void accept(@NotNull InventoryPreClickEvent event) {
         if (event.getClickedItem().hasTag(Tags.ITEM_TAG) && event.getClickedItem().getTag(Tags.ITEM_TAG) == (byte) 0x01) {

@@ -10,8 +10,12 @@ import net.minestom.server.timer.Task;
 import net.theevilreaper.tamias.area.GameArea;
 import net.theevilreaper.tamias.event.FinishBuildEvent;
 import org.jetbrains.annotations.NotNull;
+import net.minestom.server.event.trait.PlayerEvent;
+import net.theevilreaper.tamias.listener.game.PlayerStoppedMovement;
 
 /**
+ * Tbe phase implementation handles each logic which should be executed during the period where the map builds up.
+ * Its use only the {@link GamePhase} abstraction because the build process is not limited to a strict time duration.
  * @author theEvilReaper
  * @version 1.0.0
  * @since 1.0.0
@@ -25,7 +29,7 @@ public final class MapBuildPhase extends GamePhase {
     public MapBuildPhase(GameArea gameArea) {
         super("MapBuild");
         this.eventNode = EventNode.type("MapBuildPhase", EventFilter.ALL);
-        eventNode.addListener(PlayerMoveEvent.class, this::handlePlayerMove);
+        eventNode.addListener(PlayerMoveEvent.class, new PlayerStoppedMovement());
         eventNode.addListener(FinishBuildEvent.class, finishBuildEvent -> stop());
         this.gameArea = gameArea;
     }
@@ -39,14 +43,5 @@ public final class MapBuildPhase extends GamePhase {
     public void stop() {
         task.cancel();
         MinecraftServer.getGlobalEventHandler().removeChild(this.eventNode);
-    }
-
-    private void handlePlayerMove(@NotNull PlayerMoveEvent moveEvent) {
-        var currentPos = moveEvent.getPlayer().getPosition();
-        var newPos = moveEvent.getNewPosition();
-
-        if (currentPos.x() != newPos.x() || currentPos.z() != newPos.z()) {
-            moveEvent.setCancelled(true);
-        }
     }
 }

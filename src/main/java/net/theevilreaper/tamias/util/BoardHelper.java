@@ -2,26 +2,31 @@ package net.theevilreaper.tamias.util;
 
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-import net.minestom.server.network.packet.server.play.ScoreboardObjectivePacket;
-import net.minestom.server.scoreboard.Scoreboard;
 import net.minestom.server.scoreboard.Sidebar;
 import org.jetbrains.annotations.NotNull;
 
 public final class BoardHelper {
 
-    private final Scoreboard scoreboard;
+    private static final String LINE_PREFIX = "TNT-";
 
-    public BoardHelper(@NotNull Component displayName) {
-        this.scoreboard = new Sidebar(displayName);
+    private final Sidebar scoreboard;
+
+    public BoardHelper() {
+        this.scoreboard = new Sidebar(Component.empty());
     }
 
-    public void initLobbyLayout() {
-        var packet = this.scoreboard.getCreationObjectivePacket(Component.empty(), ScoreboardObjectivePacket.Type.INTEGER);
-
+    public void initLobbyLayout(@NotNull Component displayName) {
+        this.scoreboard.setTitle(displayName);
     }
 
-    public void initGameLayout() {
+    public void updateTitle(@NotNull Component displayName) {
+        this.scoreboard.setTitle(displayName);
+    }
 
+    public void initGameLayout(int maxRounds) {
+        int idCounter = 1;
+        this.scoreboard.createLine(new Sidebar.ScoreboardLine(LINE_PREFIX + idCounter, Component.text("Round:"), idCounter));
+        this.scoreboard.createLine(new Sidebar.ScoreboardLine(LINE_PREFIX + ++idCounter, Component.text("0/" + maxRounds), idCounter));
     }
 
     public void addViewer(@NotNull Player player) {
