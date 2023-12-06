@@ -25,6 +25,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 public final class GameArea {
     private static final Block GROUND_BLOCK = Block.STONE;
     private static final Block SPEED_BOOST_BLOCK = Block.REDSTONE_BLOCK;
+    private static final Block ORIGINAL_BLOCK = Block.PACKED_ICE;
     private static final int BLOCKS_PER_STEP = 20;
     private static final int TNT_SPAWN_HEIGHT = 20;
     private static final int MIN_TNT_AMOUNT = 10;
@@ -61,9 +62,13 @@ public final class GameArea {
         var startBlockZ = start.blockZ();
         var endBlockX = end.blockX();
         var endBlockZ = end.blockZ();
+        var blockY = start.blockY();
         for (int x = startBlockX; x < endBlockX; x++) {
             for (int z = startBlockZ; z < endBlockZ; z++) {
-                areaPositions.add(new Vec(x, start.blockY(), z));
+                if (instance.getBlock(x, blockY, z).equals(ORIGINAL_BLOCK)) {
+                    instance.setBlock(x, blockY, z, Block.BARRIER);
+                    areaPositions.add(new Vec(x, blockY, z));
+                }
             }
         }
     }
