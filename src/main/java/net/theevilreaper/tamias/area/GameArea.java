@@ -18,25 +18,23 @@ import org.jetbrains.annotations.NotNull;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.LinkedBlockingDeque;
 
+import static net.theevilreaper.tamias.util.Blocks.GROUND_BLOCK;
+import static net.theevilreaper.tamias.util.Blocks.ORIGINAL_BLOCK;
+import static net.theevilreaper.tamias.util.Blocks.SPEED_BOOST_BLOCK;
+import static net.theevilreaper.tamias.util.GameAreaHelper.*;
+
 @SuppressWarnings("java:S3252")
 public final class GameArea {
-    private static final Block GROUND_BLOCK = Block.STONE;
-    private static final Block SPEED_BOOST_BLOCK = Block.REDSTONE_BLOCK;
-    private static final Block ORIGINAL_BLOCK = Block.BLUE_ICE;
-    private static final int BLOCKS_PER_STEP = 20;
-    private static final int TNT_SPAWN_HEIGHT = 20;
-    private static final int MIN_TNT_AMOUNT = 10;
-    private static final int MAX_TNT_AMOUNT = 20;
-    private static final int MIN_SPEED_BOOST_AMOUNT = 10;
-    private static final int MAX_SPEED_BOOST_AMOUNT = 20;
+
+
 
     private final Instance instance;
-    private Vec start;
-    private Vec end;
-
+    private final Vec start;
+    private final Vec end;
     private final List<Vec> areaPositions;
     private final List<Vec> specialBlocks;
     private final List<Vec> tntPositions;
@@ -82,7 +80,7 @@ public final class GameArea {
                 if (chunk == null) {
                     instance.loadChunk(pos.chunkX(), pos.chunkZ()).join();
                 }
-                if (instance.getBlock(x, blockY, z).name().equals(ORIGINAL_BLOCK.name())) {
+                if (Objects.equals(instance.getBlock(x, blockY, z).name(), ORIGINAL_BLOCK.name())) {
                     instance.setBlock(x, blockY, z, Block.BARRIER);
                     areaPositions.add(new Vec(x, blockY, z));
                 }
@@ -129,7 +127,6 @@ public final class GameArea {
     private void placeAtPos(@NotNull Vec pos) {
         if (specialBlocks.contains(pos)) {
             instance.setBlock(pos, SPEED_BOOST_BLOCK);
-            spawnTnt(pos);
         } else {
             instance.setBlock(pos, GROUND_BLOCK);
         }
