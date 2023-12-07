@@ -76,6 +76,12 @@ public final class GameArea {
                 }
             }
         }
+        if (!instance.getBlock(start).name().equals(Block.AIR.name())) {
+            instance.setBlock(start, Block.AIR);
+        }
+        if (!instance.getBlock(end).name().equals(Block.AIR.name())) {
+            instance.setBlock(end, Block.AIR);
+        }
     }
 
     @NotNull
