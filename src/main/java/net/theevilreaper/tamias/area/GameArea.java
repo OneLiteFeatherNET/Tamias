@@ -25,7 +25,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 public final class GameArea {
     private static final Block GROUND_BLOCK = Block.STONE;
     private static final Block SPEED_BOOST_BLOCK = Block.REDSTONE_BLOCK;
-    private static final Block ORIGINAL_BLOCK = Block.PACKED_ICE;
+    private static final Block ORIGINAL_BLOCK = Block.BLUE_ICE;
     private static final int BLOCKS_PER_STEP = 20;
     private static final int TNT_SPAWN_HEIGHT = 20;
     private static final int MIN_TNT_AMOUNT = 10;
