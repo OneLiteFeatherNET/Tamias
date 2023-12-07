@@ -45,26 +45,38 @@ public final class GameArea {
 
     public GameArea(@NotNull Instance instance, @NotNull Vec start, @NotNull Vec end) {
         this.instance = instance;
-        var distance = start.sub(end);
-        Check.argCondition(distance.equals(Vec.ZERO), "NPE");
         this.start = start;
         this.end = end;
+        var distance = start.sub(end);
+        Check.argCondition(distance.equals(Vec.ZERO), "NPE");
         this.areaPositions = new ArrayList<>();
         this.specialBlocks = new ArrayList<>();
         this.tntPositions = new ArrayList<>();
         calculatePositions();
-        calculateSpecialBlockPositions(areaPositions);
+        calculateSpecialBlockPositions();
         calculateTntPositions();
     }
 
     void calculatePositions() {
         var startBlockX = start.blockX();
-        var startBlockZ = start.blockZ();
         var endBlockX = end.blockX();
+        if (startBlockX > endBlockX) {
+            var temp = startBlockX;
+            startBlockX = endBlockX;
+            endBlockX = temp;
+        }
+
+        var startBlockZ = start.blockZ();
         var endBlockZ = end.blockZ();
+        if (startBlockZ > endBlockZ) {
+            var temp = startBlockZ;
+            startBlockZ = endBlockZ;
+            endBlockZ = temp;
+        }
+
         var blockY = start.blockY();
         for (int x = startBlockX; x < endBlockX; x++) {
-            for (int z = endBlockZ; z < startBlockZ; z++) {
+            for (int z = startBlockZ; z < endBlockZ; z++) {
                 var pos = new Vec(x, blockY, z);
                 var chunk = instance.getChunk(pos.chunkX(), pos.chunkZ());
                 if (chunk == null) {
@@ -143,10 +155,10 @@ public final class GameArea {
         }
     }
 
-    private void calculateSpecialBlockPositions(@NotNull List<Vec> posList) {
+    private void calculateSpecialBlockPositions() {
         var amountOfSpeedBoost = random.nextInt(MAX_SPEED_BOOST_AMOUNT - MIN_SPEED_BOOST_AMOUNT) + MIN_SPEED_BOOST_AMOUNT;
         for (int i = 0; i < amountOfSpeedBoost; i++) {
-            var randomPos = posList.get(random.nextInt(posList.size()));
+            var randomPos = areaPositions.get(random.nextInt(areaPositions.size()));
             specialBlocks.add(randomPos);
         }
     }
