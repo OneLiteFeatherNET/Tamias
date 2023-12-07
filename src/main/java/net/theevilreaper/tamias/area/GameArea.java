@@ -34,8 +34,8 @@ public final class GameArea {
     private static final int MAX_SPEED_BOOST_AMOUNT = 20;
 
     private final Instance instance;
-    private final Vec start;
-    private final Vec end;
+    private Vec start;
+    private Vec end;
 
     private final List<Vec> areaPositions;
     private final List<Vec> specialBlocks;
@@ -64,8 +64,13 @@ public final class GameArea {
         var endBlockZ = end.blockZ();
         var blockY = start.blockY();
         for (int x = startBlockX; x < endBlockX; x++) {
-            for (int z = startBlockZ; z < endBlockZ; z++) {
-                if (instance.getBlock(x, blockY, z).equals(ORIGINAL_BLOCK)) {
+            for (int z = endBlockZ; z < startBlockZ; z++) {
+                var pos = new Vec(x, blockY, z);
+                var chunk = instance.getChunk(pos.chunkX(), pos.chunkZ());
+                if (chunk == null) {
+                    instance.loadChunk(pos.chunkX(), pos.chunkZ()).join();
+                }
+                if (instance.getBlock(x, blockY, z).name().equals(ORIGINAL_BLOCK.name())) {
                     instance.setBlock(x, blockY, z, Block.BARRIER);
                     areaPositions.add(new Vec(x, blockY, z));
                 }
