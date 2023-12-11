@@ -12,6 +12,7 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.timer.Task;
 import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.tamias.event.FinishBuildEvent;
+import net.theevilreaper.tamias.util.GroundData;
 import net.theevilreaper.tamias.util.Helper;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,16 +23,13 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.LinkedBlockingDeque;
 
-import static net.theevilreaper.tamias.util.Blocks.GROUND_BLOCK;
-import static net.theevilreaper.tamias.util.Blocks.ORIGINAL_BLOCK;
-import static net.theevilreaper.tamias.util.Blocks.SPEED_BOOST_BLOCK;
 import static net.theevilreaper.tamias.util.GameAreaHelper.*;
 
 @SuppressWarnings("java:S3252")
 public final class GameArea {
 
-
-
+    public static final Block ORIGINAL_BLOCK = Block.BLUE_ICE;
+    public static final GroundData DEFAULT_GROUND_DATA = new GroundData(Block.ORANGE_TERRACOTTA, null);
     private final Instance instance;
     private final Vec start;
     private final Vec end;
@@ -40,8 +38,11 @@ public final class GameArea {
     private final List<Vec> tntPositions;
     private final Random random = new Random();
 
+    private GroundData groundData;
+
 
     public GameArea(@NotNull Instance instance, @NotNull Vec start, @NotNull Vec end) {
+        this.groundData = DEFAULT_GROUND_DATA;
         this.instance = instance;
         this.start = start;
         this.end = end;
@@ -126,9 +127,10 @@ public final class GameArea {
 
     private void placeAtPos(@NotNull Vec pos) {
         if (specialBlocks.contains(pos)) {
-            instance.setBlock(pos, SPEED_BOOST_BLOCK);
+            var groundBlock = !groundData.hasAdditionalBlocks() ? groundData.groundBlock() : groundData.additionalBlocks().get(0);
+            instance.setBlock(pos, groundBlock);
         } else {
-            instance.setBlock(pos, GROUND_BLOCK);
+            instance.setBlock(pos, groundData.groundBlock());
         }
         if (tntPositions.contains(pos)) {
             spawnTnt(pos);
