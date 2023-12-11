@@ -19,9 +19,8 @@ import java.util.function.Function;
 /**
  * @author theEvilReaper
  * @version 1.0.0
- * @since
- **/
-
+ * @since 1.0.0
+ */
 public class SetupAreaCommand extends Command {
 
     private final Function<CommandSender, BaseMap> mapFunction;
