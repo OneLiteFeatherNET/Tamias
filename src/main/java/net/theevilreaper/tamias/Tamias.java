@@ -11,6 +11,7 @@ import de.icevizion.xerus.api.team.TeamServiceImpl;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithBlockEvent;
@@ -25,9 +26,12 @@ import net.minestom.server.event.player.PlayerLoginEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.event.player.PlayerSwapItemEvent;
 import net.minestom.server.extensions.Extension;
+import net.minestom.server.instance.AnvilLoader;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.utils.PropertyUtils;
+import net.theevilreaper.tamias.area.GameArea;
 import net.minestom.server.utils.validate.Check;
+import net.theevilreaper.tamias.commands.TestBuildCommand;
 import net.theevilreaper.tamias.commands.TestCommand;
 import net.theevilreaper.tamias.config.GameConfig;
 import net.theevilreaper.tamias.listener.PlayerChatListener;
@@ -58,6 +62,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.nio.file.Paths;
 
 import static de.icevizion.aves.inventory.util.InventoryConstants.CANCELLABLE_EVENT;
 
@@ -75,6 +80,7 @@ public class Tamias extends Extension {
     private final TeamService<Team> teamService;
     private final BoardHelper boardHelper;
     private MapProvider mapProvider;
+    private GameArea gameArea;
     private TeamHelper teamDistributor;
 
     public Tamias() {
@@ -93,20 +99,32 @@ public class Tamias extends Extension {
     public void initialize() {
         checkMapDirectory();
         InstanceContainer instance = MinecraftServer.getInstanceManager().createInstanceContainer();
+        var path = Paths.get("C:\\Users\\Minny\\Desktop\\Test-Minestom\\maps\\suicide_tnt");
+        instance.setChunkLoader(new AnvilLoader(path));
+        instance.enableAutoChunkLoad(true);
 
-        this.mapProvider = new MapProvider(this.gson, getDataDirectory(), instance);
-        this.teamDistributor = new TeamHelper(this.mapProvider, this.teamService.getTeams()::get);
+        MinecraftServer.getInstanceManager().registerInstance(instance);
+
+
+//        this.mapProvider = new MapProvider(gson, getDataDirectory(), instance);
+//        this.mapProvider = new MapProvider(this.gson, getDataDirectory(), instance);
+//        this.teamDistributor = new TeamHelper(this.mapProvider, this.teamService.getTeams()::get);
 
         MinecraftServer.getInstanceManager().registerInstance(instance);
         MinecraftServer.getGlobalEventHandler().addListener(PlayerLoginEvent.class, event -> {
             event.setSpawningInstance(instance);
         });
         MinecraftServer.getGlobalEventHandler().addListener(PlayerSpawnEvent.class, event -> {
-            event.getPlayer().teleport(new Pos(0, 150, 0));
+            event.getPlayer().setGameMode(GameMode.CREATIVE);
+            event.getPlayer().teleport(new Pos(-11, 130, 25));
         });
 
+        this.gameArea = new GameArea(instance, new Vec(-23, 129, 36), new Vec(35, 129, -19));
+
         MinecraftServer.getCommandManager().register(new TestCommand());
+
         this.createPhaseStructure();
+        MinecraftServer.getCommandManager().register(new TestBuildCommand(new MapBuildPhase(this.gameArea)));
         registerCancelListener(MinecraftServer.getGlobalEventHandler());
 
         if (SETUP_MODE) {
@@ -134,7 +152,7 @@ public class Tamias extends Extension {
     private void createPhaseStructure() {
         this.phaseSeries.add(new LobbyPhase());
         var gamePhaseSeries = new CyclicPhaseSeries<GamePhase>("game");
-        gamePhaseSeries.add(new MapBuildPhase());
+        gamePhaseSeries.add(new MapBuildPhase(this.gameArea));
         gamePhaseSeries.add(new PlayingPhase(this.boardHelper::updateTitle));
         gamePhaseSeries.setMaxIterations(GameConfig.GAME_ROUNDS);
         this.phaseSeries.addAll(gamePhaseSeries);

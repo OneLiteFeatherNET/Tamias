@@ -2,9 +2,14 @@ package net.theevilreaper.tamias.phase;
 
 import de.icevizion.xerus.api.phase.GamePhase;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.event.Event;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerMoveEvent;
+import net.minestom.server.timer.Task;
+import net.theevilreaper.tamias.area.GameArea;
+import net.theevilreaper.tamias.event.FinishBuildEvent;
+import org.jetbrains.annotations.NotNull;
 import net.minestom.server.event.trait.PlayerEvent;
 import net.theevilreaper.tamias.listener.game.PlayerStoppedMovement;
 
@@ -17,20 +22,26 @@ import net.theevilreaper.tamias.listener.game.PlayerStoppedMovement;
  **/
 public final class MapBuildPhase extends GamePhase {
 
-    private final EventNode<PlayerEvent> eventNode;
+    private final EventNode<Event> eventNode;
+    private final GameArea gameArea;
+    private Task task;
 
-    public MapBuildPhase() {
+    public MapBuildPhase(GameArea gameArea) {
         super("MapBuild");
-        this.eventNode = EventNode.type(this.getName(), EventFilter.PLAYER);
+        this.eventNode = EventNode.type("MapBuildPhase", EventFilter.ALL);
         eventNode.addListener(PlayerMoveEvent.class, new PlayerStoppedMovement());
+        eventNode.addListener(FinishBuildEvent.class, finishBuildEvent -> stop());
+        this.gameArea = gameArea;
     }
 
     @Override
     protected void onStart() {
         MinecraftServer.getGlobalEventHandler().addChild(this.eventNode);
+        task = gameArea.build();
     }
 
     public void stop() {
+        task.cancel();
         MinecraftServer.getGlobalEventHandler().removeChild(this.eventNode);
     }
 }
