@@ -2,12 +2,17 @@ package net.theevilreaper.tamias.phase;
 
 import de.icevizion.xerus.api.phase.TickDirection;
 import de.icevizion.xerus.api.phase.TimedPhase;
+import net.kyori.adventure.sound.Sound;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
+import net.minestom.server.sound.SoundEvent;
+import net.theevilreaper.tamias.map.MapProvider;
 import net.theevilreaper.tamias.util.Messages;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 
 import static net.theevilreaper.tamias.config.GameConfig.*;
 
@@ -18,14 +23,17 @@ import static net.theevilreaper.tamias.config.GameConfig.*;
  **/
 public final class LobbyPhase extends TimedPhase {
 
+    private static final Sound PLING = Sound.sound(SoundEvent.BLOCK_NOTE_BLOCK_BELL, Sound.Source.MASTER, 1.0f, 1.0f);
+    private final MapProvider provider;
     private boolean forceStarted;
 
-    public LobbyPhase() {
+    public LobbyPhase(@NotNull MapProvider provider) {
         super("Lobby", ChronoUnit.SECONDS, 1);
         this.setPaused(true);
         this.setCurrentTicks(LOBBY_PHASE_TIME);
         this.setTickDirection(TickDirection.DOWN);
         this.setEndTicks(-5);
+        this.provider = provider;
     }
 
 
@@ -45,8 +53,21 @@ public final class LobbyPhase extends TimedPhase {
         setLevel();
 
         switch (getCurrentTicks()) {
-            case 30, 20, 10, 3, 2, 1 -> broadcastTime();
+            case 30, 3, 1 -> broadcastTime();
+            case 20 -> {
+                broadcastTime();
+                this.provider.loadGameMap();
+            }
+            case 10 -> {
+                this.broadcastTime();
+                this.provider.loadGameChunks();
+            }
+            case 2 -> {
+                this.broadcastTime();
+                this.provider.getSpawnArea().spawnBlocks();
+            }
             case 0 -> {
+                this.provider.teleportPlayers(new ArrayList<>(MinecraftServer.getConnectionManager().getOnlinePlayers()));
             }
             default -> {
                 // Nothing to do here
@@ -61,7 +82,8 @@ public final class LobbyPhase extends TimedPhase {
 
     private void broadcastTime() {
         for (Player onlinePlayer : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
-            onlinePlayer.sendMessage(Messages.getTimeComponent(getCurrentTicks()));
+            onlinePlayer.sendMessage(Messages.getLobbyTime(getCurrentTicks()));
+            onlinePlayer.playSound(PLING, onlinePlayer.getPosition());
         }
     }
 
