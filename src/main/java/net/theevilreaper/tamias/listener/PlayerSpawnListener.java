@@ -9,6 +9,7 @@ import net.theevilreaper.tamias.phase.LobbyPhase;
 import net.theevilreaper.tamias.util.Messages;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.UUID;
 import java.util.function.Consumer;
 
 /**
@@ -19,9 +20,11 @@ import java.util.function.Consumer;
 
 public final class PlayerSpawnListener implements Consumer<PlayerSpawnEvent> {
 
+    private final UUID spawnInstanceID;
     private final LinearPhaseSeries<GamePhase> phaseSeries;
 
-    public PlayerSpawnListener(@NotNull LinearPhaseSeries<GamePhase> phaseSeries) {
+    public PlayerSpawnListener(@NotNull UUID spawnInstanceID, @NotNull LinearPhaseSeries<GamePhase> phaseSeries) {
+        this.spawnInstanceID = spawnInstanceID;
         this.phaseSeries = phaseSeries;
     }
 
@@ -32,7 +35,7 @@ public final class PlayerSpawnListener implements Consumer<PlayerSpawnEvent> {
 
         var phase = phaseSeries.getCurrentPhase();
 
-        if (phase instanceof LobbyPhase lobbyPhase) {
+        if (phase instanceof LobbyPhase lobbyPhase && player.getInstance().getUniqueId().equals(spawnInstanceID)) {
             Broadcaster.broadcast(Messages.getJoinMessage(player));
             lobbyPhase.updatePlayerValues(player);
             return;
