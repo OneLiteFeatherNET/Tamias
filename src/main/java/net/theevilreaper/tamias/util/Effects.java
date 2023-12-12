@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
  * @version 1.0.0
  * @since 1.0.0
  */
+@SuppressWarnings("java:S3252")
 public final class Effects {
 
     private static final TimedPotion BLINDNESS =
