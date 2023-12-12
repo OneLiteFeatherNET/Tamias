@@ -9,6 +9,8 @@ import net.minestom.server.utils.Direction;
 import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.tamias.config.GameConfig;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -23,6 +25,7 @@ import java.util.List;
 @SuppressWarnings("java:S3252")
 public final class SpawnArea {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SpawnArea.class);
     private static final Vec Y_VEC = new Vec(0, 1,0);
     private final Instance instance;
     private final Pos[] positions;
@@ -55,11 +58,12 @@ public final class SpawnArea {
      * If the player amount is higher than the maximum of position it will throw a {@link IllegalArgumentException}.
      * @param players the players to teleport
      */
-    public void teleport(@NotNull List<Player> players) {
+    public void teleport(@NotNull Instance instance, @NotNull List<Player> players) {
         Check.argCondition(players.size() > this.positions.length, "The amount of online players is higher then the maximum position count");
         Collections.shuffle(players);
         for (int i = 0; i < players.size(); i++) {
-            players.get(i).teleport(positions[i].add(Y_VEC));
+            LOGGER.info("Teleporting player {} to position {}", players.get(i).getUsername(), positions[i]);
+            players.get(i).setInstance(instance, positions[i].add(Y_VEC));
         }
     }
 
@@ -69,14 +73,16 @@ public final class SpawnArea {
      */
     private void calculatePositions(@NotNull Direction direction) {
         var vec = switch (direction) {
-            case NORTH -> new Vec(0, 0, -1);
-            case SOUTH -> new Vec(0, 0, 1);
-            case EAST -> new Vec(1, 0, 0);
-            case WEST -> new Vec(-1, 0, 0);
+            case NORTH -> new Vec(1, 0, 0);
+            case SOUTH -> new Vec(-1, 0, 0);
+            case EAST -> new Vec(0, 0, 1);
+            case WEST -> new Vec(0, 0, -1);
             default -> throw new IllegalStateException("Unexpected value: " + direction);
         };
+        LOGGER.info("Given start position is {}", positions[0]);
         for (int i = 1; i < positions.length; i++) {
-           positions[i] = positions[i].add(vec);
+            LOGGER.info("Calculating position {}", positions[i - 1].add(vec));
+           positions[i] = positions[i - 1].add(vec);
         }
     }
 

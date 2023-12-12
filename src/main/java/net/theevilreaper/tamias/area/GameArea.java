@@ -7,6 +7,7 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.other.FallingBlockMeta;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.timer.Task;
@@ -15,6 +16,8 @@ import net.theevilreaper.tamias.event.FinishBuildEvent;
 import net.theevilreaper.tamias.util.GroundData;
 import net.theevilreaper.tamias.util.Helper;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -28,6 +31,7 @@ import static net.theevilreaper.tamias.util.GameAreaHelper.*;
 @SuppressWarnings("java:S3252")
 public final class GameArea {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(GameArea.class);
     public static final Block ORIGINAL_BLOCK = Block.BLUE_ICE;
     public static final GroundData DEFAULT_GROUND_DATA = new GroundData(Block.ORANGE_TERRACOTTA, null);
     private final Instance instance;
@@ -36,10 +40,8 @@ public final class GameArea {
     private final List<Vec> areaPositions;
     private final List<Vec> specialBlocks;
     private final List<Vec> tntPositions;
-    private final Random random = new Random();
-
+    private Random random;
     private GroundData groundData;
-
 
     public GameArea(@NotNull Instance instance, @NotNull Vec start, @NotNull Vec end) {
         this.groundData = DEFAULT_GROUND_DATA;
@@ -52,7 +54,7 @@ public final class GameArea {
         this.specialBlocks = new ArrayList<>();
         this.tntPositions = new ArrayList<>();
         calculatePositions();
-        calculateSpecialBlockPositions();
+        //calculateSpecialBlockPositions();
         calculateTntPositions();
     }
 
@@ -93,6 +95,8 @@ public final class GameArea {
         if (!instance.getBlock(end).name().equals(Block.AIR.name())) {
             instance.setBlock(end, Block.AIR);
         }
+        LOGGER.info("The calculated area contains {} blocks", areaPositions.size());
+        this.random = new Random(this.areaPositions.size());
     }
 
     @NotNull
@@ -111,7 +115,7 @@ public final class GameArea {
                 positions.add(queue.poll());
             }
             if (positions.isEmpty()) {
-                MinecraftServer.getGlobalEventHandler().call(new FinishBuildEvent());
+                EventDispatcher.call(new FinishBuildEvent());
                 return;
             }
             for (Vec pos : positions) {
@@ -138,6 +142,7 @@ public final class GameArea {
     }
 
     private void spawnTnt(@NotNull Vec pos) {
+        System.out.println("Spawning tnt at " + pos);
         var tntEntity = new Entity(EntityType.FALLING_BLOCK);
         FallingBlockMeta fallingBlockMeta = (FallingBlockMeta) tntEntity.getEntityMeta();
         fallingBlockMeta.setBlock(Block.TNT);
