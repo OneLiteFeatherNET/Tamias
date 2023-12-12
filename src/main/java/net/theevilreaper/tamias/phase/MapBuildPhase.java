@@ -1,5 +1,6 @@
 package net.theevilreaper.tamias.phase;
 
+import de.icevizion.aves.util.Broadcaster;
 import de.icevizion.xerus.api.phase.GamePhase;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.Event;
@@ -9,9 +10,12 @@ import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.timer.Task;
 import net.theevilreaper.tamias.area.GameArea;
 import net.theevilreaper.tamias.event.FinishBuildEvent;
+import net.theevilreaper.tamias.util.Messages;
+import net.theevilreaper.tamias.util.ValueGetter;
 import org.jetbrains.annotations.NotNull;
 import net.minestom.server.event.trait.PlayerEvent;
 import net.theevilreaper.tamias.listener.game.PlayerStoppedMovement;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Tbe phase implementation handles each logic which should be executed during the period where the map builds up.
@@ -22,26 +26,33 @@ import net.theevilreaper.tamias.listener.game.PlayerStoppedMovement;
  **/
 public final class MapBuildPhase extends GamePhase {
 
-    private final EventNode<Event> eventNode;
-    private final GameArea gameArea;
+    private final ValueGetter<GameArea> mapGetter;
     private Task task;
 
-    public MapBuildPhase(GameArea gameArea) {
+    public MapBuildPhase(@Nullable ValueGetter<GameArea> mapGetter) {
         super("MapBuild");
-        this.eventNode = EventNode.type("MapBuildPhase", EventFilter.ALL);
-        eventNode.addListener(PlayerMoveEvent.class, new PlayerStoppedMovement());
-        eventNode.addListener(FinishBuildEvent.class, finishBuildEvent -> stop());
-        this.gameArea = gameArea;
+        addListener(PlayerMoveEvent.class, new PlayerStoppedMovement());
+        addListener(FinishBuildEvent.class, finishBuildEvent -> {
+            Broadcaster.broadcast(Messages.withMini("<green>Map is ready!"));
+            stop();
+        });
+        this.mapGetter = mapGetter;
+    }
+
+    @Override
+    public void start() {
+        super.start();
     }
 
     @Override
     protected void onStart() {
-        MinecraftServer.getGlobalEventHandler().addChild(this.eventNode);
-        task = gameArea.build();
+        if (this.mapGetter.getValue() == null) return;
+        Broadcaster.broadcast(Messages.withMini("<green>Map is building up..."));
+        task = this.mapGetter.getValue().build();
     }
 
     public void stop() {
         task.cancel();
-        MinecraftServer.getGlobalEventHandler().removeChild(this.eventNode);
+        finish();
     }
 }
