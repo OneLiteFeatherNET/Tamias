@@ -30,6 +30,7 @@ import net.minestom.server.utils.PropertyUtils;
 import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.tamias.commands.TestCommand;
 import net.theevilreaper.tamias.config.GameConfig;
+import net.theevilreaper.tamias.listener.PlayerBlockInteractListener;
 import net.theevilreaper.tamias.listener.PlayerChatListener;
 import net.theevilreaper.tamias.listener.PlayerJoinListener;
 import net.theevilreaper.tamias.listener.PlayerQuitListener;
@@ -186,6 +187,6 @@ public class Tamias extends Extension {
         eventNode.addListener(PlayerBlockPlaceEvent.class, CANCELLABLE_EVENT::accept);
         eventNode.addListener(ItemDropEvent.class, CANCELLABLE_EVENT::accept);
         eventNode.addListener(PlayerSwapItemEvent.class, CANCELLABLE_EVENT::accept);
-        eventNode.addListener(PlayerBlockInteractEvent.class, CANCELLABLE_EVENT::accept);
+        eventNode.addListener(PlayerBlockInteractEvent.class, new PlayerBlockInteractListener());
     }
 }
