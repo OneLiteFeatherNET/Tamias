@@ -66,9 +66,8 @@ public final class Messages {
         return PREFIX.append(Component.space()).append(MINI_MESSAGE.deserialize(text, resolvers));
     }
     @Contract
-    public static @NotNull Component getTimeComponent(int time) {
-        var secondString = time > 1 ? "seconds" : "second";
-        return withMiniPrefix("<gray>Restart in <red>" + time + " <gray>" + secondString);
+    public static @NotNull Component getLobbyTime(int time) {
+        return withMiniPrefix("<gold>Starting in... <red>" + time);
     }
 
     @Contract(value = "_ -> new", pure = true)

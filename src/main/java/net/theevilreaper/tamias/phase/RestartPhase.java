@@ -35,7 +35,7 @@ public final class RestartPhase extends TimedPhase {
     @Override
     public void onUpdate() {
         switch (getCurrentTicks()) {
-            case 10, 3, 2, 1 -> Broadcaster.broadcast(Messages.getTimeComponent(getCurrentTicks()));
+            case 10, 3, 2, 1 -> Broadcaster.broadcast(Messages.getLobbyTime(getCurrentTicks()));
             case 0 -> {
                 for (Player onlinePlayer : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
                     onlinePlayer.kick(KICK_MESSAGE);

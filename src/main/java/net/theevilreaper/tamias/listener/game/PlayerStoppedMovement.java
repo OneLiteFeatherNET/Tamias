@@ -15,9 +15,9 @@ public final class PlayerStoppedMovement implements Consumer<PlayerMoveEvent> {
     public void accept(@NotNull PlayerMoveEvent event) {
         var playerPosition = event.getPlayer().getPosition();
         var newPos = event.getNewPosition();
-
-        if (playerPosition.x() != newPos.x() || playerPosition.z() != newPos.z()) {
-            event.getPlayer().teleport(playerPosition);
+        System.out.println("Player position: " + playerPosition);
+        if (playerPosition.blockX() != newPos.blockX() || playerPosition.blockZ() != newPos.blockZ()) {
+            event.setNewPosition(playerPosition);
         }
     }
 }

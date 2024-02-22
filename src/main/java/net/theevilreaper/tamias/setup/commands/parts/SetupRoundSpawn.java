@@ -14,6 +14,7 @@ import net.theevilreaper.tamias.util.Helper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Locale;
 import java.util.function.Function;
 
 import static net.theevilreaper.tamias.setup.TamiasSetup.SELECT_MAP_FIRST;
@@ -51,6 +52,6 @@ public class SetupRoundSpawn extends Command {
 
 
         gameMap.setLeftSurvivorSpawn(Pos.fromPoint(player.getPosition()));
-        gameMap.setDirection(direction);
+        gameMap.setDirection(direction.name().toLowerCase(Locale.ROOT));
     }
 }

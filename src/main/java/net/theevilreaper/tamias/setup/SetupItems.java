@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
  * @since 1.0.0
  * @version 1.0.0
  */
+@SuppressWarnings("java:S3252")
 public final class SetupItems {
 
     private final ItemStack overview;
@@ -24,22 +25,22 @@ public final class SetupItems {
     public SetupItems(@NotNull Tag<Byte> itemTag) {
         this.overview = ItemStack.builder(Material.CHEST)
                 .displayName(Component.text("Maps", NamedTextColor.GREEN))
-                .meta(builder -> builder.setTag(itemTag, (byte) 0))
+                .meta(builder -> builder.setTag(itemTag, (byte) 0x00))
                 .build();
         this.save = ItemStack.builder(Material.BARRIER)
                 .displayName(Component.text("Save map", NamedTextColor.RED))
-                .meta(builder -> builder.setTag(itemTag, (byte) 1))
+                .meta(builder -> builder.setTag(itemTag, (byte) 0x01))
                 .build();
     }
 
     public void setOverViewItem(@NotNull Player player) {
         player.getInventory().clear();
-        player.getInventory().setItemStack(0, this.overview);
+        player.getInventory().setItemStack(0x00, this.overview);
         player.setHeldItemSlot((byte) 0);
     }
 
     public void setSaveItem(@NotNull Player player) {
         player.getInventory().clear();
-        player.getInventory().setItemStack(8, this.save);
+        player.getInventory().setItemStack(0x08, this.save);
     }
 }

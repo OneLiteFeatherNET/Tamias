@@ -8,11 +8,13 @@ import de.icevizion.aves.inventory.util.LayoutCalculator;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.inventory.click.ClickType;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.theevilreaper.tamias.setup.TamiasSetup;
+import net.theevilreaper.tamias.setup.event.MapSelectionEvent;
 import net.theevilreaper.tamias.util.Messages;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiFunction;
 
+@SuppressWarnings("java:S3252")
 public final class MapSelectionInventory extends GlobalInventoryBuilder {
 
     private static final Material SLOT_ICON = Material.PAPER;
@@ -54,6 +57,8 @@ public final class MapSelectionInventory extends GlobalInventoryBuilder {
                     if (!(clickType == ClickType.LEFT_CLICK || clickType == ClickType.RIGHT_CLICK)) return;
                     creationConsumer.apply(clickType, entry);
                     player.setTag(TamiasSetup.MAP_PATH_TAG, entry.toString());
+                    player.closeInventory();
+                    EventDispatcher.call(new MapSelectionEvent(player, entry));
                 });
             }
 

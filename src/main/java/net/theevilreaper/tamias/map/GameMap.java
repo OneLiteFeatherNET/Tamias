@@ -3,7 +3,6 @@ package net.theevilreaper.tamias.map;
 import de.icevizion.aves.map.BaseMap;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.utils.Direction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -20,14 +19,14 @@ public final class GameMap extends BaseMap {
     private Pos leftSurvivorSpawn;
     private Vec leftAreaPos;
     private Vec rightAreaPos;
-    private Direction direction;
+    private String direction;
 
 
     public GameMap() {
-        super("", Pos.ZERO, "");
+        super("Not set", Pos.ZERO, "");
     }
 
-    public GameMap(@NotNull String name, Pos spawn, @NotNull Pos bomberInitialSpawn, @NotNull Pos leftSurvivorSpawn, @NotNull Vec leftAreaPos, @NotNull Vec rightAreaPos, @NotNull Direction direction) {
+    public GameMap(@NotNull String name, Pos spawn, @NotNull Pos bomberInitialSpawn, @NotNull Pos leftSurvivorSpawn, @NotNull Vec leftAreaPos, @NotNull Vec rightAreaPos, @NotNull String direction) {
         super(name, spawn, "Team");
         this.bomberInitialSpawn = bomberInitialSpawn;
         this.leftSurvivorSpawn = leftSurvivorSpawn;
@@ -44,7 +43,7 @@ public final class GameMap extends BaseMap {
         this.rightAreaPos = vec;
     }
 
-    public void setDirection(@NotNull Direction direction) {
+    public void setDirection(@NotNull String direction) {
         this.direction = direction;
     }
 
@@ -60,7 +59,11 @@ public final class GameMap extends BaseMap {
         return bomberInitialSpawn;
     }
 
-    public @NotNull Direction getDirection() {
+    public @NotNull Pos getInitialSurvivorSpawn() {
+        return leftSurvivorSpawn;
+    }
+
+    public @NotNull String getDirection() {
         return direction;
     }
 
