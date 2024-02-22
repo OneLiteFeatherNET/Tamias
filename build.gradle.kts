@@ -3,8 +3,15 @@ plugins {
     jacoco
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
+
 group = "net.theevilreaper"
 version = "1.0-SNAPSHOT"
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
 
 repositories {
     mavenCentral()
@@ -54,7 +61,7 @@ dependencies {
 tasks {
     compileJava {
         options.encoding = "UTF-8"
-        options.release.set(17)
+        options.release.set(21)
     }
 
     jacocoTestReport {
