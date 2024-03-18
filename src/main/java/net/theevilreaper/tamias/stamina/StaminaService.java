@@ -1,8 +1,13 @@
 package net.theevilreaper.tamias.stamina;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * The class has some abilities to manage all {@link StaminaBar} references which are required in the game.
@@ -12,13 +17,24 @@ import java.util.UUID;
  */
 public final class StaminaService {
 
+    private final Lock lock;
     private final Map<UUID, StaminaBar> staminaBars;
 
     /**
      * Creates a new instance from this class.
      */
     public StaminaService() {
+        this.lock = new ReentrantLock();
         this.staminaBars = new HashMap<>();
+    }
+
+    public void addStaminas(@NotNull Map<UUID, StaminaBar> staminaBars) {
+        lock.lock();
+        try {
+            this.staminaBars.putAll(staminaBars);
+        } finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -41,4 +57,12 @@ public final class StaminaService {
         staminaBars.clear();
     }
 
+    public @Nullable StaminaBar getStaminaBar(@NotNull UUID uuid) {
+        try {
+            lock.lock();
+            return staminaBars.get(uuid);
+        } finally {
+            lock.unlock();
+        }
+    }
 }

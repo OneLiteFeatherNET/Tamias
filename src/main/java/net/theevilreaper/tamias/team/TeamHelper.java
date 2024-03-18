@@ -2,7 +2,6 @@ package net.theevilreaper.tamias.team;
 
 import de.icevizion.aves.util.Players;
 import de.icevizion.xerus.api.team.Team;
-import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.tamias.config.GameConfig;

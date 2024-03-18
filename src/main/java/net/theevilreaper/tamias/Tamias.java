@@ -32,6 +32,7 @@ import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.utils.PropertyUtils;
 import net.theevilreaper.tamias.area.GameArea;
 import net.minestom.server.utils.validate.Check;
+import net.theevilreaper.tamias.commands.StartCommand;
 import net.theevilreaper.tamias.commands.TestBuildCommand;
 import net.theevilreaper.tamias.commands.TestCommand;
 import net.theevilreaper.tamias.config.GameConfig;
@@ -48,8 +49,10 @@ import net.theevilreaper.tamias.phase.LobbyPhase;
 import net.theevilreaper.tamias.phase.MapBuildPhase;
 import net.theevilreaper.tamias.phase.PlayingPhase;
 import net.theevilreaper.tamias.phase.RestartPhase;
+import net.theevilreaper.tamias.round.RoundData;
 import net.theevilreaper.tamias.round.events.RoundFinishEvent;
 import net.theevilreaper.tamias.setup.TamiasSetup;
+import net.theevilreaper.tamias.stamina.StaminaService;
 import net.theevilreaper.tamias.team.TamiasTeamCreator;
 import net.theevilreaper.tamias.team.TeamHelper;
 import net.theevilreaper.tamias.util.BoardHelper;
@@ -81,8 +84,9 @@ public class Tamias extends Extension {
     private final LinearPhaseSeries<GamePhase> phaseSeries;
     private final TeamService<Team> teamService;
     private final BoardHelper boardHelper;
+    private final RoundData roundData;
+    private final StaminaService staminaService;
     private MapProvider mapProvider;
-    private GameArea gameArea;
     private TeamHelper teamDistributor;
 
     public Tamias() {
@@ -95,26 +99,25 @@ public class Tamias extends Extension {
                 .registerTypeAdapter(Pos.class, posAdapter)
                 .registerTypeAdapter(Vec.class, posAdapter)
                 .create();
+        this.roundData = new RoundData();
+        this.staminaService = new StaminaService();
     }
 
     @Override
     public void initialize() {
         checkMapDirectory();
         InstanceContainer instance = MinecraftServer.getInstanceManager().createInstanceContainer();
-       // var path = Paths.get("C:\\Users\\Minny\\Desktop\\Test-Minestom\\maps\\suicide_tnt");
-       // instance.setChunkLoader(new AnvilLoader(path));
         instance.enableAutoChunkLoad(true);
-
         MinecraftServer.getInstanceManager().registerInstance(instance);
+
+        MinecraftServer.getCommandManager().register(new StartCommand(this.phaseSeries));
 
         this.mapProvider = new MapProvider(gson, getDataDirectory(), instance);
         this.mapProvider = new MapProvider(this.gson, getDataDirectory(), instance);
         this.teamDistributor = new TeamHelper(this.mapProvider, this.teamService.getTeams()::get);
 
         MinecraftServer.getInstanceManager().registerInstance(instance);
-        MinecraftServer.getGlobalEventHandler().addListener(PlayerLoginEvent.class, event -> {
-            event.setSpawningInstance(instance);
-        });
+        MinecraftServer.getGlobalEventHandler().addListener(PlayerLoginEvent.class, event -> event.setSpawningInstance(instance));
         MinecraftServer.getGlobalEventHandler().addListener(PlayerSpawnEvent.class, event -> {
             event.getPlayer().setGameMode(GameMode.CREATIVE);
             if (event.getSpawnInstance().getUniqueId().equals(instance.getUniqueId())) {
@@ -124,12 +127,8 @@ public class Tamias extends Extension {
             ((LobbyPhase)this.phaseSeries.getCurrentPhase()).checkStartCondition();
         });
 
-       // this.gameArea = new GameArea(instance, new Vec(-23, 129, 36), new Vec(35, 129, -19));
-
         MinecraftServer.getCommandManager().register(new TestCommand());
-
         this.createPhaseStructure();
-      //  MinecraftServer.getCommandManager().register(new TestBuildCommand(new MapBuildPhase(this.gameArea)));
         registerCancelListener(MinecraftServer.getGlobalEventHandler());
 
         if (SETUP_MODE) {
@@ -200,7 +199,7 @@ public class Tamias extends Extension {
         eventNode.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(instance.getUniqueId(), this.phaseSeries));
         eventNode.addListener(PlayerDisconnectEvent.class, new PlayerQuitListener(this.phaseSeries));
         eventNode.addListener(ProjectileCollideWithBlockEvent.class, new ProjectileBlockListener());
-        eventNode.addListener(ProjectileCollideWithEntityEvent.class, new ProjectileEntityListener(this.teamDistributor, null));
+        eventNode.addListener(ProjectileCollideWithEntityEvent.class, new ProjectileEntityListener(this.teamDistributor, this.staminaService::getStaminaBar));
         eventNode.addListener(PlayerChatEvent.class, new PlayerChatListener());
     }
 

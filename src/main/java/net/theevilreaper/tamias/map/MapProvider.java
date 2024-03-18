@@ -73,7 +73,6 @@ public final class MapProvider {
         }
 
         Check.argCondition(lobbyPath == null, "The map folder contains no lobby map!");
-        System.out.println("Lobby path: " + lobbyPath);
         Optional<BaseMap> loadedLobbyMap = fileHandler.load(lobbyPath.resolve("map.json"), BaseMap.class);
         Check.argCondition(loadedLobbyMap.isEmpty(), "The lobby map couldn't be loaded!");
         this.lobbyMap = loadedLobbyMap.get();
@@ -89,23 +88,16 @@ public final class MapProvider {
         if (this.gameMapInstance != null) return;
         Path path;
         Collections.shuffle(this.maps);
-        System.out.println("1");
         if (this.maps.size() == 1) {
             path = this.maps.get(0);
         } else {
             path = this.maps.get(ThreadLocalRandom.current().nextInt(this.maps.size()));
         }
-        System.out.println("2");
         Check.argCondition(path == null, "Unable to load game map");
-        System.out.println("3");
         var loader = new AnvilLoader(path);
-        System.out.println("4");
         var mapOptional = fileHandler.load(path.resolve("map.json"), GameMap.class);
-
         Check.argCondition(mapOptional.isEmpty(), "Something went wrong during map load");
-
         this.gameMap = mapOptional.get();
-        System.out.println("Map is null ? " + (this.gameMap == null));
         InstanceContainer container = MinecraftServer.getInstanceManager().createInstanceContainer();
         MinecraftServer.getInstanceManager().registerInstance(container);
         container.setChunkLoader(loader);
