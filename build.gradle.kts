@@ -45,7 +45,6 @@ repositories {
 }
 
 dependencies {
-    implementation(libs.mini)
     compileOnly(libs.minestom)
     compileOnly(libs.aves)
     compileOnly(libs.xerus)

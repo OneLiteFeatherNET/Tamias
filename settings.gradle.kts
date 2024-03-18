@@ -14,7 +14,6 @@ dependencyResolutionManagement {
             library("aves", "de.icevizion.lib", "Aves").version("1.3.0+f7b17be8")
             library("xerus", "net.theevilreaper.xerus", "Xerus").version("1.2.0-SNAPSHOT+d6f910bf")
             library("canis", "com.github.theEvilReaper", "Canis").version("master-SNAPSHOT")
-            library("mini", "net.kyori", "adventure-text-minimessage").version("4.14.0")
         }
     }
 }
