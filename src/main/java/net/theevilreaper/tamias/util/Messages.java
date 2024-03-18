@@ -22,6 +22,7 @@ public final class Messages {
     private static final Component JOIN_PART;
     private static final Component DEATH_PART;
     private static final Component SHOT_PART;
+    public static final Component CHOOSING_NEW_TNT;
 
 
     static {
@@ -32,6 +33,7 @@ public final class Messages {
         JOIN_PART = withMini("<gray>joined the game!");
         DEATH_PART = withMini("<yellow>was blown up by");
         SHOT_PART = withMini("<yellow> You were shot by");
+        CHOOSING_NEW_TNT = withMiniPrefix("<red>Choosing new tnt<gold>....");
     }
 
     private Messages() { }
