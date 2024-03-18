@@ -3,7 +3,7 @@ package net.theevilreaper.tamias.listener;
 import de.icevizion.xerus.api.phase.GamePhase;
 import de.icevizion.xerus.api.phase.LinearPhaseSeries;
 import de.icevizion.xerus.api.phase.Phase;
-import net.minestom.server.event.player.PlayerLoginEvent;
+import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.theevilreaper.tamias.phase.LobbyPhase;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,7 +15,7 @@ import java.util.function.Consumer;
  * @since
  **/
 
-public class PlayerJoinListener implements Consumer<PlayerLoginEvent> {
+public class PlayerJoinListener implements Consumer<AsyncPlayerConfigurationEvent> {
 
     private final LinearPhaseSeries<GamePhase> phaseSeries;
 
@@ -24,7 +24,7 @@ public class PlayerJoinListener implements Consumer<PlayerLoginEvent> {
     }
 
     @Override
-    public void accept(PlayerLoginEvent event) {
+    public void accept(@NotNull AsyncPlayerConfigurationEvent event) {
         Phase phase = phaseSeries.getCurrentPhase();
 
         if (phase == null) return;
