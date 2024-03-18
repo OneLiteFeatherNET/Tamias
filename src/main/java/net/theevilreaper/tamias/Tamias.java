@@ -22,18 +22,14 @@ import net.minestom.server.event.player.PlayerBlockInteractEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
-import net.minestom.server.event.player.PlayerLoginEvent;
+import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.event.player.PlayerSwapItemEvent;
 import net.minestom.server.extensions.Extension;
-import net.minestom.server.instance.AnvilLoader;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.utils.PropertyUtils;
-import net.theevilreaper.tamias.area.GameArea;
-import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.tamias.commands.StartCommand;
-import net.theevilreaper.tamias.commands.TestBuildCommand;
 import net.theevilreaper.tamias.commands.TestCommand;
 import net.theevilreaper.tamias.config.GameConfig;
 import net.theevilreaper.tamias.listener.PlayerBlockInteractListener;
@@ -117,14 +113,14 @@ public class Tamias extends Extension {
         this.teamDistributor = new TeamHelper(this.mapProvider, this.teamService.getTeams()::get);
 
         MinecraftServer.getInstanceManager().registerInstance(instance);
-        MinecraftServer.getGlobalEventHandler().addListener(PlayerLoginEvent.class, event -> event.setSpawningInstance(instance));
+        MinecraftServer.getGlobalEventHandler().addListener(AsyncPlayerConfigurationEvent.class, event -> event.setSpawningInstance(instance));
         MinecraftServer.getGlobalEventHandler().addListener(PlayerSpawnEvent.class, event -> {
             event.getPlayer().setGameMode(GameMode.CREATIVE);
             if (event.getSpawnInstance().getUniqueId().equals(instance.getUniqueId())) {
                 event.getPlayer().teleport(new Pos(-11, 130, 25));
             }
 
-            ((LobbyPhase)this.phaseSeries.getCurrentPhase()).checkStartCondition();
+            ((LobbyPhase) this.phaseSeries.getCurrentPhase()).checkStartCondition();
         });
 
         MinecraftServer.getCommandManager().register(new TestCommand());
@@ -194,8 +190,8 @@ public class Tamias extends Extension {
         eventNode.addListener(RoundFinishEvent.class, new RoundFinishListener(this.teamDistributor));
     }
 
-    void registerListener(@NotNull Instance instance,  @NotNull EventNode<Event> eventNode) {
-        eventNode.addListener(PlayerLoginEvent.class, new PlayerJoinListener(this.phaseSeries));
+    void registerListener(@NotNull Instance instance, @NotNull EventNode<Event> eventNode) {
+        eventNode.addListener(AsyncPlayerConfigurationEvent.class, new PlayerJoinListener(this.phaseSeries));
         eventNode.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(instance.getUniqueId(), this.phaseSeries));
         eventNode.addListener(PlayerDisconnectEvent.class, new PlayerQuitListener(this.phaseSeries));
         eventNode.addListener(ProjectileCollideWithBlockEvent.class, new ProjectileBlockListener());

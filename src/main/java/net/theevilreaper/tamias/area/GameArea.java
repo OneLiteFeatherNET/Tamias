@@ -41,7 +41,7 @@ public final class GameArea {
     private final List<Vec> specialBlocks;
     private final List<Vec> tntPositions;
     private Random random;
-    private GroundData groundData;
+    private final GroundData groundData;
 
     public GameArea(@NotNull Instance instance, @NotNull Vec start, @NotNull Vec end) {
         this.groundData = DEFAULT_GROUND_DATA;
@@ -49,7 +49,7 @@ public final class GameArea {
         this.start = start;
         this.end = end;
         var distance = start.sub(end);
-        Check.argCondition(distance.equals(Vec.ZERO), "NPE");
+        Check.argCondition(distance.equals(Vec.ZERO), "The distance between start and end can't be zero");
         this.areaPositions = new ArrayList<>();
         this.specialBlocks = new ArrayList<>();
         this.tntPositions = new ArrayList<>();
@@ -131,7 +131,7 @@ public final class GameArea {
 
     private void placeAtPos(@NotNull Vec pos) {
         if (specialBlocks.contains(pos)) {
-            var groundBlock = !groundData.hasAdditionalBlocks() ? groundData.groundBlock() : groundData.additionalBlocks().get(0);
+            var groundBlock = !groundData.hasAdditionalBlocks() ? groundData.groundBlock() : groundData.additionalBlocks().getFirst();
             instance.setBlock(pos, groundBlock);
         } else {
             instance.setBlock(pos, groundData.groundBlock());
@@ -142,7 +142,7 @@ public final class GameArea {
     }
 
     private void spawnTnt(@NotNull Vec pos) {
-        System.out.println("Spawning tnt at " + pos);
+        LOGGER.info("Spawning a tnt at position {}", pos);
         var tntEntity = new Entity(EntityType.FALLING_BLOCK);
         FallingBlockMeta fallingBlockMeta = (FallingBlockMeta) tntEntity.getEntityMeta();
         fallingBlockMeta.setBlock(Block.TNT);

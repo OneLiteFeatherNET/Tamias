@@ -5,8 +5,10 @@ import de.icevizion.aves.file.FileHandler;
 import de.icevizion.aves.file.GsonFileHandler;
 import de.icevizion.aves.map.BaseMap;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.AnvilLoader;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.utils.Direction;
 import net.minestom.server.utils.validate.Check;
@@ -31,9 +33,9 @@ import java.util.stream.Stream;
 public final class MapProvider {
 
     private static final String LOBBY_FOLDER_NAME = "lobby";
+    private static final String MAP_FILE = "map.json";
     private final Path mapPath;
     private final FileHandler fileHandler;
-
     private BaseMap lobbyMap;
     private GameMap gameMap;
     private InstanceContainer gameMapInstance;
@@ -59,6 +61,7 @@ public final class MapProvider {
 
     /**
      * Tries to load the lobby map from the map folder.
+     *
      * @param instanceContainer the instance container to bind the directory to it
      */
     private void loadLobbyMap(@NotNull InstanceContainer instanceContainer) {
@@ -73,7 +76,9 @@ public final class MapProvider {
         }
 
         Check.argCondition(lobbyPath == null, "The map folder contains no lobby map!");
-        Optional<BaseMap> loadedLobbyMap = fileHandler.load(lobbyPath.resolve("map.json"), BaseMap.class);
+        final Path mapFile = lobbyPath.resolve(MAP_FILE);
+        Check.argCondition(!Files.exists(mapFile), "The lobby map doesn't contain a map file!");
+        Optional<BaseMap> loadedLobbyMap = fileHandler.load(mapFile, BaseMap.class);
         Check.argCondition(loadedLobbyMap.isEmpty(), "The lobby map couldn't be loaded!");
         this.lobbyMap = loadedLobbyMap.get();
 
@@ -82,6 +87,10 @@ public final class MapProvider {
 
         // We need to remove the lobby path from the maps to prevent that the lobby map is a candidate for the game
         this.maps.remove(lobbyPath);
+
+        if (this.lobbyMap.getSpawn() != null) {
+            loadChunks(instanceContainer, this.lobbyMap.getSpawn());
+        }
     }
 
     public void loadGameMap() {
@@ -89,13 +98,15 @@ public final class MapProvider {
         Path path;
         Collections.shuffle(this.maps);
         if (this.maps.size() == 1) {
-            path = this.maps.get(0);
+            path = this.maps.getFirst();
         } else {
             path = this.maps.get(ThreadLocalRandom.current().nextInt(this.maps.size()));
         }
         Check.argCondition(path == null, "Unable to load game map");
         var loader = new AnvilLoader(path);
-        var mapOptional = fileHandler.load(path.resolve("map.json"), GameMap.class);
+        final var mapPath = path.resolve(MAP_FILE);
+        Check.argCondition(!Files.exists(mapPath), "The game map doesn't contain a map file");
+        var mapOptional = fileHandler.load(mapPath, GameMap.class);
         Check.argCondition(mapOptional.isEmpty(), "Something went wrong during map load");
         this.gameMap = mapOptional.get();
         InstanceContainer container = MinecraftServer.getInstanceManager().createInstanceContainer();
@@ -121,6 +132,16 @@ public final class MapProvider {
         if (lobbyMap != null) return lobbyMap;
         if (gameMap != null) return gameMap;
         return null;
+    }
+
+    public <T extends Point> void loadChunks(@NotNull Instance instance, @NotNull T @NotNull ... positions) {
+        if (positions.length == 0) return;
+        for (int i = 0; i < positions.length; i++) {
+            final var pos = positions[i];
+            if (!instance.isChunkLoaded(pos)) {
+                instance.loadChunk(pos);
+            }
+        }
     }
 
     public @Nullable SpawnArea getSpawnArea() {
