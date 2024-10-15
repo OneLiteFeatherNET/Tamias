@@ -5,7 +5,7 @@ dependencyResolutionManagement {
         create("libs") {
             version("minestom", "1.3.1")
             version("junit", "5.10.2")
-            version("mockito", "5.11.0")
+            version("mockito", "5.14.2")
             library("minestom", "net.onelitefeather.microtus", "Minestom").versionRef("minestom")
             library("minestom-test", "net.onelitefeather.microtus.testing", "testing").versionRef("minestom")
             library("junit-jupiter", "org.junit.jupiter", "junit-jupiter").versionRef("junit")
