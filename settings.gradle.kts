@@ -4,7 +4,7 @@ dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
             version("minestom", "1.3.1")
-            version("junit", "5.10.2")
+            version("junit", "5.11.3")
             version("mockito", "5.11.0")
             library("minestom", "net.onelitefeather.microtus", "Minestom").versionRef("minestom")
             library("minestom-test", "net.onelitefeather.microtus.testing", "testing").versionRef("minestom")
