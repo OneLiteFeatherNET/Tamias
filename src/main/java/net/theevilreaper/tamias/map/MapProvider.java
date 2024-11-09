@@ -7,9 +7,9 @@ import de.icevizion.aves.map.BaseMap;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
-import net.minestom.server.instance.AnvilLoader;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
+import net.minestom.server.instance.anvil.AnvilLoader;
 import net.minestom.server.utils.Direction;
 import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.tamias.area.GameArea;
@@ -114,7 +114,6 @@ public final class MapProvider {
         container.setChunkLoader(loader);
         container.setExplosionSupplier(new ExplosionCreator());
         container.setTimeRate(0);
-        container.setTimeUpdate(null);
         this.spawnArea = new SpawnArea(container, this.gameMap.getInitialSurvivorSpawn(), Direction.valueOf(this.gameMap.getDirection().toUpperCase(Locale.ROOT)), 5);
         this.gameArea = new GameArea(container, this.gameMap.getLeftAreaPos(), this.gameMap.getRightAreaPos());
         this.gameMapInstance = container;

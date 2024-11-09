@@ -28,7 +28,6 @@ import net.minestom.server.event.player.PlayerSwapItemEvent;
 import net.minestom.server.extensions.Extension;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
-import net.minestom.server.utils.PropertyUtils;
 import net.theevilreaper.tamias.commands.StartCommand;
 import net.theevilreaper.tamias.commands.TestCommand;
 import net.theevilreaper.tamias.config.GameConfig;
@@ -75,7 +74,7 @@ import static de.icevizion.aves.inventory.util.InventoryConstants.CANCELLABLE_EV
 public class Tamias extends Extension {
 
     public static final Logger LOGGER = LoggerFactory.getLogger(Tamias.class);
-    private static final boolean SETUP_MODE = PropertyUtils.getBoolean("tamias.setup", false);
+    //private static final boolean SETUP_MODE = .getBoolean("tamias.setup", false);
     private final Gson gson;
     private final LinearPhaseSeries<GamePhase> phaseSeries;
     private final TeamService<Team> teamService;
@@ -127,7 +126,7 @@ public class Tamias extends Extension {
         this.createPhaseStructure();
         registerCancelListener(MinecraftServer.getGlobalEventHandler());
 
-        if (SETUP_MODE) {
+        if (false) {
             var dataDirectory = getDataDirectory();
             var mapDirectory = dataDirectory.resolve(GameConfig.MAP_PATH_NAME);
             List<Path> maps = new ArrayList<>();

@@ -24,12 +24,12 @@ public final class SetupItems {
 
     public SetupItems(@NotNull Tag<Byte> itemTag) {
         this.overview = ItemStack.builder(Material.CHEST)
-                .displayName(Component.text("Maps", NamedTextColor.GREEN))
-                .meta(builder -> builder.setTag(itemTag, (byte) 0x00))
+                .customName(Component.text("Maps", NamedTextColor.GREEN))
+                .set(itemTag, (byte) 0x00)
                 .build();
         this.save = ItemStack.builder(Material.BARRIER)
-                .displayName(Component.text("Save map", NamedTextColor.RED))
-                .meta(builder -> builder.setTag(itemTag, (byte) 0x01))
+                .customName(Component.text("Save map", NamedTextColor.RED))
+                .set(itemTag, (byte) 0x01)
                 .build();
     }
 

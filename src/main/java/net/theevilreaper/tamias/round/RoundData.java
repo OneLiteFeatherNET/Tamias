@@ -61,7 +61,7 @@ public final class RoundData {
                 () -> {
                     player.teleport(copy);
                     for (TimedPotion activeEffect : player.getActiveEffects()) {
-                        player.removeEffect(activeEffect.getPotion().effect());
+                        player.removeEffect(activeEffect.potion().effect());
                     }
                 }
         ).delay(2, ChronoUnit.SECONDS).schedule();

@@ -31,7 +31,7 @@ public final class Effects {
      */
     public static void setEffectForExplode(@NotNull Player player) {
         clearEffects(player);
-        player.addEffect(NIGHT_VISION.getPotion());
+        player.addEffect(NIGHT_VISION.potion());
     }
 
     /**
@@ -40,14 +40,14 @@ public final class Effects {
      */
     public static void setExplodeOrHitEffect(@NotNull Player player) {
         clearEffects(player);
-        player.addEffect(SLOWNESS.getPotion());
-        player.addEffect(BLINDNESS.getPotion());
+        player.addEffect(SLOWNESS.potion());
+        player.addEffect(BLINDNESS.potion());
     }
 
     private static void clearEffects(@NotNull Player player) {
         if (!player.getActiveEffects().isEmpty()) {
             for (TimedPotion activeEffect : player.getActiveEffects()) {
-                player.removeEffect(activeEffect.getPotion().effect());
+                player.removeEffect(activeEffect.potion().effect());
             }
         }
     }
