@@ -60,3 +60,6 @@ dependencyResolutionManagement {
         }
     }
 }
+include("common")
+include("game")
+include("setup")
