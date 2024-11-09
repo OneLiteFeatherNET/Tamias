@@ -31,7 +31,7 @@ public final class MapSelectionInventory extends GlobalInventoryBuilder {
 
     public MapSelectionInventory(@NotNull Component title, @NotNull List<Path> maps, @NotNull BiFunction<ClickType, Path, Void> creationConsumer) {
         super(title, InventoryType.CHEST_6_ROW);
-        var layout = new InventoryLayout(getType());
+        var layout = InventoryLayout.fromType(getType());
         var decoration = new InventorySlot(ItemStack.of(Material.GRAY_STAINED_GLASS_PANE), InventoryConstants.CANCEL_CLICK);
 
         layout.setItems(LayoutCalculator.fillRow(InventoryType.CHEST_1_ROW), decoration);
@@ -45,14 +45,14 @@ public final class MapSelectionInventory extends GlobalInventoryBuilder {
         lore.add(Messages.withMini("<gray>Right-click: <red>Game <gray>setup"));
 
         setDataLayoutFunction(dataLayoutFunction -> {
-            var dataLayout = dataLayoutFunction == null ? new InventoryLayout(getType()) : dataLayoutFunction;
+            var dataLayout = dataLayoutFunction == null ? InventoryLayout.fromType(getType()) : dataLayoutFunction;
             if (maps.isEmpty()) return dataLayout;
             dataLayout.blank(SLOTS);
             for (int i = 0; i < maps.size() && i < SLOTS.length; i++) {
                 var entry = maps.get(i);
                 var name = entry.getFileName().toString();
-                var item = ItemStack.builder(SLOT_ICON).displayName(Component.text(name, NamedTextColor.GREEN)).lore(lore).build();
-                dataLayout.setItem(SLOTS[i], item, (player, clickType, i1, result) -> {
+                var item = ItemStack.builder(SLOT_ICON).customName(Component.text(name, NamedTextColor.GREEN)).lore(lore).build();
+                dataLayout.setItem(SLOTS[i], item, (player, i1, clickType, result) -> {
                     result.setCancel(true);
                     if (!(clickType == ClickType.LEFT_CLICK || clickType == ClickType.RIGHT_CLICK)) return;
                     creationConsumer.apply(clickType, entry);

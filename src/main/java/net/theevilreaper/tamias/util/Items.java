@@ -23,10 +23,9 @@ public final class Items {
      */
     public Items() {
         this.shootItem = ItemStack.builder(Material.IRON_HOE)
-                .meta(builder -> builder.setTag(Tags.ITEM_TAG, (byte) 0));
+                .set(Tags.ITEM_TAG, (byte) 0);
         this.bombItem = ItemStack.builder(Material.TNT)
-                .meta(builder -> builder.setTag(Tags.ITEM_TAG, (byte) 1))
-                .build();
+                .set(Tags.ITEM_TAG, (byte) 1).build();
     }
 
     /**

@@ -13,43 +13,15 @@ java {
     }
 }
 
-repositories {
-    mavenCentral()
-    maven("https://jitpack.io")
-    maven {
-        val groupdId = "dungeon" // Gitlab Group
-        url = if (System.getenv().containsKey("CI")) {
-            val ciApiv4Url = System.getenv("CI_API_V4_URL")
-            uri("$ciApiv4Url/groups/$groupdId/-/packages/maven")
-        } else {
-            uri("https://gitlab.themeinerlp.dev/api/v4/groups/$groupdId/-/packages/maven")
-        }
-        name = "GitLab"
-        credentials(HttpHeaderCredentials::class.java) {
-            name = if (System.getenv().containsKey("CI")) {
-                "Job-Token"
-            } else {
-                "Private-Token"
-            }
-            value = if (System.getenv().containsKey("CI")) {
-                System.getenv("CI_JOB_TOKEN")
-            } else {
-                val gitLabPrivateToken: String? by project
-                gitLabPrivateToken
-            }
-        }
-        authentication {
-            create<HttpHeaderAuthentication>("header")
-        }
-    }
-}
-
 dependencies {
+    compileOnly(platform(libs.microtus.bom))
+    compileOnly(platform(libs.dungeon.bom))
     compileOnly(libs.minestom)
     compileOnly(libs.aves)
     compileOnly(libs.xerus)
-    compileOnly(libs.canis)
 
+    testCompileOnly(platform(libs.microtus.bom))
+    testCompileOnly(platform(libs.dungeon.bom))
     testImplementation(libs.minestom)
     testImplementation(libs.minestom.test)
     testImplementation(libs.xerus)
