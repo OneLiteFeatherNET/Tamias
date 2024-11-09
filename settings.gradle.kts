@@ -3,9 +3,11 @@ rootProject.name = "tamias"
 dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
+
             version("minestom", "1.4.2")
-            version("junit", "5.10.2")
+            version("junit", "5.11.3")
             version("mockito", "5.14.2")
+            
             library("minestom", "net.onelitefeather.microtus", "Minestom").versionRef("minestom")
             library("minestom-test", "net.onelitefeather.microtus.testing", "testing").versionRef("minestom")
             library("junit-jupiter", "org.junit.jupiter", "junit-jupiter").versionRef("junit")
