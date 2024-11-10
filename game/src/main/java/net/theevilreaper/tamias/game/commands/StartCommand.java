@@ -1,10 +1,18 @@
 package net.theevilreaper.tamias.game.commands;
 
-import de.icevizion.xerus.api.phase.GamePhase;
-import de.icevizion.xerus.api.phase.LinearPhaseSeries;
+import de.icevizion.xerus.api.phase.Phase;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
+import net.minestom.server.command.builder.CommandContext;
+import net.minestom.server.command.builder.condition.Conditions;
+import net.theevilreaper.tamias.game.config.GameConfig;
 import net.theevilreaper.tamias.game.phase.LobbyPhase;
+import net.theevilreaper.tamias.game.util.GameMessages;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.function.Supplier;
 
 /**
  * The command allows to force start the game.
@@ -15,23 +23,39 @@ import org.jetbrains.annotations.NotNull;
  **/
 public class StartCommand extends Command {
 
-    public StartCommand(@NotNull LinearPhaseSeries<GamePhase> timedPhase) {
-        super("start", "ss");
+    private final Supplier<Phase> phaseSupplier;
+    private final Component unableToStart = GameMessages.withPrefix(
+            Component.text("Unable to start the game because the timer is to low!", NamedTextColor.RED)
+    );
 
-        addSyntax((sender, context) -> {
-            if (!(timedPhase.getCurrentPhase() instanceof LobbyPhase lobbyPhase)) return;
-            if (lobbyPhase.isPaused()) {
-                //sender.sendMessage(Messages.PHASE_NOT_RUNNING);
-                return;
-            }
+    public StartCommand(@NotNull Supplier<Phase> phaseSupplier) {
+        super("start");
+        this.phaseSupplier = phaseSupplier;
+        this.setCondition(Conditions::playerOnly);
+        addSyntax(this::forceStart);
+    }
 
-            if (lobbyPhase.isForceStarted()) {
-                //sender.sendMessage(Messages.ALREADY_FORCE_STARTED);
-                return;
-            }
+    private void forceStart(@NotNull CommandSender sender, @NotNull CommandContext commandContext) {
+        Phase phase = phaseSupplier.get();
 
-            lobbyPhase.setForceStarted(true);
-            // sender.sendMessage(Messages.PHASE_FORCE_STARTED);
-        });
+        if (!(phase instanceof LobbyPhase lobbyPhase)) return;
+
+        if (lobbyPhase.isPaused()) {
+            sender.sendMessage(GameMessages.PHASE_NOT_RUNNING);
+            return;
+        }
+
+        if (lobbyPhase.getCurrentTicks() < GameConfig.FORCE_START_TIME + 1) {
+            sender.sendMessage(unableToStart);
+            return;
+        }
+
+        if (lobbyPhase.isForceStarted()) {
+            sender.sendMessage(GameMessages.ALREADY_FORCE_STARTED);
+            return;
+        }
+
+        lobbyPhase.setForceStarted(true);
+        sender.sendMessage(GameMessages.PHASE_FORCE_STARTED);
     }
 }
