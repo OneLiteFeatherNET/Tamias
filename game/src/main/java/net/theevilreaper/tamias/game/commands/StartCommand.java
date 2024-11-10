@@ -7,7 +7,7 @@ import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.condition.Conditions;
-import net.theevilreaper.tamias.game.config.GameConfig;
+import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.game.phase.LobbyPhase;
 import net.theevilreaper.tamias.game.util.GameMessages;
 import org.jetbrains.annotations.NotNull;

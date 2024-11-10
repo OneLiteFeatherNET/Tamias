@@ -1,12 +1,12 @@
 package net.theevilreaper.tamias.game.listener.game;
 
-import net.theevilreaper.tamias.game.round.events.RoundFinishEvent;
+import net.theevilreaper.tamias.common.round.event.RoundEndEvent;
 import net.theevilreaper.tamias.game.team.TeamHelper;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
-public final class RoundFinishListener implements Consumer<RoundFinishEvent> {
+public final class RoundFinishListener implements Consumer<RoundEndEvent> {
 
     private final TeamHelper teamDistributor;
 
@@ -15,7 +15,7 @@ public final class RoundFinishListener implements Consumer<RoundFinishEvent> {
     }
 
     @Override
-    public void accept(@NotNull RoundFinishEvent event) {
+    public void accept(@NotNull RoundEndEvent event) {
         teamDistributor.clearTeams();
     }
 }

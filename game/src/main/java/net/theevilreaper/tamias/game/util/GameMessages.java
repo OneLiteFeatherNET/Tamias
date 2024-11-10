@@ -5,6 +5,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.entity.Player;
+import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.common.util.Messages;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -39,8 +40,7 @@ public final class GameMessages extends Messages {
         SHOT_PART = withMini("<yellow> You were shot by");
         CHOOSING_NEW_TNT = withMiniPrefix("<red>Choosing new tnt<gold>....");
 
-        //TODO: Update to config usage
-        int forceStartTime = 10;
+        int forceStartTime = GameConfig.FORCE_START_TIME;
         ALREADY_FORCE_STARTED = withMiniPrefix("<red>The game has already been force started!");
         PHASE_NOT_RUNNING = withMiniPrefix("<red>The lobby countdown is not running!");
         PHASE_FORCE_STARTED = withMiniPrefix("<gray>The timer has been set to <color:#09ff00><seconds></color> seconds!",

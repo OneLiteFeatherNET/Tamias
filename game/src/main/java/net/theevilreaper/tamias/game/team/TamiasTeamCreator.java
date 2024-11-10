@@ -3,7 +3,7 @@ package net.theevilreaper.tamias.game.team;
 import de.icevizion.xerus.api.ColorData;
 import de.icevizion.xerus.api.team.Team;
 import de.icevizion.xerus.api.team.TeamCreator;
-import net.theevilreaper.tamias.game.config.GameConfig;
+import net.theevilreaper.tamias.common.config.GameConfig;
 import org.jetbrains.annotations.NotNull;
 
 public final class TamiasTeamCreator implements TeamCreator {

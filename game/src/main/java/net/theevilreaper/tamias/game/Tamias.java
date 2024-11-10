@@ -4,11 +4,10 @@ import de.icevizion.xerus.api.phase.CyclicPhaseSeries;
 import de.icevizion.xerus.api.phase.GamePhase;
 import de.icevizion.xerus.api.phase.LinearPhaseSeries;
 import de.icevizion.xerus.api.team.Team;
+import de.icevizion.xerus.api.team.TeamCreator;
 import de.icevizion.xerus.api.team.TeamService;
 import de.icevizion.xerus.api.team.TeamServiceImpl;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.coordinate.Pos;
-import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithBlockEvent;
@@ -18,14 +17,15 @@ import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.extensions.Extension;
-import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
 import net.theevilreaper.tamias.common.ListenerHandling;
+import net.theevilreaper.tamias.common.config.GameConfig;
+import net.theevilreaper.tamias.common.config.GameConfigReader;
 import net.theevilreaper.tamias.common.map.MapEntry;
 import net.theevilreaper.tamias.common.map.MapProvider;
+import net.theevilreaper.tamias.common.round.event.RoundEndEvent;
 import net.theevilreaper.tamias.game.commands.StartCommand;
 import net.theevilreaper.tamias.game.commands.TestCommand;
-import net.theevilreaper.tamias.game.config.GameConfig;
 import net.theevilreaper.tamias.game.listener.PlayerChatListener;
 import net.theevilreaper.tamias.game.listener.PlayerJoinListener;
 import net.theevilreaper.tamias.game.listener.PlayerQuitListener;
@@ -38,7 +38,6 @@ import net.theevilreaper.tamias.game.phase.MapBuildPhase;
 import net.theevilreaper.tamias.game.phase.PlayingPhase;
 import net.theevilreaper.tamias.game.phase.RestartPhase;
 import net.theevilreaper.tamias.game.round.RoundData;
-import net.theevilreaper.tamias.game.round.events.RoundFinishEvent;
 import net.theevilreaper.tamias.game.stamina.StaminaService;
 import net.theevilreaper.tamias.game.team.TamiasTeamCreator;
 import net.theevilreaper.tamias.game.team.TeamHelper;
@@ -49,6 +48,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.function.IntFunction;
+import java.util.function.Supplier;
 
 /**
  * @author theEvilReaper
@@ -65,8 +67,10 @@ public class Tamias extends Extension implements ListenerHandling {
     private final StaminaService staminaService;
     private MapProvider mapProvider;
     private TeamHelper teamDistributor;
+    private GameConfig gameConfig;
 
     public Tamias() {
+        this.gameConfig = new GameConfigReader(Paths.get("")).getConfig();
         this.phaseSeries = new LinearPhaseSeries<>();
         this.teamService = new TeamServiceImpl<>();
         this.initTeams();
@@ -100,18 +104,18 @@ public class Tamias extends Extension implements ListenerHandling {
     }
 
     private void createPhaseStructure() {
-        this.phaseSeries.add(new LobbyPhase(this.mapProvider));
+        this.phaseSeries.add(new LobbyPhase(this.mapProvider, gameConfig.minPlayers(), gameConfig.maxPlayers(), gameConfig.lobbyTime()));
         var gamePhaseSeries = new CyclicPhaseSeries<GamePhase>("game");
         gamePhaseSeries.add(new MapBuildPhase(this.mapProvider::getGameArea));
         gamePhaseSeries.add(new PlayingPhase(this.boardHelper::updateTitle));
-        gamePhaseSeries.setMaxIterations(GameConfig.GAME_ROUNDS);
+        gamePhaseSeries.setMaxIterations(3);
         this.phaseSeries.addAll(gamePhaseSeries);
         this.phaseSeries.add(new RestartPhase());
     }
 
     private void checkMapDirectory() {
         var dataDirectory = getDataDirectory();
-        var mapDirectory = dataDirectory.resolve(GameConfig.MAP_PATH_NAME);
+        var mapDirectory = dataDirectory.resolve(GameConfig.MAP_FOLDER);
         if (!Files.exists(dataDirectory)) {
             try {
                 Files.createDirectory(getDataDirectory());
@@ -130,17 +134,19 @@ public class Tamias extends Extension implements ListenerHandling {
     }
 
     private void initTeams() {
-        var teamCreator = new TamiasTeamCreator();
-        this.teamService.add(Team.builder(teamCreator).name("Survivor").capacity(16).build());
-        this.teamService.add(Team.builder(teamCreator).name("Bomber").capacity(16).build());
+        TeamCreator teamCreator = new TamiasTeamCreator();
+        int teamSize = this.gameConfig.teamSize();
+        this.teamService.add(Team.builder(teamCreator).name(GameConfig.SURVIVOR_TEAM_NAME).capacity(teamSize).build());
+        this.teamService.add(Team.builder(teamCreator).name(GameConfig.BOMBER_TEAM).capacity(teamSize).build());
     }
 
     void registerGameListener(@NotNull EventNode<Event> eventNode) {
-        eventNode.addListener(RoundFinishEvent.class, new RoundFinishListener(this.teamDistributor));
+        eventNode.addListener(RoundEndEvent.class, new RoundFinishListener(this.teamDistributor));
     }
 
     void registerListener(@NotNull EventNode<Event> eventNode) {
-        eventNode.addListener(AsyncPlayerConfigurationEvent.class, new PlayerJoinListener(this.phaseSeries::getCurrentPhase, () -> null));
+        Supplier<Integer> supplier = () -> this.gameConfig.maxPlayers();
+        eventNode.addListener(AsyncPlayerConfigurationEvent.class, new PlayerJoinListener(supplier, this.phaseSeries::getCurrentPhase, () -> null));
         eventNode.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(this.phaseSeries::getCurrentPhase));
         eventNode.addListener(PlayerDisconnectEvent.class, new PlayerQuitListener(this.phaseSeries::getCurrentPhase));
         eventNode.addListener(ProjectileCollideWithBlockEvent.class, new ProjectileBlockListener());
