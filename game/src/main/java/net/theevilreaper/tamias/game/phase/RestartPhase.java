@@ -5,11 +5,11 @@ import de.icevizion.xerus.api.phase.TimedPhase;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
-import net.theevilreaper.tamias.game.util.Messages;
+import net.theevilreaper.tamias.game.util.GameMessages;
 
 import java.time.temporal.ChronoUnit;
 
-import static net.theevilreaper.tamias.game.util.Messages.MINI_MESSAGE;
+import static net.theevilreaper.tamias.game.util.GameMessages.MINI_MESSAGE;
 
 
 /**
@@ -35,7 +35,7 @@ public final class RestartPhase extends TimedPhase {
     @Override
     public void onUpdate() {
         switch (getCurrentTicks()) {
-            case 10, 3, 2, 1 -> Broadcaster.broadcast(Messages.getLobbyTime(getCurrentTicks()));
+            case 10, 3, 2, 1 -> Broadcaster.broadcast(GameMessages.getLobbyTime(getCurrentTicks()));
             case 0 -> {
                 for (Player onlinePlayer : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
                     onlinePlayer.kick(KICK_MESSAGE);

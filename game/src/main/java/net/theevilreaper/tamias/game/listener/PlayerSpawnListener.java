@@ -6,7 +6,7 @@ import de.icevizion.xerus.api.phase.LinearPhaseSeries;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.theevilreaper.tamias.game.phase.LobbyPhase;
-import net.theevilreaper.tamias.game.util.Messages;
+import net.theevilreaper.tamias.game.util.GameMessages;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
@@ -36,7 +36,7 @@ public final class PlayerSpawnListener implements Consumer<PlayerSpawnEvent> {
         var phase = phaseSeries.getCurrentPhase();
 
         if (phase instanceof LobbyPhase lobbyPhase && player.getInstance().getUniqueId().equals(spawnInstanceID)) {
-            Broadcaster.broadcast(Messages.getJoinMessage(player));
+            Broadcaster.broadcast(GameMessages.getJoinMessage(player));
             lobbyPhase.updatePlayerValues(player);
             return;
         }

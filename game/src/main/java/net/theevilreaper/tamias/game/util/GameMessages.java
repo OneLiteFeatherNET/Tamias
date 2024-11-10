@@ -2,8 +2,10 @@ package net.theevilreaper.tamias.game.util;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.entity.Player;
+import net.theevilreaper.tamias.common.util.Messages;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -12,9 +14,8 @@ import org.jetbrains.annotations.NotNull;
  * @version 1.0.0
  * @since 1.0.0
  **/
-public final class Messages {
+public final class GameMessages extends Messages {
 
-    public static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
     public static final Component TNT_MESSAGE;
     private static final Component PREFIX;
     private static final Component SEPARATOR;
@@ -24,6 +25,9 @@ public final class Messages {
     private static final Component SHOT_PART;
     public static final Component CHOOSING_NEW_TNT;
 
+    public static final Component ALREADY_FORCE_STARTED;
+    public static final Component PHASE_NOT_RUNNING;
+    public static final Component PHASE_FORCE_STARTED;
 
     static {
         PREFIX = MINI_MESSAGE.deserialize("<gradient:#00ff33:#fffafe:0.2>Suicide<gradient:#fffafe:#ff0008>TNT</gradient></gradient>").append(Component.space());
@@ -34,39 +38,19 @@ public final class Messages {
         DEATH_PART = withMini("<yellow>was blown up by");
         SHOT_PART = withMini("<yellow> You were shot by");
         CHOOSING_NEW_TNT = withMiniPrefix("<red>Choosing new tnt<gold>....");
+
+        //TODO: Update to config usage
+        int forceStartTime = 10;
+        ALREADY_FORCE_STARTED = withMiniPrefix("<red>The game has already been force started!");
+        PHASE_NOT_RUNNING = withMiniPrefix("<red>The lobby countdown is not running!");
+        PHASE_FORCE_STARTED = withMiniPrefix("<gray>The timer has been set to <color:#09ff00><seconds></color> seconds!",
+                TagResolver.builder().tag("seconds", (argumentQueue, context) -> Tag.preProcessParsed(String.valueOf(forceStartTime))).build());
     }
 
-    private Messages() { }
-
-    @Contract(value = "_ -> new", pure = true)
-    public static @NotNull Component withPrefix(@NotNull String component) {
-        return PREFIX.append(MINI_MESSAGE.deserialize(component));
+    private GameMessages() {
+        super();
     }
 
-    @Contract(value = "_ -> new", pure = true)
-    public static @NotNull Component withPrefix(@NotNull Component component) {
-        return PREFIX.append(Component.space()).append(component);
-    }
-
-    @Contract(value = "_ -> new", pure = true)
-    public static @NotNull Component withMini(@NotNull String text) {
-        return MiniMessage.miniMessage().deserialize(text);
-    }
-
-    @Contract(value = "_, _ -> new", pure = true)
-    public static @NotNull Component withMini(@NotNull String text, @NotNull TagResolver... resolvers) {
-        return MINI_MESSAGE.deserialize(text, resolvers);
-    }
-
-    @Contract(value = "_ -> new", pure = true)
-    public static @NotNull Component withMiniPrefix(@NotNull String text) {
-        return PREFIX.append(Component.space()).append(MINI_MESSAGE.deserialize(text));
-    }
-
-    @Contract(value = "_, _ -> new", pure = true)
-    public static @NotNull Component withMiniPrefix(@NotNull String text, @NotNull TagResolver... resolvers) {
-        return PREFIX.append(Component.space()).append(MINI_MESSAGE.deserialize(text, resolvers));
-    }
     @Contract
     public static @NotNull Component getLobbyTime(int time) {
         return withMiniPrefix("<gold>Starting in... <red>" + time);
