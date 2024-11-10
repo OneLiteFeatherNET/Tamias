@@ -4,7 +4,7 @@ import de.icevizion.aves.util.Strings;
 import de.icevizion.aves.util.TimeFormat;
 import de.icevizion.xerus.api.phase.TimedPhase;
 import net.kyori.adventure.text.Component;
-import net.theevilreaper.tamias.game.util.Messages;
+import net.theevilreaper.tamias.game.util.GameMessages;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -39,6 +39,6 @@ public final class PlayingPhase extends TimedPhase {
 
     @Contract(pure = true)
     private @NotNull Component getTimeDisplay() {
-        return Messages.withMini("<gold>Time: " + Strings.getTimeString(TimeFormat.MM_SS, getCurrentTicks()));
+        return GameMessages.withMini("<gold>Time: " + Strings.getTimeString(TimeFormat.MM_SS, getCurrentTicks()));
     }
 }

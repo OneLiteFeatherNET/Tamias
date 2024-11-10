@@ -6,7 +6,7 @@ import de.icevizion.xerus.api.phase.LinearPhaseSeries;
 import de.icevizion.xerus.api.phase.Phase;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.theevilreaper.tamias.game.phase.LobbyPhase;
-import net.theevilreaper.tamias.game.util.Messages;
+import net.theevilreaper.tamias.game.util.GameMessages;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
@@ -33,7 +33,7 @@ public class PlayerQuitListener implements Consumer<PlayerDisconnectEvent> {
 
         if (phase instanceof LobbyPhase lobbyPhase) {
             lobbyPhase.checkStopCondition();
-            Broadcaster.broadcast(Messages.getLeaveMessage(event.getPlayer()));
+            Broadcaster.broadcast(GameMessages.getLeaveMessage(event.getPlayer()));
         }
     }
 }

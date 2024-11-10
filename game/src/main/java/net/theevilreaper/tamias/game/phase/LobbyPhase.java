@@ -7,7 +7,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.sound.SoundEvent;
 import net.theevilreaper.tamias.common.map.MapProvider;
-import net.theevilreaper.tamias.game.util.Messages;
+import net.theevilreaper.tamias.game.util.GameMessages;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.temporal.ChronoUnit;
@@ -84,7 +84,7 @@ public final class LobbyPhase extends TimedPhase {
 
     private void broadcastTime() {
         for (Player onlinePlayer : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
-            onlinePlayer.sendMessage(Messages.getLobbyTime(getCurrentTicks()));
+            onlinePlayer.sendMessage(GameMessages.getLobbyTime(getCurrentTicks()));
             onlinePlayer.playSound(PLING, onlinePlayer.getPosition());
         }
     }

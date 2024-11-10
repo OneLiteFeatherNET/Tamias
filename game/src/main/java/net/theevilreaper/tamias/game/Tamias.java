@@ -28,6 +28,7 @@ import net.minestom.server.event.player.PlayerSwapItemEvent;
 import net.minestom.server.extensions.Extension;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
+import net.theevilreaper.tamias.common.ListenerHandling;
 import net.theevilreaper.tamias.common.map.MapProvider;
 import net.theevilreaper.tamias.game.commands.StartCommand;
 import net.theevilreaper.tamias.game.commands.TestCommand;
@@ -64,7 +65,7 @@ import static de.icevizion.aves.inventory.util.InventoryConstants.CANCELLABLE_EV
  * @version 1.0.0
  * @since 1.0.0
  **/
-public class Tamias extends Extension {
+public class Tamias extends Extension implements ListenerHandling {
 
     public static final Logger LOGGER = LoggerFactory.getLogger(Tamias.class);
     private final Gson gson;
@@ -95,9 +96,10 @@ public class Tamias extends Extension {
         checkMapDirectory();
         InstanceContainer instance = MinecraftServer.getInstanceManager().createInstanceContainer();
         instance.enableAutoChunkLoad(true);
+        registerCancelListener(MinecraftServer.getGlobalEventHandler());
         MinecraftServer.getInstanceManager().registerInstance(instance);
 
-        MinecraftServer.getCommandManager().register(new StartCommand(this.phaseSeries));
+        MinecraftServer.getCommandManager().register(new StartCommand(this.phaseSeries::getCurrentPhase));
 
         this.mapProvider = new MapProvider(gson, getDataDirectory(), instance);
         this.mapProvider = new MapProvider(this.gson, getDataDirectory(), instance);
@@ -168,20 +170,11 @@ public class Tamias extends Extension {
     }
 
     void registerListener(@NotNull Instance instance, @NotNull EventNode<Event> eventNode) {
-        eventNode.addListener(AsyncPlayerConfigurationEvent.class, new PlayerJoinListener(this.phaseSeries));
+        eventNode.addListener(AsyncPlayerConfigurationEvent.class, new PlayerJoinListener(this.phaseSeries::getCurrentPhase, () -> null));
         eventNode.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(instance.getUniqueId(), this.phaseSeries));
         eventNode.addListener(PlayerDisconnectEvent.class, new PlayerQuitListener(this.phaseSeries));
         eventNode.addListener(ProjectileCollideWithBlockEvent.class, new ProjectileBlockListener());
         eventNode.addListener(ProjectileCollideWithEntityEvent.class, new ProjectileEntityListener(this.teamDistributor, this.staminaService::getStaminaBar));
         eventNode.addListener(PlayerChatEvent.class, new PlayerChatListener());
-    }
-
-
-    void registerCancelListener(@NotNull EventNode<Event> eventNode) {
-        eventNode.addListener(PlayerBlockBreakEvent.class, CANCELLABLE_EVENT::accept);
-        eventNode.addListener(PlayerBlockPlaceEvent.class, CANCELLABLE_EVENT::accept);
-        eventNode.addListener(ItemDropEvent.class, CANCELLABLE_EVENT::accept);
-        eventNode.addListener(PlayerSwapItemEvent.class, CANCELLABLE_EVENT::accept);
-        eventNode.addListener(PlayerBlockInteractEvent.class, new PlayerBlockInteractListener());
     }
 }

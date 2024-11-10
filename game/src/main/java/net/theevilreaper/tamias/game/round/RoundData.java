@@ -8,7 +8,7 @@ import net.minestom.server.potion.TimedPotion;
 import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.tamias.game.config.GameConfig;
 import net.theevilreaper.tamias.game.round.events.RoundFinishEvent;
-import net.theevilreaper.tamias.game.util.Messages;
+import net.theevilreaper.tamias.game.util.GameMessages;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.temporal.ChronoUnit;
@@ -40,7 +40,7 @@ public final class RoundData {
 
     public void decreaseTNTCount(@NotNull Player player) {
         if (this.spawnPositions == null) return;
-        player.sendMessage(Messages.CHOOSING_NEW_TNT);
+        player.sendMessage(GameMessages.CHOOSING_NEW_TNT);
         if (!hasTNT()) {
             EventDispatcher.call(new RoundFinishEvent(GameConfig.SURVIVOR_ID));
             this.spawnPositions = null;
