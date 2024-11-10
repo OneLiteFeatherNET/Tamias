@@ -2,7 +2,7 @@ package net.theevilreaper.tamias.game.listener.game;
 
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEvent;
-import net.theevilreaper.tamias.game.config.GameConfig;
+import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.game.stamina.ExplodeBar;
 import net.theevilreaper.tamias.game.stamina.StaminaBar;
 import net.theevilreaper.tamias.game.team.TeamHelper;

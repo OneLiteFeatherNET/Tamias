@@ -13,9 +13,8 @@ import org.jetbrains.annotations.NotNull;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 
-import static net.theevilreaper.tamias.game.config.GameConfig.FORCE_START_TIME;
-import static net.theevilreaper.tamias.game.config.GameConfig.LOBBY_PHASE_TIME;
-import static net.theevilreaper.tamias.game.config.GameConfig.MIN_PLAYERS;
+import static net.minestom.server.MinecraftServer.getConnectionManager;
+import static net.theevilreaper.tamias.common.config.GameConfig.FORCE_START_TIME;
 
 
 /**
@@ -23,19 +22,25 @@ import static net.theevilreaper.tamias.game.config.GameConfig.MIN_PLAYERS;
  * @version 1.0.0
  * @since 1.0.0
  **/
+@SuppressWarnings("java:S3252")
 public final class LobbyPhase extends TimedPhase {
 
     private static final Sound PLING = Sound.sound(SoundEvent.BLOCK_NOTE_BLOCK_BELL, Sound.Source.MASTER, 1.0f, 1.0f);
     private final MapProvider provider;
+    private final int minPlayers;
+    private final int maxPlayers;
+    private final int lobbyPhaseTime;
     private boolean forceStarted;
 
-    public LobbyPhase(@NotNull MapProvider provider) {
+    public LobbyPhase(@NotNull MapProvider provider, int minPlayers, int maxPlayers, int lobbyPhaseTime) {
         super("Lobby", ChronoUnit.SECONDS, 1);
         this.setPaused(true);
-        this.setCurrentTicks(LOBBY_PHASE_TIME);
+        this.setCurrentTicks(lobbyPhaseTime);
         this.setTickDirection(TickDirection.DOWN);
-        this.setEndTicks(-5);
         this.provider = provider;
+        this.minPlayers = minPlayers;
+        this.maxPlayers = maxPlayers;
+        this.lobbyPhaseTime = lobbyPhaseTime;
     }
 
 
@@ -69,7 +74,7 @@ public final class LobbyPhase extends TimedPhase {
                 this.provider.getSpawnArea().spawnBlocks();
             }
             case 0 -> {
-                this.provider.teleportPlayers(new ArrayList<>(MinecraftServer.getConnectionManager().getOnlinePlayers()));
+                this.provider.teleportPlayers(new ArrayList<>(getConnectionManager().getOnlinePlayers()));
             }
             default -> {
                 // Nothing to do here
@@ -83,7 +88,7 @@ public final class LobbyPhase extends TimedPhase {
     }
 
     private void broadcastTime() {
-        for (Player onlinePlayer : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+        for (Player onlinePlayer : getConnectionManager().getOnlinePlayers()) {
             onlinePlayer.sendMessage(GameMessages.getLobbyTime(getCurrentTicks()));
             onlinePlayer.playSound(PLING, onlinePlayer.getPosition());
         }
@@ -91,8 +96,8 @@ public final class LobbyPhase extends TimedPhase {
 
     private void setLevel(int amount) {
         if (amount < 0) return;
-        float currentExpCount = (float) this.getCurrentTicks() / (isForceStarted() ? FORCE_START_TIME : LOBBY_PHASE_TIME);
-        for (Player onlinePlayer : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+        float currentExpCount = (float) this.getCurrentTicks() / getLobbyOrForceTime();
+        for (Player onlinePlayer : getConnectionManager().getOnlinePlayers()) {
             onlinePlayer.setLevel(amount);
             onlinePlayer.setExp(currentExpCount);
         }
@@ -100,7 +105,7 @@ public final class LobbyPhase extends TimedPhase {
 
     public void updatePlayerValues(@NotNull Player player) {
         player.setLevel(getCurrentTicks());
-        float currentExpCount = (float) this.getCurrentTicks() / (isForceStarted() ? FORCE_START_TIME : LOBBY_PHASE_TIME);
+        float currentExpCount = (float) this.getCurrentTicks() / getLobbyOrForceTime();
         player.setExp(currentExpCount);
     }
 
@@ -112,17 +117,21 @@ public final class LobbyPhase extends TimedPhase {
     }
 
     public void checkStartCondition() {
-        if (isPaused() && MinecraftServer.getConnectionManager().getOnlinePlayers().size() >= MIN_PLAYERS) {
+        if (isPaused() && getConnectionManager().getOnlinePlayers().size() >= this.minPlayers) {
             this.setPaused(false);
         }
     }
 
     public void checkStopCondition() {
-        if (MinecraftServer.getConnectionManager().getOnlinePlayers().size() - 1 <= MIN_PLAYERS) {
+        if (getConnectionManager().getOnlinePlayers().size() - 1 <= this.maxPlayers) {
             this.setPaused(true);
-            this.setCurrentTicks(LOBBY_PHASE_TIME);
+            this.setCurrentTicks(this.lobbyPhaseTime);
             setLevel();
         }
+    }
+
+    private int getLobbyOrForceTime() {
+        return isForceStarted() ? FORCE_START_TIME : this.lobbyPhaseTime;
     }
 
     public boolean isForceStarted() {

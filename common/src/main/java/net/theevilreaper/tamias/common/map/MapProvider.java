@@ -3,36 +3,27 @@ package net.theevilreaper.tamias.common.map;
 import de.icevizion.aves.file.FileHandler;
 import de.icevizion.aves.file.GsonFileHandler;
 import de.icevizion.aves.map.BaseMap;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.anvil.AnvilLoader;
-import net.minestom.server.utils.Direction;
 import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.tamias.common.area.GameArea;
 import net.theevilreaper.tamias.common.area.SpawnArea;
+import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.common.util.GsonUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 public final class MapProvider {
 
-    private static final String LOBBY_FOLDER_NAME = "lobby";
-    private static final String MAP_FILE = "map.json";
     private final Path mapPath;
     private final FileHandler fileHandler;
     private final MapPool mapPool;
@@ -43,7 +34,7 @@ public final class MapProvider {
     private GameArea gameArea;
 
     public MapProvider(@NotNull Path originPath, @NotNull Function<Stream<Path>, List<MapEntry>> filterMaps) {
-        this.mapPath = originPath.resolve("maps");
+        this.mapPath = originPath.resolve(GameConfig.MAP_FOLDER);
         this.mapPool = new MapPool(this.mapPath, filterMaps);
         this.fileHandler = new GsonFileHandler(GsonUtil.GSON);
     }
