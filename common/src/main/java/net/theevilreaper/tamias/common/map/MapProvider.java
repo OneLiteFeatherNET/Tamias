@@ -1,6 +1,5 @@
 package net.theevilreaper.tamias.common.map;
 
-import com.google.gson.Gson;
 import de.icevizion.aves.file.FileHandler;
 import de.icevizion.aves.file.GsonFileHandler;
 import de.icevizion.aves.map.BaseMap;
@@ -14,7 +13,7 @@ import net.minestom.server.utils.Direction;
 import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.tamias.common.area.GameArea;
 import net.theevilreaper.tamias.common.area.SpawnArea;
-import net.theevilreaper.tamias.common.explosion.ExplosionCreator;
+import net.theevilreaper.tamias.common.util.GsonUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,6 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 public final class MapProvider {
@@ -35,28 +35,18 @@ public final class MapProvider {
     private static final String MAP_FILE = "map.json";
     private final Path mapPath;
     private final FileHandler fileHandler;
+    private final MapPool mapPool;
     private BaseMap lobbyMap;
     private GameMap gameMap;
     private InstanceContainer gameMapInstance;
-    private List<Path> maps;
     private SpawnArea spawnArea;
     private GameArea gameArea;
 
-    public MapProvider(@NotNull Gson gson, @NotNull Path originPath, @NotNull InstanceContainer instanceContainer) {
+    public MapProvider(@NotNull Path originPath, @NotNull Function<Stream<Path>, List<MapEntry>> filterMaps) {
         this.mapPath = originPath.resolve("maps");
-        this.fileHandler = new GsonFileHandler(gson);
-        this.loadMapPaths();
-        this.loadLobbyMap(instanceContainer);
+        this.mapPool = new MapPool(this.mapPath, filterMaps);
+        this.fileHandler = new GsonFileHandler(GsonUtil.GSON);
     }
-
-    private void loadMapPaths() {
-        try (Stream<Path> paths = Files.list(mapPath)) {
-            this.maps = new ArrayList<>(paths.filter(Files::isDirectory).toList());
-        } catch (IOException exception) {
-            MinecraftServer.getExceptionManager().handleException(exception);
-        }
-    }
-
 
     /**
      * Tries to load the lobby map from the map folder.
@@ -64,28 +54,14 @@ public final class MapProvider {
      * @param instanceContainer the instance container to bind the directory to it
      */
     private void loadLobbyMap(@NotNull InstanceContainer instanceContainer) {
-        Check.argCondition(this.maps.isEmpty(), "Can't load lobby because the maps folder contains no lobby");
-
-        Path lobbyPath = null;
-
-        for (int i = 0; i < this.maps.size() && lobbyPath == null; i++) {
-            var currentMap = this.maps.get(i);
-            if (!LOBBY_FOLDER_NAME.equals(currentMap.getFileName().toString())) continue;
-            lobbyPath = currentMap;
-        }
-
-        Check.argCondition(lobbyPath == null, "The map folder contains no lobby map!");
-        final Path mapFile = lobbyPath.resolve(MAP_FILE);
-        Check.argCondition(!Files.exists(mapFile), "The lobby map doesn't contain a map file!");
-        Optional<BaseMap> loadedLobbyMap = fileHandler.load(mapFile, BaseMap.class);
+        MapEntry mapEntry = this.mapPool.getMapEntry();
+        Check.argCondition(!mapEntry.hasMapFile(), "The lobby map doesn't contain a map file!");
+        Optional<BaseMap> loadedLobbyMap = fileHandler.load(mapEntry.getMapFile(), BaseMap.class);
         Check.argCondition(loadedLobbyMap.isEmpty(), "The lobby map couldn't be loaded!");
         this.lobbyMap = loadedLobbyMap.get();
 
-        instanceContainer.setChunkLoader(new AnvilLoader(lobbyPath));
+        instanceContainer.setChunkLoader(new AnvilLoader(mapEntry.path()));
         instanceContainer.enableAutoChunkLoad(true);
-
-        // We need to remove the lobby path from the maps to prevent that the lobby map is a candidate for the game
-        this.maps.remove(lobbyPath);
 
         if (this.lobbyMap.getSpawn() != null) {
             loadChunks(instanceContainer, this.lobbyMap.getSpawn());
@@ -94,8 +70,8 @@ public final class MapProvider {
 
     public void loadGameMap() {
         if (this.gameMapInstance != null) return;
-        Path path;
-        Collections.shuffle(this.maps);
+        Check.argCondition(this.mapPool.getAvailableMaps().isEmpty(), "No maps available");
+/*        Collections.shuffle(this.maps);
         if (this.maps.size() == 1) {
             path = this.maps.getFirst();
         } else {
@@ -116,6 +92,7 @@ public final class MapProvider {
         this.spawnArea = new SpawnArea(container, this.gameMap.getInitialSurvivorSpawn(), Direction.valueOf(this.gameMap.getDirection().toUpperCase(Locale.ROOT)), 5);
         this.gameArea = new GameArea(container, this.gameMap.getLeftAreaPos(), this.gameMap.getRightAreaPos());
         this.gameMapInstance = container;
+    */
     }
 
     public void loadGameChunks() {

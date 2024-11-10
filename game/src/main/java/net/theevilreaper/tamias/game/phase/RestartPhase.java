@@ -11,7 +11,6 @@ import java.time.temporal.ChronoUnit;
 
 import static net.theevilreaper.tamias.game.util.GameMessages.MINI_MESSAGE;
 
-
 /**
  * @author theEvilReaper
  * @version 1.0.0
