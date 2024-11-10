@@ -4,6 +4,7 @@ import de.icevizion.aves.map.BaseMap;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
 /**
@@ -11,7 +12,6 @@ import org.jetbrains.annotations.UnknownNullability;
  * @version 1.0.0
  * @since
  **/
-
 @SuppressWarnings("java:S2065")
 public final class GameMap extends BaseMap {
 
@@ -21,12 +21,19 @@ public final class GameMap extends BaseMap {
     private Vec rightAreaPos;
     private String direction;
 
-
     public GameMap() {
         super("Not set", Pos.ZERO, "");
     }
 
-    public GameMap(@NotNull String name, Pos spawn, @NotNull Pos bomberInitialSpawn, @NotNull Pos leftSurvivorSpawn, @NotNull Vec leftAreaPos, @NotNull Vec rightAreaPos, @NotNull String direction) {
+    public GameMap(
+            @NotNull String name,
+            @Nullable Pos spawn,
+            @NotNull Pos bomberInitialSpawn,
+            @NotNull Pos leftSurvivorSpawn,
+            @NotNull Vec leftAreaPos,
+            @NotNull Vec rightAreaPos,
+            @NotNull String direction
+    ) {
         super(name, spawn, "Team");
         this.bomberInitialSpawn = bomberInitialSpawn;
         this.leftSurvivorSpawn = leftSurvivorSpawn;
@@ -36,7 +43,7 @@ public final class GameMap extends BaseMap {
     }
 
     public void setLeftAreaPos(@NotNull Vec vec) {
-       this.leftAreaPos = vec;
+        this.leftAreaPos = vec;
     }
 
     public void setRightArePos(@NotNull Vec vec) {

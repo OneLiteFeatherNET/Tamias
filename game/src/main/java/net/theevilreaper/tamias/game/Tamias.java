@@ -1,7 +1,5 @@
 package net.theevilreaper.tamias.game;
 
-import com.google.gson.Gson;
-import de.icevizion.aves.file.gson.PositionGsonAdapter;
 import de.icevizion.xerus.api.phase.CyclicPhaseSeries;
 import de.icevizion.xerus.api.phase.GamePhase;
 import de.icevizion.xerus.api.phase.LinearPhaseSeries;
@@ -10,30 +8,24 @@ import de.icevizion.xerus.api.team.TeamService;
 import de.icevizion.xerus.api.team.TeamServiceImpl;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithBlockEvent;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEvent;
-import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
-import net.minestom.server.event.player.PlayerBlockBreakEvent;
-import net.minestom.server.event.player.PlayerBlockInteractEvent;
-import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
-import net.minestom.server.event.player.PlayerSwapItemEvent;
 import net.minestom.server.extensions.Extension;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
 import net.theevilreaper.tamias.common.ListenerHandling;
+import net.theevilreaper.tamias.common.map.MapEntry;
 import net.theevilreaper.tamias.common.map.MapProvider;
 import net.theevilreaper.tamias.game.commands.StartCommand;
 import net.theevilreaper.tamias.game.commands.TestCommand;
 import net.theevilreaper.tamias.game.config.GameConfig;
-import net.theevilreaper.tamias.game.listener.PlayerBlockInteractListener;
 import net.theevilreaper.tamias.game.listener.PlayerChatListener;
 import net.theevilreaper.tamias.game.listener.PlayerJoinListener;
 import net.theevilreaper.tamias.game.listener.PlayerQuitListener;
@@ -58,8 +50,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 
-import static de.icevizion.aves.inventory.util.InventoryConstants.CANCELLABLE_EVENT;
-
 /**
  * @author theEvilReaper
  * @version 1.0.0
@@ -68,7 +58,6 @@ import static de.icevizion.aves.inventory.util.InventoryConstants.CANCELLABLE_EV
 public class Tamias extends Extension implements ListenerHandling {
 
     public static final Logger LOGGER = LoggerFactory.getLogger(Tamias.class);
-    private final Gson gson;
     private final LinearPhaseSeries<GamePhase> phaseSeries;
     private final TeamService<Team> teamService;
     private final BoardHelper boardHelper;
@@ -82,11 +71,6 @@ public class Tamias extends Extension implements ListenerHandling {
         this.teamService = new TeamServiceImpl<>();
         this.initTeams();
         this.boardHelper = new BoardHelper();
-        var posAdapter = new PositionGsonAdapter();
-        this.gson = new Gson().newBuilder()
-                .registerTypeAdapter(Pos.class, posAdapter)
-                .registerTypeAdapter(Vec.class, posAdapter)
-                .create();
         this.roundData = new RoundData();
         this.staminaService = new StaminaService();
     }
@@ -101,26 +85,12 @@ public class Tamias extends Extension implements ListenerHandling {
 
         MinecraftServer.getCommandManager().register(new StartCommand(this.phaseSeries::getCurrentPhase));
 
-        this.mapProvider = new MapProvider(gson, getDataDirectory(), instance);
-        this.mapProvider = new MapProvider(this.gson, getDataDirectory(), instance);
+        this.mapProvider = new MapProvider(getDataDirectory(), pathStream -> pathStream.map(MapEntry::new).toList());
         this.teamDistributor = new TeamHelper(this.mapProvider, this.teamService.getTeams()::get);
-
-        MinecraftServer.getInstanceManager().registerInstance(instance);
-        MinecraftServer.getGlobalEventHandler().addListener(AsyncPlayerConfigurationEvent.class, event -> event.setSpawningInstance(instance));
-        MinecraftServer.getGlobalEventHandler().addListener(PlayerSpawnEvent.class, event -> {
-            event.getPlayer().setGameMode(GameMode.CREATIVE);
-            if (event.getSpawnInstance().getUniqueId().equals(instance.getUniqueId())) {
-                event.getPlayer().teleport(new Pos(-11, 130, 25));
-            }
-
-            ((LobbyPhase) this.phaseSeries.getCurrentPhase()).checkStartCondition();
-        });
-
-        MinecraftServer.getCommandManager().register(new TestCommand());
         this.createPhaseStructure();
         registerCancelListener(MinecraftServer.getGlobalEventHandler());
-
-        registerListener(instance, MinecraftServer.getGlobalEventHandler());
+        registerListener(MinecraftServer.getGlobalEventHandler());
+        MinecraftServer.getCommandManager().register(new TestCommand());
         this.phaseSeries.start();
     }
 
@@ -169,10 +139,10 @@ public class Tamias extends Extension implements ListenerHandling {
         eventNode.addListener(RoundFinishEvent.class, new RoundFinishListener(this.teamDistributor));
     }
 
-    void registerListener(@NotNull Instance instance, @NotNull EventNode<Event> eventNode) {
+    void registerListener(@NotNull EventNode<Event> eventNode) {
         eventNode.addListener(AsyncPlayerConfigurationEvent.class, new PlayerJoinListener(this.phaseSeries::getCurrentPhase, () -> null));
-        eventNode.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(instance.getUniqueId(), this.phaseSeries));
-        eventNode.addListener(PlayerDisconnectEvent.class, new PlayerQuitListener(this.phaseSeries));
+        eventNode.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(this.phaseSeries::getCurrentPhase));
+        eventNode.addListener(PlayerDisconnectEvent.class, new PlayerQuitListener(this.phaseSeries::getCurrentPhase));
         eventNode.addListener(ProjectileCollideWithBlockEvent.class, new ProjectileBlockListener());
         eventNode.addListener(ProjectileCollideWithEntityEvent.class, new ProjectileEntityListener(this.teamDistributor, this.staminaService::getStaminaBar));
         eventNode.addListener(PlayerChatEvent.class, new PlayerChatListener());
