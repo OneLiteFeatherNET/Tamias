@@ -23,6 +23,7 @@ import java.util.List;
 @SuppressWarnings("java:S3252")
 public final class SpawnArea {
 
+    private static final Block SPAWN_BLOCK = Block.TNT;
     private static final Logger LOGGER = LoggerFactory.getLogger(SpawnArea.class);
     private static final Vec Y_VEC = new Vec(0, 1,0);
     private final Instance instance;
@@ -37,6 +38,7 @@ public final class SpawnArea {
      * @param maxPositions the maximum amount of possible positions
      */
     public SpawnArea(@NotNull Instance instance, @NotNull Pos startPosition, @NotNull Direction direction, int maxPositions) {
+        Check.argCondition(maxPositions < 1, "The maximum position count must be higher than 0");
         Check.argCondition(direction == Direction.DOWN || direction == Direction.UP, "The direction must be horizontal");
         this.instance = instance;
         this.positions = new Pos[maxPositions];
@@ -88,10 +90,11 @@ public final class SpawnArea {
      * Places for each spawn position a specific block.
      */
     public void spawnBlocks() {
+        System.out.println("Spawning blocks");
+        System.out.println("Positions: " + positions.length);
         for (Pos position : positions) {
-            //TODO: Fix me
-            instance.setBlock(position, Block.STONE);
-            //instance.setBlock(position, GameConfig.SPAWN_BLOCK);
+
+            instance.setBlock(position, SPAWN_BLOCK);
         }
     }
 
