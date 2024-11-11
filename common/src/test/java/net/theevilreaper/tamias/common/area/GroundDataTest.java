@@ -37,13 +37,13 @@ class GroundDataTest {
     }
 
     @Test
-    void testGroundDataWithAdditionalBLocks() {
+    void testGroundDataWithAdditionalBlocks() {
         List<Block> additionalBlocks = List.of(Block.GLASS, Block.ACACIA_DOOR, Block.SAND);
         GroundData groundData = new GroundData(Block.AMETHYST_BLOCK, additionalBlocks);
         assertTrue(groundData.hasAdditionalBlocks());
         assertEquals(Block.AMETHYST_BLOCK, groundData.groundBlock());
         assertNotNull(groundData.additionalBlocks());
-        assertEquals(2, groundData.additionalBlocks().size());
+        assertEquals(3, groundData.additionalBlocks().size());
         assertListEquals(additionalBlocks, groundData.additionalBlocks());
     }
 
