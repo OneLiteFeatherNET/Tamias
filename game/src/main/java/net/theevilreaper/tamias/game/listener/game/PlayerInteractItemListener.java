@@ -36,8 +36,8 @@ public final class PlayerInteractItemListener implements Consumer<PlayerUseItemE
             explodeBar.start();
         }
 
-        if (stamina instanceof ShootBar shootBar) {
-            shootBar.handleShoot();
+        if (stamina instanceof ShootBar) {
+            stamina.triggerAction();
         }
     }
 }
