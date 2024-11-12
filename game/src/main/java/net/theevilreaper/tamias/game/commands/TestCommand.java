@@ -9,9 +9,8 @@ import net.minestom.server.command.builder.arguments.ArgumentWord;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.theevilreaper.tamias.game.listener.game.PlayerInteractItemListener;
-import net.theevilreaper.tamias.game.stamina.ExplodeBar;
-import net.theevilreaper.tamias.game.stamina.ShootBar;
 import net.theevilreaper.tamias.game.stamina.StaminaBar;
+import net.theevilreaper.tamias.game.stamina.StaminaFactory;
 import net.theevilreaper.tamias.game.util.Items;
 import org.jetbrains.annotations.NotNull;
 
@@ -44,11 +43,11 @@ public class TestCommand extends Command {
         if ("A".equals(argument)) {
             this.items.setBombItem(player);
             player.sendMessage("Test A");
-            this.staminaBar = new ExplodeBar(player);
+            this.staminaBar = StaminaFactory.createExplodeBar(player);
         } else {
             this.items.setShootItem(player);
             player.sendMessage("Test B");
-            this.staminaBar = new ShootBar(player);
+            this.staminaBar = StaminaFactory.createShootBar(player);
         }
     }
 }
