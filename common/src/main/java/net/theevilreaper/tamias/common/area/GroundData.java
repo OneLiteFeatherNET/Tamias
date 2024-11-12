@@ -7,6 +7,17 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
+/**
+ * A {@link GroundData} represents the definition of the ground in a specific area.
+ * Mainly used to define which is the main block for the ground and if there are additional blocks.
+ * If there are additional blocks they will be used to fill some blocks in the area.
+ *
+ * @param groundBlock      the main block for the ground
+ * @param additionalBlocks the additional blocks for the ground
+ * @author theEvilReaper
+ * @version 1.0.0
+ * @since 1.0.0
+ */
 @SuppressWarnings("java:S3252")
 public record GroundData(@NotNull Block groundBlock, @Nullable List<Block> additionalBlocks) {
 
