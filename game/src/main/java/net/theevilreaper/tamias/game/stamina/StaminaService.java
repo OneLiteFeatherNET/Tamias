@@ -11,6 +11,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * The class has some abilities to manage all {@link StaminaBar} references which are required in the game.
+ *
  * @author theEvilReaper
  * @version 1.0.0
  * @since 1.0.0
@@ -57,6 +58,26 @@ public final class StaminaService {
         staminaBars.clear();
     }
 
+    /**
+     * Removes the {@link StaminaBar} for the given {@link UUID}.
+     * @param uuid the unique identifier for the player
+     * @return true if the {@link StaminaBar} was removed successfully
+     */
+    public boolean removeStaminaBar(@NotNull UUID uuid) {
+        try {
+            lock.lock();
+            return staminaBars.remove(uuid) != null;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * Returns the {@link StaminaBar} for the given {@link UUID}.
+     *
+     * @param uuid the unique identifier for the player
+     * @return the {@link StaminaBar} or null if the player has no stamina bar
+     */
     public @Nullable StaminaBar getStaminaBar(@NotNull UUID uuid) {
         try {
             lock.lock();

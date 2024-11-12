@@ -12,6 +12,7 @@ import java.util.Objects;
  * The StaminaBar class is designed to manage and display stamina-related information for a player in a game.
  * It offers a customizable mechanism to update and render stamina data periodically.
  * The core functionality of the class revolves around a timer that ticks at regular intervals defined by the provided period parameter.
+ *
  * @author theEvilReaper
  * @version 1.0.0
  * @since 1.0.0
@@ -26,22 +27,31 @@ public abstract sealed class StaminaBar implements Runnable permits ShootBar, Ex
 
     /**
      * Creates a new reference from an {@link StaminaBar}.
-     * @param player the player who owns the bar
+     *
+     * @param player     the player who owns the bar
      * @param chronoUnit the tick interval for the bar
-     * @param period the tick period for the par
+     * @param period     the tick period for the par
      */
-    protected StaminaBar(@NotNull Player player, @NotNull ChronoUnit chronoUnit, int period) {
+    StaminaBar(@NotNull Player player, @NotNull ChronoUnit chronoUnit, int period) {
         this.player = player;
         this.chronoUnit = chronoUnit;
         this.period = period;
     }
 
+    /**
+     * Called when the {@link StaminaBar} is started in general.
+     */
     protected abstract void onStart();
 
     /**
      * The method can be called when the regeneration of the {@link StaminaBar} is finished.
      */
     protected abstract void onRegenerated();
+
+    /**
+     * Triggers the action of the {@link StaminaBar}.
+     */
+    public abstract void triggerAction();
 
     /**
      * Creates a new {@link Task} which executes the {@link StaminaBar#consume()} method on each iteration.
@@ -61,6 +71,7 @@ public abstract sealed class StaminaBar implements Runnable permits ShootBar, Ex
         if (task != null) {
             task.cancel();
             task = null;
+            status = null;
         }
     }
 
@@ -92,6 +103,7 @@ public abstract sealed class StaminaBar implements Runnable permits ShootBar, Ex
 
     /**
      * The enum contains all statuses which an {@link StaminaBar} can have.
+     *
      * @author theEvilReaper
      * @version 1.0.0
      * @since 1.0.0
