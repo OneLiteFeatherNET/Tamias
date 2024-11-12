@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MicrotusExtension.class)
 class ExplosionCreatorIntegrationTest {
@@ -38,6 +39,10 @@ class ExplosionCreatorIntegrationTest {
         instance.explode((float) vec.x(), (float) vec.y(), (float) vec.z(), 1F);
 
         explosionTracker.assertCount(1);
+        explosionTracker.assertSingle(packet -> {
+            assertEquals(1, packet.radius());
+            assertEquals(ExplosionPacket.BlockInteraction.DESTROY, packet.blockInteraction());
+        });
 
         env.destroyInstance(instance, true);
     }
