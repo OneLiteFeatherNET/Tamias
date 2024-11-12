@@ -47,7 +47,7 @@ public final class GameArea {
         this.instance = instance;
         this.start = start;
         this.end = end;
-        var distance = start.sub(end);
+        Vec distance = start.sub(end);
         Check.argCondition(distance.equals(Vec.ZERO), "The distance between start and end can't be zero");
         this.areaPositions = new ArrayList<>();
         this.specialBlocks = new ArrayList<>();
@@ -158,6 +158,9 @@ public final class GameArea {
         }
     }
 
+    /**
+     * Calculates the positions for the special blocks.
+     */
     private void calculateSpecialBlockPositions() {
         var amountOfSpeedBoost = random.nextInt(MAX_SPEED_BOOST_AMOUNT - MIN_SPEED_BOOST_AMOUNT) + MIN_SPEED_BOOST_AMOUNT;
         for (int i = 0; i < amountOfSpeedBoost; i++) {
@@ -166,6 +169,9 @@ public final class GameArea {
         }
     }
 
+    /**
+     * Calculates the positions for the tnt blocks.
+     */
     private void calculateTntPositions() {
         var amountOfTnt = random.nextInt(MAX_TNT_AMOUNT - MIN_TNT_AMOUNT) + MIN_TNT_AMOUNT;
         for (int i = 0; i < amountOfTnt; i++) {
