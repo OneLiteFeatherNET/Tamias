@@ -41,7 +41,7 @@ dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
             version("minestom", "1.5.0")
-            version("aves", "1.6.0-SNAPSHOT")
+            version("aves", "1.6.0")
             version("xerus", "1.3.0-SNAPSHOT")
 
             library("microtus.bom", "net.onelitefeather.microtus", "bom").versionRef("minestom")
