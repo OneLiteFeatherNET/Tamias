@@ -1,7 +1,6 @@
 package net.theevilreaper.tamias.common.area;
 
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.Direction;
@@ -12,7 +11,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Arrays;
@@ -98,7 +96,7 @@ class SpawnAreaIntegrationTest {
 
         spawnArea.spawnBlocks();
 
-        spawnArea.resetBlocks();
+        spawnArea.reset();
 
         int currentPositions = 0;
 
