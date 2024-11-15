@@ -97,7 +97,6 @@ public final class SpawnArea implements Area {
      */
     public void spawnBlocks() {
         for (Pos position : positions) {
-
             instance.setBlock(position, SPAWN_BLOCK);
         }
     }
