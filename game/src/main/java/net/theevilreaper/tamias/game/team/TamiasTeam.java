@@ -4,7 +4,7 @@ import de.icevizion.xerus.api.ColorData;
 import de.icevizion.xerus.api.team.TeamImpl;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
-import net.theevilreaper.tamias.game.util.Tags;
+import net.theevilreaper.tamias.common.util.Tags;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;

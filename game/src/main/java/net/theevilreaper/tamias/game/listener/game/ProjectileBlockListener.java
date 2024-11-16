@@ -1,7 +1,7 @@
 package net.theevilreaper.tamias.game.listener.game;
 
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithBlockEvent;
-import net.theevilreaper.tamias.game.util.Tags;
+import net.theevilreaper.tamias.common.util.Tags;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;

@@ -3,6 +3,9 @@ package net.theevilreaper.tamias.common.map;
 import de.icevizion.aves.map.BaseMap;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.utils.Direction;
+import net.theevilreaper.tamias.common.map.layer.GameAreaData;
+import net.theevilreaper.tamias.common.map.layer.SpawnLayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
@@ -15,8 +18,9 @@ import org.jetbrains.annotations.UnknownNullability;
 @SuppressWarnings("java:S2065")
 public final class GameMap extends BaseMap {
 
+    private SpawnLayer spawnLayer;
+    private GameAreaData gameAreaData;
     private Pos bomberInitialSpawn;
-    private Pos leftSurvivorSpawn;
     private Vec leftAreaPos;
     private Vec rightAreaPos;
     private String direction;
@@ -29,17 +33,15 @@ public final class GameMap extends BaseMap {
             @NotNull String name,
             @Nullable Pos spawn,
             @NotNull Pos bomberInitialSpawn,
-            @NotNull Pos leftSurvivorSpawn,
             @NotNull Vec leftAreaPos,
             @NotNull Vec rightAreaPos,
-            @NotNull String direction
+            @NotNull SpawnLayer spawnLayer,
+            @NotNull GameAreaData gameAreaData
     ) {
         super(name, spawn, "Team");
         this.bomberInitialSpawn = bomberInitialSpawn;
-        this.leftSurvivorSpawn = leftSurvivorSpawn;
         this.leftAreaPos = leftAreaPos;
         this.rightAreaPos = rightAreaPos;
-        this.direction = direction;
     }
 
     public void setLeftAreaPos(@NotNull Vec vec) {
@@ -50,6 +52,10 @@ public final class GameMap extends BaseMap {
         this.rightAreaPos = vec;
     }
 
+    public void setGameAreaData(@NotNull GameAreaData gameAreaData) {
+        this.gameAreaData = gameAreaData;
+    }
+
     public void setDirection(@NotNull String direction) {
         this.direction = direction;
     }
@@ -58,16 +64,20 @@ public final class GameMap extends BaseMap {
         this.bomberInitialSpawn = bomberInitialSpawn;
     }
 
-    public void setLeftSurvivorSpawn(Pos leftSurvivorSpawn) {
-        this.leftSurvivorSpawn = leftSurvivorSpawn;
+    public void setLeftSurvivorSpawn(Pos leftSurvivorSpawn, @NotNull Direction direction) {
+        this.spawnLayer = new SpawnLayer(leftSurvivorSpawn, direction);
+    }
+
+    public GameAreaData getGameAreaData() {
+        return gameAreaData;
     }
 
     public @UnknownNullability Pos getBomberInitialSpawn() {
         return bomberInitialSpawn;
     }
 
-    public @NotNull Pos getInitialSurvivorSpawn() {
-        return leftSurvivorSpawn;
+    public @NotNull SpawnLayer getSpawnData() {
+        return spawnLayer;
     }
 
     public @NotNull String getDirection() {
