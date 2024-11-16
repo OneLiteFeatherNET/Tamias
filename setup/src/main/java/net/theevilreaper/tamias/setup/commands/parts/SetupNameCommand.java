@@ -1,43 +1,57 @@
 package net.theevilreaper.tamias.setup.commands.parts;
 
-import de.icevizion.aves.map.BaseMap;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
+import net.minestom.server.command.builder.CommandContext;
+import net.minestom.server.command.builder.arguments.ArgumentString;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.condition.Conditions;
+import net.minestom.server.entity.Player;
+import net.theevilreaper.tamias.common.util.Messages;
+import net.theevilreaper.tamias.setup.TamiasSetup;
+import net.theevilreaper.tamias.setup.data.SetupData;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
 
 import static net.theevilreaper.tamias.setup.TamiasSetup.SELECT_MAP_FIRST;
 
-
 public final class SetupNameCommand extends Command {
 
-    public SetupNameCommand(@NotNull Function<CommandSender, BaseMap> mapFunction) {
+    private final Function<Player, SetupData> setupDataFunction;
+
+    public SetupNameCommand(@NotNull Function<Player, SetupData> setupDataFunction) {
         super("name");
-        setCondition(Conditions::playerOnly);
-        setDefaultExecutor((sender, context) -> {
-            var map = mapFunction.apply(sender);
+        this.setupDataFunction = setupDataFunction;
+        this.setCondition(Conditions::playerOnly);
+        ArgumentString mapName = ArgumentType.String("mapName");
+        this.addSyntax(this::handleNameSet, mapName);
+    }
 
-            if (map == null) {
-                sender.sendMessage(SELECT_MAP_FIRST);
-                return;
-            }
-            //sender.sendMessage(Messages.withMini("<red>Please provide a <gray>valid <red>name for the map"));
-        });
-        var mapName = ArgumentType.String("mapName");
+    private void handleNameSet(@NotNull CommandSender sender, @NotNull CommandContext context) {
+        if (!sender.hasTag(TamiasSetup.SETUP_TAG)) {
+            sender.sendMessage(SELECT_MAP_FIRST);
+            return;
+        }
 
-        addSyntax((sender, context) -> {
-            var map = mapFunction.apply(sender);
+        String name = context.get("mapName");
+        if (name == null || name.trim().isEmpty()) {
+            sender.sendMessage("Please provide a valid name");
+            return;
+        }
 
-            if (map == null) {
-                sender.sendMessage(SELECT_MAP_FIRST);
-                return;
-            }
-            var name = context.get(mapName);
-            map.setName(name);
-            sender.sendMessage("The name of the map now is: " + name);
-        }, mapName);
+        SetupData setupData = this.setupDataFunction.apply((Player) sender);
+        if (setupData == null) {
+            sender.sendMessage("An error occurred while setting up the map");
+            return;
+        }
+
+        setupData.getBaseMap().setName(name);
+        Component message = Messages.withPrefix(Component.text("The name of the map now is: ", NamedTextColor.GRAY))
+                .append(Component.text(name, NamedTextColor.AQUA));
+        sender.sendMessage(message);
+        setupData.triggerInventoryUpdate();
     }
 }

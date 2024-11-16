@@ -1,4 +1,4 @@
-package net.theevilreaper.tamias.game.util;
+package net.theevilreaper.tamias.common.util;
 
 import net.minestom.server.tag.Tag;
 

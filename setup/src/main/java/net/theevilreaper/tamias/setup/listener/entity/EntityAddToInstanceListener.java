@@ -1,8 +1,8 @@
-package net.theevilreaper.tamias.setup.listener;
+package net.theevilreaper.tamias.setup.listener.entity;
 
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.instance.AddEntityToInstanceEvent;
-import net.theevilreaper.tamias.setup.SetupItems;
+import net.theevilreaper.tamias.setup.util.SetupItems;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;

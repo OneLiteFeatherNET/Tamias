@@ -5,7 +5,7 @@ import net.minestom.server.item.ItemStack;
 import net.theevilreaper.tamias.game.stamina.ExplodeBar;
 import net.theevilreaper.tamias.game.stamina.ShootBar;
 import net.theevilreaper.tamias.game.stamina.StaminaBar;
-import net.theevilreaper.tamias.game.util.Tags;
+import net.theevilreaper.tamias.common.util.Tags;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;

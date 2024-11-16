@@ -7,8 +7,13 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
+import net.minestom.server.command.builder.CommandContext;
+import net.minestom.server.command.builder.arguments.ArgumentStringArray;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.condition.Conditions;
+import net.minestom.server.entity.Player;
+import net.theevilreaper.tamias.setup.TamiasSetup;
+import net.theevilreaper.tamias.setup.data.SetupData;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -25,29 +30,39 @@ import static net.theevilreaper.tamias.setup.TamiasSetup.SELECT_MAP_FIRST;
  */
 public final class SetupBuildersCommand extends Command {
 
-    public SetupBuildersCommand(@NotNull Function<CommandSender, BaseMap> mapFunction) {
+    private final Function<Player, SetupData> setupDataFunction;
+
+    public SetupBuildersCommand(@NotNull Function<Player, SetupData> setupDataFunction) {
         super("builders");
-        setCondition(Conditions::playerOnly);
+        this.setupDataFunction = setupDataFunction;
+        this.setCondition(Conditions::playerOnly);
 
-        var buildersArray = ArgumentType.StringArray("builders");
+        ArgumentStringArray buildersArray = ArgumentType.StringArray("builders");
+        this.addSyntax(this::handleBuilderSetup, buildersArray);
+    }
 
-        addSyntax((sender, context) -> {
-            String[] builders = context.get(buildersArray);
+    private void handleBuilderSetup(@NotNull CommandSender sender, @NotNull CommandContext context) {
+        if (!sender.hasTag(TamiasSetup.SETUP_TAG)) {
+            sender.sendMessage(SELECT_MAP_FIRST);
+            return;
+        }
 
-            var map = mapFunction.apply(sender);
+        String[] builders = context.get("builders");
 
-            if (map == null) {
-                sender.sendMessage(SELECT_MAP_FIRST);
-                return;
-            }
+        if (builders.length == 0) {
+            sender.sendMessage(Component.text("A map needs at least one builder", NamedTextColor.RED));
+            return;
+        }
 
-            if (builders.length == 0) {
-                sender.sendMessage(Component.text("A map needs at least one builder", NamedTextColor.RED));
-                return;
-            }
-            var buildersAsComponent = Component.join(JoinConfiguration.arrayLike(), transformBuilders(builders));
-            sender.sendMessage(Component.text("The creators of the map are: ").append(buildersAsComponent));
-        }, buildersArray);
+        SetupData setupData = this.setupDataFunction.apply((Player) sender);
+        if (setupData == null) {
+            sender.sendMessage("An error occurred while setting up the map");
+            return;
+        }
+
+        setupData.getBaseMap().setBuilders(builders);
+        Component buildersAsComponent = Component.join(JoinConfiguration.arrayLike(), transformBuilders(builders));
+        sender.sendMessage(Component.text("The creators of the map are: ").append(buildersAsComponent));
     }
 
     private @NotNull List<TextComponent> transformBuilders(@NotNull String... builders) {
