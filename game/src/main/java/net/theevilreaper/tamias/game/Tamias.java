@@ -21,7 +21,6 @@ import net.minestom.server.instance.InstanceContainer;
 import net.theevilreaper.tamias.common.ListenerHandling;
 import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.common.config.GameConfigReader;
-import net.theevilreaper.tamias.common.map.MapEntry;
 import net.theevilreaper.tamias.common.map.MapProvider;
 import net.theevilreaper.tamias.common.round.event.RoundEndEvent;
 import net.theevilreaper.tamias.game.commands.StartCommand;
@@ -49,7 +48,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
 /**

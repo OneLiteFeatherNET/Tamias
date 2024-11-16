@@ -6,7 +6,7 @@ import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.game.stamina.ExplodeBar;
 import net.theevilreaper.tamias.game.stamina.StaminaBar;
 import net.theevilreaper.tamias.game.team.TeamHelper;
-import net.theevilreaper.tamias.game.util.Tags;
+import net.theevilreaper.tamias.common.util.Tags;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

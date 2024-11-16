@@ -1,5 +1,6 @@
 package net.theevilreaper.tamias.common.map;
 
+import de.icevizion.aves.map.MapEntry;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
@@ -27,7 +28,7 @@ import java.util.stream.Stream;
  **/
 public final class MapPool {
     private static final Logger LOGGER = LoggerFactory.getLogger(MapPool.class);
-    private static final String LOBBY_MAP_NAME = System.getProperty("TAMIAS_LOBBY_MAP", "world");
+    private static final String LOBBY_MAP_NAME = System.getProperty("TAMIAS_LOBBY_MAP", "lobby");
 
     private List<MapEntry> referenceList;
     private MapEntry selectedMap;
@@ -50,7 +51,8 @@ public final class MapPool {
             this.selectedMap = this.referenceList.getFirst();
             return;
         }
-        this.selectedMap = this.referenceList.stream().filter(mapEntry -> mapEntry.path().getFileName().toString().equalsIgnoreCase(LOBBY_MAP_NAME)).findFirst().orElseThrow();
+        this.selectedMap = this.referenceList.stream()
+                .filter(MapEntry::hasMapFile).filter(mapEntry -> mapEntry.getDirectoryRoot().endsWith(LOBBY_MAP_NAME)).findFirst().orElseThrow();
     }
 
     /**

@@ -36,7 +36,7 @@ public abstract class Messages {
 
     @Contract(value = "_ -> new", pure = true)
     public static @NotNull Component withMini(@NotNull String text) {
-        return MiniMessage.miniMessage().deserialize(text);
+        return MINI_MESSAGE.deserialize(text);
     }
 
     @Contract(value = "_, _ -> new", pure = true)

@@ -1,11 +1,12 @@
-package net.theevilreaper.tamias.common.util;
+package net.theevilreaper.tamias.common.gson;
 
 import com.google.gson.Gson;
 import de.icevizion.aves.file.gson.PositionGsonAdapter;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
+import net.theevilreaper.tamias.common.map.layer.GameAreaData;
 
-public class GsonUtil {
+public final class GsonUtil {
 
     public static final Gson GSON;
 
@@ -14,6 +15,7 @@ public class GsonUtil {
         GSON = new Gson().newBuilder()
                 .registerTypeAdapter(Pos.class, positionGsonAdapter)
                 .registerTypeAdapter(Vec.class, positionGsonAdapter)
+                .registerTypeAdapter(GameAreaData.class, new GameAreaAdapter())
                 .create();
     }
 

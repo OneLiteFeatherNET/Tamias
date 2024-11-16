@@ -3,6 +3,7 @@ package net.theevilreaper.tamias.common.map;
 import de.icevizion.aves.file.FileHandler;
 import de.icevizion.aves.file.GsonFileHandler;
 import de.icevizion.aves.map.BaseMap;
+import de.icevizion.aves.map.MapEntry;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
@@ -11,8 +12,7 @@ import net.minestom.server.instance.anvil.AnvilLoader;
 import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.tamias.common.area.GameArea;
 import net.theevilreaper.tamias.common.area.SpawnArea;
-import net.theevilreaper.tamias.common.config.GameConfig;
-import net.theevilreaper.tamias.common.util.GsonUtil;
+import net.theevilreaper.tamias.common.gson.GsonUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,9 +34,13 @@ public final class MapProvider {
     private GameArea gameArea;
 
     public MapProvider(@NotNull Path originPath, @NotNull Function<Stream<Path>, List<MapEntry>> filterMaps) {
-        this.mapPath = originPath.resolve(GameConfig.MAP_FOLDER);
+        this.mapPath = originPath;
         this.mapPool = new MapPool(this.mapPath, filterMaps);
         this.fileHandler = new GsonFileHandler(GsonUtil.GSON);
+    }
+
+    public void saveMap(@NotNull Path path, @NotNull BaseMap baseMap) {
+        this.fileHandler.save(path, baseMap instanceof GameMap gameMap ? gameMap : baseMap);
     }
 
     /**
@@ -44,14 +48,14 @@ public final class MapProvider {
      *
      * @param instanceContainer the instance container to bind the directory to it
      */
-    private void loadLobbyMap(@NotNull InstanceContainer instanceContainer) {
+    public void loadLobbyMap(@NotNull InstanceContainer instanceContainer) {
         MapEntry mapEntry = this.mapPool.getMapEntry();
         Check.argCondition(!mapEntry.hasMapFile(), "The lobby map doesn't contain a map file!");
         Optional<BaseMap> loadedLobbyMap = fileHandler.load(mapEntry.getMapFile(), BaseMap.class);
         Check.argCondition(loadedLobbyMap.isEmpty(), "The lobby map couldn't be loaded!");
         this.lobbyMap = loadedLobbyMap.get();
 
-        instanceContainer.setChunkLoader(new AnvilLoader(mapEntry.path()));
+        instanceContainer.setChunkLoader(new AnvilLoader(mapEntry.getDirectoryRoot()));
         instanceContainer.enableAutoChunkLoad(true);
 
         if (this.lobbyMap.getSpawn() != null) {
@@ -87,7 +91,7 @@ public final class MapProvider {
     }
 
     public void loadGameChunks() {
-        this.gameMapInstance.loadChunk(this.gameMap.getInitialSurvivorSpawn()).join();
+        //this.gameMapInstance.loadChunk(this.gameMap.getInitialSurvivorSpawn()).join();
     }
 
     public void teleportPlayers(@NotNull List<Player> players) {
@@ -116,5 +120,9 @@ public final class MapProvider {
 
     public @Nullable GameArea getGameArea() {
         return gameArea;
+    }
+
+    public @NotNull List<MapEntry> getMapEntries() {
+        return this.mapPool.getAvailableMaps();
     }
 }

@@ -5,6 +5,7 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.EntityProjectile;
 import net.minestom.server.entity.Player;
 import net.minestom.server.utils.validate.Check;
+import net.theevilreaper.tamias.common.util.Tags;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;

@@ -11,8 +11,8 @@ import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.timer.Task;
-import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.tamias.common.event.FinishBuildEvent;
+import net.theevilreaper.tamias.common.map.layer.GameAreaData;
 import net.theevilreaper.tamias.common.util.Helper;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -33,22 +33,19 @@ public final class GameArea {
     private static final Logger LOGGER = LoggerFactory.getLogger(GameArea.class);
     public static final Block ORIGINAL_BLOCK = Block.BLUE_ICE;
     public static final GroundData DEFAULT_GROUND_DATA = new GroundData(Block.ORANGE_TERRACOTTA, null);
+
     private final Instance instance;
-    private final Vec start;
-    private final Vec end;
+    private final GameAreaData gameAreaData;
     private final List<Vec> areaPositions;
     private final List<Vec> specialBlocks;
     private final List<Vec> tntPositions;
-    private Random random;
     private final GroundData groundData;
+    private Random random;
 
-    public GameArea(@NotNull Instance instance, @NotNull Vec start, @NotNull Vec end) {
+    public GameArea(@NotNull Instance instance, @NotNull GameAreaData gameAreaData) {
         this.groundData = DEFAULT_GROUND_DATA;
         this.instance = instance;
-        this.start = start;
-        this.end = end;
-        Vec distance = start.sub(end);
-        Check.argCondition(distance.equals(Vec.ZERO), "The distance between start and end can't be zero");
+        this.gameAreaData = gameAreaData;
         this.areaPositions = new ArrayList<>();
         this.specialBlocks = new ArrayList<>();
         this.tntPositions = new ArrayList<>();
@@ -58,6 +55,8 @@ public final class GameArea {
     }
 
     void calculatePositions() {
+        var start = gameAreaData.lowerCorner();
+        var end = gameAreaData.upperCorner();
         var startBlockX = start.blockX();
         var endBlockX = end.blockX();
         if (startBlockX > endBlockX) {
@@ -94,6 +93,7 @@ public final class GameArea {
         if (!instance.getBlock(end).name().equals(Block.AIR.name())) {
             instance.setBlock(end, Block.AIR);
         }
+
         LOGGER.info("The calculated area contains {} blocks", areaPositions.size());
         this.random = new Random(this.areaPositions.size());
     }
@@ -145,7 +145,8 @@ public final class GameArea {
         var tntEntity = new Entity(EntityType.FALLING_BLOCK);
         FallingBlockMeta fallingBlockMeta = (FallingBlockMeta) tntEntity.getEntityMeta();
         fallingBlockMeta.setBlock(Block.TNT);
-        tntEntity.setInstance(instance, pos.withY(pos.y() + TNT_SPAWN_HEIGHT));
+        Vec spawnPos = new Vec(pos.blockX() + 0.5, pos.blockY() + TNT_SPAWN_HEIGHT, pos.blockZ() + 0.5);
+        tntEntity.setInstance(instance, spawnPos);
         tntEntity.scheduleNextTick(this::checkIfStillFalling);
     }
 
