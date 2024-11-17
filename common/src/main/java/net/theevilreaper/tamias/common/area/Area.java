@@ -18,6 +18,9 @@ public interface Area {
      */
     void calculatePositions();
 
+    /**
+     * Triggers the placement of the area.
+     */
     void triggerPlacement();
 
     /**

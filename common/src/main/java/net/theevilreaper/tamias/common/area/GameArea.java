@@ -1,31 +1,23 @@
 package net.theevilreaper.tamias.common.area;
 
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
-import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.other.FallingBlockMeta;
-import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.timer.Task;
 import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.tamias.common.area.placement.AreaPlacement;
 import net.theevilreaper.tamias.common.area.placement.CircleAreaPlacement;
-import net.theevilreaper.tamias.common.event.FinishBuildEvent;
 import net.theevilreaper.tamias.common.map.layer.GameAreaData;
-import net.theevilreaper.tamias.common.util.Helper;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static net.theevilreaper.tamias.common.area.GameAreaHelper.*;
@@ -55,7 +47,7 @@ public final class GameArea implements Area {
         calculatePositions();
         //calculateSpecialBlockPositions();
         calculateTntPositions();
-        this.areaPlacement = new CircleAreaPlacement(() -> this.areaPositions, () -> this.tntPositions, this::placeAtPos);
+        this.areaPlacement = new CircleAreaPlacement(this.areaPositions, () -> this.tntPositions, this::placeAtPos);
     }
 
     @Override
