@@ -1,6 +1,7 @@
 package net.theevilreaper.tamias.common.area;
 
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
@@ -62,7 +63,7 @@ class SpawnAreaIntegrationTest {
         Optional<Direction> directionOptional = Arrays.stream(Direction.values()).filter(value -> value.name().equals(face)).findFirst();
         assertTrue(directionOptional.isPresent());
 
-        Pos startPos = Pos.ZERO.add(0, 1, 0);
+        Pos startPos = Pos.ZERO;
         int maxPositions = 3;
         SpawnArea spawnArea = new SpawnArea(instance, new SpawnLayer(Pos.ZERO, directionOptional.get()), maxPositions);
         instance.loadChunk(Pos.ZERO).join();
@@ -78,7 +79,7 @@ class SpawnAreaIntegrationTest {
         }
 
         pos = Pos.fromPoint(startPos);
-        spawnArea.spawnBlocks();
+        spawnArea.triggerPlacement();
         int currentPositions = 0;
 
         // Check the start position
@@ -104,7 +105,7 @@ class SpawnAreaIntegrationTest {
         SpawnArea spawnArea = new SpawnArea(instance, new SpawnLayer(Pos.ZERO, northDir), maxPositions);
         assertNotNull(spawnArea);
 
-        spawnArea.spawnBlocks();
+        spawnArea.triggerPlacement();
 
         spawnArea.reset();
 
@@ -125,19 +126,19 @@ class SpawnAreaIntegrationTest {
     /**
      * Updates the position based on the given direction
      *
-     * @param vec       the current position
+     * @param data       the current position
      * @param direction the direction to move
      * @return the updated position
      */
-    private @NotNull Pos updatedPos(@NotNull Pos vec, @NotNull Direction direction) {
-        Pos pos = switch (direction) {
-            case NORTH -> new Pos(1, 0, 0);
-            case SOUTH -> new Pos(-1, 0, 0);
-            case EAST -> new Pos(0, 0, 1);
-            case WEST -> new Pos(0, 0, -1);
+    private @NotNull Pos updatedPos(@NotNull Pos data, @NotNull Direction direction) {
+        Vec vec = switch (direction) {
+            case NORTH -> new Vec(0, 0, -1); // Negative Z
+            case SOUTH -> new Vec(0, 0, 1);  // Positive Z
+            case EAST -> new Vec(1, 0, 0);  // Positive X
+            case WEST -> new Vec(-1, 0, 0); // Negative X
             default -> throw new IllegalStateException("Unexpected value: " + direction);
         };
-        return vec.add(pos);
+        return data.add(vec);
     }
 
     /**
