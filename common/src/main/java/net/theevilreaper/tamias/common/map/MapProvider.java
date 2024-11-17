@@ -4,21 +4,27 @@ import de.icevizion.aves.file.FileHandler;
 import de.icevizion.aves.file.GsonFileHandler;
 import de.icevizion.aves.map.BaseMap;
 import de.icevizion.aves.map.MapEntry;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.anvil.AnvilLoader;
 import net.minestom.server.utils.validate.Check;
+import net.minestom.server.world.DimensionType;
 import net.theevilreaper.tamias.common.area.GameArea;
 import net.theevilreaper.tamias.common.area.SpawnArea;
+import net.theevilreaper.tamias.common.explosion.ExplosionCreator;
 import net.theevilreaper.tamias.common.gson.GsonUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -66,32 +72,31 @@ public final class MapProvider {
     public void loadGameMap() {
         if (this.gameMapInstance != null) return;
         Check.argCondition(this.mapPool.getAvailableMaps().isEmpty(), "No maps available");
-/*        Collections.shuffle(this.maps);
-        if (this.maps.size() == 1) {
-            path = this.maps.getFirst();
+        List<MapEntry> maps = new ArrayList<>(this.mapPool.getAvailableMaps());
+        Collections.shuffle(maps);
+        MapEntry mapEntry;
+        if (maps.size() == 1) {
+            mapEntry = maps.getFirst();
         } else {
-            path = this.maps.get(ThreadLocalRandom.current().nextInt(this.maps.size()));
+            mapEntry = maps.get(ThreadLocalRandom.current().nextInt(maps.size()));
         }
-        Check.argCondition(path == null, "Unable to load game map");
-        var loader = new AnvilLoader(path);
-        final var mapPath = path.resolve(MAP_FILE);
-        Check.argCondition(!Files.exists(mapPath), "The game map doesn't contain a map file");
-        var mapOptional = fileHandler.load(mapPath, GameMap.class);
-        Check.argCondition(mapOptional.isEmpty(), "Something went wrong during map load");
-        this.gameMap = mapOptional.get();
-        InstanceContainer container = MinecraftServer.getInstanceManager().createInstanceContainer();
-        MinecraftServer.getInstanceManager().registerInstance(container);
-        container.setChunkLoader(loader);
+
+        Check.argCondition(!mapEntry.hasMapFile(), "The game map doesn't contain a map file");
+        AnvilLoader anvilLoader = new AnvilLoader(mapEntry.getDirectoryRoot());
+        InstanceContainer container = MinecraftServer.getInstanceManager().createInstanceContainer(anvilLoader);
         container.setExplosionSupplier(new ExplosionCreator());
+        container.enableAutoChunkLoad(true);
         container.setTimeRate(0);
-        this.spawnArea = new SpawnArea(container, this.gameMap.getInitialSurvivorSpawn(), Direction.valueOf(this.gameMap.getDirection().toUpperCase(Locale.ROOT)), 5);
-        this.gameArea = new GameArea(container, this.gameMap.getLeftAreaPos(), this.gameMap.getRightAreaPos());
+
+        Optional<GameMap> loadedGameMap = fileHandler.load(mapEntry.getMapFile(), GameMap.class);
+        this.gameMap = loadedGameMap.get();
+        this.spawnArea = new SpawnArea(container, this.gameMap.getSpawnData(), 16);
+        this.gameArea = new GameArea(container, this.gameMap.getGameAreaData());
         this.gameMapInstance = container;
-    */
     }
 
     public void loadGameChunks() {
-        //this.gameMapInstance.loadChunk(this.gameMap.getInitialSurvivorSpawn()).join();
+        this.gameMapInstance.loadChunk(this.gameMap.getSpawnData().pos()).join();
     }
 
     public void teleportPlayers(@NotNull List<Player> players) {

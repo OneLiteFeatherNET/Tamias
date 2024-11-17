@@ -40,7 +40,7 @@ record InternalGameConfig(
         private static final int MAX_GAME_TIME = 900;
         private static final int LOBBY_PHASE_TIME = 30;
         private static final int MAX_PLAYERS = 13;
-        private static final int MIN_PLAYERS = 2;
+        private static final int MIN_PLAYERS = 1;
         private static final int GENERAL_TEAM_SIZE = 16;
 
         static final GameConfig INTERNAL;

@@ -41,18 +41,22 @@ public final class MapPool {
      */
     public MapPool(@NotNull Path path, @NotNull Function<Stream<Path>, List<MapEntry>> filterMaps) {
         this.filterMaps = filterMaps;
-        this.referenceList = loadMapsEntries(path);
+        this.referenceList = new ArrayList<>(loadMapsEntries(path));
         this.peekMap();
     }
 
     private void peekMap() {
         Check.argCondition(this.referenceList.isEmpty(), "The map list is empty");
+        System.out.println("The map list is not empty");
+        System.out.println("Size of the map list: " + this.referenceList.size());
         if (this.referenceList.size() == 1) {
             this.selectedMap = this.referenceList.getFirst();
             return;
         }
         this.selectedMap = this.referenceList.stream()
                 .filter(MapEntry::hasMapFile).filter(mapEntry -> mapEntry.getDirectoryRoot().endsWith(LOBBY_MAP_NAME)).findFirst().orElseThrow();
+
+        this.referenceList.remove(this.selectedMap);
     }
 
     /**

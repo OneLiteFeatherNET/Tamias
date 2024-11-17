@@ -22,8 +22,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static net.theevilreaper.tamias.common.area.GameAreaHelper.*;
 
@@ -40,7 +40,6 @@ public final class GameArea {
     private final List<Vec> specialBlocks;
     private final List<Vec> tntPositions;
     private final GroundData groundData;
-    private Random random;
 
     public GameArea(@NotNull Instance instance, @NotNull GameAreaData gameAreaData) {
         this.groundData = DEFAULT_GROUND_DATA;
@@ -95,7 +94,6 @@ public final class GameArea {
         }
 
         LOGGER.info("The calculated area contains {} blocks", areaPositions.size());
-        this.random = new Random(this.areaPositions.size());
     }
 
     @NotNull
@@ -141,31 +139,30 @@ public final class GameArea {
     }
 
     private void spawnTnt(@NotNull Vec pos) {
-        LOGGER.info("Spawning a tnt at position {}", pos);
         var tntEntity = new Entity(EntityType.FALLING_BLOCK);
         FallingBlockMeta fallingBlockMeta = (FallingBlockMeta) tntEntity.getEntityMeta();
         fallingBlockMeta.setBlock(Block.TNT);
-        Vec spawnPos = new Vec(pos.blockX() + 0.5, pos.blockY() + TNT_SPAWN_HEIGHT, pos.blockZ() + 0.5);
+        Vec spawnPos = pos.add(0.5, TNT_SPAWN_HEIGHT, 0.5);
         tntEntity.setInstance(instance, spawnPos);
         tntEntity.scheduleNextTick(this::checkIfStillFalling);
     }
 
     private void checkIfStillFalling(@NotNull Entity entity) {
-        if (entity.isOnGround()) {
-            entity.remove();
-            instance.setBlock(Pos.fromPoint(entity.getPosition()), Block.TNT);
-        } else {
+        if (!entity.isOnGround()) {
             entity.scheduleNextTick(this::checkIfStillFalling);
+            return;
         }
+        entity.remove();
+        instance.setBlock(Pos.fromPoint(entity.getPosition()), Block.TNT);
     }
 
     /**
      * Calculates the positions for the special blocks.
      */
     private void calculateSpecialBlockPositions() {
-        var amountOfSpeedBoost = random.nextInt(MAX_SPEED_BOOST_AMOUNT - MIN_SPEED_BOOST_AMOUNT) + MIN_SPEED_BOOST_AMOUNT;
+        var amountOfSpeedBoost = ThreadLocalRandom.current().nextInt(MAX_SPEED_BOOST_AMOUNT - MIN_SPEED_BOOST_AMOUNT) + MIN_SPEED_BOOST_AMOUNT;
         for (int i = 0; i < amountOfSpeedBoost; i++) {
-            var randomPos = areaPositions.get(random.nextInt(areaPositions.size()));
+            var randomPos = areaPositions.get(ThreadLocalRandom.current().nextInt(amountOfSpeedBoost, this.areaPositions.size()));
             specialBlocks.add(randomPos);
         }
     }
@@ -174,11 +171,10 @@ public final class GameArea {
      * Calculates the positions for the tnt blocks.
      */
     private void calculateTntPositions() {
-        var amountOfTnt = random.nextInt(MAX_TNT_AMOUNT - MIN_TNT_AMOUNT) + MIN_TNT_AMOUNT;
+        var amountOfTnt = ThreadLocalRandom.current().nextInt(MAX_TNT_AMOUNT - MIN_TNT_AMOUNT) + MIN_TNT_AMOUNT;
         for (int i = 0; i < amountOfTnt; i++) {
-            var randomPos = areaPositions.get(random.nextInt(areaPositions.size()));
+            var randomPos = areaPositions.get(ThreadLocalRandom.current().nextInt(0, this.areaPositions.size()));
             tntPositions.add(randomPos);
         }
     }
-
 }

@@ -1,5 +1,7 @@
 package net.theevilreaper.tamias.game;
 
+import de.icevizion.aves.map.MapEntry;
+import de.icevizion.aves.util.functional.PlayerConsumer;
 import de.icevizion.xerus.api.phase.CyclicPhaseSeries;
 import de.icevizion.xerus.api.phase.GamePhase;
 import de.icevizion.xerus.api.phase.LinearPhaseSeries;
@@ -17,6 +19,7 @@ import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.extensions.Extension;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
 import net.theevilreaper.tamias.common.ListenerHandling;
 import net.theevilreaper.tamias.common.config.GameConfig;
@@ -67,10 +70,13 @@ public class Tamias extends Extension implements ListenerHandling {
     private TeamHelper teamDistributor;
     private GameConfig gameConfig;
 
+    private InstanceContainer instance;
+
     public Tamias() {
         this.gameConfig = new GameConfigReader(Paths.get("")).getConfig();
         this.phaseSeries = new LinearPhaseSeries<>();
         this.teamService = new TeamServiceImpl<>();
+        this.instance = MinecraftServer.getInstanceManager().createInstanceContainer();
         this.initTeams();
         this.boardHelper = new BoardHelper();
         this.roundData = new RoundData();
@@ -80,17 +86,16 @@ public class Tamias extends Extension implements ListenerHandling {
     @Override
     public void initialize() {
         checkMapDirectory();
-        InstanceContainer instance = MinecraftServer.getInstanceManager().createInstanceContainer();
         instance.enableAutoChunkLoad(true);
         registerCancelListener(MinecraftServer.getGlobalEventHandler());
         MinecraftServer.getInstanceManager().registerInstance(instance);
 
         MinecraftServer.getCommandManager().register(new StartCommand(this.phaseSeries::getCurrentPhase));
 
-        this.mapProvider = new MapProvider(getDataDirectory(), pathStream -> pathStream.map(MapEntry::new).toList());
+        this.mapProvider = new MapProvider(Paths.get("").resolve("maps"), pathStream -> pathStream.map(MapEntry::of).toList());
+        this.mapProvider.loadLobbyMap(this.instance);
         this.teamDistributor = new TeamHelper(this.mapProvider, this.teamService.getTeams()::get);
         this.createPhaseStructure();
-        registerCancelListener(MinecraftServer.getGlobalEventHandler());
         registerListener(MinecraftServer.getGlobalEventHandler());
         MinecraftServer.getCommandManager().register(new TestCommand());
         this.phaseSeries.start();
@@ -104,7 +109,7 @@ public class Tamias extends Extension implements ListenerHandling {
     private void createPhaseStructure() {
         this.phaseSeries.add(new LobbyPhase(this.mapProvider, gameConfig.minPlayers(), gameConfig.maxPlayers(), gameConfig.lobbyTime()));
         var gamePhaseSeries = new CyclicPhaseSeries<GamePhase>("game");
-        gamePhaseSeries.add(new MapBuildPhase(this.mapProvider::getGameArea));
+        gamePhaseSeries.add(new MapBuildPhase(this.mapProvider, this.mapProvider::getGameArea));
         gamePhaseSeries.add(new PlayingPhase(this.boardHelper::updateTitle));
         gamePhaseSeries.setMaxIterations(3);
         this.phaseSeries.addAll(gamePhaseSeries);
@@ -144,8 +149,12 @@ public class Tamias extends Extension implements ListenerHandling {
 
     void registerListener(@NotNull EventNode<Event> eventNode) {
         Supplier<Integer> supplier = () -> this.gameConfig.maxPlayers();
-        eventNode.addListener(AsyncPlayerConfigurationEvent.class, new PlayerJoinListener(supplier, this.phaseSeries::getCurrentPhase, () -> null));
-        eventNode.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(this.phaseSeries::getCurrentPhase));
+        PlayerConsumer playerConsumer = player -> {
+            System.out.println("TELEPORTING PLAYER");
+            player.teleport(this.mapProvider.getActiveMap().getSpawn());
+        };
+        eventNode.addListener(AsyncPlayerConfigurationEvent.class, new PlayerJoinListener(supplier, this.phaseSeries::getCurrentPhase,  () -> this.instance));
+        eventNode.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(this.phaseSeries::getCurrentPhase, playerConsumer));
         eventNode.addListener(PlayerDisconnectEvent.class, new PlayerQuitListener(this.phaseSeries::getCurrentPhase));
         eventNode.addListener(ProjectileCollideWithBlockEvent.class, new ProjectileBlockListener());
         eventNode.addListener(ProjectileCollideWithEntityEvent.class, new ProjectileEntityListener(this.teamDistributor, this.staminaService::getStaminaBar));

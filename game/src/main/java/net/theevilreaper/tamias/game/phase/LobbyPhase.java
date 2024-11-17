@@ -69,12 +69,9 @@ public final class LobbyPhase extends TimedPhase {
                 this.broadcastTime();
                 this.provider.loadGameChunks();
             }
-            case 2 -> {
+            case 5 -> {
                 this.broadcastTime();
                 this.provider.getSpawnArea().spawnBlocks();
-            }
-            case 0 -> {
-                this.provider.teleportPlayers(new ArrayList<>(getConnectionManager().getOnlinePlayers()));
             }
             default -> {
                 // Nothing to do here
