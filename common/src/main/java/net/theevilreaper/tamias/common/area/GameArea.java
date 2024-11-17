@@ -11,6 +11,9 @@ import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.timer.Task;
+import net.minestom.server.utils.validate.Check;
+import net.theevilreaper.tamias.common.area.placement.AreaPlacement;
+import net.theevilreaper.tamias.common.area.placement.CircleAreaPlacement;
 import net.theevilreaper.tamias.common.event.FinishBuildEvent;
 import net.theevilreaper.tamias.common.map.layer.GameAreaData;
 import net.theevilreaper.tamias.common.util.Helper;
@@ -28,7 +31,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import static net.theevilreaper.tamias.common.area.GameAreaHelper.*;
 
 @SuppressWarnings("java:S3252")
-public final class GameArea {
+public final class GameArea implements Area {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GameArea.class);
     public static final Block ORIGINAL_BLOCK = Block.BLUE_ICE;
@@ -40,6 +43,7 @@ public final class GameArea {
     private final List<Vec> specialBlocks;
     private final List<Vec> tntPositions;
     private final GroundData groundData;
+    private final AreaPlacement areaPlacement;
 
     public GameArea(@NotNull Instance instance, @NotNull GameAreaData gameAreaData) {
         this.groundData = DEFAULT_GROUND_DATA;
@@ -51,9 +55,12 @@ public final class GameArea {
         calculatePositions();
         //calculateSpecialBlockPositions();
         calculateTntPositions();
+        this.areaPlacement = new CircleAreaPlacement(() -> this.areaPositions, () -> this.tntPositions, this::placeAtPos);
     }
 
-    void calculatePositions() {
+    @Override
+    public void calculatePositions() {
+        Check.argCondition(!this.areaPositions.isEmpty(), "The calculation only can runs at once");
         var start = gameAreaData.lowerCorner();
         var end = gameAreaData.upperCorner();
         var startBlockX = start.blockX();
@@ -96,34 +103,26 @@ public final class GameArea {
         LOGGER.info("The calculated area contains {} blocks", areaPositions.size());
     }
 
-    @NotNull
-    public Task build() {
-        var posList = new ArrayList<>(areaPositions);
-        posList.sort(Helper.getComparator());
-        return buildFromQueue(posList);
+    @Override
+    public void triggerPlacement() {
+        if (this.areaPlacement.isRunning()) return;
+        this.areaPlacement.place();
     }
 
-    @NotNull
-    private Task buildFromQueue(@NotNull List<Vec> posList) {
-        var queue = new LinkedBlockingDeque<>(posList);
-        return MinecraftServer.getSchedulerManager().buildTask(() -> {
-            List<Vec> positions = new ArrayList<>();
-            for (int i = 0; !queue.isEmpty() && i < BLOCKS_PER_STEP; i++) {
-                positions.add(queue.poll());
-            }
-            if (positions.isEmpty()) {
-                EventDispatcher.call(new FinishBuildEvent());
-                return;
-            }
-            for (Vec pos : positions) {
-                placeAtPos(pos);
-            }
-            for (Player onlinePlayer : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
-                float progress = (float) queue.size() / posList.size();
-                onlinePlayer.setLevel(100 - (int) (progress * 100));
-                onlinePlayer.setExp(1 - progress);
-            }
-        }).repeat(5, ChronoUnit.MILLIS).schedule();
+    @Override
+    public void reset() {
+        for (Vec tntPosition : this.tntPositions) {
+            instance.setBlock(tntPosition, Block.AIR);
+        }
+        this.tntPositions.clear();
+        for (Vec areaPosition : this.areaPositions) {
+            instance.setBlock(areaPosition, Block.AIR);
+        }
+    }
+
+    @Override
+    public @NotNull Instance getInstance() {
+        return this.instance;
     }
 
     private void placeAtPos(@NotNull Vec pos) {

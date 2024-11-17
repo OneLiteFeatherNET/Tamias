@@ -18,6 +18,8 @@ public interface Area {
      */
     void calculatePositions();
 
+    void triggerPlacement();
+
     /**
      * Resets the area to the initial state.
      */

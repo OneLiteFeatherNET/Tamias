@@ -71,7 +71,7 @@ public final class LobbyPhase extends TimedPhase {
             }
             case 5 -> {
                 this.broadcastTime();
-                this.provider.getSpawnArea().spawnBlocks();
+                this.provider.getSpawnArea().triggerPlacement();
             }
             default -> {
                 // Nothing to do here
