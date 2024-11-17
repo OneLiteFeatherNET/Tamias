@@ -98,10 +98,8 @@ public final class SpawnArea implements Area {
         }
     }
 
-    /**
-     * Places for each spawn position a specific block.
-     */
-    public void spawnBlocks() {
+    @Override
+    public void triggerPlacement() {
         for (Pos position : positions) {
             instance.setBlock(position, SPAWN_BLOCK);
         }

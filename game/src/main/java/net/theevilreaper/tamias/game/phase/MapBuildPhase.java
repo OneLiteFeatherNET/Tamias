@@ -60,7 +60,7 @@ public final class MapBuildPhase extends GamePhase {
         MinecraftServer.getSchedulerManager().buildTask(() -> {
             Audience.audience(MinecraftServer.getConnectionManager().getOnlinePlayers())
                     .sendMessage(MAP_BUILDING);
-            task = this.mapGetter.get().build();
+            this.mapGetter.get().triggerPlacement();
         }).delay(10, ChronoUnit.SECONDS).schedule();
         /*Audience.audience(MinecraftServer.getConnectionManager().getOnlinePlayers())
                 .sendMessage(MAP_BUILDING);
