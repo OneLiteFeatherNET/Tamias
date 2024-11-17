@@ -2,13 +2,13 @@ package net.theevilreaper.tamias.common.area;
 
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.Direction;
 import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.server.utils.validate.Check;
+import net.theevilreaper.tamias.common.area.ground.TamiasGroundDataRegistry;
 import net.theevilreaper.tamias.common.map.layer.SpawnLayer;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -32,7 +32,6 @@ public final class SpawnArea implements Area {
     private static final Vec Y_VEC = new Vec(0.5, 1, 0.5);
     private final Instance instance;
     private final Pos[] positions;
-    private final Runnable resetBlocks;
     private final SpawnLayer spawnLayer;
 
     /**
@@ -50,12 +49,6 @@ public final class SpawnArea implements Area {
         this.positions = new Pos[maxPositions];
         Pos spawnLayerPos = spawnLayer.pos();
         this.positions[0] = new Pos(spawnLayerPos.blockX(), spawnLayerPos.blockY(), spawnLayerPos.blockZ(), spawnLayerPos.yaw(), spawnLayerPos.pitch());
-
-        this.resetBlocks = () -> {
-            for (Pos position : positions) {
-                instance.setBlock(position, Block.AIR);
-            }
-        };
 
         this.calculatePositions();
     }
@@ -110,7 +103,9 @@ public final class SpawnArea implements Area {
      */
     @Override
     public void reset() {
-        resetBlocks.run();
+        for (Pos position : positions) {
+            instance.setBlock(position, Block.AIR);
+        }
     }
 
     @Override

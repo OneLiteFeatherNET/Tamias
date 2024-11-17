@@ -1,9 +1,7 @@
 package net.theevilreaper.tamias.common.area.placement;
 
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.theevilreaper.tamias.common.event.FinishBuildEvent;
 import net.theevilreaper.tamias.common.util.Helper;
@@ -19,14 +17,14 @@ import static net.theevilreaper.tamias.common.area.GameAreaHelper.BLOCKS_PER_STE
 
 public final class CircleAreaPlacement extends AreaBasePlacement{
 
-    public CircleAreaPlacement(@NotNull Supplier<List<Vec>> blockPositions, @NotNull Supplier<List<Vec>> tntPositions, @NotNull BlockPlaceFunction blockPlaceFunction) {
+    public CircleAreaPlacement(@NotNull List<Vec> blockPositions, @NotNull Supplier<List<Vec>> tntPositions, @NotNull BlockPlaceFunction blockPlaceFunction) {
         super(blockPositions, tntPositions, blockPlaceFunction);
     }
 
     @Override
     public void place() {
         if (this.buildTask != null) return;
-        List<Vec> posList = new ArrayList<>(this.blockPositions.get());
+        List<Vec> posList = new ArrayList<>(this.blockPositions);
         posList.sort(Helper.getComparator());
         LinkedBlockingDeque<Vec> queue = new LinkedBlockingDeque<>(posList);
 
