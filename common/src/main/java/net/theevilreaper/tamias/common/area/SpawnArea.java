@@ -2,11 +2,14 @@ package net.theevilreaper.tamias.common.area;
 
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.Direction;
+import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.server.utils.validate.Check;
+import net.theevilreaper.tamias.common.map.layer.SpawnLayer;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,27 +29,27 @@ public final class SpawnArea implements Area {
 
     private static final Block SPAWN_BLOCK = Block.TNT;
     private static final Logger LOGGER = LoggerFactory.getLogger(SpawnArea.class);
-    private static final Vec Y_VEC = new Vec(0, 1, 0);
+    private static final Vec Y_VEC = new Vec(0.5, 1, 0.5);
     private final Instance instance;
-    private final Direction direction;
     private final Pos[] positions;
     private final Runnable resetBlocks;
+    private final SpawnLayer spawnLayer;
 
     /**
      * Creates a new object reference from {@link SpawnArea} class with the given values.
      *
-     * @param instance      the involved instance to place the block
-     * @param startPosition the first spawn which is the start position for the position calculation
-     * @param direction     the direction to indicates in which direction the calculation should go
-     * @param maxPositions  the maximum amount of possible positions
+     * @param instance     the involved instance to place the block
+     * @param spawnLayer   the spawn layer which is used to calculate the spawn positions
+     * @param maxPositions the maximum amount of possible positions
      */
-    public SpawnArea(@NotNull Instance instance, @NotNull Pos startPosition, @NotNull Direction direction, int maxPositions) {
+    public SpawnArea(@NotNull Instance instance, @NotNull SpawnLayer spawnLayer, int maxPositions) {
         Check.argCondition(maxPositions < 1, "The maximum position count must be higher than 0");
-        Check.argCondition(direction == Direction.DOWN || direction == Direction.UP, "The direction must be horizontal");
+        Check.argCondition(spawnLayer.direction() == Direction.DOWN || spawnLayer.direction() == Direction.UP, "The direction must be horizontal");
+        this.spawnLayer = spawnLayer;
         this.instance = instance;
-        this.direction = direction;
         this.positions = new Pos[maxPositions];
-        this.positions[0] = startPosition;
+        Pos spawnLayerPos = spawnLayer.pos();
+        this.positions[0] = new Pos(spawnLayerPos.blockX(), spawnLayerPos.blockY(), spawnLayerPos.blockZ(), spawnLayerPos.yaw(), spawnLayerPos.pitch());
 
         this.resetBlocks = () -> {
             for (Pos position : positions) {
@@ -65,29 +68,32 @@ public final class SpawnArea implements Area {
      */
     public void teleport(@NotNull Instance instance, @NotNull List<Player> players) {
         Check.argCondition(players.size() > this.positions.length, "The amount of online players is higher then the maximum position count");
+        if (!ChunkUtils.isLoaded(instance.getChunkAt(this.spawnLayer.pos()))) {
+            instance.loadChunk(this.spawnLayer.pos()).join();
+        }
         Collections.shuffle(players);
         for (int i = 0; i < players.size(); i++) {
+            Pos position = this.positions[i].add(Y_VEC);
             LOGGER.info("Teleporting player {} to position {}", players.get(i).getUsername(), positions[i]);
-            players.get(i).setInstance(instance, positions[i].add(Y_VEC));
+            Player player = players.get(i);
+            player.setInstance(instance, position).join();
         }
     }
-
 
     /**
      * Calculates the spawn position for the area on the given {@link Direction} which is set a creation level.
      */
     @Override
     public void calculatePositions() {
-        var vec = switch (this.direction) {
-            case NORTH -> new Vec(1, 0, 0);
-            case SOUTH -> new Vec(-1, 0, 0);
-            case EAST -> new Vec(0, 0, 1);
-            case WEST -> new Vec(0, 0, -1);
+        Direction direction = this.spawnLayer.direction();
+        Vec vec = switch (direction) {
+            case NORTH -> new Vec(0, 0, -1); // Negative Z
+            case SOUTH -> new Vec(0, 0, 1);  // Positive Z
+            case EAST -> new Vec(1, 0, 0);  // Positive X
+            case WEST -> new Vec(-1, 0, 0); // Negative X
             default -> throw new IllegalStateException("Unexpected value: " + direction);
         };
-        LOGGER.info("Given start position is {}", positions[0]);
         for (int i = 1; i < positions.length; i++) {
-            LOGGER.info("Calculating position {}", positions[i - 1].add(vec));
             positions[i] = positions[i - 1].add(vec);
         }
     }

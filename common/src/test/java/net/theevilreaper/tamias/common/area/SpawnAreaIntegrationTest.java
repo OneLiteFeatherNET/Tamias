@@ -9,6 +9,7 @@ import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.testing.Env;
 import net.minestom.testing.extension.MicrotusExtension;
 import net.theevilreaper.tamias.common.VoidGenerator;
+import net.theevilreaper.tamias.common.map.layer.SpawnLayer;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,7 +37,7 @@ class SpawnAreaIntegrationTest {
         Direction direction = directionOptional.get();
         assertThrows(
                 IllegalArgumentException.class,
-                () -> new SpawnArea(instance, Pos.ZERO, direction, 10),
+                () -> new SpawnArea(instance, new SpawnLayer(Pos.ZERO, direction), 10),
                 "The direction must be horizontal"
         );
         env.destroyInstance(instance);
@@ -47,7 +48,7 @@ class SpawnAreaIntegrationTest {
         Instance instance = env.createFlatInstance();
         assertThrows(
                 IllegalArgumentException.class,
-                () -> new SpawnArea(instance, Pos.ZERO, Direction.NORTH, 0),
+                () -> new SpawnArea(instance, new SpawnLayer(Pos.ZERO, Direction.UP), 0),
                 "The direction must be horizontal"
         );
         env.destroyInstance(instance);
@@ -63,7 +64,7 @@ class SpawnAreaIntegrationTest {
 
         Pos startPos = Pos.ZERO.add(0, 1, 0);
         int maxPositions = 3;
-        SpawnArea spawnArea = new SpawnArea(instance, startPos, directionOptional.get(), maxPositions);
+        SpawnArea spawnArea = new SpawnArea(instance, new SpawnLayer(Pos.ZERO, directionOptional.get()), maxPositions);
         instance.loadChunk(Pos.ZERO).join();
         assertNotNull(spawnArea);
 
@@ -100,7 +101,7 @@ class SpawnAreaIntegrationTest {
         Direction northDir = Direction.NORTH;
         int maxPositions = 3;
         Pos startPos = Pos.ZERO.add(0, 1, 0);
-        SpawnArea spawnArea = new SpawnArea(instance, startPos, northDir, maxPositions);
+        SpawnArea spawnArea = new SpawnArea(instance, new SpawnLayer(Pos.ZERO, northDir), maxPositions);
         assertNotNull(spawnArea);
 
         spawnArea.spawnBlocks();

@@ -1,3 +1,7 @@
+plugins {
+    alias(libs.plugins.shadow)
+}
+
 group = "net.theevilreaper.tamias.game"
 version = "1.0-SNAPSHOT"
 
@@ -16,4 +20,11 @@ dependencies {
     testImplementation(libs.xerus)
     testImplementation(libs.junit.api)
     testRuntimeOnly(libs.junit.engine)
+}
+
+
+tasks {
+    jar {
+        dependsOn("shadowJar")
+    }
 }
