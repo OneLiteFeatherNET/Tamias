@@ -38,7 +38,6 @@ import net.theevilreaper.tamias.game.phase.LobbyPhase;
 import net.theevilreaper.tamias.game.phase.MapBuildPhase;
 import net.theevilreaper.tamias.game.phase.PlayingPhase;
 import net.theevilreaper.tamias.game.phase.RestartPhase;
-import net.theevilreaper.tamias.game.round.RoundData;
 import net.theevilreaper.tamias.game.stamina.StaminaService;
 import net.theevilreaper.tamias.game.team.TamiasTeamCreator;
 import net.theevilreaper.tamias.game.team.TeamHelper;
@@ -63,7 +62,6 @@ public class Tamias extends Extension implements ListenerHandling {
     private final LinearPhaseSeries<GamePhase> phaseSeries;
     private final TeamService<Team> teamService;
     private final BoardHelper boardHelper;
-    private final RoundData roundData;
     private final StaminaService staminaService;
     private MapProvider mapProvider;
     private TeamHelper teamDistributor;
@@ -78,7 +76,6 @@ public class Tamias extends Extension implements ListenerHandling {
         this.instance = MinecraftServer.getInstanceManager().createInstanceContainer();
         this.initTeams();
         this.boardHelper = new BoardHelper();
-        this.roundData = new RoundData();
         this.staminaService = new StaminaService();
     }
 
