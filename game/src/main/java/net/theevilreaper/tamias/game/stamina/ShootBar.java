@@ -1,16 +1,11 @@
 package net.theevilreaper.tamias.game.stamina;
 
 import net.kyori.adventure.sound.Sound;
-import net.minestom.server.entity.EntityProjectile;
-import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
-import net.minestom.server.entity.metadata.item.ThrownEggMeta;
 import net.minestom.server.sound.SoundEvent;
-import net.minestom.server.utils.time.TimeUnit;
 import net.theevilreaper.tamias.game.util.ProjectileHelper;
 import org.jetbrains.annotations.NotNull;
 
-import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
 /**
@@ -60,7 +55,7 @@ public final class ShootBar extends StaminaBar {
     public void triggerAction() {
         this.currentTime = 0;
         this.status = Status.REGENERATING;
-        ProjectileHelper.spawnProjectile(player, this::createProjectile);
+        ProjectileHelper.spawnProjectile(player, ProjectileHelper::createProjectile);
     }
 
     @Override
@@ -71,20 +66,5 @@ public final class ShootBar extends StaminaBar {
             return;
         }
         this.currentTime += 1;
-    }
-
-    /**
-     * Creates a new {@link EntityProjectile} for the given player.
-     *
-     * @param player the player who should shoot
-     * @return a new instance of the {@link EntityProjectile}
-     */
-    private @NotNull EntityProjectile createProjectile(@NotNull Player player) {
-        EntityProjectile projectile = new EntityProjectile(player, EntityType.EGG);
-        ThrownEggMeta eggMeta = (ThrownEggMeta) projectile.getEntityMeta();
-        eggMeta.setOnFire(true);
-
-        projectile.scheduleRemove(Duration.of(100, TimeUnit.SERVER_TICK));
-        return projectile;
     }
 }
