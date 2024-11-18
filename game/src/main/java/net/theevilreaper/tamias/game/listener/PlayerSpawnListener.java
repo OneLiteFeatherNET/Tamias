@@ -9,7 +9,6 @@ import net.theevilreaper.tamias.game.phase.LobbyPhase;
 import net.theevilreaper.tamias.game.util.GameMessages;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -37,7 +36,6 @@ public final class PlayerSpawnListener implements Consumer<PlayerSpawnEvent> {
         var phase = phaseSupplier.get();
 
         if (event.isFirstSpawn() && phase instanceof LobbyPhase lobbyPhase) {
-            System.out.println("PlayerSpawnListener.accept");
             Broadcaster.broadcast(GameMessages.getJoinMessage(player));
             lobbyPhase.updatePlayerValues(player);
             lobbyPhase.checkStartCondition();
