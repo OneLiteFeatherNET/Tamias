@@ -2,16 +2,23 @@ package net.theevilreaper.tamias.game.team;
 
 import de.icevizion.aves.util.Players;
 import de.icevizion.xerus.api.team.Team;
+import de.icevizion.xerus.api.team.TeamService;
+import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.common.map.GameMap;
 import net.theevilreaper.tamias.common.map.MapProvider;
+import net.theevilreaper.tamias.common.util.Tags;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * @author theEvilReaper
@@ -20,52 +27,52 @@ import java.util.function.Function;
  **/
 public final class TeamHelper {
 
-    private final MapProvider mapProvider;
-    private final Function<Byte, @NotNull Team> teamMapper;
-    private final Team survivorTeam;
+    public static void allocateTeams(@NotNull TeamService<Team> teamService) {
+        Check.argCondition(!teamService.hasTeams(), "The team service must contain teams");
 
-    public TeamHelper(@NotNull MapProvider mapProvider, @NotNull Function<Byte, @NotNull Team> teamMapper) {
-        this.mapProvider = mapProvider;
-        this.teamMapper = teamMapper;
-        this.survivorTeam = teamMapper.apply(GameConfig.SURVIVOR_ID);
+        final Set<Player> onlinePlayers = new HashSet<>(MinecraftServer.getConnectionManager().getOnlinePlayers());
+        Check.argCondition(onlinePlayers.size() < 2, "The player list must contain at least two players");
+
+        final Optional<Player> randomPlayer = Players.getRandomPlayer();
+        Check.argCondition(randomPlayer.isEmpty(), "No random player found");
+
+        final Player player = randomPlayer.get();
+        onlinePlayers.remove(player);
+
+        // Bomber team is the last team
+        teamService.getTeams().getLast().addPlayer(player);
+        teamService.getTeams().getFirst().addPlayers(onlinePlayers);
     }
 
-    public void removeSurvivor(@NotNull Player player) {
-        this.survivorTeam.removePlayer(player);
-    }
-
-    public void addTNT(@NotNull Player player) {
-        this.teamMapper.apply(GameConfig.TNT_ID).addPlayer(player);
-    }
-
-    public boolean hasSurvivorLeft() {
-        return this.survivorTeam.isEmpty();
-    }
-
-    public void allocateTeams(@NotNull Set<Player> players) {
-        Check.argCondition(players.isEmpty(), "The player list cannot be empty");
-        Check.argCondition(players.size() < 2, "The player list must contain at least two players");
-        final Player randomPlayer = Players.getRandomPlayer(new ArrayList<>(players)).get();
-        players.removeIf(player -> player.getUuid().equals(randomPlayer.getUuid()));
-        teamMapper.apply(GameConfig.TNT_ID).addPlayer(randomPlayer);
-        this.survivorTeam.addPlayers(players);
-    }
-
-    public void teleport() {
-        if (mapProvider.getActiveMap() == null) return;
-        var tntTeam = teamMapper.apply(GameConfig.TNT_ID);
-        Check.argCondition(tntTeam.getPlayers().isEmpty(), "The tnt team cannot be empty");
-        Check.argCondition(tntTeam.getPlayers().size() > 1, "The tnt team must contain only one player at start");
+    /**
+     * Teleports the players of the given team to the initial spawn position.
+     * The bomber team will be teleported to the bomber spawn and the survivor team to the survivor spawn.
+     * Each position is provided by the {@link GameMap}.
+     *
+     * @param teamService the service which contains the teams
+     * @param mapSupplier the supplier which provides the map
+     */
+    public static void teleport(@NotNull TeamService<Team> teamService, @NotNull GameMap mapSupplier) {
+        Team bomberTeam = teamService.getTeams().get(GameConfig.TNT_ID);
+        Team survivorTeam = teamService.getTeams().get(GameConfig.SURVIVOR_ID);
+        Check.argCondition(bomberTeam.getPlayers().isEmpty(), "The tnt team cannot be empty");
         Check.argCondition(survivorTeam.getPlayers().isEmpty(), "The survivor team cannot be empty");
 
-        var gameMap = ((GameMap)mapProvider.getActiveMap());
-
-        tntTeam.getPlayers().forEach(player -> player.teleport(gameMap.getBomberInitialSpawn()));
-        survivorTeam.getPlayers().forEach(player -> player.teleport(gameMap.getSpawn()));
+        teleport(bomberTeam, mapSupplier.getBomberInitialSpawn());
+        teleport(survivorTeam, mapSupplier.getSpawn());
     }
 
-    public void clearTeams() {
-        teamMapper.apply(GameConfig.TNT_ID).clearPlayers();
-        teamMapper.apply(GameConfig.SURVIVOR_ID).clearPlayers();
+    /**
+     * Teleports the players of the given team to the given position.
+     *
+     * @param team the team to teleport
+     * @param pos  the position to teleport the players
+     */
+    private static void teleport(@NotNull Team team, @NotNull Pos pos) {
+        team.getPlayers().forEach(player -> player.teleport(pos).join());
+    }
+
+    private TeamHelper() {
+        throw new UnsupportedOperationException("This class cannot be instantiated");
     }
 }
