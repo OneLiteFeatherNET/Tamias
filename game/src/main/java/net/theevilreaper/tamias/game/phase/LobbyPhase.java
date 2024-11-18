@@ -3,19 +3,17 @@ package net.theevilreaper.tamias.game.phase;
 import de.icevizion.xerus.api.phase.TickDirection;
 import de.icevizion.xerus.api.phase.TimedPhase;
 import net.kyori.adventure.sound.Sound;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.sound.SoundEvent;
 import net.theevilreaper.tamias.common.map.MapProvider;
+import net.theevilreaper.tamias.game.attribute.AttributeHelper;
 import net.theevilreaper.tamias.game.util.GameMessages;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 
 import static net.minestom.server.MinecraftServer.getConnectionManager;
 import static net.theevilreaper.tamias.common.config.GameConfig.FORCE_START_TIME;
-
 
 /**
  * @author theEvilReaper
@@ -43,7 +41,6 @@ public final class LobbyPhase extends TimedPhase {
         this.lobbyPhaseTime = lobbyPhaseTime;
     }
 
-
     @Override
     public void start() {
         super.start();
@@ -52,7 +49,9 @@ public final class LobbyPhase extends TimedPhase {
 
     @Override
     protected void onFinish() {
-
+        for (Player player : getConnectionManager().getOnlinePlayers()) {
+            AttributeHelper.disableMovement(player);
+        }
     }
 
     @Override
