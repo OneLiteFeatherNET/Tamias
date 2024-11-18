@@ -19,7 +19,6 @@ import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.extensions.Extension;
-import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
 import net.theevilreaper.tamias.common.ListenerHandling;
 import net.theevilreaper.tamias.common.config.GameConfig;
@@ -43,7 +42,7 @@ import net.theevilreaper.tamias.game.round.RoundData;
 import net.theevilreaper.tamias.game.stamina.StaminaService;
 import net.theevilreaper.tamias.game.team.TamiasTeamCreator;
 import net.theevilreaper.tamias.game.team.TeamHelper;
-import net.theevilreaper.tamias.game.util.BoardHelper;
+import net.theevilreaper.tamias.game.scoreboard.BoardHelper;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,7 +93,6 @@ public class Tamias extends Extension implements ListenerHandling {
 
         this.mapProvider = new MapProvider(Paths.get("").resolve("maps"), pathStream -> pathStream.map(MapEntry::of).toList());
         this.mapProvider.loadLobbyMap(this.instance);
-        this.teamDistributor = new TeamHelper(this.mapProvider, this.teamService.getTeams()::get);
         this.createPhaseStructure();
         registerListener(MinecraftServer.getGlobalEventHandler());
         MinecraftServer.getCommandManager().register(new TestCommand());
