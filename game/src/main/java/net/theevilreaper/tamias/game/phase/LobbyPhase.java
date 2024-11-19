@@ -3,14 +3,18 @@ package net.theevilreaper.tamias.game.phase;
 import de.icevizion.xerus.api.phase.TickDirection;
 import de.icevizion.xerus.api.phase.TimedPhase;
 import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.entity.Player;
 import net.minestom.server.sound.SoundEvent;
 import net.theevilreaper.tamias.common.map.MapProvider;
 import net.theevilreaper.tamias.game.attribute.AttributeHelper;
 import net.theevilreaper.tamias.game.util.GameMessages;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.temporal.ChronoUnit;
+import java.util.function.IntConsumer;
 
 import static net.minestom.server.MinecraftServer.getConnectionManager;
 import static net.theevilreaper.tamias.common.config.GameConfig.FORCE_START_TIME;
@@ -29,8 +33,9 @@ public final class LobbyPhase extends TimedPhase {
     private final int maxPlayers;
     private final int lobbyPhaseTime;
     private boolean forceStarted;
+    private IntConsumer timeUpdater;
 
-    public LobbyPhase(@NotNull MapProvider provider, int minPlayers, int maxPlayers, int lobbyPhaseTime) {
+    public LobbyPhase(@NotNull MapProvider provider, int minPlayers, int maxPlayers, int lobbyPhaseTime, @NotNull IntConsumer timeUpdater) {
         super("Lobby", ChronoUnit.SECONDS, 1);
         this.setPaused(true);
         this.setCurrentTicks(lobbyPhaseTime);
@@ -39,6 +44,7 @@ public final class LobbyPhase extends TimedPhase {
         this.minPlayers = minPlayers;
         this.maxPlayers = maxPlayers;
         this.lobbyPhaseTime = lobbyPhaseTime;
+        this.timeUpdater = timeUpdater;
     }
 
     @Override
@@ -57,6 +63,7 @@ public final class LobbyPhase extends TimedPhase {
     @Override
     public void onUpdate() {
         setLevel();
+        this.timeUpdater.accept(getCurrentTicks());
 
         switch (getCurrentTicks()) {
             case 30, 3, 1 -> broadcastTime();
@@ -76,7 +83,11 @@ public final class LobbyPhase extends TimedPhase {
                 // Nothing to do here
             }
         }
+    }
 
+    @Contract(pure = true)
+    private @NotNull Component getTimeComponent() {
+        return Component.text(String.valueOf(getCurrentTicks()), NamedTextColor.GRAY);
     }
 
     private void setLevel() {
