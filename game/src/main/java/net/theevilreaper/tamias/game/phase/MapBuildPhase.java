@@ -4,15 +4,12 @@ import de.icevizion.xerus.api.phase.GamePhase;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.timer.Task;
 import net.theevilreaper.tamias.common.area.GameArea;
 import net.theevilreaper.tamias.common.event.FinishBuildEvent;
 import net.theevilreaper.tamias.common.map.MapProvider;
-import net.theevilreaper.tamias.game.listener.game.PlayerStoppedMovement;
 import net.theevilreaper.tamias.game.util.GameMessages;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -38,7 +35,6 @@ public final class MapBuildPhase extends GamePhase {
 
     public MapBuildPhase(@NotNull MapProvider mapProvider, @NotNull Supplier<GameArea> mapGetter) {
         super("MapBuild");
-        //addListener(PlayerMoveEvent.class, new PlayerStoppedMovement());
         addListener(FinishBuildEvent.class, finishBuildEvent -> {
             Audience.audience(MinecraftServer.getConnectionManager().getOnlinePlayers())
                     .sendMessage(MAP_READY);
