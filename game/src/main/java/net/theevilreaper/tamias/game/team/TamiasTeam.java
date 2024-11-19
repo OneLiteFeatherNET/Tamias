@@ -21,8 +21,9 @@ public final class TamiasTeam extends TeamImpl {
 
     /**
      * Creates a new instance from the team.
-     * @param name the name which the team should have
-     * @param colorData the {@link ColorData} which the team should have
+     *
+     * @param name            the name which the team should have
+     * @param colorData       the {@link ColorData} which the team should have
      * @param initialCapacity the capacity of the team
      */
     TamiasTeam(@NotNull String name, @NotNull ColorData colorData, int initialCapacity) {
@@ -31,6 +32,7 @@ public final class TamiasTeam extends TeamImpl {
 
     /**
      * Set's the team id which is required for the game.
+     *
      * @param teamTagId the id to set
      */
     public void setTeamTagId(byte teamTagId) {
