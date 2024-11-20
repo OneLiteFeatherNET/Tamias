@@ -47,8 +47,6 @@ public final class MapPool {
 
     private void peekMap() {
         Check.argCondition(this.referenceList.isEmpty(), "The map list is empty");
-        System.out.println("The map list is not empty");
-        System.out.println("Size of the map list: " + this.referenceList.size());
         if (this.referenceList.size() == 1) {
             this.selectedMap = this.referenceList.getFirst();
             return;
