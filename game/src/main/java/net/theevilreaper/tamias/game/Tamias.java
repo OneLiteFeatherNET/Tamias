@@ -49,6 +49,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.function.IntConsumer;
 import java.util.function.Supplier;
 
@@ -64,13 +65,11 @@ public class Tamias extends Extension implements ListenerHandling {
     private final TeamService<Team> teamService;
     private final StaminaService staminaService;
     private MapProvider mapProvider;
-    private TeamHelper teamDistributor;
     private GameConfig gameConfig;
 
     private InstanceContainer instance;
     private IntConsumer timeUpdater;
     private TamiasScoreboard scoreboard;
-
 
     public Tamias() {
         this.gameConfig = new GameConfigReader(Paths.get("")).getConfig();
@@ -89,13 +88,12 @@ public class Tamias extends Extension implements ListenerHandling {
         MinecraftServer.getInstanceManager().registerInstance(instance);
 
         MinecraftServer.getCommandManager().register(new StartCommand(this.phaseSeries::getCurrentPhase));
-
+ 
         this.mapProvider = new MapProvider(Paths.get("").resolve("maps"), pathStream -> pathStream.map(MapEntry::of).toList());
         this.mapProvider.loadLobbyMap(this.instance);
 
         this.scoreboard = TamiasScoreboard.of(() -> "");
         this.timeUpdater = this.scoreboard::updateTime;
-
 
         this.createPhaseStructure();
         registerListener(MinecraftServer.getGlobalEventHandler());
@@ -152,19 +150,19 @@ public class Tamias extends Extension implements ListenerHandling {
     }
 
     void registerGameListener(@NotNull EventNode<Event> eventNode) {
-        eventNode.addListener(RoundEndEvent.class, new RoundFinishListener(this.teamDistributor));
+        Supplier<List<Team>> teamSupplier = () -> this.teamService.getTeams();
+        eventNode.addListener(RoundEndEvent.class, new RoundFinishListener(teamSupplier));
     }
 
     void registerListener(@NotNull EventNode<Event> eventNode) {
         Supplier<Integer> supplier = () -> this.gameConfig.maxPlayers();
-        PlayerConsumer playerConsumer = player -> {
-            player.teleport(this.mapProvider.getActiveMap().getSpawn());
-        };
+        PlayerConsumer playerConsumer = player -> player.teleport(this.mapProvider.getActiveMap().getSpawn());
         eventNode.addListener(AsyncPlayerConfigurationEvent.class, new PlayerJoinListener(supplier, this.phaseSeries::getCurrentPhase, () -> this.instance));
         eventNode.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(this.phaseSeries::getCurrentPhase, playerConsumer));
-        eventNode.addListener(PlayerDisconnectEvent.class, new PlayerQuitListener(this.phaseSeries::getCurrentPhase));
+        eventNode.addListener(PlayerDisconnectEvent.class, new PlayerQuitListener(this.phaseSeries::getCurrentPhase, this.teamService.getTeams()::get));
         eventNode.addListener(ProjectileCollideWithBlockEvent.class, new ProjectileBlockListener());
-        eventNode.addListener(ProjectileCollideWithEntityEvent.class, new ProjectileEntityListener(this.teamDistributor, this.staminaService::getStaminaBar));
+        eventNode.addListener(ProjectileCollideWithEntityEvent.class, new ProjectileEntityListener(player -> {
+        }, this.staminaService::getStaminaBar));
         eventNode.addListener(PlayerChatEvent.class, new PlayerChatListener());
     }
 }
