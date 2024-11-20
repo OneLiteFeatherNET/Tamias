@@ -1,11 +1,11 @@
 package net.theevilreaper.tamias.game.listener.game;
 
+import de.icevizion.aves.util.functional.PlayerConsumer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEvent;
 import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.game.stamina.ExplodeBar;
 import net.theevilreaper.tamias.game.stamina.StaminaBar;
-import net.theevilreaper.tamias.game.team.TeamHelper;
 import net.theevilreaper.tamias.common.util.Tags;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,12 +16,11 @@ import java.util.function.Function;
 
 public final class ProjectileEntityListener implements Consumer<ProjectileCollideWithEntityEvent> {
 
-    private final TeamHelper teamHelper;
-
+    private final PlayerConsumer teamUpdater;
     private final Function<@NotNull UUID, @Nullable StaminaBar> staminaMapper;
 
-    public ProjectileEntityListener(@NotNull TeamHelper teamHelper, Function<@NotNull UUID, @Nullable StaminaBar> staminaMapper) {
-        this.teamHelper = teamHelper;
+    public ProjectileEntityListener(@NotNull PlayerConsumer teamUpdater, Function<@NotNull UUID, @Nullable StaminaBar> staminaMapper) {
+        this.teamUpdater = teamUpdater;
         this.staminaMapper = staminaMapper;
     }
 
@@ -42,7 +41,8 @@ public final class ProjectileEntityListener implements Consumer<ProjectileCollid
             ((ExplodeBar)staminaBar).explode();
             return;
         }
-        this.teamHelper.removeSurvivor(targetPlayer);
-        this.teamHelper.addTNT(targetPlayer);
+        // TODO: Fix
+       // this.teamHelper.removeSurvivor(targetPlayer);
+        //this.teamHelper.addTNT(targetPlayer);
     }
 }
