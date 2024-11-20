@@ -15,16 +15,16 @@ import org.jetbrains.annotations.Nullable;
 public sealed interface AreaPlacement permits AreaBasePlacement {
 
     /**
+     * Stars the placement of the area.
+     */
+    void place();
+
+    /**
      * Checks if the placement is running.
      *
      * @return {@code true} if the placement is running
      */
     boolean isRunning();
-
-    /**
-     * Starts the placement of the area.
-     */
-    void place();
 
     /**
      * Returns the current task.
