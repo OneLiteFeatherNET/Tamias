@@ -23,6 +23,7 @@ public final class GameMessages extends Messages {
     private static final Component JOIN_PART;
     private static final Component DEATH_PART;
     private static final Component SHOT_PART;
+
     public static final Component CHOOSING_NEW_TNT;
 
     public static final Component ALREADY_FORCE_STARTED;
