@@ -8,14 +8,17 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.Direction;
 import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.server.utils.validate.Check;
-import net.theevilreaper.tamias.common.area.ground.TamiasGroundDataRegistry;
 import net.theevilreaper.tamias.common.map.layer.SpawnLayer;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+
+import static net.minestom.server.MinecraftServer.getConnectionManager;
 
 /**
  * The class holds the data about the spawn area where each player will be spawned when the map is in the build phase.
@@ -93,8 +96,11 @@ public final class SpawnArea implements Area {
 
     @Override
     public void triggerPlacement() {
-        for (Pos position : positions) {
-            instance.setBlock(position, SPAWN_BLOCK);
+        Collection<Player> onlinePlayers = getConnectionManager().getOnlinePlayers();
+        Iterator<Player> iterator = onlinePlayers.iterator();
+        int counter = 0;
+        while (iterator.hasNext() && counter < this.positions.length) {
+            instance.setBlock(positions[counter++], SPAWN_BLOCK);
         }
     }
 
