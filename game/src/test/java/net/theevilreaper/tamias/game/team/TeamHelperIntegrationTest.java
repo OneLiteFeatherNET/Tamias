@@ -108,7 +108,8 @@ class TeamHelperIntegrationTest {
         Instance instance = env.createFlatInstance();
         GameMap map = new GameMap();
         Pos survivorPos = new Pos(5, 10, 5);
-        map.setBomberInitialSpawn(new Pos(10, 10, 10));
+        Pos bomberPos = new Pos(10, 10, 10);
+        map.setBomberInitialSpawn(bomberPos);
         map.setSpawn(survivorPos);
 
         List<Player> players = new ArrayList<>();
@@ -129,7 +130,7 @@ class TeamHelperIntegrationTest {
 
         TeamHelper.teleport(teamService, map);
 
-        assertEquals(new Pos(10, 10, 10), tntPlayer.getPosition());
+        assertEquals(bomberPos, tntPlayer.getPosition());
 
         teamService.getTeams().get(GameConfig.SURVIVOR_ID).getPlayers()
                 .forEach(player -> assertEquals(survivorPos, player.getPosition()));

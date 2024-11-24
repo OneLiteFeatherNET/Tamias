@@ -1,5 +1,6 @@
 package net.theevilreaper.tamias.game.phase;
 
+import de.icevizion.aves.util.functional.VoidConsumer;
 import de.icevizion.xerus.api.phase.TimedPhase;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
@@ -14,14 +15,15 @@ import java.util.function.IntConsumer;
  * @version 1.0.0
  * @since
  **/
-
 public final class PlayingPhase extends TimedPhase {
 
     private final IntConsumer timeUpdater;
+    private final VoidConsumer spawnAreaReset;
 
-    public PlayingPhase(@NotNull IntConsumer timeUpdater) {
+    public PlayingPhase(@NotNull IntConsumer timeUpdater, @NotNull VoidConsumer spawnAreaReset) {
         super("GamePhase", ChronoUnit.SECONDS, 1);
         this.timeUpdater = timeUpdater;
+        this.spawnAreaReset = spawnAreaReset;
     }
 
     @Override
@@ -29,7 +31,9 @@ public final class PlayingPhase extends TimedPhase {
         super.onStart();
         for (Player player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
             AttributeHelper.enableMovement(player);
+
         }
+        this.spawnAreaReset.apply();
     }
 
     @Override

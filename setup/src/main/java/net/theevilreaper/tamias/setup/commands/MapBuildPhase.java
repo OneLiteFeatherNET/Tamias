@@ -49,7 +49,7 @@ public final class MapBuildPhase extends GamePhase {
         if (this.mapGetter.get() == null) return;
         Audience.audience(MinecraftServer.getConnectionManager().getOnlinePlayers())
                 .sendMessage(MAP_BUILDING);
-        task = this.mapGetter.get().build();
+       // task = this.mapGetter.get().triggerPlacement();
     }
 
     public void stop() {
