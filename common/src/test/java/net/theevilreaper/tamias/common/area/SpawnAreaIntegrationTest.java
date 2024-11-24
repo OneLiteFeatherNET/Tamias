@@ -58,24 +58,26 @@ class SpawnAreaIntegrationTest {
     @ParameterizedTest(name = "Test spawn area block set usage with face {0}")
     @ValueSource(strings = {"NORTH", "SOUTH", "EAST", "WEST"})
     void testSpawnBlocks(String face, @NotNull Env env) {
+        int maxPositions = 3;
         Instance instance = env.createFlatInstance();
+        for (int i = 0; i < maxPositions; i++) {
+            env.createPlayer(instance);
+        }
         instance.setGenerator(new VoidGenerator());
         Optional<Direction> directionOptional = Arrays.stream(Direction.values()).filter(value -> value.name().equals(face)).findFirst();
         assertTrue(directionOptional.isPresent());
 
         Pos startPos = Pos.ZERO;
-        int maxPositions = 3;
         SpawnArea spawnArea = new SpawnArea(instance, new SpawnLayer(Pos.ZERO, directionOptional.get()), maxPositions);
         instance.loadChunk(Pos.ZERO).join();
         assertNotNull(spawnArea);
-
 
         Pos pos = Pos.fromPoint(startPos);
 
         // Default is stone
         for (int i = 0; i < maxPositions; i++) {
             pos = updatedPos(pos, directionOptional.get());
-            assertBlockRegion(Block.AIR, instance, pos);
+            assertBlockRegion(Block.STONE, instance, pos);
         }
 
         pos = Pos.fromPoint(startPos);
@@ -92,7 +94,7 @@ class SpawnAreaIntegrationTest {
         }
 
         assertEquals(maxPositions, currentPositions);
-        env.destroyInstance(instance);
+        env.destroyInstance(instance, true);
     }
 
     @Test
