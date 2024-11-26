@@ -31,6 +31,7 @@ public final class TamiasBoard implements TamiasScoreboard, DefaultScoreLayout {
         this.boardType = BoardType.LOBBY;
         this.lobbyScoreboard = new Sidebar(Component.empty());
         this.gameScoreboard = new Sidebar(Component.empty());
+        this.currentScoreboard = this.lobbyScoreboard;
     }
 
     @Override
@@ -62,13 +63,15 @@ public final class TamiasBoard implements TamiasScoreboard, DefaultScoreLayout {
 
     @Override
     public void switchBoard(@NotNull BoardType boardType) {
-        if (this.boardType != null && this.boardType == boardType) return;
+        if (this.boardType == boardType) return;
         this.boardType = boardType;
+        this.viewers.forEach(this.currentScoreboard::removeViewer);
         if (this.boardType == BoardType.LOBBY) {
             this.currentScoreboard = this.lobbyScoreboard;
         } else {
             this.currentScoreboard = this.gameScoreboard;
         }
+        this.viewers.forEach(this.currentScoreboard::addViewer);
     }
 
     @Override
