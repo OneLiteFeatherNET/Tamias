@@ -1,5 +1,6 @@
 package net.theevilreaper.tamias.game.stamina;
 
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -70,6 +71,10 @@ public final class StaminaService {
         } finally {
             lock.unlock();
         }
+    }
+
+    public @Nullable StaminaBar getStaminaBar(@NotNull Player player) {
+        return this.getStaminaBar(player.getUuid());
     }
 
     /**

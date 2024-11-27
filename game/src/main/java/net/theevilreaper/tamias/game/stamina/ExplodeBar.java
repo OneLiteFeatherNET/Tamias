@@ -43,15 +43,19 @@ public final class ExplodeBar extends StaminaBar {
 
     @Override
     protected void onStart() {
-        this.current = MAX + 1;
-        this.player.setLevel((int) MAX);
-        this.player.setExp(normalize(current - 1));
-        this.status = Status.READY;
+        this.resetToDefaults();
     }
 
     @Override
     protected void onRegenerated() {
         EventDispatcher.call(new BomberRequireSpawnEvent(player, this));
+    }
+
+    public void resetToDefaults() {
+        this.current = MAX + 1;
+        this.player.setLevel((int) MAX);
+        this.player.setExp(normalize(current - 1));
+        this.status = Status.READY;
     }
 
     @Override
