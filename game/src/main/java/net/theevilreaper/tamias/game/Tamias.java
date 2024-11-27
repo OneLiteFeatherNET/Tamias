@@ -21,16 +21,19 @@ import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.extensions.Extension;
 import net.minestom.server.instance.InstanceContainer;
 import net.theevilreaper.tamias.common.ListenerHandling;
+import net.theevilreaper.tamias.common.area.GameArea;
 import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.common.config.GameConfigReader;
 import net.theevilreaper.tamias.common.map.MapProvider;
 import net.theevilreaper.tamias.common.round.event.RoundEndEvent;
 import net.theevilreaper.tamias.game.commands.StartCommand;
 import net.theevilreaper.tamias.game.commands.TestCommand;
+import net.theevilreaper.tamias.game.event.BomberRequireSpawnEvent;
 import net.theevilreaper.tamias.game.listener.PlayerChatListener;
 import net.theevilreaper.tamias.game.listener.PlayerJoinListener;
 import net.theevilreaper.tamias.game.listener.PlayerQuitListener;
 import net.theevilreaper.tamias.game.listener.PlayerSpawnListener;
+import net.theevilreaper.tamias.game.listener.game.BomberReviveListener;
 import net.theevilreaper.tamias.game.listener.game.ProjectileBlockListener;
 import net.theevilreaper.tamias.game.listener.game.ProjectileEntityListener;
 import net.theevilreaper.tamias.game.listener.game.RoundFinishListener;
@@ -41,7 +44,6 @@ import net.theevilreaper.tamias.game.phase.RestartPhase;
 import net.theevilreaper.tamias.game.scoreboard.TamiasScoreboard;
 import net.theevilreaper.tamias.game.stamina.StaminaService;
 import net.theevilreaper.tamias.game.team.TamiasTeamCreator;
-import net.theevilreaper.tamias.game.team.TeamHelper;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,12 +66,13 @@ public class Tamias extends Extension implements ListenerHandling {
     private final LinearPhaseSeries<GamePhase> phaseSeries;
     private final TeamService<Team> teamService;
     private final StaminaService staminaService;
-    private MapProvider mapProvider;
-    private GameConfig gameConfig;
+    private final GameConfig gameConfig;
 
     private InstanceContainer instance;
     private IntConsumer timeUpdater;
     private TamiasScoreboard scoreboard;
+
+    private MapProvider mapProvider;
 
     public Tamias() {
         this.gameConfig = new GameConfigReader(Paths.get("")).getConfig();
@@ -114,10 +117,10 @@ public class Tamias extends Extension implements ListenerHandling {
                 gameConfig.lobbyTime(),
                 timeUpdater
         ));
-        var gamePhaseSeries = new CyclicPhaseSeries<GamePhase>("game");
+        CyclicPhaseSeries<GamePhase> gamePhaseSeries = new CyclicPhaseSeries<>("game");
         gamePhaseSeries.add(new MapBuildPhase(this.mapProvider, this.mapProvider::getGameArea));
         gamePhaseSeries.add(new PlayingPhase(timeUpdater, this.mapProvider.getSpawnArea()::reset));
-        gamePhaseSeries.setMaxIterations(3);
+        gamePhaseSeries.setMaxIterations(this.gameConfig.maxRounds());
         this.phaseSeries.addAll(gamePhaseSeries);
         this.phaseSeries.add(new RestartPhase());
     }
@@ -149,13 +152,19 @@ public class Tamias extends Extension implements ListenerHandling {
         this.teamService.add(Team.builder(teamCreator).name(GameConfig.BOMBER_TEAM).capacity(teamSize).build());
     }
 
-    void registerGameListener(@NotNull EventNode<Event> eventNode) {
-        Supplier<List<Team>> teamSupplier = () -> this.teamService.getTeams();
+    public void registerGameListener(@NotNull EventNode<Event> eventNode) {
+        Supplier<List<Team>> teamSupplier = this.teamService::getTeams;
         eventNode.addListener(RoundEndEvent.class, new RoundFinishListener(teamSupplier));
+
+        GameArea gameArea = this.mapProvider.getGameArea();
+
+        eventNode.addListener(BomberRequireSpawnEvent.class,
+                new BomberReviveListener(this.staminaService::getStaminaBar, gameArea::getRandomPosition)
+        );
     }
 
     void registerListener(@NotNull EventNode<Event> eventNode) {
-        Supplier<Integer> supplier = () -> this.gameConfig.maxPlayers();
+        Supplier<Integer> supplier = this.gameConfig::maxPlayers;
         PlayerConsumer playerConsumer = player -> player.teleport(this.mapProvider.getActiveMap().getSpawn());
         eventNode.addListener(AsyncPlayerConfigurationEvent.class, new PlayerJoinListener(supplier, this.phaseSeries::getCurrentPhase, () -> this.instance));
         eventNode.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(this.phaseSeries::getCurrentPhase, playerConsumer));
