@@ -5,6 +5,7 @@ import de.icevizion.aves.util.functional.PlayerConsumer;
 import de.icevizion.xerus.api.phase.CyclicPhaseSeries;
 import de.icevizion.xerus.api.phase.GamePhase;
 import de.icevizion.xerus.api.phase.LinearPhaseSeries;
+import de.icevizion.xerus.api.phase.Phase;
 import de.icevizion.xerus.api.team.Team;
 import de.icevizion.xerus.api.team.TeamCreator;
 import de.icevizion.xerus.api.team.TeamService;
@@ -91,7 +92,7 @@ public class Tamias extends Extension implements ListenerHandling {
         MinecraftServer.getInstanceManager().registerInstance(instance);
 
         MinecraftServer.getCommandManager().register(new StartCommand(this.phaseSeries::getCurrentPhase));
- 
+
         this.mapProvider = new MapProvider(Paths.get("").resolve("maps"), pathStream -> pathStream.map(MapEntry::of).toList());
         this.mapProvider.loadLobbyMap(this.instance);
 
@@ -168,10 +169,28 @@ public class Tamias extends Extension implements ListenerHandling {
         PlayerConsumer playerConsumer = player -> player.teleport(this.mapProvider.getActiveMap().getSpawn());
         eventNode.addListener(AsyncPlayerConfigurationEvent.class, new PlayerJoinListener(supplier, this.phaseSeries::getCurrentPhase, () -> this.instance));
         eventNode.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(this.phaseSeries::getCurrentPhase, playerConsumer));
-        eventNode.addListener(PlayerDisconnectEvent.class, new PlayerQuitListener(this.phaseSeries::getCurrentPhase, this.teamService.getTeams()::get));
+        eventNode.addListener(PlayerDisconnectEvent.class, new PlayerQuitListener(this.phaseSeries::getCurrentPhase, this.teamService.getTeams()::get, this::checkRoundEnd));
         eventNode.addListener(ProjectileCollideWithBlockEvent.class, new ProjectileBlockListener());
         eventNode.addListener(ProjectileCollideWithEntityEvent.class, new ProjectileEntityListener(player -> {
         }, this.staminaService::getStaminaBar));
         eventNode.addListener(PlayerChatEvent.class, new PlayerChatListener());
+    }
+
+    void checkRoundEnd() {
+        Phase currentPhase = this.phaseSeries.getCurrentPhase();
+        if (!(currentPhase instanceof PlayingPhase)) return;
+
+        Team survivorTeam = this.teamService.getTeams().getFirst();
+        Team bomberTeam = this.teamService.getTeams().getLast();
+
+        if (survivorTeam.isEmpty() || survivorTeam.getPlayers().size() - 1 == 0) {
+            currentPhase.finish();
+            return;
+        }
+
+        if (!bomberTeam.isEmpty()) return;
+        currentPhase.finish();
+        //TODO: Print winner
+
     }
 }

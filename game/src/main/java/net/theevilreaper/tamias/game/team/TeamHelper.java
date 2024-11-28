@@ -1,6 +1,7 @@
 package net.theevilreaper.tamias.game.team;
 
 import de.icevizion.aves.util.Players;
+import de.icevizion.aves.util.functional.PlayerConsumer;
 import de.icevizion.xerus.api.team.Team;
 import de.icevizion.xerus.api.team.TeamService;
 import net.minestom.server.MinecraftServer;
@@ -12,6 +13,7 @@ import net.theevilreaper.tamias.common.map.GameMap;
 import net.theevilreaper.tamias.common.map.MapProvider;
 import net.theevilreaper.tamias.common.util.Tags;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -62,14 +64,23 @@ public final class TeamHelper {
         teleport(survivorTeam, mapSupplier.getSpawn());
     }
 
+    private static void teleport(@NotNull Team team, @NotNull Pos pos) {
+        teleport(team, pos, null);
+    }
+
     /**
      * Teleports the players of the given team to the given position.
      *
      * @param team the team to teleport
      * @param pos  the position to teleport the players
      */
-    private static void teleport(@NotNull Team team, @NotNull Pos pos) {
-        team.getPlayers().forEach(player -> player.teleport(pos).join());
+    private static void teleport(@NotNull Team team, @NotNull Pos pos, @Nullable PlayerConsumer callback) {
+        team.getPlayers().forEach(player -> {
+            player.teleport(pos).join();
+            if (callback != null) {
+                callback.accept(player);
+            }
+        });
     }
 
     private TeamHelper() {
