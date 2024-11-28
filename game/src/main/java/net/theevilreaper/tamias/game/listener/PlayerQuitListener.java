@@ -1,6 +1,7 @@
 package net.theevilreaper.tamias.game.listener;
 
 import de.icevizion.aves.util.Broadcaster;
+import de.icevizion.aves.util.functional.VoidConsumer;
 import de.icevizion.xerus.api.phase.Phase;
 import de.icevizion.xerus.api.team.Team;
 import net.minestom.server.entity.Player;
@@ -12,7 +13,7 @@ import net.theevilreaper.tamias.game.util.GameMessages;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
 /**
@@ -26,11 +27,13 @@ import java.util.function.Supplier;
 public class PlayerQuitListener implements Consumer<PlayerDisconnectEvent> {
 
     private final Supplier<Phase> phaseSupplier;
-    private final Function<Integer, Team> teamFunction;
+    private final IntFunction<Team> teamFunction;
+    private final VoidConsumer roundEndCheck;
 
-    public PlayerQuitListener(@NotNull Supplier<Phase> phaseSupplier, @NotNull Function<Integer, Team> teamFunction) {
+    public PlayerQuitListener(@NotNull Supplier<Phase> phaseSupplier, @NotNull IntFunction<Team> teamFunction, @NotNull VoidConsumer roundEndCheck) {
         this.phaseSupplier = phaseSupplier;
         this.teamFunction = teamFunction;
+        this.roundEndCheck = roundEndCheck;
     }
 
     @Override
@@ -61,6 +64,7 @@ public class PlayerQuitListener implements Consumer<PlayerDisconnectEvent> {
 
         if (team == null) return;
         team.removePlayer(player);
+        this.roundEndCheck.apply();
     }
 
     /**
