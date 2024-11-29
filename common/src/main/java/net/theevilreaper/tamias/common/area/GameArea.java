@@ -12,6 +12,7 @@ import net.theevilreaper.tamias.common.area.placement.AreaPlacement;
 import net.theevilreaper.tamias.common.area.placement.CircleAreaPlacement;
 import net.theevilreaper.tamias.common.map.layer.GameAreaData;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -167,5 +168,19 @@ public final class GameArea implements Area {
             var randomPos = areaPositions.get(ThreadLocalRandom.current().nextInt(0, this.areaPositions.size()));
             tntPositions.add(randomPos);
         }
+    }
+
+    /**
+     * Returns a random position from the list of tnt positions.
+     * @return a random position or null if the list is empty
+     */
+    public @Nullable Pos getRandomPosition() {
+        if (this.tntPositions.isEmpty()) return null;
+
+        int randomId = ThreadLocalRandom.current().nextInt(0, this.tntPositions.size());
+
+        //TODO: Make this access here thread safe
+        Vec pos = this.tntPositions.remove(randomId);
+        return Pos.fromPoint(pos);
     }
 }
