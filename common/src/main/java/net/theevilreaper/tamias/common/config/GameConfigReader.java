@@ -20,8 +20,8 @@ import java.util.Properties;
  *     <li>maxPlayers</li>
  *     <li>lobbyTime</li>
  *     <li>gameTime</li>
- *     <li>survivorTeamSize</li>
- *     <li>slenderTeamSize</li>
+ *     <li>teamSize</li>
+ *     <li>maxRounds</li>
  * </ul>
  * <p>
  * If a property can not be found in the file, the default value will be used.
@@ -105,12 +105,18 @@ public final class GameConfigReader {
             teamSize = Integer.parseInt(properties.getProperty("teamSize"));
         }
 
+        int maxRounds = internal.maxRounds();
+
+        if (properties.containsKey("maxRounds")) {
+            maxRounds = Integer.parseInt(properties.getProperty("maxRounds"));
+        }
 
         configBuilder.minPlayers(minPlayers)
                 .maxPlayers(maxPlayers)
                 .lobbyTime(lobbyTime)
                 .gameTime(maxGameTime)
-                .teamSize(teamSize);
+                .teamSize(teamSize)
+                .maxRounds(maxRounds);
         return configBuilder.build();
     }
 }

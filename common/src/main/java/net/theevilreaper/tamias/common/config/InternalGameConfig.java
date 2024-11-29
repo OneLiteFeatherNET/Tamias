@@ -21,7 +21,8 @@ record InternalGameConfig(
         int maxPlayers,
         int lobbyTime,
         int gameTime,
-        int teamSize
+        int teamSize,
+        int maxRounds
 ) implements GameConfig {
 
     /**
@@ -42,6 +43,7 @@ record InternalGameConfig(
         private static final int MAX_PLAYERS = 13;
         private static final int MIN_PLAYERS = 1;
         private static final int GENERAL_TEAM_SIZE = 16;
+        private static final int MAX_ROUNDS = 3;
 
         static final GameConfig INTERNAL;
 
@@ -51,7 +53,8 @@ record InternalGameConfig(
                     MAX_PLAYERS,
                     LOBBY_PHASE_TIME,
                     MAX_GAME_TIME,
-                    GENERAL_TEAM_SIZE
+                    GENERAL_TEAM_SIZE,
+                    MAX_ROUNDS
             );
         }
 

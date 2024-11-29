@@ -19,7 +19,8 @@ public record GameConfigImpl(
         int maxPlayers,
         int lobbyTime,
         int gameTime,
-        int teamSize
+        int teamSize,
+        int maxRounds
 ) implements GameConfig {
 
 }
