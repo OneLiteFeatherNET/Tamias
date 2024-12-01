@@ -1,7 +1,9 @@
 package net.theevilreaper.tamias.common.area;
 
 import net.minestom.server.instance.Instance;
+import net.minestom.server.timer.Task;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * With an {@link Area} it is possible to get specific positions in an area between two points.
@@ -34,4 +36,6 @@ public interface Area {
      * @return the given instance
      */
     @NotNull Instance getInstance();
+
+    @Nullable Task getTask();
 }

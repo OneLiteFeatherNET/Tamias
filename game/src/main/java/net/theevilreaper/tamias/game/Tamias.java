@@ -120,7 +120,7 @@ public class Tamias extends Extension implements ListenerHandling {
         ));
         CyclicPhaseSeries<GamePhase> gamePhaseSeries = new CyclicPhaseSeries<>("game");
         gamePhaseSeries.add(new MapBuildPhase(this.mapProvider, this.mapProvider::getGameArea));
-        gamePhaseSeries.add(new PlayingPhase(timeUpdater, this.mapProvider.getSpawnArea()::reset));
+        gamePhaseSeries.add(new PlayingPhase(timeUpdater, () -> this.mapProvider.getSpawnArea()::reset));
         gamePhaseSeries.setMaxIterations(this.gameConfig.maxRounds());
         this.phaseSeries.addAll(gamePhaseSeries);
         this.phaseSeries.add(new RestartPhase());

@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.time.temporal.ChronoUnit;
 import java.util.function.IntConsumer;
+import java.util.function.Supplier;
 
 /**
  * @author theEvilReaper
@@ -18,9 +19,9 @@ import java.util.function.IntConsumer;
 public final class PlayingPhase extends TimedPhase {
 
     private final IntConsumer timeUpdater;
-    private final VoidConsumer spawnAreaReset;
+    private final Supplier<VoidConsumer> spawnAreaReset;
 
-    public PlayingPhase(@NotNull IntConsumer timeUpdater, @NotNull VoidConsumer spawnAreaReset) {
+    public PlayingPhase(@NotNull IntConsumer timeUpdater, @NotNull Supplier<VoidConsumer> spawnAreaReset) {
         super("GamePhase", ChronoUnit.SECONDS, 1);
         this.timeUpdater = timeUpdater;
         this.spawnAreaReset = spawnAreaReset;
@@ -33,7 +34,7 @@ public final class PlayingPhase extends TimedPhase {
             AttributeHelper.enableMovement(player);
 
         }
-        this.spawnAreaReset.apply();
+        this.spawnAreaReset.get().apply();
     }
 
     @Override
