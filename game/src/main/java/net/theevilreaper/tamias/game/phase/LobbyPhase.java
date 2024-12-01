@@ -110,12 +110,22 @@ public final class LobbyPhase extends TimedPhase {
         }
     }
 
+    /**
+     * Updates some data to display the current time.
+     *
+     * @param player the player who should receive the update
+     */
     public void updatePlayerValues(@NotNull Player player) {
         player.setLevel(getCurrentTicks());
         float currentExpCount = (float) this.getCurrentTicks() / getLobbyOrForceTime();
         player.setExp(currentExpCount);
     }
 
+    /**
+     * Updates the state which indicates, if the phase is force started or not.
+     *
+     * @param forceStarted true if the phase is force started otherwise false
+     */
     public void setForceStarted(boolean forceStarted) {
         if (forceStarted) {
             this.setCurrentTicks(FORCE_START_TIME);
