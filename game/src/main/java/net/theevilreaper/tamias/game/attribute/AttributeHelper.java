@@ -5,10 +5,13 @@ import net.minestom.server.entity.attribute.Attribute;
 import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("java:S3252")
-public class AttributeHelper {
+public final class AttributeHelper {
 
     private static final double ZERO_MOVEMENT = 0.0;
     private static final double DEFAULT_MOVE_SPEED = 0.1;
+
+    private static final double DEFAULT_JUMP_HEIGHT = 0.42;
+    private static final double ZERO_JUMP = 0.0;
 
     /**
      * Disables the movement for the player.
@@ -16,6 +19,7 @@ public class AttributeHelper {
      */
     public static void disableMovement(@NotNull Player player) {
         player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).setBaseValue(ZERO_MOVEMENT);
+        player.getAttribute(Attribute.GENERIC_JUMP_STRENGTH).setBaseValue(ZERO_JUMP);
     }
 
     /**
@@ -24,6 +28,7 @@ public class AttributeHelper {
      */
     public static void enableMovement(@NotNull Player player) {
         player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).setBaseValue(DEFAULT_MOVE_SPEED);
+        player.getAttribute(Attribute.GENERIC_JUMP_STRENGTH).setBaseValue(DEFAULT_JUMP_HEIGHT);
     }
 
     private AttributeHelper() {
