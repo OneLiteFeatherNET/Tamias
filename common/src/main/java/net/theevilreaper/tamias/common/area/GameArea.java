@@ -7,6 +7,7 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.other.FallingBlockMeta;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.timer.Task;
 import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.tamias.common.area.placement.AreaPlacement;
 import net.theevilreaper.tamias.common.area.placement.CircleAreaPlacement;
@@ -182,5 +183,10 @@ public final class GameArea implements Area {
         //TODO: Make this access here thread safe
         Vec pos = this.tntPositions.remove(randomId);
         return Pos.fromPoint(pos);
+    }
+
+    @Override
+    public @Nullable Task getTask() {
+        return this.areaPlacement.getTask();
     }
 }

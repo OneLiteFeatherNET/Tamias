@@ -5,11 +5,13 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.timer.Task;
 import net.minestom.server.utils.Direction;
 import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.tamias.common.map.layer.SpawnLayer;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +54,6 @@ public final class SpawnArea implements Area {
         this.positions = new Pos[maxPositions];
         Pos spawnLayerPos = spawnLayer.pos();
         this.positions[0] = new Pos(spawnLayerPos.blockX(), spawnLayerPos.blockY(), spawnLayerPos.blockZ(), spawnLayerPos.yaw(), spawnLayerPos.pitch());
-
         this.calculatePositions();
     }
 
@@ -99,7 +100,7 @@ public final class SpawnArea implements Area {
         Collection<Player> onlinePlayers = getConnectionManager().getOnlinePlayers();
         Iterator<Player> iterator = onlinePlayers.iterator();
         int counter = 0;
-        while (iterator.hasNext() && counter < this.positions.length) {
+        while (iterator.hasNext() && counter < onlinePlayers.size()) {
             instance.setBlock(positions[counter++], SPAWN_BLOCK);
         }
     }
@@ -117,5 +118,10 @@ public final class SpawnArea implements Area {
     @Override
     public @NotNull Instance getInstance() {
         return this.instance;
+    }
+
+    @Override
+    public @Nullable Task getTask() {
+        throw new UnsupportedOperationException("The spawn area doesn't support tasks");
     }
 }
