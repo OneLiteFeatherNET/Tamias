@@ -1,5 +1,6 @@
 package net.theevilreaper.tamias.game.phase;
 
+import de.icevizion.aves.util.functional.PlayerConsumer;
 import de.icevizion.aves.util.functional.VoidConsumer;
 import de.icevizion.xerus.api.phase.TimedPhase;
 import net.minestom.server.MinecraftServer;
@@ -20,11 +21,17 @@ public final class PlayingPhase extends TimedPhase {
 
     private final IntConsumer timeUpdater;
     private final Supplier<VoidConsumer> spawnAreaReset;
+    private final PlayerConsumer scoreboardAdd;
 
-    public PlayingPhase(@NotNull IntConsumer timeUpdater, @NotNull Supplier<VoidConsumer> spawnAreaReset) {
+    public PlayingPhase(
+            @NotNull IntConsumer timeUpdater,
+            @NotNull Supplier<VoidConsumer> spawnAreaReset,
+            @NotNull PlayerConsumer scoreboardAdd
+    ) {
         super("GamePhase", ChronoUnit.SECONDS, 1);
         this.timeUpdater = timeUpdater;
         this.spawnAreaReset = spawnAreaReset;
+        this.scoreboardAdd = scoreboardAdd;
     }
 
     @Override
@@ -32,7 +39,7 @@ public final class PlayingPhase extends TimedPhase {
         super.onStart();
         for (Player player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
             AttributeHelper.enableMovement(player);
-
+            this.scoreboardAdd.accept(player);
         }
         this.spawnAreaReset.get().apply();
     }
