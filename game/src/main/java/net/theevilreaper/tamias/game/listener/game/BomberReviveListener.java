@@ -1,9 +1,11 @@
 package net.theevilreaper.tamias.game.listener.game;
 
+import de.icevizion.aves.util.functional.PlayerConsumer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.common.util.Tags;
+import net.theevilreaper.tamias.game.attribute.AttributeHelper;
 import net.theevilreaper.tamias.game.event.BomberRequireSpawnEvent;
 import net.theevilreaper.tamias.game.stamina.ExplodeBar;
 import net.theevilreaper.tamias.game.stamina.StaminaBar;
@@ -18,10 +20,15 @@ public final class BomberReviveListener implements Consumer<BomberRequireSpawnEv
 
     private final Function<Player, StaminaBar> barGetter;
     private final Supplier<Pos> spawnPos;
+    private final PlayerConsumer itemSetter;
 
-    public BomberReviveListener(@NotNull Function<Player, StaminaBar> barGetter, @NotNull Supplier<Pos> spawnPos) {
+    public BomberReviveListener(
+            @NotNull Function<Player, StaminaBar> barGetter,
+            @NotNull Supplier<Pos> spawnPos,
+            @NotNull PlayerConsumer itemSetter) {
         this.barGetter = barGetter;
         this.spawnPos = spawnPos;
+        this.itemSetter = itemSetter;
     }
 
     @Override
@@ -52,5 +59,7 @@ public final class BomberReviveListener implements Consumer<BomberRequireSpawnEv
         });
 
         player.teleport(newSpawnPos);
+        AttributeHelper.enableMovement(player);
+        this.itemSetter.accept(player);
     }
 }
