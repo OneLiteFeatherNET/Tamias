@@ -48,7 +48,7 @@ class SpawnAreaIntegrationTest {
     @Test
     void testInvalidPositionUsage(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
-        SpawnLayer spawnLayer = new SpawnLayer(Pos.ZERO, Direction.UP;
+        SpawnLayer spawnLayer = new SpawnLayer(Pos.ZERO, Direction.UP);
         assertThrows(
                 IllegalArgumentException.class,
                 () -> new SpawnArea(instance, spawnLayer, 0),
