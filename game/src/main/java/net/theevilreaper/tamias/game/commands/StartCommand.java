@@ -8,6 +8,7 @@ import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.condition.Conditions;
 import net.theevilreaper.tamias.common.config.GameConfig;
+import net.theevilreaper.tamias.common.util.Messages;
 import net.theevilreaper.tamias.game.phase.LobbyPhase;
 import net.theevilreaper.tamias.game.util.GameMessages;
 import org.jetbrains.annotations.NotNull;
@@ -24,7 +25,7 @@ import java.util.function.Supplier;
 public class StartCommand extends Command {
 
     private final Supplier<Phase> phaseSupplier;
-    private final Component unableToStart = GameMessages.withPrefix(
+    private final Component unableToStart = Messages.withPrefix(
             Component.text("Unable to start the game because the timer is to low!", NamedTextColor.RED)
     );
 

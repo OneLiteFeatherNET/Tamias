@@ -94,9 +94,7 @@ public class SetupAreaCommand extends Command {
         switch (argument) {
             case "left" -> setLeftCorner((Player) sender, setupData);
             case "right" -> setRightCorner((Player) sender, setupData);
-            default -> {
-                sender.sendMessage("Invalid argument");
-            }
+            default -> sender.sendMessage("Invalid argument");
         }
     }
 

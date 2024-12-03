@@ -5,7 +5,6 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.theevilreaper.tamias.common.util.Tags;
-import net.theevilreaper.tamias.setup.TamiasSetup;
 import net.theevilreaper.tamias.setup.data.SetupData;
 import net.theevilreaper.tamias.setup.event.MapSetupFinishEvent;
 import org.jetbrains.annotations.NotNull;

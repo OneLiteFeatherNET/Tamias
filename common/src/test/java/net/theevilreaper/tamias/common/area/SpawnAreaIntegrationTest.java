@@ -36,9 +36,10 @@ class SpawnAreaIntegrationTest {
         assertTrue(directionOptional.isPresent());
 
         Direction direction = directionOptional.get();
+        SpawnLayer spawnLayer = new SpawnLayer(Pos.ZERO, direction);
         assertThrows(
                 IllegalArgumentException.class,
-                () -> new SpawnArea(instance, new SpawnLayer(Pos.ZERO, direction), 10),
+                () -> new SpawnArea(instance, spawnLayer, 10),
                 "The direction must be horizontal"
         );
         env.destroyInstance(instance);
@@ -47,9 +48,10 @@ class SpawnAreaIntegrationTest {
     @Test
     void testInvalidPositionUsage(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
+        SpawnLayer spawnLayer = new SpawnLayer(Pos.ZERO, Direction.UP;
         assertThrows(
                 IllegalArgumentException.class,
-                () -> new SpawnArea(instance, new SpawnLayer(Pos.ZERO, Direction.UP), 0),
+                () -> new SpawnArea(instance, spawnLayer, 0),
                 "The direction must be horizontal"
         );
         env.destroyInstance(instance);
