@@ -42,6 +42,8 @@ public final class GameMap extends BaseMap {
         this.bomberInitialSpawn = bomberInitialSpawn;
         this.leftAreaPos = leftAreaPos;
         this.rightAreaPos = rightAreaPos;
+        this.spawnLayer = spawnLayer;
+        this.gameAreaData = gameAreaData;
     }
 
     public void setLeftAreaPos(@NotNull Vec vec) {

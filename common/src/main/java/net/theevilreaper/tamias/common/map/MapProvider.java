@@ -11,7 +11,6 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.anvil.AnvilLoader;
 import net.minestom.server.utils.validate.Check;
-import net.minestom.server.world.DimensionType;
 import net.theevilreaper.tamias.common.area.GameArea;
 import net.theevilreaper.tamias.common.area.SpawnArea;
 import net.theevilreaper.tamias.common.explosion.ExplosionCreator;
