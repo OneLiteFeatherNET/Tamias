@@ -28,7 +28,7 @@ public final class TeamHelper {
         Check.argCondition(!teamService.hasTeams(), "The team service must contain teams");
 
         final Set<Player> onlinePlayers = new HashSet<>(MinecraftServer.getConnectionManager().getOnlinePlayers());
-        Check.argCondition(onlinePlayers.size() < 2, "The player list must contain at least two players");
+       // Check.argCondition(onlinePlayers.size() < 2, "The player list must contain at least two players");
 
         final Optional<Player> randomPlayer = Players.getRandomPlayer();
         Check.argCondition(randomPlayer.isEmpty(), "No random player found");
@@ -68,7 +68,7 @@ public final class TeamHelper {
      * @param pos  the position to teleport the players
      */
     private static void teleport(@NotNull Team team, @NotNull Pos pos, @Nullable PlayerConsumer callback) {
-        Check.argCondition(team.getPlayers().isEmpty(), "The given team can't be empty");
+       // Check.argCondition(team.getPlayers().isEmpty(), "The given team can't be empty");
         team.getPlayers().forEach(player -> {
             player.teleport(pos).join();
             if (callback != null) {

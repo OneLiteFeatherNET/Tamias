@@ -137,7 +137,7 @@ public class Tamias extends Extension implements ListenerHandling {
 
         gameSeries.add(new PrePlayingPhase(
                 this.teamService,
-                this.mapProvider::getActiveMap,
+                this.mapProvider.getActiveMap(),
                 gamePreparation,
                 this.items
         ));
@@ -187,7 +187,7 @@ public class Tamias extends Extension implements ListenerHandling {
 
     void registerListener(@NotNull EventNode<Event> node) {
         Supplier<Integer> supplier = this.gameConfig::maxPlayers;
-        PlayerConsumer playerConsumer = player -> player.teleport(this.mapProvider.getActiveMap().getSpawn());
+        PlayerConsumer playerConsumer = player -> player.teleport(this.mapProvider.getActiveMap().get().getSpawn());
         node.addListener(AsyncPlayerConfigurationEvent.class, new PlayerJoinListener(supplier, this.phaseSeries::getCurrentPhase, () -> this.instance));
         IntConsumer playerConsumerFunction = this.scoreboard::updatePlayerCount;
         node.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(this.phaseSeries::getCurrentPhase, playerConsumer, this.scoreboard::addViewer, playerConsumerFunction));

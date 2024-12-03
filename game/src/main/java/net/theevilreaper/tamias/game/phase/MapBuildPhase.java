@@ -72,5 +72,6 @@ public final class MapBuildPhase extends GamePhase {
     @Override
     public void finish() {
         task.cancel();
+        super.finish();
     }
 }

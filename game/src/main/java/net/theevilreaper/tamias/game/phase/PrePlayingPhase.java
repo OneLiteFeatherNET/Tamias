@@ -14,12 +14,15 @@ import net.theevilreaper.tamias.common.util.Tags;
 import net.theevilreaper.tamias.game.team.TeamHelper;
 import net.theevilreaper.tamias.game.util.Items;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.temporal.ChronoUnit;
 import java.util.function.Supplier;
 
 public final class PrePlayingPhase extends TimedPhase {
 
+    private final Logger LOGGER = LoggerFactory.getLogger(PrePlayingPhase.class);
     private final TeamService<Team> teamService;
     private final Supplier<BaseMap> gameMapSupplier;
     private final VoidConsumer gamePreparation;
@@ -32,20 +35,25 @@ public final class PrePlayingPhase extends TimedPhase {
             @NotNull Items items
     ) {
         super("Pre-Playing", ChronoUnit.SECONDS, 1);
-        this.setPaused(true);
         this.setCurrentTicks(5);
-        this.setEndTicks(0);
         this.setTickDirection(TickDirection.DOWN);
         this.teamService = teamService;
         this.gameMapSupplier = gameMapSupplier;
         this.items = items;
         this.gamePreparation = gamePreparation;
+
+    }
+
+    @Override
+    public void start() {
+        super.start();
     }
 
     @Override
     public void onStart() {
         super.onStart();
         TeamHelper.allocateTeams(this.teamService);
+        LOGGER.info("Allocated teams");
     }
 
     @Override
@@ -60,6 +68,7 @@ public final class PrePlayingPhase extends TimedPhase {
 
     @Override
     public void onUpdate() {
+       LOGGER.info("Map is ");
     }
 
     /**
