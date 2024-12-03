@@ -87,10 +87,16 @@ public final class ExplodeBar extends StaminaBar {
             return;
         }
         this.explode();
-        player.playSound(EXPLODE_SOUND);
+        this.player.playSound(EXPLODE_SOUND);
         this.status = Status.REGENERATING;
+        // If the player explodes, we need to disable the movement and clear the inventory
+        AttributeHelper.disableMovement(this.player);
+        this.player.getInventory().clear();
     }
 
+    /**
+     * Handles the regeneration of the bomber.
+     */
     private void handleBomberRegeneration() {
         ++current;
 
@@ -112,6 +118,7 @@ public final class ExplodeBar extends StaminaBar {
 
     /**
      * Normalizes the current value to a float value between 0 and 1.
+     *
      * @param current the current value
      * @return the normalized value
      */
