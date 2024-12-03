@@ -2,6 +2,7 @@ package net.theevilreaper.tamias.game.phase;
 
 import de.icevizion.aves.util.functional.PlayerConsumer;
 import de.icevizion.aves.util.functional.VoidConsumer;
+import de.icevizion.xerus.api.phase.TickDirection;
 import de.icevizion.xerus.api.phase.TimedPhase;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
@@ -15,7 +16,7 @@ import java.util.function.Supplier;
 /**
  * @author theEvilReaper
  * @version 1.0.0
- * @since
+ * @since 1.0.0
  **/
 public final class PlayingPhase extends TimedPhase {
 
@@ -32,6 +33,8 @@ public final class PlayingPhase extends TimedPhase {
         this.timeUpdater = timeUpdater;
         this.spawnAreaReset = spawnAreaReset;
         this.scoreboardAdd = scoreboardAdd;
+        this.setCurrentTicks(300);
+        this.setTickDirection(TickDirection.DOWN);
     }
 
     @Override
