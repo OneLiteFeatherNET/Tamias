@@ -145,5 +145,7 @@ class TeamHelperIntegrationTest {
 
         teamService.getTeams().get(GameConfig.SURVIVOR_ID).getPlayers()
                 .forEach(player -> assertEquals(survivorPos, player.getPosition()));
+
+        env.destroyInstance(instance, true);
     }
 }
