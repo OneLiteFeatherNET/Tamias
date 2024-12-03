@@ -28,7 +28,7 @@ class TamiasScoreboardIntegrationTest {
 
     @BeforeEach
     void setup() {
-        tamiasScoreboard = new TamiasBoard(() -> "Test");
+        tamiasScoreboard = new TamiasBoard();
     }
 
     @AfterEach
