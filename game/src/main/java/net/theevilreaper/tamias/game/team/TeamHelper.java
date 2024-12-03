@@ -10,17 +10,12 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.common.map.GameMap;
-import net.theevilreaper.tamias.common.map.MapProvider;
-import net.theevilreaper.tamias.common.util.Tags;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * @author theEvilReaper
@@ -54,17 +49,17 @@ public final class TeamHelper {
      * @param teamService the service which contains the teams
      * @param mapSupplier the supplier which provides the map
      */
-    public static void teleport(@NotNull TeamService<Team> teamService, @NotNull GameMap mapSupplier) {
+    public static void teleport(@NotNull TeamService<Team> teamService, @NotNull GameMap mapSupplier, @NotNull PlayerConsumer playerConsumer) {
         Team bomberTeam = teamService.getTeams().get(GameConfig.TNT_ID);
         Team survivorTeam = teamService.getTeams().get(GameConfig.SURVIVOR_ID);
         Check.argCondition(bomberTeam.getPlayers().isEmpty(), "The tnt team cannot be empty");
         Check.argCondition(survivorTeam.getPlayers().isEmpty(), "The survivor team cannot be empty");
 
-        teleport(bomberTeam, mapSupplier.getBomberInitialSpawn());
-        teleport(survivorTeam, mapSupplier.getSpawn());
+        teleport(bomberTeam, mapSupplier.getBomberInitialSpawn(), playerConsumer);
+        teleport(survivorTeam, mapSupplier.getSpawn(), playerConsumer);
     }
 
-    private static void teleport(@NotNull Team team, @NotNull Pos pos) {
+    public static void teleport(@NotNull Team team, @NotNull Pos pos) {
         teleport(team, pos, null);
     }
 

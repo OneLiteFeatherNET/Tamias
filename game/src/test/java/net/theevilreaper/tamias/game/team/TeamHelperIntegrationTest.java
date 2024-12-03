@@ -87,16 +87,18 @@ class TeamHelperIntegrationTest {
     void testTeamTeleportWithEmptyTeams(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
         GameMap map = new GameMap();
+        Team tnt = teamService.getTeams().get(GameConfig.TNT_ID);
         assertThrowsExactly(
                 IllegalArgumentException.class,
-                () -> TeamHelper.teleport(teamService, map),
+                () -> TeamHelper.teleport(tnt, map.getBomberInitialSpawn()),
                 "The tnt team cannot be empty"
         );
 
-        teamService.getTeams().get(GameConfig.TNT_ID).addPlayer(env.createPlayer(instance));
+        Team survivorTeam = teamService.getTeams().get(GameConfig.TNT_ID);
+        survivorTeam.addPlayer(env.createPlayer(instance));
         assertThrowsExactly(
                 IllegalArgumentException.class,
-                () -> TeamHelper.teleport(teamService, map),
+                () -> TeamHelper.teleport(survivorTeam, map.getSpawn()),
                 "The survivor team cannot be empty"
         );
 
@@ -128,7 +130,7 @@ class TeamHelperIntegrationTest {
 
         assertNotNull(tntPlayer);
 
-        TeamHelper.teleport(teamService, map);
+        TeamHelper.teleport(teamService.getTeams().getFirst(), map.getSpawn());
 
         assertEquals(bomberPos, tntPlayer.getPosition());
 
