@@ -1,6 +1,6 @@
 package net.theevilreaper.tamias.game.scoreboard;
 
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
@@ -61,7 +61,7 @@ class TamiasScoreboardIntegrationTest {
             assertEquals(2, packet.mode());
             assertNull(packet.numberFormat());
             assertNotNull(packet.objectiveValue());
-            String content = LegacyComponentSerializer.legacySection().serialize(packet.objectiveValue());
+            String content = PlainTextComponentSerializer.plainText().serialize(packet.objectiveValue());
             assertNotNull(content);
             assertFalse(content.isEmpty());
             assertTrue(content.contains("Time: 00:12"));
