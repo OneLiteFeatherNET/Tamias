@@ -19,7 +19,6 @@ import net.minestom.server.tag.Tag;
 import net.theevilreaper.tamias.common.gson.GsonUtil;
 import net.theevilreaper.tamias.common.map.MapProvider;
 import net.theevilreaper.tamias.setup.commands.SetupCommand;
-import net.theevilreaper.tamias.setup.commands.TestBuildCommand;
 import net.theevilreaper.tamias.setup.data.SetupDataService;
 import net.theevilreaper.tamias.setup.event.MapSetupFinishEvent;
 import net.theevilreaper.tamias.setup.event.MapSetupSelectEvent;
@@ -101,7 +100,6 @@ public class TamiasSetup extends Extension {
     private void registerCommands() {
         CommandManager commandManager = MinecraftServer.getCommandManager();
         commandManager.register(new SetupCommand(this.setupDataService));
-        commandManager.register(new TestBuildCommand(this.setupDataService));
     }
 
     /**
