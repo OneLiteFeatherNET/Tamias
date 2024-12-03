@@ -6,13 +6,13 @@ group = "net.theevilreaper.tamias.setup"
 version = "1.0-SNAPSHOT"
 
 dependencies {
-    compileOnly(libs.minestom)
-    compileOnly(libs.aves)
-    compileOnly(libs.xerus)
-
     implementation(project(":common"))
     implementation(platform(libs.microtus.bom))
     implementation(platform(libs.dungeon.bom))
+
+    compileOnly(libs.minestom)
+    compileOnly(libs.aves)
+    compileOnly(libs.xerus)
 
     testImplementation(libs.minestom)
     testImplementation(libs.minestom.test)
