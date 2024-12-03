@@ -13,11 +13,12 @@ import org.jetbrains.annotations.UnmodifiableView;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Supplier;
+
+import static net.theevilreaper.tamias.game.scoreboard.TamiasScoreboard.ScoreType.*;
+import static net.theevilreaper.tamias.game.scoreboard.TamiasScoreboard.ScoreType.PLAYER;
 
 public final class TamiasBoard implements TamiasScoreboard, DefaultScoreLayout {
 
-    private final Supplier<String> mapName;
     private final Sidebar lobbyScoreboard;
     private final Sidebar gameScoreboard;
     private final Set<Player> viewers;
@@ -25,8 +26,7 @@ public final class TamiasBoard implements TamiasScoreboard, DefaultScoreLayout {
     private Sidebar currentScoreboard;
     private BoardType boardType;
 
-    TamiasBoard(@NotNull Supplier<String> mapName) {
-        this.mapName = mapName;
+    TamiasBoard() {
         this.viewers = new HashSet<>();
         this.boardType = BoardType.LOBBY;
         this.lobbyScoreboard = new Sidebar(Component.empty());
@@ -36,15 +36,27 @@ public final class TamiasBoard implements TamiasScoreboard, DefaultScoreLayout {
 
     @Override
     public void initDefaults() {
-        this.initLobbyScoreboard(this.lobbyScoreboard, this.mapName.get());
+        this.initLobbyScoreboard(this.lobbyScoreboard, "not-set");
         this.initGameScoreboard(this.gameScoreboard);
     }
 
     @Override
+    public void updateMapName(@NotNull String mapName) {
+        if (this.boardType != BoardType.LOBBY) return;
+        this.currentScoreboard.updateLineContent("map-name", SPACER.append(Component.text(mapName, NamedTextColor.RED)));
+    }
+
+    @Override
+    public void updatePlayerCount(int playerCount) {
+        Component playerComponent = Component.text(String.valueOf(playerCount), NamedTextColor.YELLOW);
+        this.currentScoreboard.updateLineContent(PLAYER.getName(), SPACER.append(playerComponent));
+    }
+
+    @Override
     public void updateGameDefaults(int tnt, int players, int round) {
-        this.gameScoreboard.updateLineContent(ScoreType.TNT.getName(), Component.text(String.valueOf(tnt)));
-        this.gameScoreboard.updateLineContent(ScoreType.PLAYER.getName(), Component.text(String.valueOf(players)));
-        this.gameScoreboard.updateLineContent(ScoreType.ROUND.getName(), Component.text(String.valueOf(round)));
+        this.gameScoreboard.updateLineContent(TNT.getName(), Component.text(String.valueOf(tnt)));
+        this.gameScoreboard.updateLineContent(PLAYER.getName(), Component.text(String.valueOf(players)));
+        this.gameScoreboard.updateLineContent(ROUND.getName(), Component.text(String.valueOf(round)));
     }
 
     @Override
@@ -57,7 +69,7 @@ public final class TamiasBoard implements TamiasScoreboard, DefaultScoreLayout {
     @Override
     public void updateTime(int time) {
         if (this.currentScoreboard == null) return;
-        Component timeFormat = Component.text(Strings.getTimeString(TimeFormat.MM_SS, time));
+        Component timeFormat = Component.text(Strings.getTimeString(TimeFormat.MM_SS, time), NamedTextColor.YELLOW);
         this.currentScoreboard.setTitle(this.timeComponent.append(timeFormat));
     }
 

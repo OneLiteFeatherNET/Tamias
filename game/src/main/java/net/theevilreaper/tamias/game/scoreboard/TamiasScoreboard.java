@@ -5,19 +5,25 @@ import net.minestom.server.Viewable;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Supplier;
-
+/**
+ * The interface represents the basic structure of a scoreboard for the game.
+ * The scoreboard is used to display different information to the player.
+ *
+ * @author theEvilReaper
+ * @version 1.0.0
+ * @see TamiasBoard
+ * @since 1.0.0
+ */
 public interface TamiasScoreboard extends Viewable {
 
     /**
      * Creates a new instance of the scoreboard
      *
-     * @param mapName the name of the map
      * @return the new instance
      */
-    @Contract(pure = true, value = "_ -> new")
-    static @NotNull TamiasScoreboard of(@NotNull Supplier<String> mapName) {
-        return new TamiasBoard(mapName);
+    @Contract(pure = true)
+    static @NotNull TamiasScoreboard of() {
+        return new TamiasBoard();
     }
 
     /**
@@ -36,6 +42,10 @@ public interface TamiasScoreboard extends Viewable {
      * @param time the current time
      */
     void updateTime(int time);
+
+    void updateMapName(@NotNull String mapName);
+
+    void updatePlayerCount(int playerCount);
 
     /**
      * Updates the game scoreboard with some default values for the round start

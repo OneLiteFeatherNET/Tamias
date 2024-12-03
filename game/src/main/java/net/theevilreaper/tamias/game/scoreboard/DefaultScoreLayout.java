@@ -1,6 +1,7 @@
 package net.theevilreaper.tamias.game.scoreboard;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.scoreboard.Sidebar;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,6 +17,8 @@ import static net.theevilreaper.tamias.game.scoreboard.TamiasScoreboard.ScoreTyp
  */
 sealed interface DefaultScoreLayout permits TamiasBoard {
 
+    Component SPACER = Component.text("»", NamedTextColor.YELLOW).append(Component.space());
+
     /**
      * Initializes the lobby scoreboard with the given map name
      *
@@ -24,11 +27,11 @@ sealed interface DefaultScoreLayout permits TamiasBoard {
      */
     default void initLobbyScoreboard(@NotNull Sidebar lobbyScoreboard, @NotNull String mapName) {
         lobbyScoreboard.createLine(new Sidebar.ScoreboardLine("empty-line-1", Component.empty(), 6));
-        lobbyScoreboard.createLine(new Sidebar.ScoreboardLine("player-header", Component.text("Players:"), 5));
-        lobbyScoreboard.createLine(new Sidebar.ScoreboardLine(PLAYER.getName(), Component.text("0"), 4));
+        lobbyScoreboard.createLine(new Sidebar.ScoreboardLine("player-header", Component.text("Players:", NamedTextColor.GRAY), 5));
+        lobbyScoreboard.createLine(new Sidebar.ScoreboardLine(PLAYER.getName(), Component.text("0", NamedTextColor.YELLOW), 4));
         lobbyScoreboard.createLine(new Sidebar.ScoreboardLine("empty-line-2", Component.empty(), 3));
-        lobbyScoreboard.createLine(new Sidebar.ScoreboardLine("map-header", Component.text("Map:"), 2));
-        lobbyScoreboard.createLine(new Sidebar.ScoreboardLine("map-name", Component.text(mapName), 1));
+        lobbyScoreboard.createLine(new Sidebar.ScoreboardLine("map-header", Component.text("Map:", NamedTextColor.GRAY), 2));
+        lobbyScoreboard.createLine(new Sidebar.ScoreboardLine("map-name", SPACER.append(Component.text(mapName)), 1));
     }
 
     /**
