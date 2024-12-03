@@ -4,6 +4,7 @@ import de.icevizion.aves.util.Broadcaster;
 import de.icevizion.aves.util.functional.VoidConsumer;
 import de.icevizion.xerus.api.phase.Phase;
 import de.icevizion.xerus.api.team.Team;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.theevilreaper.tamias.common.util.Tags;
@@ -13,6 +14,7 @@ import net.theevilreaper.tamias.game.util.GameMessages;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
@@ -24,16 +26,23 @@ import java.util.function.Supplier;
  * @version 1.0.0
  * @since 1.0.0
  **/
-public class PlayerQuitListener implements Consumer<PlayerDisconnectEvent> {
+public final class PlayerQuitListener implements Consumer<PlayerDisconnectEvent> {
 
     private final Supplier<Phase> phaseSupplier;
     private final IntFunction<Team> teamFunction;
     private final VoidConsumer roundEndCheck;
+    private final IntConsumer playerCountUpdater;
 
-    public PlayerQuitListener(@NotNull Supplier<Phase> phaseSupplier, @NotNull IntFunction<Team> teamFunction, @NotNull VoidConsumer roundEndCheck) {
+    public PlayerQuitListener(
+            @NotNull Supplier<Phase> phaseSupplier,
+            @NotNull IntFunction<Team> teamFunction,
+            @NotNull VoidConsumer roundEndCheck,
+            @NotNull IntConsumer playerCountUpdater
+    ) {
         this.phaseSupplier = phaseSupplier;
         this.teamFunction = teamFunction;
         this.roundEndCheck = roundEndCheck;
+        this.playerCountUpdater = playerCountUpdater;
     }
 
     @Override
@@ -75,6 +84,7 @@ public class PlayerQuitListener implements Consumer<PlayerDisconnectEvent> {
     private void handleLobbyQuit(@NotNull LobbyPhase lobbyPhase, @NotNull Player player) {
         lobbyPhase.checkStopCondition();
         Broadcaster.broadcast(GameMessages.getLeaveMessage(player));
+        this.playerCountUpdater.accept(MinecraftServer.getConnectionManager().getOnlinePlayerCount());
     }
 
     /**

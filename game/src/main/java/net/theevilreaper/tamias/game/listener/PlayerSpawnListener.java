@@ -10,6 +10,7 @@ import net.theevilreaper.tamias.game.util.GameMessages;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 import java.util.function.Supplier;
 
 import static net.minestom.server.MinecraftServer.getConnectionManager;
@@ -23,10 +24,19 @@ public final class PlayerSpawnListener implements Consumer<PlayerSpawnEvent> {
 
     private final Supplier<Phase> phaseSupplier;
     private final PlayerConsumer spawnConsumer;
+    private final PlayerConsumer scoreboardConsumer;
+    private final IntConsumer playerCountUpdater;
 
-    public PlayerSpawnListener(@NotNull Supplier<Phase> phaseSupplier, @NotNull PlayerConsumer spawnConsumer) {
+    public PlayerSpawnListener(
+            @NotNull Supplier<Phase> phaseSupplier,
+            @NotNull PlayerConsumer spawnConsumer,
+            @NotNull PlayerConsumer scoreboardConsumer,
+            @NotNull IntConsumer playerCountUpdater
+    ) {
         this.phaseSupplier = phaseSupplier;
         this.spawnConsumer = spawnConsumer;
+        this.scoreboardConsumer = scoreboardConsumer;
+        this.playerCountUpdater = playerCountUpdater;
     }
 
     @Override
@@ -41,6 +51,8 @@ public final class PlayerSpawnListener implements Consumer<PlayerSpawnEvent> {
             lobbyPhase.updatePlayerValues(player);
             lobbyPhase.checkStartCondition();
             this.spawnConsumer.accept(player);
+            this.scoreboardConsumer.accept(player);
+            this.playerCountUpdater.accept(getConnectionManager().getOnlinePlayers().size());
         }
     }
 }

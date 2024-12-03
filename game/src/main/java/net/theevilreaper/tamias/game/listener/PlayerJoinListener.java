@@ -26,7 +26,11 @@ public final class PlayerJoinListener implements Consumer<AsyncPlayerConfigurati
     private final Supplier<@Nullable Phase> phaseSupplier;
     private final Supplier<@NotNull Instance> instanceSupplier;
 
-    public PlayerJoinListener(@NotNull Supplier<Integer> maxPlayers, @NotNull Supplier<Phase> phaseSupplier, @NotNull Supplier<Instance> instanceSupplier) {
+    public PlayerJoinListener(
+            @NotNull Supplier<Integer> maxPlayers,
+            @NotNull Supplier<Phase> phaseSupplier,
+            @NotNull Supplier<Instance> instanceSupplier
+    ) {
         this.maxPlayers = maxPlayers;
         this.phaseSupplier = phaseSupplier;
         this.instanceSupplier = instanceSupplier;
