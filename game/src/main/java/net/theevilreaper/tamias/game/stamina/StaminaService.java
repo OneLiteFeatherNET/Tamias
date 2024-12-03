@@ -61,6 +61,7 @@ public final class StaminaService {
 
     /**
      * Removes the {@link StaminaBar} for the given {@link UUID}.
+     *
      * @param uuid the unique identifier for the player
      * @return true if the {@link StaminaBar} was removed successfully
      */
@@ -73,6 +74,12 @@ public final class StaminaService {
         }
     }
 
+    /**
+     * Returns the {@link StaminaBar} for the given {@link Player}.
+     *
+     * @param player the player to get the stamina bar
+     * @return the {@link StaminaBar} or null if the player has no stamina bar
+     */
     public @Nullable StaminaBar getStaminaBar(@NotNull Player player) {
         return this.getStaminaBar(player.getUuid());
     }

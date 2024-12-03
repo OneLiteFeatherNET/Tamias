@@ -79,4 +79,19 @@ class StaminaServiceIntegrationTest {
         assertFalse(staminaService.removeStaminaBar(player.getUuid()));
         env.destroyInstance(instance, true);
     }
+
+    @Test
+    void testStaminaGet(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player firstPlayer = env.createPlayer(instance);
+        StaminaBar staminaBar = StaminaFactory.createExplodeBar(firstPlayer);
+        staminaService.addStaminas(Map.of(firstPlayer.getUuid(), staminaBar));
+
+        Player secondPlayer = env.createPlayer(instance);
+
+        assertNotNull(staminaService.getStaminaBar(firstPlayer));
+        assertNull(staminaService.getStaminaBar(secondPlayer));
+
+        env.destroyInstance(instance, true);
+    }
 }
