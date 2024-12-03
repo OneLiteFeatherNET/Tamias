@@ -11,6 +11,7 @@ import de.icevizion.xerus.api.team.Team;
 import de.icevizion.xerus.api.team.TeamCreator;
 import de.icevizion.xerus.api.team.TeamService;
 import de.icevizion.xerus.api.team.TeamServiceImpl;
+import de.icevizion.xerus.api.team.event.MultiPlayerTeamEvent;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -39,6 +40,7 @@ import net.theevilreaper.tamias.game.listener.game.BomberReviveListener;
 import net.theevilreaper.tamias.game.listener.game.ProjectileBlockListener;
 import net.theevilreaper.tamias.game.listener.game.ProjectileEntityListener;
 import net.theevilreaper.tamias.game.listener.game.RoundFinishListener;
+import net.theevilreaper.tamias.game.listener.team.TeamActionListener;
 import net.theevilreaper.tamias.game.phase.LobbyPhase;
 import net.theevilreaper.tamias.game.phase.MapBuildPhase;
 import net.theevilreaper.tamias.game.phase.PlayingPhase;
@@ -183,17 +185,18 @@ public class Tamias extends Extension implements ListenerHandling {
         );
     }
 
-    void registerListener(@NotNull EventNode<Event> eventNode) {
+    void registerListener(@NotNull EventNode<Event> node) {
         Supplier<Integer> supplier = this.gameConfig::maxPlayers;
         PlayerConsumer playerConsumer = player -> player.teleport(this.mapProvider.getActiveMap().getSpawn());
-        eventNode.addListener(AsyncPlayerConfigurationEvent.class, new PlayerJoinListener(supplier, this.phaseSeries::getCurrentPhase, () -> this.instance));
+        node.addListener(AsyncPlayerConfigurationEvent.class, new PlayerJoinListener(supplier, this.phaseSeries::getCurrentPhase, () -> this.instance));
         IntConsumer playerConsumerFunction = this.scoreboard::updatePlayerCount;
-        eventNode.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(this.phaseSeries::getCurrentPhase, playerConsumer, this.scoreboard::addViewer, playerConsumerFunction));
-        eventNode.addListener(PlayerDisconnectEvent.class, new PlayerQuitListener(this.phaseSeries::getCurrentPhase, this.teamService.getTeams()::get, this::checkRoundEnd, playerConsumerFunction));
-        eventNode.addListener(ProjectileCollideWithBlockEvent.class, new ProjectileBlockListener());
-        eventNode.addListener(ProjectileCollideWithEntityEvent.class, new ProjectileEntityListener(player -> {
+        node.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(this.phaseSeries::getCurrentPhase, playerConsumer, this.scoreboard::addViewer, playerConsumerFunction));
+        node.addListener(PlayerDisconnectEvent.class, new PlayerQuitListener(this.phaseSeries::getCurrentPhase, this.teamService.getTeams()::get, this::checkRoundEnd, playerConsumerFunction));
+        node.addListener(ProjectileCollideWithBlockEvent.class, new ProjectileBlockListener());
+        node.addListener(ProjectileCollideWithEntityEvent.class, new ProjectileEntityListener(player -> {
         }, this.staminaService::getStaminaBar));
-        eventNode.addListener(PlayerChatEvent.class, new PlayerChatListener());
+        node.addListener(PlayerChatEvent.class, new PlayerChatListener());
+        node.addListener((Class<MultiPlayerTeamEvent<Team>>) (Class<?>) MultiPlayerTeamEvent.class, new TeamActionListener());
     }
 
     void checkRoundEnd() {
