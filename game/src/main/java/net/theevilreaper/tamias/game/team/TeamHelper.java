@@ -52,8 +52,6 @@ public final class TeamHelper {
     public static void teleport(@NotNull TeamService<Team> teamService, @NotNull GameMap mapSupplier, @NotNull PlayerConsumer playerConsumer) {
         Team bomberTeam = teamService.getTeams().get(GameConfig.TNT_ID);
         Team survivorTeam = teamService.getTeams().get(GameConfig.SURVIVOR_ID);
-        Check.argCondition(bomberTeam.getPlayers().isEmpty(), "The tnt team cannot be empty");
-        Check.argCondition(survivorTeam.getPlayers().isEmpty(), "The survivor team cannot be empty");
 
         teleport(bomberTeam, mapSupplier.getBomberInitialSpawn(), playerConsumer);
         teleport(survivorTeam, mapSupplier.getSpawn(), playerConsumer);
@@ -70,6 +68,7 @@ public final class TeamHelper {
      * @param pos  the position to teleport the players
      */
     private static void teleport(@NotNull Team team, @NotNull Pos pos, @Nullable PlayerConsumer callback) {
+        Check.argCondition(team.getPlayers().isEmpty(), "The given team can't be empty");
         team.getPlayers().forEach(player -> {
             player.teleport(pos).join();
             if (callback != null) {
