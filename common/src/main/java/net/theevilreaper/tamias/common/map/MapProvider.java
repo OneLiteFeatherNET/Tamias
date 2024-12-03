@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public final class MapProvider {
@@ -37,6 +38,8 @@ public final class MapProvider {
     private InstanceContainer gameMapInstance;
     private SpawnArea spawnArea;
     private GameArea gameArea;
+
+    private BaseMap activeMap;
 
     public MapProvider(@NotNull Path originPath, @NotNull Function<Stream<Path>, List<MapEntry>> filterMaps) {
         this.mapPath = originPath;
@@ -66,6 +69,8 @@ public final class MapProvider {
         if (this.lobbyMap.getSpawn() != null) {
             loadChunks(instanceContainer, this.lobbyMap.getSpawn());
         }
+
+        this.activeMap = this.lobbyMap;
     }
 
     public void loadGameMap() {
@@ -92,6 +97,7 @@ public final class MapProvider {
         this.spawnArea = new SpawnArea(container, this.gameMap.getSpawnData(), 16);
         this.gameArea = new GameArea(container, this.gameMap.getGameAreaData());
         this.gameMapInstance = container;
+        this.activeMap = this.gameMap;
     }
 
     public void loadGameChunks() {
@@ -100,12 +106,6 @@ public final class MapProvider {
 
     public void teleportPlayers(@NotNull List<Player> players) {
         this.spawnArea.teleport(this.gameMapInstance, players);
-    }
-
-    public @Nullable BaseMap getActiveMap() {
-        if (lobbyMap != null) return lobbyMap;
-        if (gameMap != null) return gameMap;
-        return null;
     }
 
     public <T extends Point> void loadChunks(@NotNull Instance instance, @NotNull T @NotNull ... positions) {
@@ -128,5 +128,13 @@ public final class MapProvider {
 
     public @NotNull List<MapEntry> getMapEntries() {
         return this.mapPool.getAvailableMaps();
+    }
+
+    /**
+     * Returns the active map.
+     * @return the active map
+     */
+    public @NotNull Supplier<BaseMap> getActiveMap() {
+        return () -> this.activeMap;
     }
 }
