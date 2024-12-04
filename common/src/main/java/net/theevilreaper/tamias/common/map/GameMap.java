@@ -20,7 +20,6 @@ public final class GameMap extends BaseMap {
     private SpawnLayer spawnLayer;
     private GameAreaData gameAreaData;
     private Pos bomberInitialSpawn;
-    private String direction;
 
     public GameMap() {
         super("Not set", Pos.ZERO);
@@ -46,15 +45,6 @@ public final class GameMap extends BaseMap {
      */
     public void setGameAreaData(@NotNull GameAreaData gameAreaData) {
         this.gameAreaData = gameAreaData;
-    }
-
-    /**
-     * Set's the direction for the map.
-     *
-     * @param direction the direction to set
-     */
-    public void setDirection(@NotNull String direction) {
-        this.direction = direction;
     }
 
     /**
@@ -101,14 +91,5 @@ public final class GameMap extends BaseMap {
      */
     public @NotNull SpawnLayer getSpawnData() {
         return spawnLayer;
-    }
-
-    /**
-     * Get the direction for the map.
-     *
-     * @return the direction
-     */
-    public @NotNull String getDirection() {
-        return direction;
     }
 }
