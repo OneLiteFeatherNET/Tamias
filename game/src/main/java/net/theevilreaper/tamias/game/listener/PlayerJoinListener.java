@@ -6,8 +6,8 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.instance.Instance;
+import net.theevilreaper.tamias.common.util.Messages;
 import net.theevilreaper.tamias.game.phase.LobbyPhase;
-import net.theevilreaper.tamias.game.util.GameMessages;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,7 +21,7 @@ import java.util.function.Supplier;
  **/
 public final class PlayerJoinListener implements Consumer<AsyncPlayerConfigurationEvent> {
 
-    private static final Component KICK_COMPONENT = GameMessages.withMini("<red>The game has already started! Unable to join!");
+    private static final Component KICK_COMPONENT = Messages.withMini("<red>The game has already started! Unable to join!");
     private final Supplier<Integer> maxPlayers;
     private final Supplier<@Nullable Phase> phaseSupplier;
     private final Supplier<@NotNull Instance> instanceSupplier;

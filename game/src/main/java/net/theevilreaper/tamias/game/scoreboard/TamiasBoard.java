@@ -19,10 +19,12 @@ import static net.theevilreaper.tamias.game.scoreboard.TamiasScoreboard.ScoreTyp
 
 public final class TamiasBoard implements TamiasScoreboard, DefaultScoreLayout {
 
+    private final Component timeComponent = Component.text("Time:", NamedTextColor.GRAY).append(Component.space());
+    private final Component lobbyTimeComponent = Component.text("Lobby", NamedTextColor.GREEN).append(Component.space()).append(timeComponent);
+
     private final Sidebar lobbyScoreboard;
     private final Sidebar gameScoreboard;
     private final Set<Player> viewers;
-    private final Component timeComponent = Component.text("Time:", NamedTextColor.GRAY).append(Component.space());
     private Sidebar currentScoreboard;
     private BoardType boardType;
 
@@ -70,14 +72,17 @@ public final class TamiasBoard implements TamiasScoreboard, DefaultScoreLayout {
     public void updateTime(int time) {
         if (this.currentScoreboard == null) return;
         Component timeFormat = Component.text(Strings.getTimeString(TimeFormat.MM_SS, time), NamedTextColor.YELLOW);
-        this.currentScoreboard.setTitle(this.timeComponent.append(timeFormat));
+        Component rawTimeFormat = this.boardType == BoardType.LOBBY ? lobbyTimeComponent : timeComponent;
+        this.currentScoreboard.setTitle(rawTimeFormat.append(timeFormat));
     }
 
     @Override
     public void switchBoard(@NotNull BoardType boardType) {
         if (this.boardType == boardType) return;
         this.boardType = boardType;
-        this.viewers.forEach(this.currentScoreboard::removeViewer);
+        if (this.currentScoreboard != null) {
+            this.viewers.forEach(this.currentScoreboard::removeViewer);
+        }
         if (this.boardType == BoardType.LOBBY) {
             this.currentScoreboard = this.lobbyScoreboard;
         } else {

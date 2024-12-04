@@ -10,6 +10,9 @@ import net.minestom.testing.Env;
 import net.minestom.testing.TestConnection;
 import net.minestom.testing.extension.MicrotusExtension;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,22 +22,38 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(MicrotusExtension.class)
 class BoardHelperIntegrationTest {
 
-    @Disabled
+    private static TamiasScoreboard tamiasScoreboard;
+
+    @BeforeAll
+    static void setup() {
+        tamiasScoreboard = TamiasScoreboard.of();
+        tamiasScoreboard.initDefaults();
+    }
+
+    @AfterEach
+    void reset() {
+        tamiasScoreboard.resetBoard();
+    }
+
+    @AfterAll
+    static void cleanup() {
+        tamiasScoreboard = null;
+    }
+
     @Test
     void testLobbyBoardTitleUpdate(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
-       // BoardHelper boardHelper = new BoardHelper();
 
         TestConnection connection = env.createConnection();
         Player player = connection.connect(instance, Pos.ZERO).join();
 
         assertNotNull(player);
-
-       // boardHelper.add(player);
+        tamiasScoreboard.switchBoard(TamiasScoreboard.BoardType.LOBBY);
+        tamiasScoreboard.addViewer(player);
 
         Collector<ScoreboardObjectivePacket> collector = connection.trackIncoming(ScoreboardObjectivePacket.class);
 
-      //  boardHelper.updateLobbyTitle(10);
+        tamiasScoreboard.updateTime(10);
 
         collector.assertSingle();
         collector.assertSingle(packet -> {
@@ -49,23 +68,21 @@ class BoardHelperIntegrationTest {
         env.destroyInstance(instance, true);
     }
 
-    @Disabled
     @Test
     void testGameBoardTitleUpdate(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
-       // BoardHelper boardHelper = new BoardHelper();
 
         TestConnection connection = env.createConnection();
         Player player = connection.connect(instance, Pos.ZERO).join();
 
         assertNotNull(player);
 
-        // boardHelper.add(player);
-        // boardHelper.switchToGame();
+        tamiasScoreboard.addViewer(player);
+        tamiasScoreboard.switchBoard(TamiasScoreboard.BoardType.GAME);
 
         Collector<ScoreboardObjectivePacket> collector = connection.trackIncoming(ScoreboardObjectivePacket.class);
 
-        // boardHelper.updateTitle(Component.text("Test"));
+        tamiasScoreboard.updateTime(10);
 
         collector.assertSingle();
         collector.assertSingle(packet -> {
@@ -73,7 +90,7 @@ class BoardHelperIntegrationTest {
             String text = PlainTextComponentSerializer.plainText().serialize(packet.objectiveValue());
             assertNotNull(text);
             assertFalse(text.isEmpty());
-            assertEquals("Test", text);
+            assertTrue(text.contains("10"));
         });
 
         env.destroyInstance(instance, true);
