@@ -41,13 +41,13 @@ sealed interface DefaultScoreLayout permits TamiasBoard {
      */
     default void initGameScoreboard(@NotNull Sidebar gameScoreboard) {
         gameScoreboard.createLine(new Sidebar.ScoreboardLine("empty-line-1", Component.empty(), 8));
-        gameScoreboard.createLine(new Sidebar.ScoreboardLine("tnt-header", Component.text("TNT:"), 7));
-        gameScoreboard.createLine(new Sidebar.ScoreboardLine(TNT.getName(), Component.text("0"), 6));
+        gameScoreboard.createLine(new Sidebar.ScoreboardLine("tnt-header", Component.text("TNT:", NamedTextColor.RED), 7));
+        gameScoreboard.createLine(new Sidebar.ScoreboardLine(TNT.getName(), SPACER.append(Component.text("0")), 6));
         gameScoreboard.createLine(new Sidebar.ScoreboardLine("empty-line-2", Component.empty(), 5));
-        gameScoreboard.createLine(new Sidebar.ScoreboardLine("player-header", Component.text("Players:"), 4));
-        gameScoreboard.createLine(new Sidebar.ScoreboardLine(PLAYER.getName(), Component.text("0"), 3));
+        gameScoreboard.createLine(new Sidebar.ScoreboardLine("player-header", Component.text("Players:", NamedTextColor.GREEN), 4));
+        gameScoreboard.createLine(new Sidebar.ScoreboardLine(PLAYER.getName(), SPACER.append(Component.text("0", NamedTextColor.GRAY)), 3));
         gameScoreboard.createLine(new Sidebar.ScoreboardLine("empty-line-3", Component.empty(), 2));
-        gameScoreboard.createLine(new Sidebar.ScoreboardLine("round-header", Component.text("Round:"), 1));
-        gameScoreboard.createLine(new Sidebar.ScoreboardLine(ROUND.getName(), Component.text("0"), 0));
+        gameScoreboard.createLine(new Sidebar.ScoreboardLine("round-header", Component.text("Round:", NamedTextColor.AQUA), 1));
+        gameScoreboard.createLine(new Sidebar.ScoreboardLine(ROUND.getName(), SPACER.append(Component.text("0")), 0));
     }
 }
