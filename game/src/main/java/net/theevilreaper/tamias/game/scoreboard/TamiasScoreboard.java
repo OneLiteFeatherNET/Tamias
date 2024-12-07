@@ -22,8 +22,8 @@ public interface TamiasScoreboard extends Viewable {
      * @return the new instance
      */
     @Contract(pure = true)
-    static @NotNull TamiasScoreboard of() {
-        return new TamiasBoard();
+    static @NotNull TamiasScoreboard of(int maxRounds) {
+        return new TamiasBoard(maxRounds);
     }
 
     /**
@@ -46,6 +46,10 @@ public interface TamiasScoreboard extends Viewable {
     void updateMapName(@NotNull String mapName);
 
     void updatePlayerCount(int playerCount);
+
+    void updateRound(int round);
+
+    void updateTntCount(int tntCount);
 
     /**
      * Updates the game scoreboard with some default values for the round start

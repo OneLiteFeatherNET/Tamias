@@ -14,13 +14,17 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import static net.theevilreaper.tamias.game.scoreboard.TamiasScoreboard.ScoreType.*;
 import static net.theevilreaper.tamias.game.scoreboard.TamiasScoreboard.ScoreType.PLAYER;
+import static net.theevilreaper.tamias.game.scoreboard.TamiasScoreboard.ScoreType.ROUND;
+import static net.theevilreaper.tamias.game.scoreboard.TamiasScoreboard.ScoreType.TNT;
 
 public final class TamiasBoard implements TamiasScoreboard, DefaultScoreLayout {
 
-    private final Component timeComponent = Component.text("Time:", NamedTextColor.GRAY).append(Component.space());
-    private final Component lobbyTimeComponent = Component.text("Lobby", NamedTextColor.GREEN).append(Component.space()).append(timeComponent);
+    private final Component timeComponent = Component.text("Time:", NamedTextColor.GOLD).append(Component.space());
+    private final Component bracketSpacer = Component.space().append(Component.text("|", NamedTextColor.GRAY)).append(Component.space());
+    private final Component lobbyTimeComponent = Component.text("Lobby", NamedTextColor.GREEN)
+            .append(bracketSpacer)
+            .append(timeComponent);
 
     private final Sidebar lobbyScoreboard;
     private final Sidebar gameScoreboard;
@@ -28,12 +32,15 @@ public final class TamiasBoard implements TamiasScoreboard, DefaultScoreLayout {
     private Sidebar currentScoreboard;
     private BoardType boardType;
 
-    TamiasBoard() {
+    private final int maxRound;
+
+    TamiasBoard(int maxRound) {
         this.viewers = new HashSet<>();
         this.boardType = BoardType.LOBBY;
         this.lobbyScoreboard = new Sidebar(Component.empty());
         this.gameScoreboard = new Sidebar(Component.empty());
         this.currentScoreboard = this.lobbyScoreboard;
+        this.maxRound = maxRound;
     }
 
     @Override
@@ -50,15 +57,31 @@ public final class TamiasBoard implements TamiasScoreboard, DefaultScoreLayout {
 
     @Override
     public void updatePlayerCount(int playerCount) {
-        Component playerComponent = Component.text(String.valueOf(playerCount), NamedTextColor.YELLOW);
+        Component playerComponent = Component.text(String.valueOf(playerCount), NamedTextColor.WHITE);
         this.currentScoreboard.updateLineContent(PLAYER.getName(), SPACER.append(playerComponent));
     }
 
     @Override
     public void updateGameDefaults(int tnt, int players, int round) {
-        this.gameScoreboard.updateLineContent(TNT.getName(), Component.text(String.valueOf(tnt)));
-        this.gameScoreboard.updateLineContent(PLAYER.getName(), Component.text(String.valueOf(players)));
-        this.gameScoreboard.updateLineContent(ROUND.getName(), Component.text(String.valueOf(round)));
+        this.updateTntCount(tnt);
+        this.updatePlayerCount(players);
+        this.updateRound(round);
+    }
+
+    @Override
+    public void updateRound(int round) {
+        if (this.boardType == BoardType.LOBBY) return;
+        String roundString = String.valueOf(round);
+        String maxRoundString = String.valueOf(this.maxRound);
+        Component newRoundScore = SPACER.append(Component.text(roundString, NamedTextColor.WHITE)).append(Component.text(" / ")).append(Component.text(maxRoundString, NamedTextColor.WHITE));
+        this.currentScoreboard.updateLineContent(ROUND.getName(), newRoundScore);
+    }
+
+    @Override
+    public void updateTntCount(int tntCount) {
+        if (this.boardType == BoardType.LOBBY) return;
+        Component newTntCount = SPACER.append(Component.text(String.valueOf(tntCount), NamedTextColor.WHITE));
+        this.currentScoreboard.updateLineContent(TNT.getName(), newTntCount);
     }
 
     @Override
@@ -94,7 +117,7 @@ public final class TamiasBoard implements TamiasScoreboard, DefaultScoreLayout {
     @Override
     public void updateScore(@NotNull ScoreType scoreType, @NotNull Component value) {
         if (this.boardType == null || this.boardType == BoardType.LOBBY) return;
-        this.gameScoreboard.updateLineContent(scoreType.getName(), value);
+        this.currentScoreboard.updateLineContent(scoreType.getName(), value);
     }
 
     @Override
