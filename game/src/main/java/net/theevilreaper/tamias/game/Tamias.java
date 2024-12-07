@@ -3,8 +3,8 @@ package net.theevilreaper.tamias.game;
 import de.icevizion.aves.map.MapEntry;
 import de.icevizion.aves.util.functional.PlayerConsumer;
 import de.icevizion.aves.util.functional.VoidConsumer;
+import de.icevizion.xerus.api.ColorData;
 import de.icevizion.xerus.api.phase.CyclicPhaseSeries;
-import de.icevizion.xerus.api.phase.GamePhase;
 import de.icevizion.xerus.api.phase.LinearPhaseSeries;
 import de.icevizion.xerus.api.phase.Phase;
 import de.icevizion.xerus.api.team.Team;
@@ -69,7 +69,7 @@ import java.util.function.Supplier;
 public class Tamias extends Extension implements ListenerHandling {
 
     public static final Logger LOGGER = LoggerFactory.getLogger(Tamias.class);
-    private final LinearPhaseSeries<GamePhase> phaseSeries;
+    private final LinearPhaseSeries<Phase> phaseSeries;
     private final TeamService<Team> teamService;
     private final StaminaService staminaService;
     private final GameConfig gameConfig;
@@ -103,7 +103,7 @@ public class Tamias extends Extension implements ListenerHandling {
         this.mapProvider = new MapProvider(Paths.get("").resolve("maps"), pathStream -> pathStream.map(MapEntry::of).toList());
         this.mapProvider.loadLobbyMap(this.instance);
 
-        this.scoreboard = TamiasScoreboard.of();
+        this.scoreboard = TamiasScoreboard.of(3);
         this.scoreboard.initDefaults();
         this.timeUpdater = this.scoreboard::updateTime;
 
@@ -127,11 +127,12 @@ public class Tamias extends Extension implements ListenerHandling {
                 gameConfig.lobbyTime(),
                 timeUpdater
         ));
-        CyclicPhaseSeries<GamePhase> gameSeries = new CyclicPhaseSeries<>("game");
+        CyclicPhaseSeries<Phase> gameSeries = new CyclicPhaseSeries<>("game");
         gameSeries.add(new MapBuildPhase(this.mapProvider, this.mapProvider::getGameArea, this.scoreboard::removeViewer));
 
         VoidConsumer gamePreparation = () -> {
             int survivorCount = this.teamService.getTeams().get(GameConfig.SURVIVOR_ID).getPlayers().size();
+            this.scoreboard.switchBoard(TamiasScoreboard.BoardType.GAME);
             this.scoreboard.updateGameDefaults(10, survivorCount, 1);
         };
 
@@ -143,7 +144,7 @@ public class Tamias extends Extension implements ListenerHandling {
         ));
         gameSeries.add(new PlayingPhase(timeUpdater, () -> this.mapProvider.getSpawnArea()::reset, this.scoreboard::addViewer));
         gameSeries.setMaxIterations(this.gameConfig.maxRounds());
-        this.phaseSeries.addAll(gameSeries);
+        this.phaseSeries.add(gameSeries);
         this.phaseSeries.add(new RestartPhase());
     }
 
@@ -170,8 +171,14 @@ public class Tamias extends Extension implements ListenerHandling {
     private void initTeams() {
         TeamCreator teamCreator = new TamiasTeamCreator();
         int teamSize = this.gameConfig.teamSize();
-        this.teamService.add(Team.builder(teamCreator).name(GameConfig.SURVIVOR_TEAM_NAME).capacity(teamSize).build());
-        this.teamService.add(Team.builder(teamCreator).name(GameConfig.BOMBER_TEAM).capacity(teamSize).build());
+        this.teamService.add(Team.builder(teamCreator)
+                .colorData(ColorData.GREEN).name(GameConfig.SURVIVOR_TEAM_NAME).capacity(teamSize)
+                .build()
+        );
+        this.teamService.add(Team.builder(teamCreator)
+                .colorData(ColorData.RED).name(GameConfig.BOMBER_TEAM).capacity(teamSize)
+                .build()
+        );
     }
 
     public void registerGameListener(@NotNull EventNode<Event> eventNode) {
