@@ -75,7 +75,7 @@ public class TamiasSetup extends Extension {
     private void registerListener() {
         var manager = MinecraftServer.getGlobalEventHandler();
         SetupItems items = new SetupItems();
-        Supplier<Pos> spawnPos = () -> this.mapProvider.getActiveMap().getSpawnOrDefault(FALLBACK_POS);
+        Supplier<Pos> spawnPos = () -> this.mapProvider.getActiveMap().get().getSpawnOrDefault(FALLBACK_POS);
         manager.addListener(PlayerUseItemEvent.class, new PlayerUseItemListener(inventoryProvider::openMapSetupInventory, setupDataService::getSetupData));
         manager.addListener(PlayerDisconnectEvent.class, new PlayerDisconnectListener(setupDataService::getSetupData));
         manager.addListener(AsyncPlayerConfigurationEvent.class, new PlayerConfigurationListener(() -> this.mainInstance));
@@ -91,7 +91,7 @@ public class TamiasSetup extends Extension {
      * @param player the player to set the instance
      */
     private void instanceCallback(@NotNull Player player) {
-        player.setInstance(this.mainInstance, this.mapProvider.getActiveMap().getSpawnOrDefault(FALLBACK_POS));
+        player.setInstance(this.mainInstance, this.mapProvider.getActiveMap().get().getSpawnOrDefault(FALLBACK_POS));
     }
 
     /**
