@@ -13,6 +13,7 @@ import de.icevizion.xerus.api.team.TeamService;
 import de.icevizion.xerus.api.team.TeamServiceImpl;
 import de.icevizion.xerus.api.team.event.MultiPlayerTeamEvent;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithBlockEvent;
@@ -23,6 +24,7 @@ import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.extensions.Extension;
 import net.minestom.server.instance.InstanceContainer;
+import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.tamias.common.ListenerHandling;
 import net.theevilreaper.tamias.common.area.GameArea;
 import net.theevilreaper.tamias.common.config.GameConfig;
@@ -43,21 +45,23 @@ import net.theevilreaper.tamias.game.listener.game.RoundFinishListener;
 import net.theevilreaper.tamias.game.listener.team.TeamActionListener;
 import net.theevilreaper.tamias.game.phase.LobbyPhase;
 import net.theevilreaper.tamias.game.phase.MapBuildPhase;
-import net.theevilreaper.tamias.game.phase.PlayingPhase;
-import net.theevilreaper.tamias.game.phase.PrePlayingPhase;
 import net.theevilreaper.tamias.game.phase.RestartPhase;
+import net.theevilreaper.tamias.game.phase.playing.PlayingPhase;
+import net.theevilreaper.tamias.game.phase.playing.PostPlayingPhase;
+import net.theevilreaper.tamias.game.phase.playing.PrePlayingPhase;
+import net.theevilreaper.tamias.game.round.RoundProvider;
 import net.theevilreaper.tamias.game.scoreboard.TamiasScoreboard;
 import net.theevilreaper.tamias.game.stamina.StaminaService;
 import net.theevilreaper.tamias.game.team.TamiasTeamCreator;
+import net.theevilreaper.tamias.game.util.FileChecker;
 import net.theevilreaper.tamias.game.util.Items;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 import java.util.function.Supplier;
 
@@ -68,13 +72,12 @@ import java.util.function.Supplier;
  **/
 public class Tamias extends Extension implements ListenerHandling {
 
-    public static final Logger LOGGER = LoggerFactory.getLogger(Tamias.class);
     private final LinearPhaseSeries<Phase> phaseSeries;
     private final TeamService<Team> teamService;
     private final StaminaService staminaService;
     private final GameConfig gameConfig;
     private final Items items;
-
+    private final RoundProvider roundProvider;
     private InstanceContainer instance;
     private IntConsumer timeUpdater;
     private TamiasScoreboard scoreboard;
@@ -89,11 +92,12 @@ public class Tamias extends Extension implements ListenerHandling {
         this.initTeams();
         this.staminaService = new StaminaService();
         this.items = new Items();
+        this.roundProvider = new RoundProvider(this.gameConfig.maxRounds());
     }
 
     @Override
     public void initialize() {
-        checkMapDirectory();
+        FileChecker.checkFileIntegrity(getDataDirectory());
         instance.enableAutoChunkLoad(true);
         registerCancelListener(MinecraftServer.getGlobalEventHandler());
         MinecraftServer.getInstanceManager().registerInstance(instance);
@@ -128,7 +132,8 @@ public class Tamias extends Extension implements ListenerHandling {
                 timeUpdater
         ));
         CyclicPhaseSeries<Phase> gameSeries = new CyclicPhaseSeries<>("game");
-        gameSeries.add(new MapBuildPhase(this.mapProvider, this.mapProvider::getGameArea, this.scoreboard::removeViewer));
+        Consumer<List<Player>> teleportConsumer = players -> this.mapProvider.teleportPlayers(players, this.roundProvider.isFirstRound());
+        gameSeries.add(new MapBuildPhase(teleportConsumer, this.mapProvider::getGameArea, this.scoreboard::removeViewer));
 
         VoidConsumer gamePreparation = () -> {
             int survivorCount = this.teamService.getTeams().get(GameConfig.SURVIVOR_ID).getPlayers().size();
@@ -142,30 +147,23 @@ public class Tamias extends Extension implements ListenerHandling {
                 gamePreparation,
                 this.items
         ));
-        gameSeries.add(new PlayingPhase(timeUpdater, () -> this.mapProvider.getSpawnArea()::reset, this.scoreboard::addViewer));
+        gameSeries.add(new PlayingPhase(
+                timeUpdater,
+                () -> this.mapProvider.getSpawnArea()::reset,
+                this.scoreboard::addViewer,
+                this::registerGameListener
+        ));
+        gameSeries.add(
+                new PostPlayingPhase(
+                        this.roundProvider::isLastRound,
+                        this.mapProvider.getGameArea()::reset,
+                        this.mapProvider.getSpawnArea()::triggerPlacement,
+                        teleportConsumer
+                )
+        );
         gameSeries.setMaxIterations(this.gameConfig.maxRounds());
         this.phaseSeries.add(gameSeries);
         this.phaseSeries.add(new RestartPhase());
-    }
-
-    private void checkMapDirectory() {
-        var dataDirectory = getDataDirectory();
-        var mapDirectory = dataDirectory.resolve(GameConfig.MAP_FOLDER);
-        if (!Files.exists(dataDirectory)) {
-            try {
-                Files.createDirectory(getDataDirectory());
-            } catch (IOException exception) {
-                LOGGER.error("Unable to create extension directory", exception);
-            }
-        }
-
-        if (!Files.exists(mapDirectory)) {
-            try {
-                Files.createDirectory(mapDirectory);
-            } catch (IOException exception) {
-                LOGGER.error("Unable to create the map folder", exception);
-            }
-        }
     }
 
     private void initTeams() {
@@ -181,15 +179,14 @@ public class Tamias extends Extension implements ListenerHandling {
         );
     }
 
-    public void registerGameListener(@NotNull EventNode<Event> eventNode) {
-        Supplier<List<Team>> teamSupplier = this.teamService::getTeams;
-        eventNode.addListener(RoundEndEvent.class, new RoundFinishListener(teamSupplier));
+    public @NotNull Map<Class<? extends Event>, Consumer<? extends Event>> registerGameListener() {
+        Map<Class<? extends Event>, Consumer<? extends Event>> listenerMap = new HashMap<>();
+        listenerMap.put(RoundEndEvent.class, new RoundFinishListener(this.teamService::getTeams));
 
         GameArea gameArea = this.mapProvider.getGameArea();
-
-        eventNode.addListener(BomberRequireSpawnEvent.class,
-                new BomberReviveListener(this.staminaService::getStaminaBar, gameArea::getRandomPosition, items::setBombItem)
-        );
+        Check.argCondition(gameArea == null, "The game area must be initialized before the game listener");
+        listenerMap.put(BomberRequireSpawnEvent.class, new BomberReviveListener(this.staminaService::getStaminaBar, gameArea::getRandomPosition, items::setBombItem));
+        return listenerMap;
     }
 
     void registerListener(@NotNull EventNode<Event> node) {
