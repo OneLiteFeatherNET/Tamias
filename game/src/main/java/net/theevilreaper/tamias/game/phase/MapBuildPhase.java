@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static net.minestom.server.MinecraftServer.getConnectionManager;
@@ -32,19 +33,23 @@ public final class MapBuildPhase extends GamePhase {
 
     private static final Component MAP_READY = Messages.withMini("<green>Map is ready!");
     private static final Component MAP_BUILDING = Messages.withMini("<green>Map is building up...");
-    private final MapProvider mapProvider;
+    private final  Consumer<List<Player>> teleportConsumer;
     private final Supplier<GameArea> mapGetter;
     private final PlayerConsumer scoreboardRemover;
     private Task task;
 
-    public MapBuildPhase(@NotNull MapProvider mapProvider, @NotNull Supplier<GameArea> mapGetter, @NotNull PlayerConsumer scoreboardRemover) {
+    public MapBuildPhase(
+            @NotNull Consumer<List<Player>> teleportConsumer,
+            @NotNull Supplier<GameArea> mapGetter,
+            @NotNull PlayerConsumer scoreboardRemover
+    ) {
         super("MapBuild");
         addListener(FinishBuildEvent.class, finishBuildEvent -> {
             Audience.audience(MinecraftServer.getConnectionManager().getOnlinePlayers())
                     .sendMessage(MAP_READY);
             finish();
         });
-        this.mapProvider = mapProvider;
+        this.teleportConsumer = teleportConsumer;
         this.mapGetter = mapGetter;
         this.scoreboardRemover = scoreboardRemover;
     }
@@ -57,7 +62,7 @@ public final class MapBuildPhase extends GamePhase {
     @Override
     protected void onStart() {
         List<Player> playerList = new ArrayList<>(getConnectionManager().getOnlinePlayers());
-        this.mapProvider.teleportPlayers(playerList);
+        this.teleportConsumer.accept(playerList);
         for (Player player : playerList) {
             this.scoreboardRemover.accept(player);
         }

@@ -1,4 +1,4 @@
-package net.theevilreaper.tamias.game.phase;
+package net.theevilreaper.tamias.game.phase.playing;
 
 import de.icevizion.aves.map.BaseMap;
 import de.icevizion.aves.util.functional.VoidConsumer;
