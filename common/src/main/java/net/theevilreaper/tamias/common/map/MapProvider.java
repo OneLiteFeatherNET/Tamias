@@ -104,8 +104,8 @@ public final class MapProvider {
         this.gameMapInstance.loadChunk(this.gameMap.getSpawnData().pos()).join();
     }
 
-    public void teleportPlayers(@NotNull List<Player> players) {
-        this.spawnArea.teleport(this.gameMapInstance, players);
+    public void teleportPlayers(@NotNull List<Player> players, boolean switchInstance) {
+        this.spawnArea.teleport(this.gameMapInstance, players, switchInstance);
     }
 
     public <T extends Point> void loadChunks(@NotNull Instance instance, @NotNull T @NotNull ... positions) {
