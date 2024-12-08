@@ -12,8 +12,6 @@ import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.tamias.common.map.layer.SpawnLayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -33,7 +31,6 @@ import static net.minestom.server.MinecraftServer.getConnectionManager;
 public final class SpawnArea implements Area {
 
     private static final Block SPAWN_BLOCK = Block.TNT;
-    private static final Logger LOGGER = LoggerFactory.getLogger(SpawnArea.class);
     private static final Vec Y_VEC = new Vec(0.5, 1, 0.5);
     private final Instance instance;
     private final Pos[] positions;
@@ -61,9 +58,11 @@ public final class SpawnArea implements Area {
      * Teleports a given amount of players to the positions.
      * If the player amount is higher than the maximum of position it will throw a {@link IllegalArgumentException}.
      *
-     * @param players the players to teleport
+     * @param instance       the instance where the players should be teleported
+     * @param players        the players to teleport
+     * @param switchInstance if the player should be switched to the instance
      */
-    public void teleport(@NotNull Instance instance, @NotNull List<Player> players) {
+    public void teleport(@NotNull Instance instance, @NotNull List<Player> players, boolean switchInstance) {
         Check.argCondition(players.size() > this.positions.length, "The amount of online players is higher then the maximum position count");
         if (!ChunkUtils.isLoaded(instance.getChunkAt(this.spawnLayer.pos()))) {
             instance.loadChunk(this.spawnLayer.pos()).join();
@@ -71,9 +70,12 @@ public final class SpawnArea implements Area {
         Collections.shuffle(players);
         for (int i = 0; i < players.size(); i++) {
             Pos position = this.positions[i].add(Y_VEC);
-            LOGGER.info("Teleporting player {} to position {}", players.get(i).getUsername(), positions[i]);
             Player player = players.get(i);
-            player.setInstance(instance, position).join();
+            if (switchInstance) {
+                player.setInstance(instance, position).join();
+                return;
+            }
+            player.teleport(position);
         }
     }
 
