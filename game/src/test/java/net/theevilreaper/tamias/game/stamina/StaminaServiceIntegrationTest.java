@@ -52,7 +52,7 @@ class StaminaServiceIntegrationTest {
 
         assertEquals(1, staminaBars.size());
 
-        staminaService.addStaminas(staminaBars);
+        staminaService.add(staminaBars);
 
         assertNotNull(staminaService.getStaminaBar(player.getUuid()));
 
@@ -73,7 +73,7 @@ class StaminaServiceIntegrationTest {
 
         assertEquals(1, staminaBars.size());
 
-        staminaService.addStaminas(staminaBars);
+        staminaService.add(staminaBars);
 
         assertTrue(staminaService.removeStaminaBar(player.getUuid()));
         assertFalse(staminaService.removeStaminaBar(player.getUuid()));
@@ -85,7 +85,7 @@ class StaminaServiceIntegrationTest {
         Instance instance = env.createFlatInstance();
         Player firstPlayer = env.createPlayer(instance);
         StaminaBar staminaBar = StaminaFactory.createExplodeBar(firstPlayer);
-        staminaService.addStaminas(Map.of(firstPlayer.getUuid(), staminaBar));
+        staminaService.add(Map.of(firstPlayer.getUuid(), staminaBar));
 
         Player secondPlayer = env.createPlayer(instance);
 

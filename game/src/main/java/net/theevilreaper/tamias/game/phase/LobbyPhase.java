@@ -1,5 +1,6 @@
 package net.theevilreaper.tamias.game.phase;
 
+import de.icevizion.aves.util.functional.VoidConsumer;
 import de.icevizion.xerus.api.phase.TickDirection;
 import de.icevizion.xerus.api.phase.TimedPhase;
 import net.kyori.adventure.sound.Sound;
@@ -29,6 +30,7 @@ public final class LobbyPhase extends TimedPhase {
 
     private static final Sound PLING = Sound.sound(SoundEvent.BLOCK_NOTE_BLOCK_BELL, Sound.Source.MASTER, 1.0f, 1.0f);
     private final MapProvider provider;
+    private final VoidConsumer roundUpdateTrigger;
     private final int minPlayers;
     private final int maxPlayers;
     private final int lobbyPhaseTime;
@@ -40,8 +42,9 @@ public final class LobbyPhase extends TimedPhase {
             int minPlayers,
             int maxPlayers,
             int lobbyPhaseTime,
-            @NotNull IntConsumer timeUpdater
-    ) {
+            @NotNull IntConsumer timeUpdater,
+            @NotNull VoidConsumer roundUpdateTrigger
+            ) {
         super("Lobby", ChronoUnit.SECONDS, 1);
         this.setPaused(true);
         this.setCurrentTicks(lobbyPhaseTime);
@@ -51,6 +54,7 @@ public final class LobbyPhase extends TimedPhase {
         this.maxPlayers = maxPlayers;
         this.lobbyPhaseTime = lobbyPhaseTime;
         this.timeUpdater = timeUpdater;
+        this.roundUpdateTrigger = roundUpdateTrigger;
     }
 
     @Override
@@ -61,9 +65,7 @@ public final class LobbyPhase extends TimedPhase {
 
     @Override
     protected void onFinish() {
-        for (Player player : getConnectionManager().getOnlinePlayers()) {
-            AttributeHelper.disableMovement(player);
-        }
+        this.roundUpdateTrigger.apply();
     }
 
     @Override

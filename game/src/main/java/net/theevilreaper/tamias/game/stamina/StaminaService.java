@@ -30,7 +30,7 @@ public final class StaminaService {
         this.staminaBars = new HashMap<>();
     }
 
-    public void addStaminas(@NotNull Map<UUID, StaminaBar> staminaBars) {
+    public void add(@NotNull Map<UUID, StaminaBar> staminaBars) {
         lock.lock();
         try {
             this.staminaBars.putAll(staminaBars);
@@ -43,6 +43,8 @@ public final class StaminaService {
      * Starts all {@link net.minestom.server.timer.Task} reference from each {@link StaminaBar}.
      */
     public void start() {
+        System.out.println("Starting all stamina bars");
+        System.out.println("Stamina bars: " + staminaBars.size());
         for (StaminaBar value : this.staminaBars.values()) {
             value.start();
         }

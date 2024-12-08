@@ -135,6 +135,11 @@ public final class TamiasBoard implements TamiasScoreboard, DefaultScoreLayout {
         return false;
     }
 
+    @Override
+    public void hideBoard() {
+        this.viewers.forEach(this.currentScoreboard::removeViewer);
+    }
+
     @Contract(pure = true)
     @Override
     public @NotNull @UnmodifiableView Set<@NotNull Player> getViewers() {

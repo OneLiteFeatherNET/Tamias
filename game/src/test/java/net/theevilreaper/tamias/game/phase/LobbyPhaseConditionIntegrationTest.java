@@ -29,7 +29,7 @@ class LobbyPhaseConditionIntegrationTest {
     @BeforeAll
     static void setup() {
         MapProvider mapProvider = new MapProvider(Paths.get(""), pathStream -> List.of(MapEntry.of(Path.of(""))));
-        lobbyPhase = new LobbyPhase(mapProvider, 1, 2, LOBBY_PHASE_TIME, value -> {});
+        lobbyPhase = new LobbyPhase(mapProvider, 1, 2, LOBBY_PHASE_TIME, value -> {}, () -> {});
     }
 
     @AfterEach

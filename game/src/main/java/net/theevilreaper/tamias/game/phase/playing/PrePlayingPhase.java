@@ -33,6 +33,7 @@ public final class PrePlayingPhase extends TimedPhase {
     private final Supplier<BaseMap> gameMapSupplier;
     private final VoidConsumer gamePreparation;
     private final BiConsumer<Player, Integer> itemConsumer;
+    private final VoidConsumer staminaCreation;
 
     /**
      * Creates a new instance from the phase
@@ -46,7 +47,8 @@ public final class PrePlayingPhase extends TimedPhase {
             @NotNull TeamService<Team> teamService,
             @NotNull Supplier<BaseMap> gameMapSupplier,
             @NotNull VoidConsumer gamePreparation,
-            @NotNull BiConsumer<Player, Integer> itemConsumer
+            @NotNull BiConsumer<Player, Integer> itemConsumer,
+            @NotNull VoidConsumer staminaCreation
     ) {
         super("Pre-Playing", ChronoUnit.SECONDS, 1);
         this.setCurrentTicks(5);
@@ -55,7 +57,7 @@ public final class PrePlayingPhase extends TimedPhase {
         this.gameMapSupplier = gameMapSupplier;
         this.itemConsumer = itemConsumer;
         this.gamePreparation = gamePreparation;
-
+        this.staminaCreation = staminaCreation;
     }
 
     @Override
@@ -79,6 +81,7 @@ public final class PrePlayingPhase extends TimedPhase {
         TeamHelper.teleport(this.teamService, gameMap, this::updatePlayer);
         Team tntTeam = this.teamService.getTeams().get(GameConfig.TNT_ID);
         EntityHelper.switchToTNT(tntTeam.getPlayers().stream().findFirst().get());
+        this.staminaCreation.apply();
     }
 
     @Override
