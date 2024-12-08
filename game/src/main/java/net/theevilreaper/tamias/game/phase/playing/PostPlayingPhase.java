@@ -59,5 +59,4 @@ public final class PostPlayingPhase extends TimedPhase {
             this.teleportConsumer.accept(onlinePlayers);
         }
     }
-
 }

@@ -11,8 +11,10 @@ public final class PlayerChatListener implements Consumer<PlayerChatEvent> {
 
     @Override
     public void accept(@NotNull PlayerChatEvent event) {
-        var player = event.getPlayer();
+        event.setChatFormat(this::buildChatLayout);
+    }
 
-        event.setChatFormat(chatEvent -> GameMessages.buildChatLayout(player, Component.text(event.getMessage())));
+    private @NotNull Component buildChatLayout(@NotNull PlayerChatEvent event) {
+        return GameMessages.buildChatLayout(event.getPlayer(), Component.text(event.getMessage()));
     }
 }

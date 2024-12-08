@@ -2,6 +2,7 @@ package net.theevilreaper.tamias.game.stamina;
 
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.instance.Instance;
@@ -9,6 +10,7 @@ import net.minestom.server.potion.Potion;
 import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.sound.SoundEvent;
 import net.theevilreaper.tamias.game.attribute.AttributeHelper;
+import net.theevilreaper.tamias.game.event.BomberExplodeEvent;
 import net.theevilreaper.tamias.game.event.BomberRequireSpawnEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -27,7 +29,6 @@ public final class ExplodeBar extends StaminaBar {
 
     private static final Sound TICK_SOUND = Sound.sound(SoundEvent.UI_BUTTON_CLICK, Sound.Source.MASTER, 1F, 10F);
     private static final Sound EXPLODE_SOUND = Sound.sound(SoundEvent.ENTITY_GENERIC_EXPLODE, Sound.Source.MASTER, 1F, 1F);
-    private static final Potion BLINDNESS = new Potion(PotionEffect.BLINDNESS, (byte) 1, Integer.MAX_VALUE);
     private static final float MAX = 10;
 
     private float current;
@@ -86,7 +87,7 @@ public final class ExplodeBar extends StaminaBar {
             player.playSound(TICK_SOUND);
             return;
         }
-        this.explode();
+        EventDispatcher.call(new BomberExplodeEvent(player, Vec.fromPoint(player.getPosition())));
         this.player.playSound(EXPLODE_SOUND);
         this.status = Status.REGENERATING;
         // If the player explodes, we need to disable the movement and clear the inventory
@@ -103,17 +104,6 @@ public final class ExplodeBar extends StaminaBar {
         if (current > MAX / 2) {
             this.onRegenerated();
         }
-    }
-
-    /**
-     * Triggers the logic to explode a player.
-     */
-    public void explode() {
-        Instance instance = this.player.getInstance();
-        Pos pos = Pos.fromPoint(player.getPosition());
-        instance.explode((float) pos.x(), (float) pos.y(), (float) pos.z(), 1);
-        player.addEffect(BLINDNESS);
-        AttributeHelper.disableMovement(player);
     }
 
     /**

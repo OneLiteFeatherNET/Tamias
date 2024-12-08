@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * The interface represents the basic structure of a scoreboard for the game.
- * The scoreboard is used to display different information to the player.
+ * It is used to display different information to the player.
  *
  * @author theEvilReaper
  * @version 1.0.0
@@ -47,7 +47,12 @@ public interface TamiasScoreboard extends Viewable {
 
     void updatePlayerCount(int playerCount);
 
-    void updateRound(int round);
+    /**
+     * Updates the component which represents the round.
+     *
+     * @param round the new data to set
+     */
+    void updateRound(@NotNull Component round);
 
     void updateTntCount(int tntCount);
 

@@ -6,6 +6,7 @@ import de.icevizion.aves.map.BaseMap;
 import de.icevizion.aves.map.MapEntry;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
@@ -30,21 +31,22 @@ import java.util.stream.Stream;
 
 public final class MapProvider {
 
-    private final Path mapPath;
     private final FileHandler fileHandler;
     private final MapPool mapPool;
+
     private BaseMap lobbyMap;
     private GameMap gameMap;
     private InstanceContainer gameMapInstance;
     private SpawnArea spawnArea;
     private GameArea gameArea;
 
+    private InstanceContainer activeInstance;
     private BaseMap activeMap;
 
     public MapProvider(@NotNull Path originPath, @NotNull Function<Stream<Path>, List<MapEntry>> filterMaps) {
-        this.mapPath = originPath;
-        this.mapPool = new MapPool(this.mapPath, filterMaps);
+        this.mapPool = new MapPool(originPath, filterMaps);
         this.fileHandler = new GsonFileHandler(GsonUtil.GSON);
+        this.activeInstance = MinecraftServer.getInstanceManager().createInstanceContainer();
     }
 
     public void saveMap(@NotNull Path path, @NotNull BaseMap baseMap) {
@@ -118,6 +120,16 @@ public final class MapProvider {
         }
     }
 
+    public void teleportToActiveSpawn(@NotNull Player player) {
+        Pos spawnPos = this.activeMap.getSpawnOrDefault(Pos.ZERO);
+        if (player.getInstance().getUniqueId().equals(this.activeInstance.getUniqueId())) {
+            player.teleport(spawnPos);
+            return;
+        }
+
+        player.setInstance(this.activeInstance, spawnPos);
+    }
+
     public @Nullable SpawnArea getSpawnArea() {
         return spawnArea;
     }
@@ -136,5 +148,9 @@ public final class MapProvider {
      */
     public @NotNull Supplier<BaseMap> getActiveMap() {
         return () -> this.activeMap;
+    }
+
+    public @NotNull Supplier<InstanceContainer> getActiveInstance() {
+        return () -> this.activeInstance;
     }
 }

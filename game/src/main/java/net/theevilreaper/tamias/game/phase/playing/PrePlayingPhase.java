@@ -12,34 +12,48 @@ import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.common.map.GameMap;
 import net.theevilreaper.tamias.common.util.Tags;
 import net.theevilreaper.tamias.game.team.TeamHelper;
-import net.theevilreaper.tamias.game.util.Items;
+import net.theevilreaper.tamias.game.util.EntityHelper;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.time.temporal.ChronoUnit;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
+/**
+ * The {@link PrePlayingPhase} deals each code logic which should be executed before the {@link PlayingPhase} begins.
+ * It reduces the complexity of the playing phase without dealing too much overhead.
+ *
+ * @author theEvilReaper
+ * @version 1.0.0
+ * @since 1.0.0
+ */
 public final class PrePlayingPhase extends TimedPhase {
 
-    private final Logger LOGGER = LoggerFactory.getLogger(PrePlayingPhase.class);
     private final TeamService<Team> teamService;
     private final Supplier<BaseMap> gameMapSupplier;
     private final VoidConsumer gamePreparation;
-    private final Items items;
+    private final BiConsumer<Player, Integer> itemConsumer;
 
+    /**
+     * Creates a new instance from the phase
+     *
+     * @param teamService     the service which provides access to the teams
+     * @param gameMapSupplier the supplier to access data from the map
+     * @param gamePreparation the logic which should be executed during due to this phase
+     * @param itemConsumer     the consumer which triggers the item set logic
+     */
     public PrePlayingPhase(
             @NotNull TeamService<Team> teamService,
             @NotNull Supplier<BaseMap> gameMapSupplier,
             @NotNull VoidConsumer gamePreparation,
-            @NotNull Items items
+            @NotNull BiConsumer<Player, Integer> itemConsumer
     ) {
         super("Pre-Playing", ChronoUnit.SECONDS, 1);
         this.setCurrentTicks(5);
         this.setTickDirection(TickDirection.DOWN);
         this.teamService = teamService;
         this.gameMapSupplier = gameMapSupplier;
-        this.items = items;
+        this.itemConsumer = itemConsumer;
         this.gamePreparation = gamePreparation;
 
     }
@@ -53,7 +67,6 @@ public final class PrePlayingPhase extends TimedPhase {
     public void onStart() {
         super.onStart();
         TeamHelper.allocateTeams(this.teamService);
-        LOGGER.info("Allocated teams");
     }
 
     @Override
@@ -64,11 +77,12 @@ public final class PrePlayingPhase extends TimedPhase {
         this.gamePreparation.apply();
         //Teleportation
         TeamHelper.teleport(this.teamService, gameMap, this::updatePlayer);
+        Team tntTeam = this.teamService.getTeams().get(GameConfig.TNT_ID);
+        EntityHelper.switchToTNT(tntTeam.getPlayers().stream().findFirst().get());
     }
 
     @Override
     public void onUpdate() {
-       LOGGER.info("Map is ");
     }
 
     /**
@@ -79,11 +93,7 @@ public final class PrePlayingPhase extends TimedPhase {
     private void updatePlayer(@NotNull Player player) {
         byte id = player.getTag(Tags.TEAM_ID);
 
-        if (id == GameConfig.SURVIVOR_ID) {
-            this.items.setShootItem(player);
-        } else {
-            this.items.setBombItem(player);
-        }
+        this.itemConsumer.accept(player, ((int) id));
 
         Team team = this.teamService.getTeams().get(id);
 

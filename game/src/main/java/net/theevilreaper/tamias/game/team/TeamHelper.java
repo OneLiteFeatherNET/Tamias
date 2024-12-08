@@ -10,12 +10,14 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.common.map.GameMap;
+import net.theevilreaper.tamias.common.util.Tags;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.IntFunction;
 
 /**
  * @author theEvilReaper
@@ -23,6 +25,22 @@ import java.util.Set;
  * @since 1.0.0
  **/
 public final class TeamHelper {
+
+    public static void switchToTNTTeam(@NotNull IntFunction<Team> teamIntFunction, @NotNull Player player) {
+        Check.argCondition(!player.hasTag(Tags.TEAM_ID), "Need a team tag for switching teams");
+
+        int id = player.getTag(Tags.TEAM_ID);
+
+        Check.argCondition(GameConfig.SURVIVOR_ID != id, "The player must be a survivor");
+
+        Team survivorTeam = teamIntFunction.apply(id);
+        Team bomberTeam = teamIntFunction.apply(GameConfig.TNT_ID);
+
+        survivorTeam.removePlayer(player, involved -> involved.getInventory().clear());
+        bomberTeam.addPlayer(player);
+
+        //TODO: Choose random spawn
+    }
 
     public static void allocateTeams(@NotNull TeamService<Team> teamService) {
         Check.argCondition(!teamService.hasTeams(), "The team service must contain teams");

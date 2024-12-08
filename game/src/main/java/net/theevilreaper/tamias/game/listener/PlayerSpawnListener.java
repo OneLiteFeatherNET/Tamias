@@ -18,7 +18,7 @@ import static net.minestom.server.MinecraftServer.getConnectionManager;
 /**
  * @author theEvilReaper
  * @version 1.0.0
- * @since
+ * @since 1.0.0
  **/
 public final class PlayerSpawnListener implements Consumer<PlayerSpawnEvent> {
 
