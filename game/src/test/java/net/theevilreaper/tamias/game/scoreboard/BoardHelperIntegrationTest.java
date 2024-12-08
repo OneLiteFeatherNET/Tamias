@@ -26,7 +26,7 @@ class BoardHelperIntegrationTest {
 
     @BeforeAll
     static void setup() {
-        tamiasScoreboard = TamiasScoreboard.of();
+        tamiasScoreboard = TamiasScoreboard.of(3);
         tamiasScoreboard.initDefaults();
     }
 

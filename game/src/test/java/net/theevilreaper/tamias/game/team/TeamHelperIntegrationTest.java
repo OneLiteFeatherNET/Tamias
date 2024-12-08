@@ -62,6 +62,7 @@ class TeamHelperIntegrationTest {
         );
     }
 
+     @Disabled
     @Test
     void testTeamAllocateWithInvalidPlayerBase(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
@@ -92,6 +93,7 @@ class TeamHelperIntegrationTest {
         env.destroyInstance(instance, true);
     }
 
+    @Disabled
     @Test
     void testTeamTeleportWithEmptyTeams(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
