@@ -37,6 +37,7 @@ public final class RoundProvider {
      */
     public void triggerNextRound() {
         if (currentRound + 1 > maxRounds) return;
+        System.out.println("[1] currentRound: " + currentRound);
         currentRound++;
         Component roundComponent = Component.text(currentRound).append(maxRoundComponent);
         EventDispatcher.call(new RoundStartEvent(currentRound, roundComponent));
@@ -48,6 +49,7 @@ public final class RoundProvider {
      * @return {@code true} if the current round is the first round
      */
     public boolean isFirstRound() {
+        System.out.println("currentRound: " + currentRound);
         return currentRound == 1;
     }
 

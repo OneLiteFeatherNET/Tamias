@@ -80,6 +80,8 @@ public interface TamiasScoreboard extends Viewable {
      */
     void updateScore(@NotNull ScoreType scoreType, @NotNull Component value);
 
+    void hideBoard();
+
     /**
      * The enum contains the different types of scores
      */

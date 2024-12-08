@@ -1,6 +1,7 @@
 package net.theevilreaper.tamias.game.phase;
 
 import de.icevizion.aves.util.functional.PlayerConsumer;
+import de.icevizion.aves.util.functional.VoidConsumer;
 import de.icevizion.xerus.api.phase.GamePhase;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
@@ -11,6 +12,7 @@ import net.theevilreaper.tamias.common.area.GameArea;
 import net.theevilreaper.tamias.common.event.FinishBuildEvent;
 import net.theevilreaper.tamias.common.map.MapProvider;
 import net.theevilreaper.tamias.common.util.Messages;
+import net.theevilreaper.tamias.game.attribute.AttributeHelper;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.temporal.ChronoUnit;
@@ -33,10 +35,10 @@ public final class MapBuildPhase extends GamePhase {
 
     private static final Component MAP_READY = Messages.withMini("<green>Map is ready!");
     private static final Component MAP_BUILDING = Messages.withMini("<green>Map is building up...");
-    private final  Consumer<List<Player>> teleportConsumer;
+    private final Consumer<List<Player>> teleportConsumer;
     private final Supplier<GameArea> mapGetter;
     private final PlayerConsumer scoreboardRemover;
-    private Task task;
+    private VoidConsumer taskReset;
 
     public MapBuildPhase(
             @NotNull Consumer<List<Player>> teleportConsumer,
@@ -65,18 +67,19 @@ public final class MapBuildPhase extends GamePhase {
         this.teleportConsumer.accept(playerList);
         for (Player player : playerList) {
             this.scoreboardRemover.accept(player);
+            AttributeHelper.disableMovement(player);
         }
         MinecraftServer.getSchedulerManager().buildTask(() -> {
             Audience.audience(MinecraftServer.getConnectionManager().getOnlinePlayers())
                     .sendMessage(MAP_BUILDING);
             this.mapGetter.get().triggerPlacement();
-            this.task = this.mapGetter.get().getTask();
+            this.taskReset = () -> this.mapGetter.get().resetTask();
         }).delay(10, ChronoUnit.SECONDS).schedule();
     }
 
     @Override
     public void finish() {
-        task.cancel();
+        this.taskReset.apply();
         super.finish();
     }
 }
