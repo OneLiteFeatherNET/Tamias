@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+@SuppressWarnings("java:S3252")
 public final class FireworkUtil {
 
     private static final int FIREWORK_ENTITY_SPAWN_COUNT = 3;

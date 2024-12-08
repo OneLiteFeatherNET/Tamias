@@ -1,10 +1,9 @@
 package net.theevilreaper.tamias.game.listener;
 
-import de.icevizion.aves.util.Broadcaster;
 import de.icevizion.aves.util.functional.VoidConsumer;
 import de.icevizion.xerus.api.phase.Phase;
 import de.icevizion.xerus.api.team.Team;
-import net.minestom.server.MinecraftServer;
+import net.kyori.adventure.audience.Audience;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.theevilreaper.tamias.common.util.Tags;
@@ -18,10 +17,13 @@ import java.util.function.IntConsumer;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
+import static net.minestom.server.MinecraftServer.getConnectionManager;
+
 /**
  * The listener implementation handles the {@link PlayerDisconnectEvent} call, when a player disconnects.
  * This is required to perform operations on different states of the game.
  * As example the quit logic in the {@link LobbyPhase} is different compared to the {@link PlayingPhase}
+ *
  * @author theEvilReaper
  * @version 1.0.0
  * @since 1.0.0
@@ -62,8 +64,9 @@ public final class PlayerQuitListener implements Consumer<PlayerDisconnectEvent>
 
     /**
      * Handles the quit logic for the {@link PlayingPhase}.
+     *
      * @param playingPhase the phase reference
-     * @param player the involved player
+     * @param player       the involved player
      */
     private void handleGameQuit(@NotNull PlayingPhase playingPhase, @NotNull Player player) {
         if (!player.hasTag(Tags.TEAM_ID)) return;
@@ -78,17 +81,17 @@ public final class PlayerQuitListener implements Consumer<PlayerDisconnectEvent>
 
     /**
      * Handles the quit logic for the {@link LobbyPhase}.
+     *
      * @param lobbyPhase the reference from the phase
-     * @param player the player which is involved
+     * @param player     the player which is involved
      */
     private void handleLobbyQuit(@NotNull LobbyPhase lobbyPhase, @NotNull Player player) {
         lobbyPhase.checkStopCondition();
-        Broadcaster.broadcast(GameMessages.getLeaveMessage(player));
-        this.playerCountUpdater.accept(MinecraftServer.getConnectionManager().getOnlinePlayerCount());
+        Audience.audience(getConnectionManager().getOnlinePlayers()).sendMessage(GameMessages.getLeaveMessage(player));
+        this.playerCountUpdater.accept(getConnectionManager().getOnlinePlayerCount());
     }
 
     /**
-     *
      * @param player
      */
     private void handleGeneralQuit(@NotNull Player player) {

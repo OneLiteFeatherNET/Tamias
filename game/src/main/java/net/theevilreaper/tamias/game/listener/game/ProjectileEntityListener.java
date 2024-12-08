@@ -38,7 +38,7 @@ public final class ProjectileEntityListener implements Consumer<ProjectileCollid
         if (staminaBar == null) return;
 
         if (teamValue == GameConfig.TNT_ID) {
-            ((ExplodeBar)staminaBar).explode();
+            staminaBar.triggerAction();
             return;
         }
         // TODO: Fix

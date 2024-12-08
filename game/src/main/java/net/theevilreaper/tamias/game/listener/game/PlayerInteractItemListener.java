@@ -1,5 +1,6 @@
 package net.theevilreaper.tamias.game.listener.game;
 
+import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.item.ItemStack;
 import net.theevilreaper.tamias.game.stamina.ExplodeBar;
@@ -18,9 +19,9 @@ import java.util.function.Function;
  */
 public final class PlayerInteractItemListener implements Consumer<PlayerUseItemEvent> {
 
-    private final Function<Void, StaminaBar> staminaBarConsumer;
+    private final Function<Player, StaminaBar> staminaBarConsumer;
 
-    public PlayerInteractItemListener(Function<Void, StaminaBar> staminaBarConsumer) {
+    public PlayerInteractItemListener(@NotNull Function<Player, StaminaBar> staminaBarConsumer) {
         this.staminaBarConsumer = staminaBarConsumer;
     }
 
@@ -31,7 +32,7 @@ public final class PlayerInteractItemListener implements Consumer<PlayerUseItemE
         final byte value = stack.getTag(Tags.ITEM_TAG);
         if (value > 0x02) return;
 
-        StaminaBar stamina = staminaBarConsumer.apply(null);
+        StaminaBar stamina = staminaBarConsumer.apply(event.getPlayer());
         if (stamina instanceof ExplodeBar explodeBar) {
             explodeBar.start();
         }

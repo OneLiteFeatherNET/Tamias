@@ -1,4 +1,4 @@
-package net.theevilreaper.tamias.game.listener.game;
+package net.theevilreaper.tamias.game.listener.round;
 
 import de.icevizion.xerus.api.team.Team;
 import net.theevilreaper.tamias.common.round.event.RoundEndEvent;

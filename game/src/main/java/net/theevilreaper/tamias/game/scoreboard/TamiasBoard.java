@@ -65,16 +65,13 @@ public final class TamiasBoard implements TamiasScoreboard, DefaultScoreLayout {
     public void updateGameDefaults(int tnt, int players, int round) {
         this.updateTntCount(tnt);
         this.updatePlayerCount(players);
-        this.updateRound(round);
+        this.updateRound(SPACER);
     }
 
     @Override
-    public void updateRound(int round) {
+    public void updateRound(@NotNull Component round) {
         if (this.boardType == BoardType.LOBBY) return;
-        String roundString = String.valueOf(round);
-        String maxRoundString = String.valueOf(this.maxRound);
-        Component newRoundScore = SPACER.append(Component.text(roundString, NamedTextColor.WHITE)).append(Component.text(" / ")).append(Component.text(maxRoundString, NamedTextColor.WHITE));
-        this.currentScoreboard.updateLineContent(ROUND.getName(), newRoundScore);
+        this.currentScoreboard.updateLineContent(ROUND.getName(), SPACER.append(round));
     }
 
     @Override

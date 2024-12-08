@@ -60,7 +60,7 @@ public class TamiasSetup extends Extension {
 
     @Override
     public void initialize() {
-        MinecraftServer.getInstanceManager().registerInstance(this.mainInstance);
+        MinecraftServer.getInstanceManager().registerInstance(this.mapProvider.getActiveInstance().get());
         this.mapProvider.loadLobbyMap(this.mainInstance);
         this.inventoryProvider = new InventoryProvider(this.mapProvider::getMapEntries);
         this.registerListener();

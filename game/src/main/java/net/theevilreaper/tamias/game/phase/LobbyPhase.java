@@ -32,10 +32,16 @@ public final class LobbyPhase extends TimedPhase {
     private final int minPlayers;
     private final int maxPlayers;
     private final int lobbyPhaseTime;
+    private final IntConsumer timeUpdater;
     private boolean forceStarted;
-    private IntConsumer timeUpdater;
 
-    public LobbyPhase(@NotNull MapProvider provider, int minPlayers, int maxPlayers, int lobbyPhaseTime, @NotNull IntConsumer timeUpdater) {
+    public LobbyPhase(
+            @NotNull MapProvider provider,
+            int minPlayers,
+            int maxPlayers,
+            int lobbyPhaseTime,
+            @NotNull IntConsumer timeUpdater
+    ) {
         super("Lobby", ChronoUnit.SECONDS, 1);
         this.setPaused(true);
         this.setCurrentTicks(lobbyPhaseTime);
