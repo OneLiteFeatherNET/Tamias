@@ -54,10 +54,9 @@ public final class Effects {
      * @param player the player to clear the effects
      */
     private static void clearEffects(@NotNull Player player) {
-        if (!player.getActiveEffects().isEmpty()) {
-            for (TimedPotion activeEffect : player.getActiveEffects()) {
-                player.removeEffect(activeEffect.potion().effect());
-            }
+        if (player.getActiveEffects().isEmpty()) return;
+        for (TimedPotion activeEffect : player.getActiveEffects()) {
+            player.removeEffect(activeEffect.potion().effect());
         }
     }
 }
