@@ -7,10 +7,8 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
-import net.minestom.server.timer.Task;
 import net.theevilreaper.tamias.common.area.GameArea;
 import net.theevilreaper.tamias.common.event.FinishBuildEvent;
-import net.theevilreaper.tamias.common.map.MapProvider;
 import net.theevilreaper.tamias.common.util.Messages;
 import net.theevilreaper.tamias.game.attribute.AttributeHelper;
 import org.jetbrains.annotations.NotNull;
@@ -73,7 +71,7 @@ public final class MapBuildPhase extends GamePhase {
             Audience.audience(MinecraftServer.getConnectionManager().getOnlinePlayers())
                     .sendMessage(MAP_BUILDING);
             this.mapGetter.get().triggerPlacement();
-            this.taskReset = () -> this.mapGetter.get().resetTask();
+          //  this.taskReset = () -> this.mapGetter.get().resetTask();
         }).delay(10, ChronoUnit.SECONDS).schedule();
     }
 
