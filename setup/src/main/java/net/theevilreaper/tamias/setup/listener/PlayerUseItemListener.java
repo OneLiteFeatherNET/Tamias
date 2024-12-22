@@ -4,6 +4,7 @@ import de.icevizion.aves.util.functional.PlayerConsumer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.player.PlayerUseItemEvent;
+import net.minestom.server.item.ItemStack;
 import net.theevilreaper.tamias.common.util.Tags;
 import net.theevilreaper.tamias.setup.data.SetupData;
 import net.theevilreaper.tamias.setup.event.MapSetupFinishEvent;
@@ -14,20 +15,17 @@ import java.util.function.Function;
 
 public final class PlayerUseItemListener implements Consumer<PlayerUseItemEvent> {
 
-    private final PlayerConsumer openInvFunction;
+    private final PlayerConsumer invOpener;
     private final Function<Player, SetupData> saveFunction;
 
-    public PlayerUseItemListener(
-            @NotNull PlayerConsumer openInvFunction,
-            @NotNull Function<Player, SetupData>  saveFunction
-    ) {
-        this.openInvFunction = openInvFunction;
+    public PlayerUseItemListener(@NotNull PlayerConsumer invOpener, @NotNull Function<Player, SetupData> saveFunction) {
+        this.invOpener = invOpener;
         this.saveFunction = saveFunction;
     }
 
     @Override
     public void accept(@NotNull PlayerUseItemEvent event) {
-        var stack = event.getItemStack();
+        ItemStack stack = event.getItemStack();
 
         if (!stack.hasTag(Tags.ITEM_TAG)) return;
 
@@ -35,10 +33,11 @@ public final class PlayerUseItemListener implements Consumer<PlayerUseItemEvent>
 
         Player player = event.getPlayer();
         if (itemId == 0x00) {
-            this.openInvFunction.accept(player);
+            this.invOpener.accept(player);
             return;
         }
-        SetupData setupData = saveFunction.apply(player);
+
+        SetupData setupData = this.saveFunction.apply(player);
         if (setupData == null) return;
 
         if (itemId == 0x02) {

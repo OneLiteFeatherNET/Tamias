@@ -42,13 +42,7 @@ public final class MapSetupSelectListener implements Consumer<MapSetupSelectEven
             player.sendMessage("You already have a map selected");
         }
 
-        SetupData.Builder builder;
-
-        if (setupData == null) {
-            builder = SetupData.builder().player(player);
-        } else {
-            builder = SetupData.builder(setupData);
-        }
+        SetupData.Builder builder = setupData == null ? SetupData.builder().player(player) : SetupData.builder(setupData);
 
         MapEntry mapEntry = event.getMapEntry();
         Component message = Messages.withPrefix(Component.text("You selected the map: ", NamedTextColor.GRAY))
