@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 
 import static net.minestom.server.MinecraftServer.getConnectionManager;
 
@@ -62,7 +63,7 @@ public final class SpawnArea implements Area {
      * @param players        the players to teleport
      * @param switchInstance if the player should be switched to the instance
      */
-    public void teleport(@NotNull Instance instance, @NotNull List<Player> players, boolean switchInstance) {
+    public void teleport(@NotNull Instance instance, @NotNull List<Player> players, BooleanSupplier switchInstance) {
         Check.argCondition(players.size() > this.positions.length, "The amount of online players is higher then the maximum position count");
         if (!ChunkUtils.isLoaded(instance.getChunkAt(this.spawnLayer.pos()))) {
             instance.loadChunk(this.spawnLayer.pos()).join();
@@ -71,7 +72,7 @@ public final class SpawnArea implements Area {
         for (int i = 0; i < players.size(); i++) {
             Pos position = this.positions[i].add(Y_VEC);
             Player player = players.get(i);
-            if (switchInstance) {
+            if (switchInstance.getAsBoolean()) {
                 player.setInstance(instance, position).join();
                 return;
             }
