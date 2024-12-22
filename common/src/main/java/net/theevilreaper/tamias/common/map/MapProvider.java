@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -106,7 +107,7 @@ public final class MapProvider {
         this.gameMapInstance.loadChunk(this.gameMap.getSpawnData().pos()).join();
     }
 
-    public void teleportPlayers(@NotNull List<Player> players, boolean switchInstance) {
+    public void teleportPlayers(@NotNull List<Player> players, BooleanSupplier switchInstance) {
         this.spawnArea.teleport(this.gameMapInstance, players, switchInstance);
     }
 

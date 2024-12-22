@@ -18,6 +18,7 @@ import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.tag.Tag;
 import net.theevilreaper.tamias.common.gson.GsonUtil;
 import net.theevilreaper.tamias.common.map.MapProvider;
+import net.theevilreaper.tamias.common.util.MapFilter;
 import net.theevilreaper.tamias.setup.commands.SetupCommand;
 import net.theevilreaper.tamias.setup.data.SetupDataService;
 import net.theevilreaper.tamias.setup.event.MapSetupFinishEvent;
@@ -39,7 +40,7 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-public class TamiasSetup extends Extension {
+public class TamiasSetup extends Extension implements MapFilter {
 
     private static final Pos FALLBACK_POS = new Pos(0, 100, 0);
     public static final Tag<Byte> SETUP_TAG = Tag.Byte("setup");
@@ -53,7 +54,7 @@ public class TamiasSetup extends Extension {
 
     public TamiasSetup() {
         this.mainInstance = MinecraftServer.getInstanceManager().createInstanceContainer();
-        this.mapProvider = new MapProvider(Paths.get("").resolve("maps"), TamiasSetup::defaultFilter);
+        this.mapProvider = new MapProvider(ROOT_FOLDER.resolve("maps"), this::filterMapsForSetup);
         this.fileHandler = new GsonFileHandler(GsonUtil.GSON);
         this.setupDataService = new SetupDataService();
     }
