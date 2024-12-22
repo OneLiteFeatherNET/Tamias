@@ -1,6 +1,9 @@
 package net.theevilreaper.tamias.game.stamina;
 
+import de.icevizion.xerus.api.team.Team;
+import de.icevizion.xerus.api.team.TeamService;
 import net.minestom.server.entity.Player;
+import net.theevilreaper.tamias.common.config.GameConfig;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,12 +33,20 @@ public final class StaminaService {
         this.staminaBars = new HashMap<>();
     }
 
-    public void add(@NotNull Map<UUID, StaminaBar> staminaBars) {
-        lock.lock();
-        try {
-            this.staminaBars.putAll(staminaBars);
-        } finally {
-            lock.unlock();
+    /**
+     * Creates all {@link StaminaBar} instances for the given {@link TeamService}.
+     * @param teamService the service to get the teams
+     */
+    public void createStaminaObjects(@NotNull TeamService<Team> teamService) {
+        Team survivorTeam = teamService.getTeams().get(GameConfig.SURVIVOR_ID);
+        Team bomberTeam = teamService.getTeams().get(GameConfig.TNT_ID);
+
+        for (Player player : survivorTeam.getPlayers()) {
+            staminaBars.put(player.getUuid(), StaminaFactory.createShootBar(player));
+        }
+
+        for (Player player : bomberTeam.getPlayers()) {
+            staminaBars.put(player.getUuid(), StaminaFactory.createExplodeBar(player));
         }
     }
 
@@ -43,8 +54,6 @@ public final class StaminaService {
      * Starts all {@link net.minestom.server.timer.Task} reference from each {@link StaminaBar}.
      */
     public void start() {
-        System.out.println("Starting all stamina bars");
-        System.out.println("Stamina bars: " + staminaBars.size());
         for (StaminaBar value : this.staminaBars.values()) {
             value.start();
         }
