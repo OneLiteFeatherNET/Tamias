@@ -67,12 +67,13 @@ public class TamiasSetup extends Extension {
     private void registerListener() {
         GlobalEventHandler manager = MinecraftServer.getGlobalEventHandler();
         Supplier<Instance> instanceSupplier = mapProvider.getActiveInstance();
+        SetupMapProvider setupMapProvider = (SetupMapProvider) mapProvider;
         PlayerConsumer initialSpawnSupplier = player -> {
-            mapProvider.teleportToSpawn(player);
+            setupMapProvider.teleportToSpawn(player, false);
             setupItems.setOverViewItem(player);
         };
         PlayerConsumer instanceSwitcher = player -> {
-            mapProvider.teleportToSpawn(player, true);
+            setupMapProvider.teleportToSpawn(player, true);
             setupItems.setOverViewItem(player);
         };
         manager.addListener(PlayerUseItemEvent.class, new PlayerUseItemListener(inventoryProvider::openMapSetupInventory, setupDataService::getSetupData));
