@@ -18,7 +18,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -29,12 +28,12 @@ public final class BomberReviveListener implements Consumer<BomberRequireSpawnEv
     private static final Sound RESPAWN = Sound.sound(SoundEvent.BLOCK_ANVIL_PLACE, Sound.Source.MASTER, 1f, 0.65f);
 
     private final Function<Player, StaminaBar> barGetter;
-    private final Optional<Supplier<Pos>> spawnPos;
+    private final Supplier<Pos> spawnPos;
     private final PlayerConsumer itemSetter;
 
     public BomberReviveListener(
             @NotNull Function<Player, StaminaBar> barGetter,
-            @NotNull Optional<Supplier<Pos>>  spawnPos,
+            @NotNull Supplier<Pos>  spawnPos,
             @NotNull PlayerConsumer itemSetter
     ) {
         this.barGetter = barGetter;
@@ -52,12 +51,12 @@ public final class BomberReviveListener implements Consumer<BomberRequireSpawnEv
 
         if (teamId != GameConfig.TNT_ID) return;
 
-        if (this.spawnPos.isEmpty()) {
+        if (this.spawnPos.get() == null) {
             event.setCancelled(true);
             //TODO: Light spectator mode is here required
             return;
         }
-        Pos newSpawnPos = this.spawnPos.get().get().add(0, 1,0);
+        Pos newSpawnPos = this.spawnPos.get().add(0, 1,0);
 
         ExplodeBar staminaBar = (ExplodeBar) this.barGetter.apply(player);
         staminaBar.resetToDefaults();

@@ -1,18 +1,18 @@
 package net.theevilreaper.tamias.setup.map;
 
 import de.icevizion.aves.file.FileHandler;
-import de.icevizion.aves.file.GsonFileHandler;
 import de.icevizion.aves.map.BaseMap;
 import de.icevizion.aves.map.MapEntry;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.anvil.AnvilLoader;
 import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.tamias.common.config.GameConfig;
-import net.theevilreaper.tamias.common.gson.GsonUtil;
 import net.theevilreaper.tamias.common.map.GameMap;
-import net.theevilreaper.tamias.common.map.d.MapProvider;
+import net.theevilreaper.tamias.common.map.MapProvider;
 import net.theevilreaper.tamias.common.util.MapFilter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -31,14 +31,15 @@ import java.util.stream.Stream;
 
 public final class SetupMapProvider implements MapProvider, MapFilter {
 
+    private static final Pos FALLBACK_POS = new Pos(0, 100, 0);
     private static final Logger FILE_LOGGER = LoggerFactory.getLogger(SetupMapProvider.class);
     private final FileHandler fileHandler;
     private final BaseMap baseMap;
     private final List<MapEntry> maps;
     private final InstanceContainer activeInstance;
 
-    public SetupMapProvider() {
-        this.fileHandler = new GsonFileHandler(GsonUtil.GSON);
+    public SetupMapProvider(@NotNull FileHandler fileHandler) {
+        this.fileHandler = fileHandler;
         this.maps = loadMapEntries(ROOT_FOLDER.resolve(GameConfig.MAP_FOLDER));
         this.activeInstance = MinecraftServer.getInstanceManager().createInstanceContainer();
         Check.argCondition(this.maps.isEmpty(), "No maps found in the map folder");
@@ -91,6 +92,16 @@ public final class SetupMapProvider implements MapProvider, MapFilter {
     }
 
     @Override
+    public void teleportToSpawn(@NotNull Player player, boolean instanceSet) {
+        Pos pos = this.baseMap.getSpawnOrDefault(FALLBACK_POS);
+        if (!instanceSet) {
+            player.teleport(pos);
+            return;
+        }
+        player.setInstance(this.activeInstance, pos);
+    }
+
+    @Override
     public @UnmodifiableView @NotNull List<MapEntry> getEntries() {
         return Collections.unmodifiableList(maps);
     }
@@ -102,5 +113,9 @@ public final class SetupMapProvider implements MapProvider, MapFilter {
 
     public @NotNull BaseMap getBaseMap() {
         return baseMap;
+    }
+
+    public @NotNull Pos getSpawnPos() {
+        return this.baseMap.getSpawnOrDefault(FALLBACK_POS);
     }
 }

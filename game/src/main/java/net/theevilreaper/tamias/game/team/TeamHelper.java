@@ -7,10 +7,12 @@ import de.icevizion.xerus.api.team.TeamService;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.common.map.GameMap;
 import net.theevilreaper.tamias.common.util.Tags;
+import net.theevilreaper.tamias.game.event.RoleToBomberChangeEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,8 +40,7 @@ public final class TeamHelper {
 
         survivorTeam.removePlayer(player, involved -> involved.getInventory().clear());
         bomberTeam.addPlayer(player);
-
-        //TODO: Choose random spawn
+        EventDispatcher.call(new RoleToBomberChangeEvent(player));
     }
 
     public static void allocateTeams(@NotNull TeamService<Team> teamService) {

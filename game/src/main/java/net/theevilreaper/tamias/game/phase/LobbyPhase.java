@@ -4,14 +4,11 @@ import de.icevizion.aves.util.functional.VoidConsumer;
 import de.icevizion.xerus.api.phase.TickDirection;
 import de.icevizion.xerus.api.phase.TimedPhase;
 import net.kyori.adventure.sound.Sound;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.entity.Player;
 import net.minestom.server.sound.SoundEvent;
 import net.theevilreaper.tamias.common.map.MapProvider;
-import net.theevilreaper.tamias.game.attribute.AttributeHelper;
+import net.theevilreaper.tamias.game.map.GameMapProvider;
 import net.theevilreaper.tamias.game.util.GameMessages;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.temporal.ChronoUnit;
@@ -29,7 +26,7 @@ import static net.theevilreaper.tamias.common.config.GameConfig.FORCE_START_TIME
 public final class LobbyPhase extends TimedPhase {
 
     private static final Sound PLING = Sound.sound(SoundEvent.BLOCK_NOTE_BLOCK_BELL, Sound.Source.MASTER, 1.0f, 1.0f);
-    private final MapProvider provider;
+    private final MapProvider mapProvider;
     private final VoidConsumer roundUpdateTrigger;
     private final int minPlayers;
     private final int maxPlayers;
@@ -38,20 +35,20 @@ public final class LobbyPhase extends TimedPhase {
     private boolean forceStarted;
 
     public LobbyPhase(
-            @NotNull MapProvider provider,
+            @NotNull MapProvider mapProvider,
+            @NotNull IntConsumer timeUpdater,
+            @NotNull VoidConsumer roundUpdateTrigger,
             int minPlayers,
             int maxPlayers,
-            int lobbyPhaseTime,
-            @NotNull IntConsumer timeUpdater,
-            @NotNull VoidConsumer roundUpdateTrigger
-            ) {
+            int lobbyPhaseTime
+    ) {
         super("Lobby", ChronoUnit.SECONDS, 1);
         this.setPaused(true);
         this.setCurrentTicks(lobbyPhaseTime);
         this.setTickDirection(TickDirection.DOWN);
-        this.provider = provider;
         this.minPlayers = minPlayers;
         this.maxPlayers = maxPlayers;
+        this.mapProvider = mapProvider;
         this.lobbyPhaseTime = lobbyPhaseTime;
         this.timeUpdater = timeUpdater;
         this.roundUpdateTrigger = roundUpdateTrigger;
@@ -73,29 +70,21 @@ public final class LobbyPhase extends TimedPhase {
         setLevel();
         this.timeUpdater.accept(getCurrentTicks());
 
+        GameMapProvider gameMapProvider = (GameMapProvider) this.mapProvider;
         switch (getCurrentTicks()) {
-            case 30, 3, 1 -> broadcastTime();
-            case 20 -> {
-                broadcastTime();
-                this.provider.loadGameMap();
-            }
+            case 30, 20, 3, 1 -> broadcastTime();
             case 10 -> {
                 this.broadcastTime();
-                this.provider.loadGameChunks();
+                gameMapProvider.loadGameChunks();
             }
             case 5 -> {
                 this.broadcastTime();
-                this.provider.getSpawnArea().triggerPlacement();
+                gameMapProvider.triggerSpawnPlacement();
             }
             default -> {
                 // Nothing to do here
             }
         }
-    }
-
-    @Contract(pure = true)
-    private @NotNull Component getTimeComponent() {
-        return Component.text(String.valueOf(getCurrentTicks()), NamedTextColor.GRAY);
     }
 
     private void setLevel() {
