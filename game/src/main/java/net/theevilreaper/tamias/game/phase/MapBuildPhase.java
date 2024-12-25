@@ -7,11 +7,13 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
+import net.minestom.server.timer.Task;
 import net.theevilreaper.tamias.common.area.GameArea;
 import net.theevilreaper.tamias.common.event.FinishBuildEvent;
 import net.theevilreaper.tamias.common.util.Messages;
 import net.theevilreaper.tamias.game.attribute.AttributeHelper;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
 
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -31,17 +33,18 @@ import static net.minestom.server.MinecraftServer.getConnectionManager;
  **/
 public final class MapBuildPhase extends GamePhase {
 
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(MapBuildPhase.class);
     private static final Component MAP_READY = Messages.withMini("<green>Map is ready!");
     private static final Component MAP_BUILDING = Messages.withMini("<green>Map is building up...");
+    private final VoidConsumer mapReferenceChange;
     private final Consumer<List<Player>> teleportConsumer;
-    private final Supplier<GameArea> mapGetter;
-    private final PlayerConsumer scoreboardRemover;
+    private final Supplier<VoidConsumer> mapPlacementTaskTrigger;
     private VoidConsumer taskReset;
 
     public MapBuildPhase(
+            @NotNull VoidConsumer mapReferenceChange,
             @NotNull Consumer<List<Player>> teleportConsumer,
-            @NotNull Supplier<GameArea> mapGetter,
-            @NotNull PlayerConsumer scoreboardRemover
+            @NotNull Supplier<VoidConsumer> mapPlacementTaskTrigger
     ) {
         super("MapBuild");
         addListener(FinishBuildEvent.class, finishBuildEvent -> {
@@ -49,9 +52,9 @@ public final class MapBuildPhase extends GamePhase {
                     .sendMessage(MAP_READY);
             finish();
         });
+        this.mapReferenceChange = mapReferenceChange;
         this.teleportConsumer = teleportConsumer;
-        this.mapGetter = mapGetter;
-        this.scoreboardRemover = scoreboardRemover;
+        this.mapPlacementTaskTrigger = mapPlacementTaskTrigger;
     }
 
     @Override
@@ -61,17 +64,15 @@ public final class MapBuildPhase extends GamePhase {
 
     @Override
     protected void onStart() {
+        this.mapReferenceChange.apply();
         List<Player> playerList = new ArrayList<>(getConnectionManager().getOnlinePlayers());
         this.teleportConsumer.accept(playerList);
-        for (Player player : playerList) {
-            this.scoreboardRemover.accept(player);
-            AttributeHelper.disableMovement(player);
-        }
         MinecraftServer.getSchedulerManager().buildTask(() -> {
             Audience.audience(MinecraftServer.getConnectionManager().getOnlinePlayers())
                     .sendMessage(MAP_BUILDING);
-            this.mapGetter.get().triggerPlacement();
-          //  this.taskReset = () -> this.mapGetter.get().resetTask();
+            LOGGER.info("Map is building up...");
+            this.taskReset = this.mapPlacementTaskTrigger.get();
+            LOGGER.info("Map placement task started");
         }).delay(10, ChronoUnit.SECONDS).schedule();
     }
 
@@ -79,5 +80,6 @@ public final class MapBuildPhase extends GamePhase {
     public void finish() {
         this.taskReset.apply();
         super.finish();
+        this.taskReset = null;
     }
 }

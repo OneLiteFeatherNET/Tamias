@@ -3,7 +3,6 @@ package net.theevilreaper.tamias.setup.listener.map;
 import de.icevizion.aves.map.BaseMap;
 import de.icevizion.aves.map.MapEntry;
 import de.icevizion.aves.util.functional.PlayerConsumer;
-import net.theevilreaper.tamias.common.map.MapProvider;
 import net.theevilreaper.tamias.setup.data.SetupData;
 import net.theevilreaper.tamias.setup.event.MapSetupFinishEvent;
 import org.jetbrains.annotations.NotNull;

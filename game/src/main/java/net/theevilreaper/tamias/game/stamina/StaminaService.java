@@ -35,6 +35,7 @@ public final class StaminaService {
 
     /**
      * Creates all {@link StaminaBar} instances for the given {@link TeamService}.
+     *
      * @param teamService the service to get the teams
      */
     public void createStaminaObjects(@NotNull TeamService<Team> teamService) {
@@ -71,6 +72,21 @@ public final class StaminaService {
     }
 
     /**
+     * Adds a new {@link StaminaBar} for the given {@link UUID}.
+     *
+     * @param uuid       the unique identifier for the player
+     * @param staminaBar the stamina bar to add
+     */
+    public void add(@NotNull UUID uuid, @NotNull StaminaBar staminaBar) {
+        lock.lock();
+        try {
+            staminaBars.put(uuid, staminaBar);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
      * Removes the {@link StaminaBar} for the given {@link UUID}.
      *
      * @param uuid the unique identifier for the player
@@ -79,7 +95,12 @@ public final class StaminaService {
     public boolean removeStaminaBar(@NotNull UUID uuid) {
         try {
             lock.lock();
-            return staminaBars.remove(uuid) != null;
+            StaminaBar staminaBar = staminaBars.get(uuid);
+            if (staminaBar != null) {
+                staminaBar.stop();
+                return true;
+            }
+            return false;
         } finally {
             lock.unlock();
         }

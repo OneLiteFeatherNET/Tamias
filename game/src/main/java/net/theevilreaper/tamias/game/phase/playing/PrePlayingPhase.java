@@ -86,6 +86,7 @@ public final class PrePlayingPhase extends TimedPhase {
 
     @Override
     public void onUpdate() {
+        // Nothing to do here at the moment
     }
 
     /**

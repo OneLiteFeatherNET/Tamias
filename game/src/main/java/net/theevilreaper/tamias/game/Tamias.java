@@ -24,7 +24,6 @@ import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.extensions.Extension;
-import net.minestom.server.instance.InstanceContainer;
 import net.theevilreaper.tamias.common.ListenerHandling;
 import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.common.config.GameConfigReader;
@@ -49,6 +48,7 @@ import net.theevilreaper.tamias.game.listener.game.ProjectileEntityListener;
 import net.theevilreaper.tamias.game.listener.round.RoundFinishListener;
 import net.theevilreaper.tamias.game.listener.round.RoundStartListener;
 import net.theevilreaper.tamias.game.listener.team.TeamActionListener;
+import net.theevilreaper.tamias.game.map.GameMapProvider;
 import net.theevilreaper.tamias.game.phase.LobbyPhase;
 import net.theevilreaper.tamias.game.phase.MapBuildPhase;
 import net.theevilreaper.tamias.game.phase.RestartPhase;
@@ -70,7 +70,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
@@ -97,7 +96,7 @@ public class Tamias extends Extension implements ListenerHandling, MapFilter {
         this.gameConfig = new GameConfigReader(ROOT_FOLDER).getConfig();
         this.phaseSeries = new LinearPhaseSeries<>();
         this.teamService = new TeamServiceImpl<>();
-        this.mapProvider = new MapProvider(ROOT_FOLDER.resolve(GameConfig.MAP_FOLDER), this::filterMapsForGame);
+        this.mapProvider = new GameMapProvider();
         this.initTeams();
         this.staminaService = new StaminaService();
         this.items = new Items();
@@ -110,14 +109,10 @@ public class Tamias extends Extension implements ListenerHandling, MapFilter {
     public void initialize() {
         FileChecker.checkFileIntegrity(getDataDirectory());
         registerCancelListener(MinecraftServer.getGlobalEventHandler());
-        InstanceContainer instance = this.mapProvider.getActiveInstance().get();
-        MinecraftServer.getInstanceManager().registerInstance(instance);
 
         MinecraftServer.getCommandManager().register(new StartCommand(this.phaseSeries::getCurrentPhase));
 
-        this.mapProvider.loadLobbyMap();
         this.scoreboard.initDefaults();
-
         this.createPhaseStructure();
         registerListener(MinecraftServer.getGlobalEventHandler());
         MinecraftServer.getCommandManager().register(new TestCommand());
@@ -131,17 +126,25 @@ public class Tamias extends Extension implements ListenerHandling, MapFilter {
     }
 
     private void createPhaseStructure() {
+        GameMapProvider gameMapProvider = (GameMapProvider) this.mapProvider;
+
         this.phaseSeries.add(new LobbyPhase(
                 this.mapProvider,
-                gameConfig.minPlayers(),
-                gameConfig.maxPlayers(),
-                gameConfig.lobbyTime(),
                 timeUpdater,
-                this.roundProvider::triggerNextRound
+                this.roundProvider::triggerNextRound,
+                this.gameConfig.minPlayers(),
+                this.gameConfig.maxPlayers(),
+                this.gameConfig.lobbyTime()
         ));
         CyclicPhaseSeries<Phase> gameSeries = new CyclicPhaseSeries<>("game");
-        Consumer<List<Player>> teleportConsumer = players -> this.mapProvider.teleportPlayers(players, this.roundProvider::isFirstRound);
-        gameSeries.add(new MapBuildPhase(teleportConsumer, this.mapProvider::getGameArea, this.scoreboard::removeViewer));
+        Consumer<List<Player>> teleportConsumer = players -> gameMapProvider.teleportPlayers(players, this.roundProvider::isFirstRound);
+        gameSeries.add(new MapBuildPhase(
+                gameMapProvider::switchInstanceHolding,
+                teleportConsumer,
+                () -> {
+                    return null;
+                }
+        ));
 
         VoidConsumer gamePreparation = () -> {
             int survivorCount = this.teamService.getTeams().get(GameConfig.SURVIVOR_ID).getPlayers().size();
@@ -149,28 +152,12 @@ public class Tamias extends Extension implements ListenerHandling, MapFilter {
             this.scoreboard.updateGameDefaults(10, survivorCount, 1);
         };
 
-        VoidConsumer staminaCreation = () -> {
-            Team survivorTeam = this.teamService.getTeams().get(GameConfig.SURVIVOR_ID);
-            Team bomberTeam = this.teamService.getTeams().get(GameConfig.TNT_ID);
-
-            Map<UUID, StaminaBar> staminaBars = new HashMap<>();
-
-            for (Player player : survivorTeam.getPlayers()) {
-                staminaBars.put(player.getUuid(), StaminaFactory.createShootBar(player));
-            }
-
-            for (Player player : bomberTeam.getPlayers()) {
-                staminaBars.put(player.getUuid(), StaminaFactory.createExplodeBar(player));
-            }
-            this.staminaService.add(staminaBars);
-        };
-
         gameSeries.add(new PrePlayingPhase(
                 this.teamService,
-                this.mapProvider.getActiveMap(),
+                gameMapProvider::getActiveMap,
                 gamePreparation,
                 this.items::setItemToPlayer,
-                staminaCreation
+                () -> staminaService.createStaminaObjects(this.teamService)
         ));
 
         VoidConsumer startLogic = () -> {
@@ -178,7 +165,7 @@ public class Tamias extends Extension implements ListenerHandling, MapFilter {
                 AttributeHelper.enableMovement(player);
                 this.scoreboard.addViewer(player);
             }
-            this.mapProvider.getSpawnArea().reset();
+            gameMapProvider.resetSpawnArea();
             this.staminaService.start();
         };
 
@@ -195,8 +182,8 @@ public class Tamias extends Extension implements ListenerHandling, MapFilter {
                         this.roundProvider::isLastRound,
                         this.roundProvider::triggerNextRound,
                         this.scoreboard::hideBoard,
-                        () -> this.mapProvider.getGameArea()::reset,
-                        () -> this.mapProvider.getSpawnArea()::triggerPlacement,
+                        gameMapProvider::resetGameArea,
+                        gameMapProvider::triggerSpawnPlacement,
                         teleportConsumer
                 )
         );
@@ -221,8 +208,8 @@ public class Tamias extends Extension implements ListenerHandling, MapFilter {
     public @NotNull Map<Class<? extends Event>, Consumer<? extends Event>> registerGameListener() {
         Map<Class<? extends Event>, Consumer<? extends Event>> listenerMap = new HashMap<>();
         listenerMap.put(RoundEndEvent.class, new RoundFinishListener(this.teamService::getTeams));
-
-        Optional<Supplier<Pos>> randomPos = Optional.ofNullable(() -> this.mapProvider.getGameArea().getRandomPosition());
+        GameMapProvider gameMapProvider = (GameMapProvider) this.mapProvider;
+        Supplier<Pos> randomPos = gameMapProvider.getGameArea()::getRandomPosition;
         listenerMap.put(PlayerUseItemEvent.class, new PlayerInteractItemListener(staminaService::getStaminaBar));
         listenerMap.put(BomberRequireSpawnEvent.class, new BomberReviveListener(this.staminaService::getStaminaBar, randomPos, items::setBombItem));
         listenerMap.put(BomberExplodeEvent.class, new BomberExplodeListener());
@@ -237,7 +224,7 @@ public class Tamias extends Extension implements ListenerHandling, MapFilter {
                 new PlayerJoinListener(this.phaseSeries::getCurrentPhase, this.mapProvider.getActiveInstance(), gameConfig.maxPlayers())
         );
         IntConsumer playerConsumerFunction = this.scoreboard::updatePlayerCount;
-        node.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(this.phaseSeries::getCurrentPhase, this.mapProvider::teleportToActiveSpawn, this.scoreboard::addViewer, playerConsumerFunction));
+        node.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(this.phaseSeries::getCurrentPhase, this.mapProvider::teleportToSpawn, this.scoreboard::addViewer, playerConsumerFunction));
         VoidConsumer checkRoundEnd = () -> RoundEndConditions.checkRoundEnd(this.phaseSeries, this.teamService);
         node.addListener(PlayerDisconnectEvent.class, new PlayerQuitListener(this.phaseSeries::getCurrentPhase, this.teamService.getTeams()::get, checkRoundEnd, playerConsumerFunction));
         node.addListener(ProjectileCollideWithBlockEvent.class, new ProjectileBlockListener());
