@@ -1,13 +1,9 @@
 package net.theevilreaper.tamias.game.stamina;
 
 import net.kyori.adventure.sound.Sound;
-import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
-import net.minestom.server.instance.Instance;
-import net.minestom.server.potion.Potion;
-import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.sound.SoundEvent;
 import net.theevilreaper.tamias.game.attribute.AttributeHelper;
 import net.theevilreaper.tamias.game.event.BomberExplodeEvent;

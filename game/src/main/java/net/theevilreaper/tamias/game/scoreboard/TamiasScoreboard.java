@@ -16,14 +16,9 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface TamiasScoreboard extends Viewable {
 
-    /**
-     * Creates a new instance of the scoreboard
-     *
-     * @return the new instance
-     */
     @Contract(pure = true)
-    static @NotNull TamiasScoreboard of(int maxRounds) {
-        return new TamiasBoard(maxRounds);
+    static @NotNull TamiasScoreboard create() {
+        return new TamiasBoard();
     }
 
     /**

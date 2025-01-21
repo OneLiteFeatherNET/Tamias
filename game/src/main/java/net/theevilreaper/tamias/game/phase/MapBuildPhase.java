@@ -7,11 +7,8 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
-import net.minestom.server.timer.Task;
-import net.theevilreaper.tamias.common.area.GameArea;
 import net.theevilreaper.tamias.common.event.FinishBuildEvent;
 import net.theevilreaper.tamias.common.util.Messages;
-import net.theevilreaper.tamias.game.attribute.AttributeHelper;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 

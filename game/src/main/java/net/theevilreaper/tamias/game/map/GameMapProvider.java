@@ -24,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -33,7 +34,7 @@ import java.util.function.Supplier;
 
 public final class GameMapProvider implements MapProvider, MapFilter {
 
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(GameMapProvider.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GameMapProvider.class);
     private final FileHandler fileHandler;
     private final MapPool mapPool;
     private final BaseMap lobbyMap;
@@ -59,16 +60,15 @@ public final class GameMapProvider implements MapProvider, MapFilter {
         this.lobbyMap = loadedLobbyMap.get();
         this.loadBaseMap(lobbyEntry);
 
-        MapEntry gameEntry = this.mapPool.peekGameMap();
+        MapEntry gameEntry = this.mapPool.peekRandomMap();
 
         Check.argCondition(!gameEntry.hasMapFile(), "The game map doesn't contain a map file!");
         Optional<GameMap> loadedGameMap = fileHandler.load(gameEntry.getMapFile(), GameMap.class);
         Check.argCondition(loadedGameMap.isEmpty(), "The game map couldn't be loaded!");
         this.gameMap = loadedGameMap.get();
         ((GameMap) this.gameMap).setMapEntry(gameEntry);
-        System.out.println("Loaded game map: " + this.gameMap.getName());
-        this.gameArea = new GameArea(((GameMap) this.gameMap).getGameAreaData());
-        this.spawnArea = new SpawnArea(((GameMap) this.gameMap).getSpawnData(), 16);
+        this.gameArea = new GameArea(null, ((GameMap) this.gameMap).getGameAreaData());
+        this.spawnArea = new SpawnArea(null, ((GameMap) this.gameMap).getSpawnData(), 16);
 
         MinecraftServer.getInstanceManager().registerInstance(this.activeInstance);
         this.createGameMapContainer();
@@ -95,14 +95,14 @@ public final class GameMapProvider implements MapProvider, MapFilter {
         AnvilLoader anvilLoader = new AnvilLoader(mapEntry.getDirectoryRoot());
         this.gameMapInstance.setChunkLoader(anvilLoader);
 
-        this.gameArea.excludeBlocks(this.gameMapInstance);
+        //this.gameArea.excludeBlocks(this.gameMapInstance);
     }
 
     public void switchInstanceHolding() {
         this.activeMap = this.gameMap;
         MinecraftServer.getInstanceManager().registerInstance(this.gameMapInstance);
         this.activeInstance = this.gameMapInstance;
-        this.gameArea.setInstanceSupplier(() -> this.gameMapInstance);
+        //this.gameArea.setInstanceSupplier(() -> this.gameMapInstance);
     }
 
     public void teleportPlayers(@NotNull List<Player> players, BooleanSupplier switchInstance) {
@@ -110,15 +110,15 @@ public final class GameMapProvider implements MapProvider, MapFilter {
     }
 
     public void resetSpawnArea() {
-        this.spawnArea.reset(this.gameMapInstance);
+        this.spawnArea.reset();
     }
 
     public void resetGameArea() {
-        this.gameArea.reset(this.gameMapInstance);
+        this.gameArea.reset();
     }
 
     public void triggerSpawnPlacement() {
-        this.spawnArea.triggerPlacement(this.gameMapInstance);
+        this.spawnArea.triggerPlacement();
     }
 
     public void cleanupMapPlacement() {
@@ -127,7 +127,7 @@ public final class GameMapProvider implements MapProvider, MapFilter {
 
     public @NotNull Task triggerGamePlacement() {
         LOGGER.warn("Triggering game placement");
-        this.gameArea.triggerPlacement(this.gameMapInstance);
+        this.gameArea.triggerPlacement();
         return this.gameArea.getTask();
     }
 

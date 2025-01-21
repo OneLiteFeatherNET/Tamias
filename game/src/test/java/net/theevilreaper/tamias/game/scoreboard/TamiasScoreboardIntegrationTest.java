@@ -28,7 +28,7 @@ class TamiasScoreboardIntegrationTest {
 
     @BeforeEach
     void setup() {
-        tamiasScoreboard = new TamiasBoard(3);
+        tamiasScoreboard = TamiasScoreboard.create();
     }
 
     @AfterEach

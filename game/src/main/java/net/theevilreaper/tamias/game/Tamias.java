@@ -58,8 +58,6 @@ import net.theevilreaper.tamias.game.phase.playing.PrePlayingPhase;
 import net.theevilreaper.tamias.game.round.RoundEndConditions;
 import net.theevilreaper.tamias.game.round.RoundProvider;
 import net.theevilreaper.tamias.game.scoreboard.TamiasScoreboard;
-import net.theevilreaper.tamias.game.stamina.StaminaBar;
-import net.theevilreaper.tamias.game.stamina.StaminaFactory;
 import net.theevilreaper.tamias.game.stamina.StaminaService;
 import net.theevilreaper.tamias.game.team.TamiasTeamCreator;
 import net.theevilreaper.tamias.game.team.TeamHelper;
@@ -70,7 +68,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 import java.util.function.Supplier;
@@ -101,7 +98,7 @@ public class Tamias extends Extension implements ListenerHandling, MapFilter {
         this.staminaService = new StaminaService();
         this.items = new Items();
         this.roundProvider = new RoundProvider(this.gameConfig.maxRounds());
-        this.scoreboard = TamiasScoreboard.of(this.gameConfig.maxRounds());
+        this.scoreboard = TamiasScoreboard.create();
         this.timeUpdater = this.scoreboard::updateTime;
     }
 
@@ -224,7 +221,8 @@ public class Tamias extends Extension implements ListenerHandling, MapFilter {
                 new PlayerJoinListener(this.phaseSeries::getCurrentPhase, this.mapProvider.getActiveInstance(), gameConfig.maxPlayers())
         );
         IntConsumer playerConsumerFunction = this.scoreboard::updatePlayerCount;
-        node.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(this.phaseSeries::getCurrentPhase, this.mapProvider::teleportToSpawn, this.scoreboard::addViewer, playerConsumerFunction));
+        PlayerConsumer teleportConsumer = player -> this.mapProvider.teleportToSpawn(player, false);
+        node.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(this.phaseSeries::getCurrentPhase, teleportConsumer, this.scoreboard::addViewer, playerConsumerFunction));
         VoidConsumer checkRoundEnd = () -> RoundEndConditions.checkRoundEnd(this.phaseSeries, this.teamService);
         node.addListener(PlayerDisconnectEvent.class, new PlayerQuitListener(this.phaseSeries::getCurrentPhase, this.teamService.getTeams()::get, checkRoundEnd, playerConsumerFunction));
         node.addListener(ProjectileCollideWithBlockEvent.class, new ProjectileBlockListener());

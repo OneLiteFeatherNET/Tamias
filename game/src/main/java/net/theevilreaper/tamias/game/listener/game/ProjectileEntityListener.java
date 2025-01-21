@@ -4,7 +4,6 @@ import de.icevizion.aves.util.functional.PlayerConsumer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEvent;
 import net.theevilreaper.tamias.common.config.GameConfig;
-import net.theevilreaper.tamias.game.stamina.ExplodeBar;
 import net.theevilreaper.tamias.game.stamina.StaminaBar;
 import net.theevilreaper.tamias.common.util.Tags;
 import org.jetbrains.annotations.NotNull;
