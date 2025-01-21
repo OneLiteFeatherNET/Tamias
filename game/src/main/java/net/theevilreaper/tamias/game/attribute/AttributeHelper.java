@@ -4,6 +4,13 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.entity.attribute.Attribute;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * The {@link AttributeHelper} is a helper class to adjust some attributes of the player.
+ *
+ * @author theEvilReaper
+ * @version 1.0.0
+ * @since 1.0.0
+ */
 @SuppressWarnings("java:S3252")
 public final class AttributeHelper {
 
@@ -15,6 +22,7 @@ public final class AttributeHelper {
 
     /**
      * Disables the movement for the player.
+     *
      * @param player the player to disable the movement
      */
     public static void disableMovement(@NotNull Player player) {
@@ -24,6 +32,7 @@ public final class AttributeHelper {
 
     /**
      * Enables the movement for the player.
+     *
      * @param player the player to enable the movement
      */
     public static void enableMovement(@NotNull Player player) {
