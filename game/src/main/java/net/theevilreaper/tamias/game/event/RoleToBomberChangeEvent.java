@@ -7,18 +7,28 @@ import org.jetbrains.annotations.NotNull;
 /**
  * The event is called when player switches the role to bomber.
  *
+ * @author theEvilReaper
  * @version 1.0.0
  * @since 1.0.0
- * @author theEvilReaper
  */
 public final class RoleToBomberChangeEvent implements PlayerEvent {
 
     private final Player player;
 
+    /**
+     * Creates a new instance of the {@link RoleToBomberChangeEvent}.
+     *
+     * @param player the player who should change the role
+     */
     public RoleToBomberChangeEvent(@NotNull Player player) {
         this.player = player;
     }
 
+    /**
+     * Returns the player who triggered the event.
+     *
+     * @return the player
+     */
     @Override
     public @NotNull Player getPlayer() {
         return this.player;

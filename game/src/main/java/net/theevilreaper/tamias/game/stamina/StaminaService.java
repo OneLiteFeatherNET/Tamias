@@ -3,7 +3,6 @@ package net.theevilreaper.tamias.game.stamina;
 import de.icevizion.xerus.api.team.Team;
 import de.icevizion.xerus.api.team.TeamService;
 import net.minestom.server.entity.Player;
-import net.theevilreaper.tamias.common.config.GameConfig;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,8 +38,9 @@ public final class StaminaService {
      * @param teamService the service to get the teams
      */
     public void createStaminaObjects(@NotNull TeamService<Team> teamService) {
-        Team survivorTeam = teamService.getTeams().get(GameConfig.SURVIVOR_ID);
-        Team bomberTeam = teamService.getTeams().get(GameConfig.TNT_ID);
+        // There are just two teams in the game. So this should be fine but when changing the order of the teams this will break
+        Team survivorTeam = teamService.getTeams().getFirst();
+        Team bomberTeam = teamService.getTeams().getLast();
 
         for (Player player : survivorTeam.getPlayers()) {
             staminaBars.put(player.getUuid(), StaminaFactory.createShootBar(player));

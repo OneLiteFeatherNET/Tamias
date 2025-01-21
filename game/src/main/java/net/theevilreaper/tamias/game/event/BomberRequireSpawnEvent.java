@@ -24,7 +24,7 @@ public final class BomberRequireSpawnEvent implements PlayerEvent, CancellableEv
      * Creates a new instance from this event.
      *
      * @param player     the player who should spawn
-     * @param explodeBar the explode bar
+     * @param explodeBar the reference to the {@link ExplodeBar}
      */
     public BomberRequireSpawnEvent(@NotNull Player player, @NotNull ExplodeBar explodeBar) {
         this.player = player;
@@ -52,9 +52,9 @@ public final class BomberRequireSpawnEvent implements PlayerEvent, CancellableEv
     }
 
     /**
-     * Returns the explode bar.
+     * Returns involved reference of the {@link ExplodeBar}.
      *
-     * @return the explode bar
+     * @return the reference
      */
     public @NotNull ExplodeBar getExplodeBar() {
         return this.explodeBar;
