@@ -1,19 +1,20 @@
 package net.theevilreaper.tamias.game.stamina;
 
+import de.icevizion.xerus.api.ColorData;
+import de.icevizion.xerus.api.team.Team;
+import de.icevizion.xerus.api.team.TeamService;
+import de.icevizion.xerus.api.team.TeamServiceImpl;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.testing.Env;
 import net.minestom.testing.extension.MicrotusExtension;
+import net.theevilreaper.tamias.common.config.GameConfig;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,15 +22,29 @@ import static org.junit.jupiter.api.Assertions.*;
 class StaminaServiceIntegrationTest {
 
     private static StaminaService staminaService;
+    private static TeamService<Team> teamService;
 
-    @BeforeEach
-    void setUp() {
+    @BeforeAll
+    static void setUp() {
         staminaService = new StaminaService();
+        teamService = new TeamServiceImpl<>();
+        teamService.add(Team.builder()
+                .colorData(ColorData.GREEN).name(GameConfig.SURVIVOR_TEAM_NAME).capacity(1)
+                .build()
+        );
+        teamService.add(Team.builder()
+                .colorData(ColorData.RED).name(GameConfig.BOMBER_TEAM).capacity(1)
+                .build()
+        );
     }
 
     @AfterEach
     void tearDown() {
         staminaService.cleanUp();
+        for (int i = 0; i < teamService.getTeams().size(); i++) {
+            Team team = teamService.getTeams().get(i);
+            team.clearPlayers();
+        }
     }
 
     @AfterAll
@@ -42,19 +57,22 @@ class StaminaServiceIntegrationTest {
     void testStaminaAdd(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
         Player player = env.createPlayer(instance);
-        StaminaBar staminaBar = StaminaFactory.createExplodeBar(player);
+        Player secondPlayer = env.createPlayer(instance);
 
+        teamService.getTeams().getFirst().addPlayer(player);
+        teamService.getTeams().getLast().addPlayer(secondPlayer);
+
+        staminaService.createStaminaObjects(teamService);
+
+        StaminaBar staminaBar = staminaService.getStaminaBar(player.getUuid());
         assertNotNull(staminaBar);
-        assertInstanceOf(ExplodeBar.class, staminaBar);
-
-        Map<UUID, StaminaBar> staminaBars = new HashMap<>();
-        staminaBars.put(player.getUuid(), staminaBar);
-
-        assertEquals(1, staminaBars.size());
-
-        staminaService.add(staminaBars);
+        assertInstanceOf(ShootBar.class, staminaBar);
 
         assertNotNull(staminaService.getStaminaBar(player.getUuid()));
+
+        StaminaBar secondBar = staminaService.getStaminaBar(secondPlayer.getUuid());
+        assertNotNull(secondBar);
+        assertInstanceOf(ExplodeBar.class, secondBar);
 
         env.destroyInstance(instance, true);
     }
@@ -63,20 +81,15 @@ class StaminaServiceIntegrationTest {
     void testStaminaRemove(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
         Player player = env.createPlayer(instance);
-        StaminaBar staminaBar = StaminaFactory.createExplodeBar(player);
+        Player secondPlayer = env.createPlayer(instance);
 
-        assertNotNull(staminaBar);
-        assertInstanceOf(ExplodeBar.class, staminaBar);
+        teamService.getTeams().getFirst().addPlayer(player);
 
-        Map<UUID, StaminaBar> staminaBars = new HashMap<>();
-        staminaBars.put(player.getUuid(), staminaBar);
-
-        assertEquals(1, staminaBars.size());
-
-        staminaService.add(staminaBars);
+        staminaService.createStaminaObjects(teamService);
 
         assertTrue(staminaService.removeStaminaBar(player.getUuid()));
-        assertFalse(staminaService.removeStaminaBar(player.getUuid()));
+        assertFalse(staminaService.removeStaminaBar(secondPlayer.getUuid()));
+
         env.destroyInstance(instance, true);
     }
 
@@ -84,8 +97,10 @@ class StaminaServiceIntegrationTest {
     void testStaminaGet(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
         Player firstPlayer = env.createPlayer(instance);
-        StaminaBar staminaBar = StaminaFactory.createExplodeBar(firstPlayer);
-        staminaService.add(Map.of(firstPlayer.getUuid(), staminaBar));
+
+        teamService.getTeams().getFirst().addPlayer(firstPlayer);
+
+        staminaService.createStaminaObjects(teamService);
 
         Player secondPlayer = env.createPlayer(instance);
 
