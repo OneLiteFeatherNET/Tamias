@@ -7,7 +7,6 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.instance.InstanceContainer;
 import net.theevilreaper.tamias.game.phase.LobbyPhase;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

@@ -32,15 +32,12 @@ public final class TamiasBoard implements TamiasScoreboard, DefaultScoreLayout {
     private Sidebar currentScoreboard;
     private BoardType boardType;
 
-    private final int maxRound;
-
-    TamiasBoard(int maxRound) {
+    TamiasBoard() {
         this.viewers = new HashSet<>();
         this.boardType = BoardType.LOBBY;
         this.lobbyScoreboard = new Sidebar(Component.empty());
         this.gameScoreboard = new Sidebar(Component.empty());
         this.currentScoreboard = this.lobbyScoreboard;
-        this.maxRound = maxRound;
     }
 
     @Override
