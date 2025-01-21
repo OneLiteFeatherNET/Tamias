@@ -5,9 +5,11 @@ import de.icevizion.xerus.api.phase.Phase;
 import de.icevizion.xerus.api.team.Team;
 import de.icevizion.xerus.api.team.TeamService;
 import net.theevilreaper.tamias.game.phase.playing.PlayingPhase;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
-public final class RoundEndConditions {
+@ApiStatus.Internal
+public final class RoundConditions {
 
     public static void checkRoundEnd(@NotNull LinearPhaseSeries<Phase> phaseSeries, @NotNull TeamService<Team> teamService) {
         Phase currentPhase = phaseSeries.getCurrentPhase();
@@ -27,7 +29,7 @@ public final class RoundEndConditions {
 
     }
 
-    private RoundEndConditions() {
+    private RoundConditions() {
         // Prevent instantiation
     }
 }

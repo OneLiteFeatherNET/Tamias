@@ -55,7 +55,7 @@ import net.theevilreaper.tamias.game.phase.RestartPhase;
 import net.theevilreaper.tamias.game.phase.playing.PlayingPhase;
 import net.theevilreaper.tamias.game.phase.playing.PostPlayingPhase;
 import net.theevilreaper.tamias.game.phase.playing.PrePlayingPhase;
-import net.theevilreaper.tamias.game.round.RoundEndConditions;
+import net.theevilreaper.tamias.game.round.RoundConditions;
 import net.theevilreaper.tamias.game.round.RoundProvider;
 import net.theevilreaper.tamias.game.scoreboard.TamiasScoreboard;
 import net.theevilreaper.tamias.game.stamina.StaminaService;
@@ -223,7 +223,7 @@ public class Tamias extends Extension implements ListenerHandling, MapFilter {
         IntConsumer playerConsumerFunction = this.scoreboard::updatePlayerCount;
         PlayerConsumer teleportConsumer = player -> this.mapProvider.teleportToSpawn(player, false);
         node.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(this.phaseSeries::getCurrentPhase, teleportConsumer, this.scoreboard::addViewer, playerConsumerFunction));
-        VoidConsumer checkRoundEnd = () -> RoundEndConditions.checkRoundEnd(this.phaseSeries, this.teamService);
+        VoidConsumer checkRoundEnd = () -> RoundConditions.checkRoundEnd(this.phaseSeries, this.teamService);
         node.addListener(PlayerDisconnectEvent.class, new PlayerQuitListener(this.phaseSeries::getCurrentPhase, this.teamService.getTeams()::get, checkRoundEnd, playerConsumerFunction));
         node.addListener(ProjectileCollideWithBlockEvent.class, new ProjectileBlockListener());
         node.addListener(ProjectileCollideWithEntityEvent.class, new ProjectileEntityListener(player -> {
