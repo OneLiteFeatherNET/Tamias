@@ -19,6 +19,7 @@ dependencyResolutionManagement {
                     create<HttpHeaderAuthentication>("header")
                 }
             }
+            maven("https://reposilite.worldseed.online/public")
         }
     } else {
         repositories {
@@ -36,6 +37,7 @@ dependencyResolutionManagement {
                     create<HttpHeaderAuthentication>("header")
                 }
             }
+            maven("https://reposilite.worldseed.online/public")
         }
     }
     versionCatalogs {
@@ -44,9 +46,12 @@ dependencyResolutionManagement {
             version("aves", "1.6.1")
             version("xerus", "1.3.0-SNAPSHOT")
             version("shadow", "8.3.5")
+            version("projectiles", "2.1.1")
 
             library("microtus.bom", "net.onelitefeather.microtus", "bom").versionRef("minestom")
             library("dungeon.bom", "net.theevilreaper.dungeon.bom", "base").version("1.1.1")
+
+            library("atlas.projectiles", "ca.atlasengine", "atlas-projectiles").versionRef("projectiles")
 
             library("minestom", "net.onelitefeather.microtus", "Microtus").withoutVersion()
             library("minestom-test", "net.onelitefeather.microtus.testing", "testing").withoutVersion()

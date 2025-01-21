@@ -9,6 +9,7 @@ dependencies {
     implementation(project(":common"))
     implementation(platform(libs.microtus.bom))
     implementation(platform(libs.dungeon.bom))
+    implementation(libs.atlas.projectiles)
 
     compileOnly(libs.minestom)
     compileOnly(libs.aves)
