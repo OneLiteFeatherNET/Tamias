@@ -44,6 +44,11 @@ class EffectsTest {
         env.destroyInstance(instance, true);
     }
 
+    /**
+     * Assert that the player has no effects.
+     *
+     * @param player the player to check
+     */
     private void assertNoEffects(@NotNull Player player) {
         assertFalse(player.hasEffect(PotionEffect.BLINDNESS));
         assertFalse(player.hasEffect(PotionEffect.SLOWNESS));
