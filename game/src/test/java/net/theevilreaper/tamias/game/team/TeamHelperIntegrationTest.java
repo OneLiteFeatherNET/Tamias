@@ -62,7 +62,7 @@ class TeamHelperIntegrationTest {
         );
     }
 
-     @Disabled
+    @Disabled
     @Test
     void testTeamAllocateWithInvalidPlayerBase(@NotNull Env env) {
         Instance instance = env.createFlatInstance();

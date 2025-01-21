@@ -8,6 +8,8 @@ import net.minestom.testing.Env;
 import net.minestom.testing.extension.MicrotusExtension;
 import net.theevilreaper.tamias.common.util.Tags;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -16,13 +18,23 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(MicrotusExtension.class)
 class ItemsTest {
 
+    private static Items items;
+
+    @BeforeAll
+    static void setUp() {
+        items = new Items();
+    }
+
+    @AfterAll
+    static void tearDown() {
+        items = null;
+    }
+
     @Test
     void testShootItemSet(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
         Player player = env.createPlayer(instance);
         assertNotNull(player);
-
-        Items items = new Items();
 
         items.setShootItem(player);
         ItemStack eye = player.getInventory().getItemStack(0x00);
@@ -39,8 +51,6 @@ class ItemsTest {
         Instance instance = env.createFlatInstance();
         Player player = env.createPlayer(instance);
         assertNotNull(player);
-
-        Items items = new Items();
 
         items.setBombItem(player);
         ItemStack bomb = player.getInventory().getItemStack(0x00);
