@@ -45,7 +45,7 @@ dependencyResolutionManagement {
             version("minestom", "1.5.0")
             version("aves", "1.6.1")
             version("xerus", "1.3.0-SNAPSHOT")
-            version("shadow", "8.3.5")
+            version("shadow", "8.3.6")
             version("projectiles", "2.1.1")
 
             library("microtus.bom", "net.onelitefeather.microtus", "bom").versionRef("minestom")
