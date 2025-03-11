@@ -73,6 +73,7 @@ class LobbyDataIntegrationTest extends MapDataTestBase {
                 lobbyData::swapAreaMode,
                 "A LobbyData can't swap the area mode"
         );
-        env.destroyInstance(instance);
+
+        env.destroyInstance(instance, true);
     }
 }
