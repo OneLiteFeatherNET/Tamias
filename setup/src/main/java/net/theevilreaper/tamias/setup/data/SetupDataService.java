@@ -8,6 +8,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * The {@link SetupDataService} is used to store each active {@link SetupData} instances for the players.
+ * The cache is used to store the data for the players.
+ *
+ * @author 1.0.0
+ * @author theEvilReaper
+ * @version 1.0.0
+ * @see SetupData
+ */
 public final class SetupDataService {
 
     private final ReentrantLock lock;
