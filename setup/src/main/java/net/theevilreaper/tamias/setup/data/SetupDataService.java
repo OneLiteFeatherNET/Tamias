@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class SetupDataService {
+public final class SetupDataService {
 
     private final ReentrantLock lock;
     private final Map<Player, SetupData> setupDataCache;

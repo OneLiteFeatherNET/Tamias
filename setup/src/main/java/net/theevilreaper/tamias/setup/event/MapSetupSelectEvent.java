@@ -4,7 +4,6 @@ import de.icevizion.aves.map.MapEntry;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.trait.CancellableEvent;
 import net.minestom.server.event.trait.PlayerEvent;
-import net.theevilreaper.tamias.setup.state.SetupState;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -18,7 +17,7 @@ public final class MapSetupSelectEvent implements PlayerEvent, CancellableEvent 
 
     private final Player player;
     private final MapEntry mapEntry;
-    private final SetupState setupMode;
+    private final boolean lobbyMode;
     private boolean cancelled;
 
     /**
@@ -26,12 +25,12 @@ public final class MapSetupSelectEvent implements PlayerEvent, CancellableEvent 
      *
      * @param player    the player who selected the map
      * @param mapEntry  the selected map
-     * @param setupMode the current setup mode
+     * @param lobbyMode if the setup is for the lobby or the game
      */
-    public MapSetupSelectEvent(@NotNull Player player, @NotNull MapEntry mapEntry, @NotNull SetupState setupMode) {
+    public MapSetupSelectEvent(@NotNull Player player, @NotNull MapEntry mapEntry, boolean lobbyMode) {
         this.player = player;
         this.mapEntry = mapEntry;
-        this.setupMode = setupMode;
+        this.lobbyMode = lobbyMode;
     }
 
     /**
@@ -64,12 +63,11 @@ public final class MapSetupSelectEvent implements PlayerEvent, CancellableEvent 
     }
 
     /**
-     * Returns the current setup mode.
-     *
-     * @return the current mode
+     * Returns if the setup is for the lobby or the game.
+     * @return true if the setup is for the lobby
      */
-    public @NotNull SetupState getSetupMode() {
-        return setupMode;
+    public boolean isLobbyMode() {
+        return lobbyMode;
     }
 
     /**
