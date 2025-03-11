@@ -14,7 +14,7 @@ import java.nio.file.Paths;
  */
 public abstract class MapDataTestBase {
 
-    protected static MapEntry testMapEntry;
+    protected static final MapEntry testMapEntry;
 
     static {
         testMapEntry = MapEntry.of(Paths.get(""));
