@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
@@ -67,12 +68,15 @@ class LobbyDataIntegrationTest extends MapDataTestBase {
                 .build();
 
         assertInstanceOf(LobbyData.class, lobbyData);
+        assertFalse(lobbyData.hasAreaMode());
 
         assertThrowsExactly(
                 UnsupportedOperationException.class,
                 lobbyData::swapAreaMode,
                 "A LobbyData can't swap the area mode"
         );
+
+        assertFalse(lobbyData.hasAreaMode());
 
         env.destroyInstance(instance, true);
     }
