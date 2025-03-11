@@ -4,6 +4,7 @@ import de.icevizion.aves.map.BaseMap;
 import de.icevizion.aves.map.MapEntry;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
@@ -23,7 +24,6 @@ public abstract sealed class SetupDataImpl implements SetupData permits LobbyDat
     protected BaseMap baseMap;
     protected InstanceContainer instance;
     protected BossBar bossBar;
-
     protected Component title;
 
     SetupDataImpl(
@@ -39,6 +39,9 @@ public abstract sealed class SetupDataImpl implements SetupData permits LobbyDat
 
     @Override
     public void updateTitle() {
+        if (this.title == null) {
+            this.title = Component.text("Please set a title", NamedTextColor.RED);
+        }
         this.bossBar.name(title);
     }
 
