@@ -42,7 +42,7 @@ dependencyResolutionManagement {
     }
     versionCatalogs {
         create("libs") {
-            version("minestom", "1.5.0")
+            version("minestom", "1.5.1")
             version("aves", "1.6.1")
             version("xerus", "1.3.0-SNAPSHOT")
             version("shadow", "8.3.6")
