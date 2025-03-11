@@ -1,6 +1,5 @@
 package net.theevilreaper.tamias.game.phase;
 
-import de.icevizion.aves.util.functional.PlayerConsumer;
 import de.icevizion.aves.util.functional.VoidConsumer;
 import de.icevizion.xerus.api.phase.GamePhase;
 import net.kyori.adventure.audience.Audience;

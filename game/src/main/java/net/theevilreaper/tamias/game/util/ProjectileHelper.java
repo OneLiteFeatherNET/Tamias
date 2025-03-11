@@ -2,16 +2,15 @@ package net.theevilreaper.tamias.game.util;
 
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityProjectile;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.item.ThrownEggMeta;
-import net.minestom.server.utils.time.TimeUnit;
 import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.tamias.common.util.Tags;
 import org.jetbrains.annotations.NotNull;
 
-import java.time.Duration;
 import java.util.function.Function;
 
 /**
@@ -35,6 +34,7 @@ public final class ProjectileHelper {
         projectile.setTag(Tags.SHOOTER_ID, player.getUuid());
         Vec direction = projectile.getPosition().direction();
         projectile.shoot(position.add(direction).sub(0, 0.2, 0), PROJECTILE_SPEED * 3, 1.0);
+
     }
 
     /**
@@ -47,8 +47,15 @@ public final class ProjectileHelper {
         EntityProjectile projectile = new EntityProjectile(player, EntityType.EGG);
         ThrownEggMeta eggMeta = (ThrownEggMeta) projectile.getEntityMeta();
         eggMeta.setOnFire(true);
-
-        projectile.scheduleRemove(Duration.of(100, TimeUnit.SERVER_TICK));
+        checkIfStillFalling(projectile);
         return projectile;
+    }
+
+    private static void checkIfStillFalling(@NotNull Entity entity) {
+        if (!entity.isOnGround()) {
+            entity.scheduleNextTick(ProjectileHelper::checkIfStillFalling);
+            return;
+        }
+        entity.remove();
     }
 }
