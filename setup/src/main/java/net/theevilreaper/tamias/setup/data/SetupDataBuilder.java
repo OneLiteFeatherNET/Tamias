@@ -3,7 +3,7 @@ package net.theevilreaper.tamias.setup.data;
 import de.icevizion.aves.map.BaseMap;
 import de.icevizion.aves.map.MapEntry;
 import net.minestom.server.entity.Player;
-import net.theevilreaper.tamias.setup.state.SetupState;
+import net.theevilreaper.tamias.common.map.GameMap;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -20,7 +20,6 @@ import org.jetbrains.annotations.NotNull;
 public final class SetupDataBuilder implements SetupData.Builder {
 
     private MapEntry mapEntry;
-    private SetupState mode;
     private Player player;
     private BaseMap baseMap;
 
@@ -46,12 +45,6 @@ public final class SetupDataBuilder implements SetupData.Builder {
     }
 
     @Override
-    public SetupData.@NotNull Builder state(@NotNull SetupState mode) {
-        this.mode = mode;
-        return this;
-    }
-
-    @Override
     public SetupData.@NotNull Builder player(@NotNull Player player) {
         this.player = player;
         return this;
@@ -65,9 +58,9 @@ public final class SetupDataBuilder implements SetupData.Builder {
 
     @Override
     public @NotNull SetupData build() {
-        return switch (mode) {
-            case LOBBY -> new LobbyData(this.player, this.mapEntry, this.mode, this.baseMap);
-            case GAME -> new GameData(this.player, this.mapEntry, this.mode, this.baseMap);
-        };
+        if (this.baseMap instanceof GameMap) {
+            return new GameData(this.player, this.mapEntry, this.baseMap);
+        }
+        return new LobbyData(this.player, this.mapEntry, this.baseMap);
     }
 }
