@@ -9,6 +9,7 @@ import net.minestom.server.command.CommandManager;
 import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.instance.AddEntityToInstanceEvent;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
+import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.event.player.PlayerUseItemEvent;
@@ -22,6 +23,7 @@ import net.theevilreaper.tamias.setup.data.SetupDataService;
 import net.theevilreaper.tamias.setup.event.MapSetupFinishEvent;
 import net.theevilreaper.tamias.setup.event.MapSetupSelectEvent;
 import net.theevilreaper.tamias.setup.inventory.InventoryProvider;
+import net.theevilreaper.tamias.setup.listener.PlayerChatListener;
 import net.theevilreaper.tamias.setup.listener.PlayerConfigurationListener;
 import net.theevilreaper.tamias.setup.listener.PlayerDisconnectListener;
 import net.theevilreaper.tamias.setup.listener.PlayerSpawnListener;
@@ -36,7 +38,7 @@ import java.util.function.Supplier;
 
 public class TamiasSetup extends Extension {
 
-    public static final Tag<Byte> SETUP_TAG = Tag.Byte("setup");
+    public static final Tag<Byte> SETUP_TAG = Tag.Transient("setup");
     public static final Tag<Boolean> DELETE_TAG = Tag.Boolean("delete").defaultValue(false);
     public static final Component SELECT_MAP_FIRST = Component.text("<red>Please select a map first!");
     private final FileHandler fileHandler;
@@ -83,6 +85,7 @@ public class TamiasSetup extends Extension {
         manager.addListener(AddEntityToInstanceEvent.class, new EntityAddToInstanceListener(instanceSupplier, setupItems));
         manager.addListener(MapSetupSelectEvent.class, new MapSetupSelectListener(this.fileHandler, this.setupDataService));
         manager.addListener(MapSetupFinishEvent.class, new MapSetupFinishListener(this.mapProvider::saveMap, instanceSwitcher));
+        manager.addListener(PlayerChatEvent.class, new PlayerChatListener(this.setupDataService));
     }
 
     /**
