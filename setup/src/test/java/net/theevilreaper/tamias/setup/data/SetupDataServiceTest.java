@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.nio.file.Paths;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -59,13 +60,15 @@ class SetupDataServiceTest {
 
     @Test
     void testPlayerRemove() {
-        assertFalse(setupDataProvider.removeSetupData(player));
+        Optional<SetupData> setupData = setupDataProvider.removeSetupData(player);
+        assertTrue(setupData.isEmpty());
 
         SetupData data = SetupData.builder()
                 .player(player)
                 .mapEntry(testEntry)
                 .build();
         setupDataProvider.addSetupData(player, data);
-        assertTrue(setupDataProvider.removeSetupData(player));
+        setupData = setupDataProvider.removeSetupData(player);
+        assertTrue(setupData.isPresent());
     }
 }

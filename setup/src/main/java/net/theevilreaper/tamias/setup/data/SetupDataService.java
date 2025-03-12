@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -52,10 +53,10 @@ public final class SetupDataService {
      * @param player the player to remove the data from
      * @return {@code true} if the data was removed successfully
      */
-    public boolean removeSetupData(@NotNull Player player) {
+    public @NotNull Optional<SetupData> removeSetupData(@NotNull Player player) {
         lock.lock();
         try {
-            return setupDataCache.remove(player) != null;
+            return Optional.ofNullable(setupDataCache.remove(player));
         } finally {
             lock.unlock();
         }
