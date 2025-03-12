@@ -90,6 +90,7 @@ class MapSetupInventoryIntegrationTest extends MapDataTestBase {
         assertEquals(mapSlot.getItem().material(), invStack.material());
 
         env.destroyInstance(instance, true);
+        mapSetupInventory.unregister();
     }
 
 }
