@@ -52,11 +52,10 @@ public class MapSetupInventory extends GlobalInventoryBuilder {
 
         this.setLayout(layout);
 
-        if (maps.get().isEmpty()) {
-            return;
-        }
-        setDataLayoutFunction(dataLayoutFunction -> {
-            var dataLayout = dataLayoutFunction == null ? InventoryLayout.fromType(getType()) : dataLayoutFunction;
+        if (maps.get().isEmpty()) return;
+
+        this.setDataLayoutFunction(dataLayout -> {
+            dataLayout = dataLayout == null ? InventoryLayout.fromType(getType()) : dataLayout;
 
             dataLayout.blank(MAP_SLOTS);
             List<MapEntry> mapEntries = maps.get();
