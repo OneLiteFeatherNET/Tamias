@@ -53,6 +53,7 @@ class SetupDataServiceTest {
                 .mapEntry(testEntry)
                 .build();
         setupDataProvider.addSetupData(player, data);
+        assertFalse(data.hasAreaMode());
         assertNotNull(setupDataProvider.getSetupData(player));
     }
 
