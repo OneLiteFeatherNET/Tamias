@@ -20,6 +20,7 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.Tag;
 import net.theevilreaper.tamias.common.gson.GsonUtil;
 import net.theevilreaper.tamias.common.map.MapProvider;
+import net.theevilreaper.tamias.common.util.MapFilter;
 import net.theevilreaper.tamias.setup.commands.SetupCommand;
 import net.theevilreaper.tamias.setup.data.SetupDataService;
 import net.theevilreaper.tamias.setup.event.MapSetupFinishEvent;
@@ -53,7 +54,7 @@ public final class TamiasSetup extends Extension {
 
     public TamiasSetup() {
         this.fileHandler = new GsonFileHandler(GsonUtil.GSON);
-        this.mapProvider = new SetupMapProvider(this.fileHandler);
+        this.mapProvider = new SetupMapProvider(MapFilter.ROOT_FOLDER, this.fileHandler);
         this.setupDataService = new SetupDataService();
         this.setupItems = new SetupItems();
         this.mapSetupInventory = new MapSetupInventory(this.mapProvider::getEntries);
