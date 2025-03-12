@@ -92,5 +92,4 @@ class MapSetupInventoryIntegrationTest extends MapDataTestBase {
         env.destroyInstance(instance, true);
         mapSetupInventory.unregister();
     }
-
 }

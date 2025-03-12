@@ -54,7 +54,7 @@ class ConfirmInventoryIntegrationTest {
         windowItemsPacketCollector.assertCount(1);
 
         assertEquals(1, packets.size(), "The packet size must be at least 1");
-        assertEquals(1, itemsPackets.size(), "There should only be two item");
+        assertEquals(1, itemsPackets.size(), "There should only be one item list");
 
         OpenWindowPacket windowPacket = packets.getFirst();
 
