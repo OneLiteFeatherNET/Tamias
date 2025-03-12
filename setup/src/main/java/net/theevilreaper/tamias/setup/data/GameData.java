@@ -34,20 +34,35 @@ public final class GameData extends SetupDataImpl {
 
         if (this.areaMode) {
             this.areaDataBuilder = GameAreaData.builder();
-        } else {
-            GameMap gameMap = (GameMap) this.baseMap;
-            gameMap.setGameAreaData(this.areaDataBuilder.build());
+            return;
         }
+        GameMap gameMap = (GameMap) this.baseMap;
+        gameMap.setGameAreaData(this.areaDataBuilder.build());
     }
 
+    /**
+     * Sets the left corner of the area.
+     *
+     * @param vec the left corner
+     */
     public void setLeftCorner(@NotNull Vec vec) {
         this.areaDataBuilder.lowerCorner(vec);
     }
 
+    /**
+     * Sets the direction of the area.
+     *
+     * @param direction the direction of the area
+     */
     public void setDirection(@NotNull Direction direction) {
         this.areaDataBuilder.facing(direction);
     }
 
+    /**
+     * Sets the right corner of the area.
+     *
+     * @param vec the right corner
+     */
     public void setRightCorner(@NotNull Vec vec) {
         this.areaDataBuilder.upperCorner(vec);
     }
