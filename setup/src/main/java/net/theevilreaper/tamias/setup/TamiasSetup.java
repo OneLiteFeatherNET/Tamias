@@ -84,7 +84,7 @@ public final class TamiasSetup extends Extension {
             setupItems.setOverViewItem(player);
         };
         manager.addListener(PlayerUseItemEvent.class, new PlayerUseItemListener(this::updateMapInventory, setupDataService::getSetupData));
-        manager.addListener(PlayerDisconnectEvent.class, new PlayerDisconnectListener(setupDataService::getSetupData));
+        manager.addListener(PlayerDisconnectEvent.class, new PlayerDisconnectListener(setupDataService::removeSetupData));
         manager.addListener(AsyncPlayerConfigurationEvent.class, new PlayerConfigurationListener(instanceSupplier));
         manager.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(initialSpawnSupplier));
         manager.addListener(AddEntityToInstanceEvent.class, new EntityAddToInstanceListener(instanceSupplier, setupItems));
