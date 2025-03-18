@@ -1,7 +1,8 @@
 package net.theevilreaper.tamias.common.area.ground;
 
 import net.minestom.server.instance.block.Block;
-import net.theevilreaper.tamias.common.area.GroundData;
+import net.theevilreaper.tamias.common.ground.GroundData;
+import net.theevilreaper.tamias.common.ground.GroundDataRegistry;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;

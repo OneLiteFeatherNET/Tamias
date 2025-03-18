@@ -1,6 +1,7 @@
 package net.theevilreaper.tamias.common.area;
 
 import net.minestom.server.instance.block.Block;
+import net.theevilreaper.tamias.common.ground.GroundData;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
