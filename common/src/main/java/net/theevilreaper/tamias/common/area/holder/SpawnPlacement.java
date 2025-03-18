@@ -19,7 +19,6 @@ import java.util.Set;
 import static net.minestom.server.MinecraftServer.getConnectionManager;
 import static net.theevilreaper.tamias.common.area.SpawnArea.SPAWN_BLOCK;
 
-
 public final class SpawnPlacement implements Placement {
 
     private final Instance instance;

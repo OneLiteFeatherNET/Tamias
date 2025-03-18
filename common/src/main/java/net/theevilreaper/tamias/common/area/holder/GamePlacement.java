@@ -2,17 +2,16 @@ package net.theevilreaper.tamias.common.area.holder;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.other.FallingBlockMeta;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
-import net.theevilreaper.tamias.common.area.GroundData;
 import net.theevilreaper.tamias.common.area.PlayingArea;
 import net.theevilreaper.tamias.common.area.placement.AreaPlacement;
 import net.theevilreaper.tamias.common.area.placement.CircleAreaPlacement;
+import net.theevilreaper.tamias.common.ground.GroundData;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,19 +23,18 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Supplier;
 
 public final class GamePlacement implements Placement {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GamePlacement.class);
 
-    public static final Block ORIGINAL_BLOCK = Block.BLUE_ICE;
-    public static final GroundData DEFAULT_GROUND_DATA = new GroundData(Block.ORANGE_TERRACOTTA, null);
-
     private final AreaPlacement placement;
     private final PlayingArea area;
     private final Instance instance;
+    private final Supplier<GroundData> groundDataSupplier;
 
-    public GamePlacement(@NotNull Instance instance, @NotNull PlayingArea area) {
+    public GamePlacement(@NotNull Instance instance, @NotNull PlayingArea area, @NotNull Supplier<GroundData> groundDataSupplier) {
         this.instance = instance;
         this.area = area;
         this.placement = new CircleAreaPlacement<Point>(
@@ -44,6 +42,7 @@ public final class GamePlacement implements Placement {
                 () -> new ArrayList<>(area.getTntPositions()),
                 this::placeAtPos
         );
+        this.groundDataSupplier = groundDataSupplier;
     }
 
     @Override
@@ -104,19 +103,13 @@ public final class GamePlacement implements Placement {
      * @param pos the position to place the block at
      */
     private <T extends Point> void placeAtPos(@NotNull T pos) {
-        if (instance == null) {
-            LOGGER.warn("Cannot place block at position {} because instance is null", pos);
-            return;
-        }
+        Set<Point> specialBlocks = this.area.getSpecialPositions();
 
-        Set<Vec> specialBlocks = this.area.getSpecialPositions();
-        GroundData groundData = DEFAULT_GROUND_DATA;
-
+        GroundData groundData = this.groundDataSupplier.get();
         if (specialBlocks.contains(pos)) {
-            var groundBlock = !groundData.hasAdditionalBlocks() ? groundData.groundBlock() : groundData.additionalBlocks().getFirst();
-            instance.setBlock(pos, groundBlock);
+            instance.setBlock(pos, groundData.getAddtionalBlock());
         } else {
-            instance.setBlock(pos, ORIGINAL_BLOCK);
+            instance.setBlock(pos, groundData.groundBlock());
         }
 
         if (ThreadLocalRandom.current().nextInt(0, 100) <= 15) { // TNT_SPAWN_CHANCE
@@ -144,8 +137,10 @@ public final class GamePlacement implements Placement {
         // Preload chunks in batch for better performance
         preloadChunks(instance, startBlockX, endBlockX, startBlockZ, endBlockZ);
 
+        String groundBlockName = groundDataSupplier.get().groundBlock().name();
+
         for (Point pos : areaPositions) {
-            if (Objects.equals(instance.getBlock(pos).name(), ORIGINAL_BLOCK.name())) {
+            if (Objects.equals(instance.getBlock(pos).name(), groundBlockName)) {
                 instance.setBlock(pos, Block.BARRIER);
             }
         }

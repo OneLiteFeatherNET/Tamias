@@ -18,7 +18,10 @@ import static net.theevilreaper.tamias.common.area.GameAreaHelper.BLOCKS_PER_STE
 
 public final class CircleAreaPlacement<T extends Point> extends AreaBasePlacement<T> {
 
-    public CircleAreaPlacement(@NotNull List<T> blockPositions, @NotNull Supplier<List<T>> tntPositions, @NotNull BlockPlaceFunction blockPlaceFunction) {
+    public CircleAreaPlacement(
+            @NotNull List<T> blockPositions,
+            @NotNull Supplier<List<T>> tntPositions,
+            @NotNull BlockPlaceFunction<T> blockPlaceFunction) {
         super(blockPositions, tntPositions, blockPlaceFunction);
     }
 

@@ -36,9 +36,9 @@ public final class GameArea implements PlayingArea {
     private static final Logger LOGGER = LoggerFactory.getLogger(GameArea.class);
 
     private final GameAreaData gameAreaData;
-    private final List<Vec> areaPositions;
-    private final Set<Vec> specialBlocks;
-    private final Set<Vec> tntPositions;
+    private final List<Point> areaPositions;
+    private final Set<Point> specialBlocks;
+    private final Set<Point> tntPositions;
 
     /**
      * Creates a new GameArea with the given instance and game area data.
@@ -102,7 +102,7 @@ public final class GameArea implements PlayingArea {
         );
 
         // Create a copy of the area positions to avoid modifying the original list
-        List<Vec> availablePositions = new ArrayList<>(this.areaPositions);
+        List<Point> availablePositions = new ArrayList<>(this.areaPositions);
 
         for (int i = 0; i < specialBlockCount; i++) {
             // Get a random index within the remaining available positions
@@ -126,7 +126,7 @@ public final class GameArea implements PlayingArea {
         );
 
         // Create a copy of the area positions to avoid modifying the original list
-        List<Vec> availablePositions = new ArrayList<>(this.areaPositions);
+        List<Point> availablePositions = new ArrayList<>(this.areaPositions);
 
         for (int i = 0; i < tntCount; i++) {
             // Get a random index within the remaining available positions
@@ -150,12 +150,12 @@ public final class GameArea implements PlayingArea {
         synchronized (this.tntPositions) {
             if (this.tntPositions.isEmpty()) return null;
 
-            List<Vec> internalPositions = new ArrayList<>(this.tntPositions);
+            List<Point> internalPositions = new ArrayList<>(this.tntPositions);
 
             int randomId = ThreadLocalRandom.current().nextInt(0, this.tntPositions.size());
 
             // Thread-safe removal from the list
-            Vec pos = internalPositions.remove(randomId);
+            Point pos = internalPositions.remove(randomId);
             this.tntPositions.remove(pos);
             return Pos.fromPoint(pos);
         }
@@ -167,12 +167,12 @@ public final class GameArea implements PlayingArea {
     }
 
     @Override
-    public @NotNull Set<Vec> getTntPositions() {
+    public @NotNull Set<Point> getTntPositions() {
         return this.tntPositions;
     }
 
     @Override
-    public @NotNull Set<Vec> getSpecialPositions() {
+    public @NotNull Set<Point> getSpecialPositions() {
         return this.specialBlocks;
     }
 }
