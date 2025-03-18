@@ -23,7 +23,6 @@ import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.event.player.PlayerUseItemEvent;
-import net.minestom.server.extensions.Extension;
 import net.theevilreaper.tamias.common.ListenerHandling;
 import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.common.config.GameConfigReader;
@@ -61,10 +60,10 @@ import net.theevilreaper.tamias.game.scoreboard.TamiasScoreboard;
 import net.theevilreaper.tamias.game.stamina.StaminaService;
 import net.theevilreaper.tamias.game.team.TamiasTeamCreator;
 import net.theevilreaper.tamias.game.team.TeamHelper;
-import net.theevilreaper.tamias.game.util.FileChecker;
 import net.theevilreaper.tamias.game.util.Items;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,7 +76,7 @@ import java.util.function.Supplier;
  * @version 1.0.0
  * @since 1.0.0
  **/
-public class Tamias extends Extension implements ListenerHandling, MapFilter {
+public final class TamiasGame implements ListenerHandling, MapFilter {
 
     private final LinearPhaseSeries<Phase> phaseSeries;
     private final TeamService<Team> teamService;
@@ -89,8 +88,8 @@ public class Tamias extends Extension implements ListenerHandling, MapFilter {
     private final TamiasScoreboard scoreboard;
     private final MapProvider mapProvider;
 
-    public Tamias() {
-        this.gameConfig = new GameConfigReader(ROOT_FOLDER).getConfig();
+    public TamiasGame(@NotNull Path rootPath) {
+        this.gameConfig = new GameConfigReader(rootPath).getConfig();
         this.phaseSeries = new LinearPhaseSeries<>();
         this.teamService = new TeamServiceImpl<>();
         this.mapProvider = new GameMapProvider();
@@ -100,11 +99,7 @@ public class Tamias extends Extension implements ListenerHandling, MapFilter {
         this.roundProvider = new RoundProvider(this.gameConfig.maxRounds());
         this.scoreboard = TamiasScoreboard.create();
         this.timeUpdater = this.scoreboard::updateTime;
-    }
 
-    @Override
-    public void initialize() {
-        FileChecker.checkFileIntegrity(getDataDirectory());
         registerCancelListener(MinecraftServer.getGlobalEventHandler());
 
         MinecraftServer.getCommandManager().register(new StartCommand(this.phaseSeries::getCurrentPhase));
@@ -115,11 +110,6 @@ public class Tamias extends Extension implements ListenerHandling, MapFilter {
         MinecraftServer.getCommandManager().register(new TestCommand());
         this.phaseSeries.start();
         this.scoreboard.updateMapName("Test");
-    }
-
-    @Override
-    public void terminate() {
-
     }
 
     private void createPhaseStructure() {
