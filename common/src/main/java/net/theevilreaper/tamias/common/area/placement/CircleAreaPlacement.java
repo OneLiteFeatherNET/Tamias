@@ -2,9 +2,8 @@ package net.theevilreaper.tamias.common.area.placement;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.event.EventDispatcher;
-import net.theevilreaper.tamias.common.event.FinishBuildEvent;
+import net.theevilreaper.tamias.common.event.AreaFinishBuildEvent;
 import net.theevilreaper.tamias.common.util.Helper;
 import org.jetbrains.annotations.NotNull;
 
@@ -38,7 +37,7 @@ public final class CircleAreaPlacement<T extends Point> extends AreaBasePlacemen
                 positions.add(queue.poll());
             }
             if (positions.isEmpty()) {
-                EventDispatcher.call(new FinishBuildEvent());
+                EventDispatcher.call(new AreaFinishBuildEvent());
                 return;
             }
             for (T pos : positions) {

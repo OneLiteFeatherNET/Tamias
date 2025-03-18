@@ -6,7 +6,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
-import net.theevilreaper.tamias.common.event.FinishBuildEvent;
+import net.theevilreaper.tamias.common.event.AreaFinishBuildEvent;
 import net.theevilreaper.tamias.common.util.Messages;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -43,7 +43,7 @@ public final class MapBuildPhase extends GamePhase {
             @NotNull Supplier<VoidConsumer> mapPlacementTaskTrigger
     ) {
         super("MapBuild");
-        addListener(FinishBuildEvent.class, finishBuildEvent -> {
+        addListener(AreaFinishBuildEvent.class, areaFinishBuildEvent -> {
             Audience.audience(MinecraftServer.getConnectionManager().getOnlinePlayers())
                     .sendMessage(MAP_READY);
             finish();
