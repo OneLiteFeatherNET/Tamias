@@ -77,7 +77,7 @@ public final class GamePlacement implements Placement {
                 .schedule();
     }
 
-    private <T extends Point>  void checkIfStillFalling(@NotNull Entity entity, @NotNull T originalPos) {
+    private <T extends Point> void checkIfStillFalling(@NotNull Entity entity, @NotNull T originalPos) {
         if (!entity.isOnGround()) {
             // Schedule with a longer delay to reduce resource usage
             entity.scheduler().buildTask(() -> checkIfStillFalling(entity, originalPos))
@@ -145,16 +145,19 @@ public final class GamePlacement implements Placement {
             }
         }
 
-
-        // Clear air blocks at corners
-        if (!instance.getBlock(start).name().equals(Block.AIR.name())) {
-            instance.setBlock(start, Block.AIR);
-        }
-        if (!instance.getBlock(end).name().equals(Block.AIR.name())) {
-            instance.setBlock(end, Block.AIR);
-        }
-
+        replaceCornerBlock(start);
+        replaceCornerBlock(end);
         LOGGER.info("Applied {} positions to the instance", areaPositions.size());
+    }
+
+    /**
+     * Replaces the corner block at the specified position with air.
+     *
+     * @param position the position to replace the block at
+     */
+    private void replaceCornerBlock(@NotNull Point position) {
+        if (instance.getBlock(position) == Block.AIR) return;
+        instance.setBlock(position, Block.AIR);
     }
 
     /**
