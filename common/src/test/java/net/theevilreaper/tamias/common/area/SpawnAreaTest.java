@@ -3,6 +3,7 @@ package net.theevilreaper.tamias.common.area;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.utils.Direction;
 import net.theevilreaper.tamias.common.map.layer.SpawnLayer;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -26,6 +27,17 @@ class SpawnAreaTest {
                 IllegalArgumentException.class,
                 () -> new SpawnArea(spawnLayer, 10),
                 "The direction must be horizontal"
+        );
+    }
+
+    @Test
+    void testResetThrowsAnException() {
+        SpawnLayer spawnLayer = new SpawnLayer(Pos.ZERO, Direction.WEST);
+        SpawnArea spawnArea = new SpawnArea(spawnLayer, 10);
+        assertThrows(
+                UnsupportedOperationException.class,
+                spawnArea::reset,
+                "The spawn area can't be reset"
         );
     }
 }

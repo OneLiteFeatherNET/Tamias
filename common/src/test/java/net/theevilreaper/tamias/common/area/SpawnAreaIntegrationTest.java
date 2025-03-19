@@ -86,8 +86,7 @@ class SpawnAreaIntegrationTest {
         Placement placement = new SpawnPlacement(instance, spawnArea);
 
         placement.triggerPlacement();
-
-        spawnArea.reset();
+        placement.clear();
 
         int currentPositions = 0;
 
