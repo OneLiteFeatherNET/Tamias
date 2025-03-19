@@ -138,7 +138,6 @@ public final class GamePlacement implements Placement {
         preloadChunks(instance, startBlockX, endBlockX, startBlockZ, endBlockZ);
 
         for (Point pos : areaPositions) {
-            System.out.println("Position: " + pos);
             instance.setBlock(pos, Block.BARRIER);
         }
 
@@ -153,7 +152,8 @@ public final class GamePlacement implements Placement {
      * @param position the position to replace the block at
      */
     private void replaceCornerBlock(@NotNull Point position) {
-        if (instance.getBlock(position) == Block.AIR) return;
+        Block block = instance.getBlock(position);
+        if (block == Block.AIR || block == Block.BARRIER) return;
         instance.setBlock(position, Block.AIR);
     }
 
