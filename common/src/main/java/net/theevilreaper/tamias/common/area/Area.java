@@ -1,12 +1,7 @@
 package net.theevilreaper.tamias.common.area;
 
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.coordinate.Vec;
-import net.minestom.server.instance.Instance;
-import net.minestom.server.timer.Task;
-import net.theevilreaper.tamias.common.map.layer.GameAreaData;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.Set;

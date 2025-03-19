@@ -3,7 +3,7 @@ package net.theevilreaper.tamias.common.area;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.utils.Direction;
-import net.theevilreaper.tamias.common.map.layer.GameAreaData;
+import net.theevilreaper.tamias.common.map.layer.AreaData;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -12,11 +12,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class GameAreaTest {
 
     private static final int POSITION_VALUE = 10;
-    private static GameAreaData areaData;
+    private static AreaData areaData;
 
     @BeforeAll
     static void setUp() {
-        areaData = GameAreaData.builder()
+        areaData = AreaData.builder()
                 .lowerCorner(Vec.ZERO)
                 .upperCorner(new Vec(POSITION_VALUE, POSITION_VALUE, POSITION_VALUE))
                 .facing(Direction.DOWN)
@@ -65,13 +65,13 @@ class GameAreaTest {
 
     @Test
     void testPositionCalculationTwice() {
-        GameAreaData gameAreaData = GameAreaData.builder()
+        AreaData areaData = AreaData.builder()
                 .lowerCorner(Vec.ZERO)
                 .upperCorner(new Vec(1, 1, 1))
                 .facing(Direction.DOWN)
                 .build();
 
-        GameArea gameArea = new GameArea(gameAreaData);
+        GameArea gameArea = new GameArea(areaData);
 
         assertFalse(gameArea.getPositions().isEmpty());
 

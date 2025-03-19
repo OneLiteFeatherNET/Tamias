@@ -3,8 +3,7 @@ package net.theevilreaper.tamias.common.area;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.utils.validate.Check;
-import net.theevilreaper.tamias.common.map.layer.GameAreaData;
+import net.theevilreaper.tamias.common.map.layer.AreaData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
@@ -35,7 +34,7 @@ public final class GameArea implements PlayingArea {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GameArea.class);
 
-    private final GameAreaData gameAreaData;
+    private final AreaData areaData;
     private final List<Point> areaPositions;
     private final Set<Point> specialBlocks;
     private final Set<Point> tntPositions;
@@ -45,10 +44,10 @@ public final class GameArea implements PlayingArea {
      * This constructor initializes all necessary components and calculates positions.
      * The instance can be null during initialization and set later.
      *
-     * @param gameAreaData the data defining the area boundaries
+     * @param areaData the data defining the area boundaries
      */
-    public GameArea(@NotNull GameAreaData gameAreaData) {
-        this.gameAreaData = gameAreaData;
+    public GameArea(@NotNull AreaData areaData) {
+        this.areaData = areaData;
         this.areaPositions = new ArrayList<>();
         this.specialBlocks = new HashSet<>();
         this.tntPositions = new HashSet<>();
@@ -59,9 +58,11 @@ public final class GameArea implements PlayingArea {
 
     @Override
     public void calculatePositions() {
-        Check.argCondition(!this.areaPositions.isEmpty(), "The calculation only can runs at once");
-        var start = gameAreaData.lowerCorner();
-        var end = gameAreaData.upperCorner();
+        if (!this.areaPositions.isEmpty()) {
+            throw new IllegalStateException("The calculation only can runs at once");
+        }
+        var start = areaData.lowerCorner();
+        var end = areaData.upperCorner();
 
         // Simplify coordinate handling
         int startBlockX = Math.min(start.blockX(), end.blockX());
@@ -89,7 +90,8 @@ public final class GameArea implements PlayingArea {
 
     @Override
     public @NotNull @UnmodifiableView Set<Point> getPositions() {
-        return Collections.unmodifiableSet((Set<? extends Point>) this.areaPositions);
+        Set<Point> result = new HashSet<>(areaPositions);
+        return Collections.unmodifiableSet(result);
     }
 
     /**
@@ -162,8 +164,8 @@ public final class GameArea implements PlayingArea {
     }
 
     @Override
-    public @NotNull GameAreaData getGameAreaData() {
-        return this.gameAreaData;
+    public @NotNull AreaData getGameAreaData() {
+        return this.areaData;
     }
 
     @Override

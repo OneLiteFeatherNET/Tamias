@@ -25,7 +25,9 @@ public final class SpawnPlacement implements Placement {
     private final Area area;
 
     public SpawnPlacement(@NotNull Instance instance, @NotNull Area area) {
-        Check.argCondition(area instanceof SpawnArea, "The area must be a spawn area");
+        if (!(area instanceof SpawnArea)) {
+            throw new IllegalArgumentException("The instance must be an instance");
+        }
         this.instance = instance;
         this.area = area;
     }

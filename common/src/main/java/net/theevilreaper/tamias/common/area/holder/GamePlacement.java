@@ -137,12 +137,9 @@ public final class GamePlacement implements Placement {
         // Preload chunks in batch for better performance
         preloadChunks(instance, startBlockX, endBlockX, startBlockZ, endBlockZ);
 
-        String groundBlockName = groundDataSupplier.get().groundBlock().name();
-
         for (Point pos : areaPositions) {
-            if (Objects.equals(instance.getBlock(pos).name(), groundBlockName)) {
-                instance.setBlock(pos, Block.BARRIER);
-            }
+            System.out.println("Position: " + pos);
+            instance.setBlock(pos, Block.BARRIER);
         }
 
         replaceCornerBlock(start);
