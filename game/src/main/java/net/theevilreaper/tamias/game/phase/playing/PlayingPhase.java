@@ -4,6 +4,8 @@ import net.theevilreaper.aves.util.functional.VoidConsumer;
 import net.theevilreaper.xerus.api.phase.TickDirection;
 import net.theevilreaper.xerus.api.phase.TimedPhase;
 import net.minestom.server.event.Event;
+import net.minestom.server.event.EventDispatcher;
+import net.theevilreaper.tamias.common.event.AreaCleanupEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.temporal.ChronoUnit;
@@ -43,6 +45,7 @@ public final class PlayingPhase extends TimedPhase {
         super.onStart();
         this.setCurrentTicks(30);
         //this.setCurrentTicks(300);
+        EventDispatcher.call(new AreaCleanupEvent(true));
         this.startGameLogic.apply();
     }
 
