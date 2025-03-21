@@ -4,6 +4,7 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.theevilreaper.tamias.common.map.layer.AreaData;
+import net.theevilreaper.tamias.common.util.CountCalculator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
@@ -16,8 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
-
-import static net.theevilreaper.tamias.common.area.GameAreaHelper.*;
+import java.util.function.IntSupplier;
 
 /**
  * The GameArea class represents a playable area in a Minecraft world.
@@ -38,19 +38,36 @@ public final class GameArea implements PlayingArea {
     private final List<Point> areaPositions;
     private final Set<Point> specialBlocks;
     private final Set<Point> tntPositions;
+    private final CountCalculator tntCountCalculator;
+    private final CountCalculator specialBlockCountCalculator;
 
-    /**
-     * Creates a new GameArea with the given instance and game area data.
-     * This constructor initializes all necessary components and calculates positions.
-     * The instance can be null during initialization and set later.
-     *
-     * @param areaData the data defining the area boundaries
-     */
     public GameArea(@NotNull AreaData areaData) {
         this.areaData = areaData;
         this.areaPositions = new ArrayList<>();
         this.specialBlocks = new HashSet<>();
         this.tntPositions = new HashSet<>();
+        this.tntCountCalculator = InternalCountCalculator::defaultTNTCalculator;
+        this.specialBlockCountCalculator = InternalCountCalculator::defaultSpecialBlocksCalculator;
+        calculatePositions();
+        calculateSpecialBlockPositions();
+        calculateTntPositions();
+    }
+
+    /**
+     * Creates a new GameArea with the given instance, game area data, TNT count calculator,
+     * and special block count calculator.
+     * This constructor initializes all necessary components and calculates positions.
+     * The instance can be null during initialization and set later.
+     *
+     * @param areaData the data defining the area boundaries
+     */
+    public GameArea(@NotNull AreaData areaData, @NotNull CountCalculator tntCountCalculator, @NotNull CountCalculator specialBlockCountCalculator) {
+        this.areaData = areaData;
+        this.areaPositions = new ArrayList<>();
+        this.specialBlocks = new HashSet<>();
+        this.tntPositions = new HashSet<>();
+        this.tntCountCalculator = tntCountCalculator;
+        this.specialBlockCountCalculator = specialBlockCountCalculator;
         calculatePositions();
         calculateSpecialBlockPositions();
         calculateTntPositions();
@@ -98,10 +115,8 @@ public final class GameArea implements PlayingArea {
      * Calculates the positions for the special blocks.
      */
     private void calculateSpecialBlockPositions() {
-        int specialBlockCount = Math.min(
-                ThreadLocalRandom.current().nextInt(MAX_SPEED_BOOST_AMOUNT - MIN_SPEED_BOOST_AMOUNT) + MIN_SPEED_BOOST_AMOUNT,
-                this.areaPositions.size()
-        );
+        IntSupplier positionCountSupplier = this.areaPositions::size;
+        int specialBlockCount = this.specialBlockCountCalculator.calculateSpecialBlockCount(positionCountSupplier);
 
         // Create a copy of the area positions to avoid modifying the original list
         List<Point> availablePositions = new ArrayList<>(this.areaPositions);
@@ -122,10 +137,9 @@ public final class GameArea implements PlayingArea {
      * Calculates the positions for the tnt blocks.
      */
     private void calculateTntPositions() {
-        int tntCount = Math.min(
-                ThreadLocalRandom.current().nextInt(MAX_TNT_AMOUNT - MIN_TNT_AMOUNT) + MIN_TNT_AMOUNT,
-                this.areaPositions.size()
-        );
+        IntSupplier positionCountSupplier = this.areaPositions::size;
+        int tntCount = this.tntCountCalculator.calculateSpecialBlockCount(positionCountSupplier);
+        System.out.println("TNT COUNT: " + tntCount);
 
         // Create a copy of the area positions to avoid modifying the original list
         List<Point> availablePositions = new ArrayList<>(this.areaPositions);

@@ -2,6 +2,7 @@ package net.theevilreaper.tamias.common.map.layer;
 
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.utils.Direction;
+import net.theevilreaper.tamias.common.util.CountCalculator;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -80,6 +81,22 @@ public sealed interface AreaData permits AreaDataLayer {
          * @return the current builder instance
          */
         @NotNull Builder facing(@NotNull Direction facing);
+
+        /**
+         * Sets the TNT count calculator.
+         *
+         * @param tntCountCalculator the tnt count calculator
+         * @return the current builder instance
+         */
+        @NotNull Builder tntCountCalculator(@NotNull CountCalculator tntCountCalculator);
+
+        /**
+         * Sets the special count calculator.
+         *
+         * @param specialCountCalculator the special count calculator
+         * @return the current builder instance
+         */
+        @NotNull Builder specialCountCalculator(@NotNull CountCalculator specialCountCalculator);
 
         /**
          * Builds the {@link AreaData} instance.

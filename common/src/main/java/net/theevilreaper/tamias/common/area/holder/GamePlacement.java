@@ -37,7 +37,7 @@ public final class GamePlacement implements Placement {
     public GamePlacement(@NotNull Instance instance, @NotNull PlayingArea area, @NotNull Supplier<GroundData> groundDataSupplier) {
         this.instance = instance;
         this.area = area;
-        this.placement = new CircleAreaPlacement<Point>(
+        this.placement = new CircleAreaPlacement<>(
                 new ArrayList<>(area.getPositions()),
                 () -> new ArrayList<>(area.getTntPositions()),
                 this::placeAtPos
