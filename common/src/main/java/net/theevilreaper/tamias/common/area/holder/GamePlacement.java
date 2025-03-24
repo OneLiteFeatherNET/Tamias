@@ -60,9 +60,11 @@ public final class GamePlacement implements Placement {
     }
 
     private <T extends Point> void spawnTnt(@NotNull T pos) {
-        var tntEntity = new Entity(EntityType.FALLING_BLOCK);
+        System.out.println("B");
+        Entity tntEntity = new Entity(EntityType.FALLING_BLOCK);
         FallingBlockMeta fallingBlockMeta = (FallingBlockMeta) tntEntity.getEntityMeta();
         fallingBlockMeta.setBlock(Block.TNT);
+        System.out.println("C");
 
         // Add random offsets to prevent stacking
         double offsetX = ThreadLocalRandom.current().nextDouble(0.3, 0.7);
@@ -71,6 +73,8 @@ public final class GamePlacement implements Placement {
         Pos entityPos = new Pos(pos.x() + offsetX, pos.y() + 0.5, pos.z() + offsetZ);
         tntEntity.setInstance(instance, entityPos);
 
+        System.out.println("entityPos: " + entityPos);
+
         // Schedule a check to see if the entity is still falling
         tntEntity.scheduler().buildTask(() -> checkIfStillFalling(tntEntity, pos))
                 .delay(Duration.ofMillis(500))
@@ -78,6 +82,7 @@ public final class GamePlacement implements Placement {
     }
 
     private <T extends Point> void checkIfStillFalling(@NotNull Entity entity, @NotNull T originalPos) {
+        System.out.println("A");
         if (!entity.isOnGround()) {
             // Schedule with a longer delay to reduce resource usage
             entity.scheduler().buildTask(() -> checkIfStillFalling(entity, originalPos))
@@ -86,6 +91,7 @@ public final class GamePlacement implements Placement {
         } else {
             // Entity has landed, place TNT at the original position
             instance.setBlock(originalPos, Block.TNT);
+            System.out.println("TNT landed at " + originalPos);
             entity.remove();
         }
     }
@@ -112,7 +118,8 @@ public final class GamePlacement implements Placement {
             instance.setBlock(pos, groundData.groundBlock());
         }
 
-        if (ThreadLocalRandom.current().nextInt(0, 100) <= 15) { // TNT_SPAWN_CHANCE
+        if (ThreadLocalRandom.current().nextInt(0, 100) <= 15) {
+            System.out.println("M");// TNT_SPAWN_CHANCE
             spawnTnt(pos);
         }
     }
