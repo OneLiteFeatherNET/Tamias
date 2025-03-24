@@ -26,13 +26,15 @@ class GameAreaTest {
     @Test
     void testPositionAccess() {
         GameArea gameArea = new GameArea(areaData);
+        gameArea.calculatePositions();
+
         assertNotNull(gameArea);
         assertFalse(gameArea.getPositions().isEmpty());
 
         assertNotEquals(0, gameArea.getPositions().size());
         assertNotEquals(GameAreaHelper.MAX_TNT_AMOUNT + 1, gameArea.getTntPositions().size());
         assertNotEquals(GameAreaHelper.MIN_TNT_AMOUNT - 1, gameArea.getTntPositions().size());
-        assertFalse(gameArea.getSpecialPositions().isEmpty());
+        assertTrue(gameArea.getSpecialPositions().isEmpty());
 
         assertNotNull(gameArea.getGameAreaData());
         assertEquals(areaData, gameArea.getGameAreaData());
@@ -41,6 +43,8 @@ class GameAreaTest {
     @Test
     void testRandomPositionGet() {
         GameArea gameArea = new GameArea(areaData);
+        gameArea.calculatePositions();
+        gameArea.calculateTntPositions(() -> 10);
         assertNotNull(gameArea);
         assertFalse(gameArea.getPositions().isEmpty());
 
@@ -55,6 +59,9 @@ class GameAreaTest {
     void testGameAreaClear() {
         GameArea gameArea = new GameArea(areaData);
         assertNotNull(gameArea);
+        gameArea.calculatePositions();
+        gameArea.calculateSpecialBlockPositions(() -> 1);
+        gameArea.calculateTntPositions(() -> 1);
         assertFalse(gameArea.getSpecialPositions().isEmpty());
         assertFalse(gameArea.getTntPositions().isEmpty());
 
@@ -72,7 +79,7 @@ class GameAreaTest {
                 .build();
 
         GameArea gameArea = new GameArea(areaData);
-
+        gameArea.calculatePositions();
         assertFalse(gameArea.getPositions().isEmpty());
 
         assertThrowsExactly(
@@ -86,6 +93,7 @@ class GameAreaTest {
     void testPositionCalculation() {
         GameArea gameArea = new GameArea(areaData);
         assertNotNull(gameArea);
+        gameArea.calculatePositions();
         assertFalse(gameArea.getPositions().isEmpty());
 
         Vec start = Vec.ZERO;
