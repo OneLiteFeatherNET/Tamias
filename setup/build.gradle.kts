@@ -8,7 +8,7 @@ version = "1.0-SNAPSHOT"
 dependencies {
     implementation(project(":common"))
     implementation(platform(libs.microtus.bom))
-    implementation(platform(libs.dungeon.bom))
+    implementation(platform(libs.mycelium.bom))
 
     compileOnly(libs.minestom)
     compileOnly(libs.aves)
