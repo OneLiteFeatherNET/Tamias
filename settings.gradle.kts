@@ -4,7 +4,7 @@ dependencyResolutionManagement {
     repositories {
         maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
         mavenCentral()
-        maven("https://jitpack.io")
+        maven("https://reposilite.worldseed.online/public")
         maven {
             name = "OneLiteFeatherRepository"
             url = uri("https://repo.onelitefeather.dev/onelitefeather")
