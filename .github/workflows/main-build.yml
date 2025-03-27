@@ -10,6 +10,9 @@ jobs:
     if: github.repository_owner == 'OneLiteFeatherNET'
     name: Build and Test
     runs-on: ${{ matrix.os }}
+    env:
+      ONELITEFEATHER_MAVEN_USERNAME: ${{ secrets.ONELITEFEATHER_MAVEN_USERNAME }}
+      ONELITEFEATHER_MAVEN_PASSWORD: ${{ secrets.ONELITEFEATHER_MAVEN_PASSWORD }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
