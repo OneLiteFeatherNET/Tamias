@@ -1,4 +1,4 @@
-package net.theevilreaper.tamias.setup.listener;
+package net.theevilreaper.tamias.setup.listener.item;
 
 import de.icevizion.aves.util.functional.PlayerConsumer;
 import net.minestom.server.entity.Player;
