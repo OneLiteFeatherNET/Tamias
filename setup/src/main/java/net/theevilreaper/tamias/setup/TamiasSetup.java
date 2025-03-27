@@ -10,6 +10,8 @@ import net.minestom.server.command.CommandManager;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.instance.AddEntityToInstanceEvent;
+import net.minestom.server.event.item.ItemDropEvent;
+import net.minestom.server.event.item.PickupItemEvent;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
@@ -30,7 +32,9 @@ import net.theevilreaper.tamias.setup.listener.PlayerChatListener;
 import net.theevilreaper.tamias.setup.listener.PlayerConfigurationListener;
 import net.theevilreaper.tamias.setup.listener.PlayerDisconnectListener;
 import net.theevilreaper.tamias.setup.listener.PlayerSpawnListener;
-import net.theevilreaper.tamias.setup.listener.PlayerUseItemListener;
+import net.theevilreaper.tamias.setup.listener.item.PlayerDropItemListener;
+import net.theevilreaper.tamias.setup.listener.item.PlayerPickupItemListener;
+import net.theevilreaper.tamias.setup.listener.item.PlayerUseItemListener;
 import net.theevilreaper.tamias.setup.listener.entity.EntityAddToInstanceListener;
 import net.theevilreaper.tamias.setup.listener.map.MapSetupFinishListener;
 import net.theevilreaper.tamias.setup.listener.map.MapSetupSelectListener;
@@ -83,7 +87,6 @@ public final class TamiasSetup extends Extension {
             setupMapProvider.teleportToSpawn(player, true);
             setupItems.setOverViewItem(player);
         };
-        manager.addListener(PlayerUseItemEvent.class, new PlayerUseItemListener(this::updateMapInventory, setupDataService::getSetupData));
         manager.addListener(PlayerDisconnectEvent.class, new PlayerDisconnectListener(setupDataService::removeSetupData));
         manager.addListener(AsyncPlayerConfigurationEvent.class, new PlayerConfigurationListener(instanceSupplier));
         manager.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(initialSpawnSupplier));
@@ -91,6 +94,11 @@ public final class TamiasSetup extends Extension {
         manager.addListener(MapSetupSelectEvent.class, new MapSetupSelectListener(this.fileHandler, this.setupDataService));
         manager.addListener(MapSetupFinishEvent.class, new MapSetupFinishListener(this.mapProvider::saveMap, instanceSwitcher));
         manager.addListener(PlayerChatEvent.class, new PlayerChatListener(this.setupDataService));
+
+        // Item listener
+        manager.addListener(PlayerUseItemEvent.class, new PlayerUseItemListener(this::updateMapInventory, setupDataService::getSetupData));
+        manager.addListener(ItemDropEvent.class, new PlayerDropItemListener());
+        manager.addListener(PickupItemEvent.class, new PlayerPickupItemListener());
     }
 
     /**
