@@ -13,8 +13,6 @@ import net.minestom.server.command.builder.condition.Conditions;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.utils.Direction;
-import net.minestom.server.utils.MathUtils;
-import net.theevilreaper.tamias.common.util.DirectionFaceHelper;
 import net.theevilreaper.tamias.common.util.Messages;
 import net.theevilreaper.tamias.setup.TamiasSetup;
 import net.theevilreaper.tamias.setup.data.GameData;
