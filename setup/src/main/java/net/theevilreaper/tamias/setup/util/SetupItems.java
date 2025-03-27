@@ -34,7 +34,7 @@ public final class SetupItems {
                 .customName(Component.text("Maps", NamedTextColor.GREEN))
                 .set(Tags.ITEM_TAG, (byte) 0x00)
                 .build();
-        this.save = ItemStack.builder(Material.BARRIER)
+        this.save = ItemStack.builder(Material.BELL)
                 .customName(Component.text("Save map", NamedTextColor.RED))
                 .set(Tags.ITEM_TAG, (byte) 0x01)
                 .build();
