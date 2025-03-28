@@ -4,7 +4,7 @@ import net.minestom.server.coordinate.Point;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
-import java.util.Set;
+import java.util.Collection;
 
 /**
  * With an {@link Area} it is possible to get specific positions in an area between two points.
@@ -26,7 +26,13 @@ public interface Area {
      */
     void reset();
 
-    @NotNull @UnmodifiableView
-    Set<Point> getPositions();
+    /**
+     * Returns the given data structure which holds the positions.
+     *
+     * @return the positions
+     */
+    @NotNull
+    @UnmodifiableView
+    Collection<Point> getPositions();
 
 }
