@@ -1,16 +1,19 @@
 package net.theevilreaper.tamias.setup.data;
 
+import de.icevizion.aves.map.MapEntry;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.testing.Env;
 import net.minestom.testing.extension.MicrotusExtension;
-import net.theevilreaper.tamias.setup.state.SetupState;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
+import java.nio.file.Paths;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,12 +23,14 @@ class SetupDataServiceTest {
     private static SetupDataService setupDataProvider;
     private static Instance instance;
     private static Player player;
+    private static MapEntry testEntry;
 
     @BeforeAll
     static void setUp(@NotNull Env env) {
         setupDataProvider = new SetupDataService();
         instance = env.createFlatInstance();
         player = env.createPlayer(instance);
+        testEntry = MapEntry.of(Paths.get(""));
     }
 
     @AfterEach
@@ -39,27 +44,31 @@ class SetupDataServiceTest {
         env.destroyInstance(instance, true);
         instance = null;
         player = null;
+        testEntry = null;
     }
 
     @Test
     void testPlayerAdd() {
         SetupData data = SetupData.builder()
-                .state(SetupState.LOBBY)
                 .player(player)
+                .mapEntry(testEntry)
                 .build();
         setupDataProvider.addSetupData(player, data);
+        assertFalse(data.hasAreaMode());
         assertNotNull(setupDataProvider.getSetupData(player));
     }
 
     @Test
     void testPlayerRemove() {
-        assertFalse(setupDataProvider.removeSetupData(player));
+        Optional<SetupData> setupData = setupDataProvider.removeSetupData(player);
+        assertTrue(setupData.isEmpty());
 
         SetupData data = SetupData.builder()
-                .state(SetupState.LOBBY)
                 .player(player)
+                .mapEntry(testEntry)
                 .build();
         setupDataProvider.addSetupData(player, data);
-        assertTrue(setupDataProvider.removeSetupData(player));
+        setupData = setupDataProvider.removeSetupData(player);
+        assertTrue(setupData.isPresent());
     }
 }

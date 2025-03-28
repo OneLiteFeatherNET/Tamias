@@ -22,9 +22,10 @@ import net.theevilreaper.tamias.common.util.Messages;
 import net.theevilreaper.tamias.setup.TamiasSetup;
 import net.theevilreaper.tamias.setup.commands.type.SpawnType;
 import net.theevilreaper.tamias.setup.data.SetupData;
-import net.theevilreaper.tamias.setup.util.SetupMessages;
+import net.theevilreaper.tamias.setup.util.DirectionUtil;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 import static net.theevilreaper.tamias.setup.TamiasSetup.SELECT_MAP_FIRST;
@@ -72,7 +73,7 @@ public final class SetupPositionCommand extends Command {
         }
         Component posAsComponent = Components.convertPoint(Pos.fromPoint(player.getPosition()));
         Component argComponent = Component.text(type, NamedTextColor.GREEN);
-        Component message = Messages.withPrefix(Component.text("The ")
+        Component message = Messages.withPrefix(Component.text("The ", NamedTextColor.GRAY)
                 .append(argComponent)
                 .append(Component.space())
                 .append(Component.text("position of the map is now located at: ", NamedTextColor.GRAY))
@@ -98,19 +99,12 @@ public final class SetupPositionCommand extends Command {
      * @param gameMap the map to set the spawn
      */
     private void handleSurvivorSpawnSet(@NotNull Player player, @NotNull GameMap gameMap) {
-        Direction direction = MathUtils.getHorizontalDirection(player.getPosition().yaw());
+        Optional<Direction> determinedDirection = DirectionUtil.parseDirection(player);
 
-        Vec dir = player.getPosition().direction();
-
-        double directionPitch = Math.toDegrees(-Math.atan2(dir.y(), Math.sqrt(dir.x() * dir.x() + dir.z() * dir.z())));
-
-        if (!DirectionFaceHelper.isValidFace(directionPitch)) {
-            String indirectDirection = DirectionFaceHelper.getInvalidDirection(directionPitch).name();
-            player.sendMessage(SetupMessages.getInvalidFace(indirectDirection));
-            return;
-        }
+        if (determinedDirection.isEmpty()) return;
 
         Pos pos = Pos.fromPoint(player.getPosition());
+        Direction direction = determinedDirection.get();
 
         gameMap.setLeftSurvivorSpawn(pos, direction);
 

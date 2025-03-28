@@ -3,7 +3,6 @@ package net.theevilreaper.tamias.setup.data;
 import de.icevizion.aves.map.BaseMap;
 import de.icevizion.aves.map.MapEntry;
 import net.minestom.server.entity.Player;
-import net.theevilreaper.tamias.setup.state.SetupState;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -96,13 +95,6 @@ public sealed interface SetupData permits SetupDataImpl {
     @NotNull MapEntry getMapEntry();
 
     /**
-     * Returns the setup mode of the setup data.
-     *
-     * @return the given mode
-     */
-    @NotNull SetupState getSetupState();
-
-    /**
      * Returns the player of the setup data.
      *
      * @return the given player
@@ -133,14 +125,6 @@ public sealed interface SetupData permits SetupDataImpl {
          * @return the builder instance
          */
         @NotNull Builder mapEntry(@NotNull MapEntry mapEntry);
-
-        /**
-         * Sets the mode for the setup data.
-         *
-         * @param mode the mode for the setup data
-         * @return the builder instance
-         */
-        @NotNull Builder state(@NotNull SetupState mode);
 
         /**
          * Sets the player for the setup data.

@@ -6,9 +6,19 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class SetupDataService {
+/**
+ * The {@link SetupDataService} is used to store each active {@link SetupData} instances for the players.
+ * The cache is used to store the data for the players.
+ *
+ * @author 1.0.0
+ * @author theEvilReaper
+ * @version 1.0.0
+ * @see SetupData
+ */
+public final class SetupDataService {
 
     private final ReentrantLock lock;
     private final Map<Player, SetupData> setupDataCache;
@@ -43,10 +53,10 @@ public class SetupDataService {
      * @param player the player to remove the data from
      * @return {@code true} if the data was removed successfully
      */
-    public boolean removeSetupData(@NotNull Player player) {
+    public @NotNull Optional<SetupData> removeSetupData(@NotNull Player player) {
         lock.lock();
         try {
-            return setupDataCache.remove(player) != null;
+            return Optional.ofNullable(setupDataCache.remove(player));
         } finally {
             lock.unlock();
         }

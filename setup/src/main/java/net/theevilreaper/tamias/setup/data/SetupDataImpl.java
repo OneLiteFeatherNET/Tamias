@@ -4,17 +4,14 @@ import de.icevizion.aves.map.BaseMap;
 import de.icevizion.aves.map.MapEntry;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.anvil.AnvilLoader;
-import net.theevilreaper.tamias.setup.state.SetupState;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Locale;
 import java.util.Objects;
 
 public abstract sealed class SetupDataImpl implements SetupData permits LobbyData, GameData {
@@ -24,20 +21,17 @@ public abstract sealed class SetupDataImpl implements SetupData permits LobbyDat
     protected final Player player;
 
     protected MapEntry mapEntry;
-    protected SetupState state;
     protected BaseMap baseMap;
     protected InstanceContainer instance;
-    protected boolean areaMode;
     protected BossBar bossBar;
+    protected Component title;
 
     SetupDataImpl(
             @NotNull Player player,
             @NotNull MapEntry mapEntry,
-            @NotNull SetupState state,
             @NotNull BaseMap baseMap
     ) {
         this.mapEntry = mapEntry;
-        this.state = state;
         this.player = player;
         this.bossBar = BossBar.bossBar(Component.empty(), 1, BossBar.Color.RED, BossBar.Overlay.PROGRESS);
         this.baseMap = baseMap;
@@ -45,10 +39,9 @@ public abstract sealed class SetupDataImpl implements SetupData permits LobbyDat
 
     @Override
     public void updateTitle() {
-        TextComponent title = Component.text("Setup mode: ", NamedTextColor.GRAY)
-                .append(Component.text(state.name().toLowerCase(Locale.ROOT), NamedTextColor.LIGHT_PURPLE))
-                .append(Component.text(", Map: ", NamedTextColor.GRAY))
-                .append(Component.text(mapEntry.getDirectoryRoot().getFileName().toString(), NamedTextColor.LIGHT_PURPLE));
+        if (this.title == null) {
+            this.title = Component.text("Please set a title", NamedTextColor.RED);
+        }
         this.bossBar.name(title);
     }
 
@@ -70,7 +63,6 @@ public abstract sealed class SetupDataImpl implements SetupData permits LobbyDat
     @Override
     public void reset() {
         if (instance == null) return;
-        this.state = null;
         this.mapEntry = null;
         this.baseMap = null;
         player.hideBossBar(this.bossBar);
@@ -90,12 +82,6 @@ public abstract sealed class SetupDataImpl implements SetupData permits LobbyDat
     }
 
     @Override
-    public void swapAreaMode() {
-        if (this.state == SetupState.LOBBY) return;
-        this.areaMode = !this.areaMode;
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -109,18 +95,8 @@ public abstract sealed class SetupDataImpl implements SetupData permits LobbyDat
     }
 
     @Override
-    public boolean hasAreaMode() {
-        return this.areaMode;
-    }
-
-    @Override
     public @NotNull MapEntry getMapEntry() {
         return this.mapEntry;
-    }
-
-    @Override
-    public @NotNull SetupState getSetupState() {
-        return this.state;
     }
 
     @Override

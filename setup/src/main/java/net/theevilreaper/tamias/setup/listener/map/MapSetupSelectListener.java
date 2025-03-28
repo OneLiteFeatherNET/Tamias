@@ -15,7 +15,6 @@ import net.theevilreaper.tamias.setup.TamiasSetup;
 import net.theevilreaper.tamias.setup.data.SetupData;
 import net.theevilreaper.tamias.setup.data.SetupDataService;
 import net.theevilreaper.tamias.setup.event.MapSetupSelectEvent;
-import net.theevilreaper.tamias.setup.state.SetupState;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.temporal.ChronoUnit;
@@ -48,8 +47,8 @@ public final class MapSetupSelectListener implements Consumer<MapSetupSelectEven
         Component message = Messages.withPrefix(Component.text("You selected the map: ", NamedTextColor.GRAY))
                 .append(Component.text(event.getMapEntry().getDirectoryRoot().getFileName().toString(), NamedTextColor.AQUA));
         player.sendMessage(message);
-        BaseMap baseMap = loadData(mapEntry, event.getSetupMode());
-        builder.mapEntry(mapEntry).state(event.getSetupMode()).baseMap(baseMap);
+        BaseMap baseMap = loadData(mapEntry, event.isLobbyMode());
+        builder.mapEntry(mapEntry).baseMap(baseMap);
 
         player.setGameMode(GameMode.CREATIVE);
         player.setAllowFlying(true);
@@ -71,16 +70,14 @@ public final class MapSetupSelectListener implements Consumer<MapSetupSelectEven
         return MinecraftServer.getSchedulerManager().buildTask(runnable).delay(3, ChronoUnit.SECONDS);
     }
 
-    private @NotNull BaseMap loadData(@NotNull MapEntry mapEntry, @NotNull SetupState setupState) {
+    private @NotNull BaseMap loadData(@NotNull MapEntry mapEntry, boolean lobbyMode) {
+
         if (!mapEntry.hasMapFile()) {
-            return switch (setupState) {
-                case LOBBY -> new BaseMap();
-                case GAME -> new GameMap();
-            };
+            return lobbyMode ? new BaseMap() : new GameMap();
         }
-        return switch (setupState) {
-            case LOBBY -> this.fileHandler.load(mapEntry.getMapFile(), BaseMap.class).get();
-            case GAME -> this.fileHandler.load(mapEntry.getMapFile(), GameMap.class).get();
-        };
+
+        Class<? extends BaseMap> mapClass = lobbyMode ? BaseMap.class : GameMap.class;
+
+        return this.fileHandler.load(mapEntry.getMapFile(), mapClass).get();
     }
 }

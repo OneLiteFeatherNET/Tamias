@@ -29,29 +29,54 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+/**
+ * SetupMapProvider is responsible for loading and managing maps in the game.
+ * It implements the MapProvider and MapFilter interfaces to provide map-related functionalities.
+ *
+ * @version 1.0.0
+ * @since 1.0.0
+ * @author theEvilReaper
+ */
 public final class SetupMapProvider implements MapProvider, MapFilter {
 
     private static final Pos FALLBACK_POS = new Pos(0, 100, 0);
     private static final Logger FILE_LOGGER = LoggerFactory.getLogger(SetupMapProvider.class);
+    private static final String LOBBY_SUFFIX = "lobby"; // Constant for lobby suffix
+
     private final FileHandler fileHandler;
     private final BaseMap baseMap;
     private final List<MapEntry> maps;
     private final InstanceContainer activeInstance;
 
-    public SetupMapProvider(@NotNull FileHandler fileHandler) {
+    /**
+     * Constructs a SetupMapProvider with the specified FileHandler.
+     *
+     * @param path the path where the maps are stored
+     * @param fileHandler the FileHandler used to load and save maps
+     */
+    public SetupMapProvider(@NotNull Path path, @NotNull FileHandler fileHandler) {
         this.fileHandler = fileHandler;
-        this.maps = loadMapEntries(ROOT_FOLDER.resolve(GameConfig.MAP_FOLDER));
+        this.maps = loadMapEntries(path.resolve(GameConfig.MAP_FOLDER));
         this.activeInstance = MinecraftServer.getInstanceManager().createInstanceContainer();
         Check.argCondition(this.maps.isEmpty(), "No maps found in the map folder");
-        MapEntry mapEntry = this.maps.stream().filter(this::isLobbyMap).findFirst().orElseThrow(() -> {
-            FILE_LOGGER.error("No lobby map found in the map folder");
-            return new IllegalStateException("No lobby map found in the map folder");
-        });
+
+        MapEntry mapEntry = this.maps.stream()
+                .filter(this::isLobbyMap)
+                .findFirst()
+                .orElseThrow(() -> new MapLoadingException("No lobby map found in the map folder"));
+
         this.maps.remove(mapEntry);
-        this.baseMap = this.fileHandler.load(mapEntry.getMapFile(), BaseMap.class).orElseThrow();
+        this.baseMap = this.fileHandler.load(mapEntry.getMapFile(), BaseMap.class)
+                .orElseThrow(() -> new MapLoadingException("Failed to load map file: " + mapEntry.getMapFile()));
+
         this.registerInstance(mapEntry);
     }
 
+    /**
+     * Registers the specified map entry with the active instance.
+     *
+     * @param mapEntry the map entry to register
+     */
     private void registerInstance(@NotNull MapEntry mapEntry) {
         this.activeInstance.setChunkLoader(new AnvilLoader(mapEntry.getDirectoryRoot()));
         this.activeInstance.enableAutoChunkLoad(true);
@@ -66,11 +91,11 @@ public final class SetupMapProvider implements MapProvider, MapFilter {
      * @return true if the map is a lobby map
      */
     private boolean isLobbyMap(@NotNull MapEntry mapEntry) {
-        return mapEntry.getDirectoryRoot().endsWith("lobby");
+        return mapEntry.getDirectoryRoot().endsWith(LOBBY_SUFFIX);
     }
 
     /**
-     * Loads all maps from the given path. It will filter all directories and create a new {@link MapEntry} instance.
+     * Loads all maps from the given path. It filters all directories and creates new {@link MapEntry} instances.
      *
      * @param path the path where the maps are stored
      * @return a list with all available maps
@@ -78,7 +103,7 @@ public final class SetupMapProvider implements MapProvider, MapFilter {
     private @NotNull List<MapEntry> loadMapEntries(@NotNull Path path) {
         List<MapEntry> mapEntries = new ArrayList<>();
         try (Stream<Path> stream = Files.list(path)) {
-            mapEntries = this.filterMapsForSetup((stream.filter(Files::isDirectory)));
+            mapEntries.addAll(this.filterMapsForSetup(stream.filter(Files::isDirectory)));
         } catch (IOException exception) {
             MinecraftServer.getExceptionManager().handleException(exception);
             FILE_LOGGER.error("Unable to load maps from path {}", path, exception);
@@ -111,11 +136,30 @@ public final class SetupMapProvider implements MapProvider, MapFilter {
         return () -> this.activeInstance;
     }
 
+    /**
+     * Retrieves the base map currently in use.
+     *
+     * @return the base map
+     */
     public @NotNull BaseMap getBaseMap() {
         return baseMap;
     }
 
+    /**
+     * Retrieves the spawn position for the base map.
+     *
+     * @return the spawn position
+     */
     public @NotNull Pos getSpawnPos() {
         return this.baseMap.getSpawnOrDefault(FALLBACK_POS);
+    }
+
+    /**
+     * Custom exception for map loading errors.
+     */
+    public static class MapLoadingException extends RuntimeException {
+        public MapLoadingException(String message) {
+            super(message);
+        }
     }
 }

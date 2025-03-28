@@ -60,7 +60,7 @@ class SetupItemsTest {
         ItemStack saveItem = player.getInventory().getItemStack(0x06);
         assertNotNull(saveItem);
         assertNotEquals(Material.AIR, saveItem.material());
-        assertEquals(Material.BARRIER, saveItem.material());
+        assertEquals(Material.BELL, saveItem.material());
 
         assertEquals(0x01, saveItem.getTag(Tags.ITEM_TAG).byteValue());
         assertEquals(0x00, player.getHeldSlot());

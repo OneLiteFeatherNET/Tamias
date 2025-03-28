@@ -13,15 +13,14 @@ import net.minestom.server.command.builder.condition.Conditions;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.utils.Direction;
-import net.minestom.server.utils.MathUtils;
-import net.theevilreaper.tamias.common.util.DirectionFaceHelper;
 import net.theevilreaper.tamias.common.util.Messages;
 import net.theevilreaper.tamias.setup.TamiasSetup;
 import net.theevilreaper.tamias.setup.data.GameData;
 import net.theevilreaper.tamias.setup.data.SetupData;
-import net.theevilreaper.tamias.setup.util.SetupMessages;
+import net.theevilreaper.tamias.setup.util.DirectionUtil;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 import static net.theevilreaper.tamias.setup.TamiasSetup.SELECT_MAP_FIRST;
@@ -99,19 +98,12 @@ public class SetupAreaCommand extends Command {
     }
 
     private void setLeftCorner(@NotNull Player player, @NotNull SetupData setupData) {
-        Direction direction = MathUtils.getHorizontalDirection(player.getPosition().yaw());
+        Optional<Direction> directionOptional = DirectionUtil.parseDirection(player);
+        if (directionOptional.isEmpty()) return;
 
-        Vec dir = player.getPosition().direction();
-
-        double directionPitch = Math.toDegrees(-Math.atan2(dir.y(), Math.sqrt(dir.x() * dir.x() + dir.z() * dir.z())));
-
-        if (!DirectionFaceHelper.isValidFace(directionPitch)) {
-            String indirectDirection = DirectionFaceHelper.getInvalidDirection(directionPitch).name();
-            player.sendMessage(SetupMessages.getInvalidFace(indirectDirection));
-            return;
-        }
         Vec vec = Vec.fromPoint(player.getPosition()).sub(0, -1,0);
 
+        Direction direction = directionOptional.get();
         GameData gameData = ((GameData) setupData);
 
         gameData.setLeftCorner(vec);
