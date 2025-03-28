@@ -13,11 +13,10 @@ import net.theevilreaper.tamias.common.map.layer.SpawnLayer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.function.BooleanSupplier;
-import java.util.stream.Collectors;
 
 /**
  * The class holds the data about the spawn area where each player will be spawned when the map is in the build phase.
@@ -102,7 +101,7 @@ public final class SpawnArea implements Area {
     }
 
     @Override
-    public @NotNull Set<Point> getPositions() {
-        return Arrays.stream(this.positions).collect(Collectors.toUnmodifiableSet());
+    public @NotNull Collection<Point> getPositions() {
+        return Arrays.asList(this.positions);
     }
 }
