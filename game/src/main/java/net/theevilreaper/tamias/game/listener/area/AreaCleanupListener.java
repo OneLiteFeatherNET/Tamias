@@ -18,13 +18,11 @@ public final class AreaCleanupListener implements Consumer<AreaCleanupEvent> {
 
     @Override
     public void accept(@NotNull AreaCleanupEvent event) {
-        if (event.lobby()) {
+        if (event.isSpawn()) {
             this.spawnPlacement.clear();
             return;
         }
 
         this.gamePlacement.clear();
-
     }
-
 }
