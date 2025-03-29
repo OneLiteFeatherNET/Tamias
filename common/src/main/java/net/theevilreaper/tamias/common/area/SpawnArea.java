@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 
 /**
  * The class holds the data about the spawn area where each player will be spawned when the map is in the build phase.
@@ -57,7 +58,7 @@ public final class SpawnArea implements Area {
      * @param players        the players to teleport
      * @param switchInstance if the player should be switched to the instance
      */
-    public void teleport(@NotNull Instance instance, @NotNull List<Player> players, BooleanSupplier switchInstance) {
+    public void teleport(@NotNull Instance instance, @NotNull List<Player> players, BooleanSupplier switchInstance, Consumer<Player> callback) {
         Check.argCondition(players.size() > this.positions.length, "The amount of online players is higher then the maximum position count");
         if (!ChunkUtils.isLoaded(instance.getChunkAt(this.spawnLayer.pos()))) {
             instance.loadChunk(this.spawnLayer.pos()).join();
@@ -68,9 +69,12 @@ public final class SpawnArea implements Area {
             Player player = players.get(i);
             if (switchInstance.getAsBoolean()) {
                 player.setInstance(instance, position).join();
+                if (callback == null) return;
+                callback.accept(player);
                 return;
             }
             player.teleport(position);
+            callback.accept(player);
         }
     }
 

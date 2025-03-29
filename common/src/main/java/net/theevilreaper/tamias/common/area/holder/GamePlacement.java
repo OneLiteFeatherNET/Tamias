@@ -8,22 +8,24 @@ import net.minestom.server.entity.metadata.other.FallingBlockMeta;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.theevilreaper.tamias.common.area.GameArea;
 import net.theevilreaper.tamias.common.area.PlayingArea;
 import net.theevilreaper.tamias.common.area.placement.AreaPlacement;
 import net.theevilreaper.tamias.common.area.placement.CircleAreaPlacement;
 import net.theevilreaper.tamias.common.ground.GroundData;
+import net.theevilreaper.tamias.common.ground.GroundDataRegistry;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Supplier;
 
 public final class GamePlacement implements Placement {
 
@@ -32,9 +34,10 @@ public final class GamePlacement implements Placement {
     private final AreaPlacement placement;
     private final PlayingArea area;
     private final Instance instance;
-    private final Supplier<GroundData> groundDataSupplier;
 
-    public GamePlacement(@NotNull Instance instance, @NotNull PlayingArea area, @NotNull Supplier<GroundData> groundDataSupplier) {
+    private GroundData groundData;
+
+    public GamePlacement(@NotNull Instance instance, @NotNull PlayingArea area) {
         this.instance = instance;
         this.area = area;
         this.placement = new CircleAreaPlacement<>(
@@ -42,7 +45,6 @@ public final class GamePlacement implements Placement {
                 () -> new ArrayList<>(area.getTntPositions()),
                 this::placeAtPos
         );
-        this.groundDataSupplier = groundDataSupplier;
     }
 
     @Override
@@ -50,10 +52,11 @@ public final class GamePlacement implements Placement {
         clearSet(this.area.getPositions());
         clearSet(this.area.getTntPositions());
         clearSet(this.area.getSpecialPositions());
+        this.groundData = null;
         this.area.reset();
     }
 
-    private <T extends Point> void clearSet(@NotNull Set<T> positions) {
+    private <T extends Point> void clearSet(@NotNull Collection<T> positions) {
         for (T position : positions) {
             instance.setBlock(position, Block.AIR);
         }
@@ -99,6 +102,7 @@ public final class GamePlacement implements Placement {
     @Override
     public void triggerPlacement() {
         if (this.placement.isRunning()) return;
+        this.groundData = GroundDataRegistry.instance().getRandomData();
         this.placement.place();
     }
 
@@ -111,7 +115,6 @@ public final class GamePlacement implements Placement {
     private <T extends Point> void placeAtPos(@NotNull T pos) {
         Set<Point> specialBlocks = this.area.getSpecialPositions();
 
-        GroundData groundData = this.groundDataSupplier.get();
         if (specialBlocks.contains(pos)) {
             instance.setBlock(pos, groundData.getAddtionalBlock());
         } else {
@@ -124,32 +127,35 @@ public final class GamePlacement implements Placement {
         }
     }
 
+    public void flatten() {
+        Set<Point> positions = new HashSet<>();
+        replaceCornerBlock(this.area.getGameAreaData().lowerCorner());
+        replaceCornerBlock(this.area.getGameAreaData().upperCorner());
+        for (Point pos : area.getPositions()) {
+            Block block = instance.getBlock(pos);
+            if (block == Block.AIR) {
+                positions.add(pos);
+                continue;
+            }
+
+            if (instance.getBlock(pos.add(0, 1,0)) != Block.AIR) {
+                positions.add(pos);
+            }
+        }
+        ((GameArea) this.area).flattenPositions(positions);
+        LOGGER.info("Flatten area by {} positions", positions.size());
+    }
+
     /**
      * Applies the calculated positions to the given instance.
      * This method should be called after the instance is available if it wasn't provided in the constructor.
-     *
-     * @param instance the instance to apply the positions to
      */
-    public void applyPositions(@NotNull Instance instance) {
-        var start = area.getGameAreaData().lowerCorner();
-        var end = area.getGameAreaData().upperCorner();
-        Set<Point> areaPositions = area.getPositions();
-
-        // Simplify coordinate handling
-        int startBlockX = Math.min(start.blockX(), end.blockX());
-        int endBlockX = Math.max(start.blockX(), end.blockX());
-        int startBlockZ = Math.min(start.blockZ(), end.blockZ());
-        int endBlockZ = Math.max(start.blockZ(), end.blockZ());
-
-        // Preload chunks in batch for better performance
-        preloadChunks(instance, startBlockX, endBlockX, startBlockZ, endBlockZ);
+    public void applyPositions() {
+        Collection<Point> areaPositions = area.getPositions();
 
         for (Point pos : areaPositions) {
             instance.setBlock(pos, Block.BARRIER);
         }
-
-        replaceCornerBlock(start);
-        replaceCornerBlock(end);
         LOGGER.info("Applied {} positions to the instance", areaPositions.size());
     }
 
@@ -167,18 +173,23 @@ public final class GamePlacement implements Placement {
     /**
      * Preloads chunks in the specified area to improve performance.
      *
-     * @param instance the instance to preload chunks in
-     * @param startX   the start X coordinate
-     * @param endX     the end X coordinate
-     * @param startZ   the start Z coordinate
-     * @param endZ     the end Z coordinate
      */
-    private void preloadChunks(@NotNull Instance instance, int startX, int endX, int startZ, int endZ) {
+    public void preloadChunks() {
+        var start = area.getGameAreaData().lowerCorner();
+        var end = area.getGameAreaData().upperCorner();
+
+        // Simplify coordinate handling
+        int startBlockX = Math.min(start.blockX(), end.blockX());
+        int endBlockX = Math.max(start.blockX(), end.blockX());
+        int startBlockZ = Math.min(start.blockZ(), end.blockZ());
+        int endBlockZ = Math.max(start.blockZ(), end.blockZ());
+
+
         // Calculate chunk coordinates
-        int startChunkX = startX >> 4;
-        int endChunkX = endX >> 4;
-        int startChunkZ = startZ >> 4;
-        int endChunkZ = endZ >> 4;
+        int startChunkX = startBlockX >> 4;
+        int endChunkX = endBlockX >> 4;
+        int startChunkZ = startBlockZ >> 4;
+        int endChunkZ = endBlockZ >> 4;
 
         // Create a list of chunk positions to load
         List<CompletableFuture<Chunk>> futures = new ArrayList<>();

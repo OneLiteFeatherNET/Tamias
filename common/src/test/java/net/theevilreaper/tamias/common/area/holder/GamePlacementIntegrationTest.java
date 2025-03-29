@@ -38,12 +38,12 @@ class GamePlacementIntegrationTest {
         assertNotNull(gameArea);
         gameArea.calculatePositions();
         GroundData groundData = new GroundData(Block.BAMBOO_BLOCK, null);
-        Placement placement = new GamePlacement(instance, gameArea, () -> groundData);
+        Placement placement = new GamePlacement(instance, gameArea);
         assertNotNull(placement);
         assertInstanceOf(GamePlacement.class, placement);
 
         GamePlacement gamePlacement = (GamePlacement) placement;
-        gamePlacement.applyPositions(instance);
+        gamePlacement.applyPositions();
 
         Set<Point> testPositions = new HashSet<>();
 
