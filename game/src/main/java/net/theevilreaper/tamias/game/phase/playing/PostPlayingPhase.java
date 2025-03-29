@@ -6,7 +6,6 @@ import net.theevilreaper.xerus.api.phase.TimedPhase;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
-import net.theevilreaper.tamias.common.area.holder.Placement;
 import net.theevilreaper.tamias.common.event.AreaCleanupEvent;
 import net.theevilreaper.tamias.common.event.AreaSpawnTriggerEvent;
 import org.jetbrains.annotations.NotNull;
