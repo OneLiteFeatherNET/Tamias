@@ -2,7 +2,9 @@ package net.theevilreaper.tamias.game.team;
 
 import de.icevizion.aves.util.Players;
 import de.icevizion.aves.util.functional.PlayerConsumer;
+import de.icevizion.xerus.api.ColorData;
 import de.icevizion.xerus.api.team.Team;
+import de.icevizion.xerus.api.team.TeamCreator;
 import de.icevizion.xerus.api.team.TeamService;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
@@ -28,6 +30,27 @@ import java.util.function.IntFunction;
  **/
 public final class TeamHelper {
 
+    /**
+     * Loads the teams into the team service.
+     * The survivor team is green and the bomber team is red.
+     *
+     * @param teamSize    the size of each team
+     * @param teamService the service which provides access to the teams
+     */
+    public static void loadTeams(int teamSize, @NotNull TeamService<Team> teamService) {
+        // Avoid loading teams multiple times
+        if (teamService.hasTeams()) return;
+        TeamCreator teamCreator = new TamiasTeamCreator();
+        teamService.add(Team.builder(teamCreator)
+                .colorData(ColorData.GREEN).name(GameConfig.SURVIVOR_TEAM_NAME).capacity(teamSize)
+                .build()
+        );
+        teamService.add(Team.builder(teamCreator)
+                .colorData(ColorData.RED).name(GameConfig.BOMBER_TEAM).capacity(teamSize)
+                .build()
+        );
+    }
+
     public static void switchToTNTTeam(@NotNull IntFunction<Team> teamIntFunction, @NotNull Player player) {
         Check.argCondition(!player.hasTag(Tags.TEAM_ID), "Need a team tag for switching teams");
 
@@ -47,7 +70,7 @@ public final class TeamHelper {
         Check.argCondition(!teamService.hasTeams(), "The team service must contain teams");
 
         final Set<Player> onlinePlayers = new HashSet<>(MinecraftServer.getConnectionManager().getOnlinePlayers());
-       // Check.argCondition(onlinePlayers.size() < 2, "The player list must contain at least two players");
+        // Check.argCondition(onlinePlayers.size() < 2, "The player list must contain at least two players");
 
         final Optional<Player> randomPlayer = Players.getRandomPlayer();
         Check.argCondition(randomPlayer.isEmpty(), "No random player found");
@@ -87,7 +110,7 @@ public final class TeamHelper {
      * @param pos  the position to teleport the players
      */
     private static void teleport(@NotNull Team team, @NotNull Pos pos, @Nullable PlayerConsumer callback) {
-       // Check.argCondition(team.getPlayers().isEmpty(), "The given team can't be empty");
+        // Check.argCondition(team.getPlayers().isEmpty(), "The given team can't be empty");
         team.getPlayers().forEach(player -> {
             player.teleport(pos).join();
             if (callback != null) {
