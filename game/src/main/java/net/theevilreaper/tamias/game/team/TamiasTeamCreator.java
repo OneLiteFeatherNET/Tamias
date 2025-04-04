@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
  * @see TeamCreator
  * @since 1.0.0
  */
-public final class TamiasTeamCreator implements TeamCreator {
+final class TamiasTeamCreator implements TeamCreator {
 
     /**
      * Creates a new instance of the {@link TamiasTeam}.

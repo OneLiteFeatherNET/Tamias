@@ -2,12 +2,10 @@ package net.theevilreaper.tamias.game;
 
 import de.icevizion.aves.util.functional.PlayerConsumer;
 import de.icevizion.aves.util.functional.VoidConsumer;
-import de.icevizion.xerus.api.ColorData;
 import de.icevizion.xerus.api.phase.CyclicPhaseSeries;
 import de.icevizion.xerus.api.phase.LinearPhaseSeries;
 import de.icevizion.xerus.api.phase.Phase;
 import de.icevizion.xerus.api.team.Team;
-import de.icevizion.xerus.api.team.TeamCreator;
 import de.icevizion.xerus.api.team.TeamService;
 import de.icevizion.xerus.api.team.TeamServiceImpl;
 import de.icevizion.xerus.api.team.event.MultiPlayerTeamEvent;
@@ -59,7 +57,6 @@ import net.theevilreaper.tamias.game.round.RoundConditions;
 import net.theevilreaper.tamias.game.round.RoundProvider;
 import net.theevilreaper.tamias.game.scoreboard.TamiasScoreboard;
 import net.theevilreaper.tamias.game.stamina.StaminaService;
-import net.theevilreaper.tamias.game.team.TamiasTeamCreator;
 import net.theevilreaper.tamias.game.team.TeamHelper;
 import net.theevilreaper.tamias.game.util.FileChecker;
 import net.theevilreaper.tamias.game.util.Items;
@@ -94,7 +91,7 @@ public class Tamias extends Extension implements ListenerHandling, MapFilter {
         this.phaseSeries = new LinearPhaseSeries<>();
         this.teamService = new TeamServiceImpl<>();
         this.mapProvider = new GameMapProvider();
-        this.initTeams();
+        TeamHelper.loadTeams(this.gameConfig.teamSize(), this.teamService);
         this.staminaService = new StaminaService();
         this.items = new Items();
         this.roundProvider = new RoundProvider(this.gameConfig.maxRounds());
@@ -187,19 +184,6 @@ public class Tamias extends Extension implements ListenerHandling, MapFilter {
         gameSeries.setMaxIterations(this.gameConfig.maxRounds());
         this.phaseSeries.add(gameSeries);
         this.phaseSeries.add(new RestartPhase());
-    }
-
-    private void initTeams() {
-        TeamCreator teamCreator = new TamiasTeamCreator();
-        int teamSize = this.gameConfig.teamSize();
-        this.teamService.add(Team.builder(teamCreator)
-                .colorData(ColorData.GREEN).name(GameConfig.SURVIVOR_TEAM_NAME).capacity(teamSize)
-                .build()
-        );
-        this.teamService.add(Team.builder(teamCreator)
-                .colorData(ColorData.RED).name(GameConfig.BOMBER_TEAM).capacity(teamSize)
-                .build()
-        );
     }
 
     public @NotNull Map<Class<? extends Event>, Consumer<? extends Event>> registerGameListener() {
