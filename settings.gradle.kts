@@ -26,7 +26,7 @@ dependencyResolutionManagement {
             version("minestom", "1.5.1")
             version("shadow", "8.3.6")
             version("bom", "1.1.2")
-            version("projectiles", "2.1.1")
+            version("projectiles", "2.1.2")
             version("aonyx", "0.1.0")
 
             library("microtus.bom", "net.onelitefeather.microtus", "bom").versionRef("minestom")
