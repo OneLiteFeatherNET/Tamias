@@ -9,6 +9,7 @@ dependencies {
     implementation(project(":common"))
     implementation(platform(libs.microtus.bom))
     implementation(platform(libs.mycelium.bom))
+    implementation(platform(libs.game.bom))
     implementation(libs.atlas.projectiles)
 
     compileOnly(libs.minestom)
@@ -17,6 +18,7 @@ dependencies {
 
     testImplementation(libs.minestom)
     testImplementation(libs.minestom.test)
+    testImplementation(platform(libs.game.bom))
     testImplementation(libs.aves)
     testImplementation(libs.xerus)
     testImplementation(libs.junit.api)
