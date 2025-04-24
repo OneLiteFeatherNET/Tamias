@@ -24,14 +24,14 @@ dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
             version("minestom", "1.5.1")
-            version("aves", "1.6.1")
-            version("xerus", "1.3.0")
             version("shadow", "8.3.6")
             version("bom", "1.1.2")
             version("projectiles", "2.1.1")
+            version("aonyx", "0.1.0")
 
             library("microtus.bom", "net.onelitefeather.microtus", "bom").versionRef("minestom")
             library("mycelium.bom", "net.theevilreaper.mycelium.bom", "mycelium-bom").versionRef("bom")
+            library("game.bom", "net.onelitefeather.aonyx.bom", "aonyx-bom").versionRef("aonyx")
 
 
             library("atlas.projectiles", "ca.atlasengine", "atlas-projectiles").versionRef("projectiles")
@@ -43,8 +43,8 @@ dependencyResolutionManagement {
             library("mockito.core", "org.mockito", "mockito-core").withoutVersion()
             library("mockito.junit", "org.mockito", "mockito-junit-jupiter").withoutVersion()
 
-            library("aves", "de.icevizion.lib", "aves").versionRef("aves")
-            library("xerus", "net.theevilreaper.xerus", "xerus").versionRef("xerus")
+            library("aves", "de.icevizion.lib", "aves").withoutVersion()
+            library("xerus", "net.theevilreaper.xerus", "xerus").withoutVersion()
 
             plugin("shadow", "com.gradleup.shadow").versionRef("shadow")
         }

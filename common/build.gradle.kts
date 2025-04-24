@@ -5,11 +5,13 @@ version = "1.0-SNAPSHOT"
 dependencies {
     implementation(platform(libs.microtus.bom))
     implementation(platform(libs.mycelium.bom))
+    implementation(platform(libs.game.bom))
 
     compileOnly(libs.minestom)
     compileOnly(libs.aves)
     compileOnly(libs.xerus)
 
+    testImplementation(platform(libs.game.bom))
     testImplementation(libs.minestom)
     testImplementation(libs.minestom.test)
     testImplementation(libs.aves)
