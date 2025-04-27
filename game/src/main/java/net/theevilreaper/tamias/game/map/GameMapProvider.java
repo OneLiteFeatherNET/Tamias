@@ -60,13 +60,13 @@ public final class GameMapProvider implements MapProvider, MapFilter {
         this.lobbyMap = loadedLobbyMap.get();
         this.loadBaseMap(lobbyEntry);
 
-        MapEntry gameEntry = this.mapPool.peekRandomMap();
+        MapEntry gameEntry = this.mapPool.getAvailableMaps().getFirst();
 
         Check.argCondition(!gameEntry.hasMapFile(), "The game map doesn't contain a map file!");
         Optional<GameMap> loadedGameMap = fileHandler.load(gameEntry.getMapFile(), GameMap.class);
         Check.argCondition(loadedGameMap.isEmpty(), "The game map couldn't be loaded!");
         this.gameMap = loadedGameMap.get();
-        ((GameMap) this.gameMap).setMapEntry(gameEntry);
+        //((GameMap) this.gameMap).setMapEntry(gameEntry);
         this.gameArea = new GameArea(null, ((GameMap) this.gameMap).getGameAreaData());
         this.spawnArea = new SpawnArea(null, ((GameMap) this.gameMap).getSpawnData(), 16);
 
@@ -78,7 +78,7 @@ public final class GameMapProvider implements MapProvider, MapFilter {
         activeInstance.setChunkLoader(new AnvilLoader(mapEntry.getDirectoryRoot()));
         activeInstance.enableAutoChunkLoad(true);
         if (this.lobbyMap.getSpawn() != null) {
-            loadChunks(activeInstance, this.lobbyMap.getSpawn());
+          //  loadChunks(activeInstance, this.lobbyMap.getSpawn());
         }
         this.activeMap = this.lobbyMap;
     }
@@ -90,10 +90,10 @@ public final class GameMapProvider implements MapProvider, MapFilter {
         this.gameMapInstance.enableAutoChunkLoad(true);
         this.gameMapInstance.setTimeRate(0);
         GameMap castetMap = ((GameMap) this.gameMap);
-        MapEntry mapEntry = castetMap.getMapEntry();
-        Check.argCondition(mapEntry == null, "The game map contains no map entry reference");
-        AnvilLoader anvilLoader = new AnvilLoader(mapEntry.getDirectoryRoot());
-        this.gameMapInstance.setChunkLoader(anvilLoader);
+        //MapEntry mapEntry = castetMap.getMapEntry();
+       // Check.argCondition(mapEntry == null, "The game map contains no map entry reference");
+       // AnvilLoader anvilLoader = new AnvilLoader(mapEntry.getDirectoryRoot());
+      //  this.gameMapInstance.setChunkLoader();
 
         //this.gameArea.excludeBlocks(this.gameMapInstance);
     }
