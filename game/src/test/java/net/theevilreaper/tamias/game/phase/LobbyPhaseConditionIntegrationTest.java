@@ -4,7 +4,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.testing.Env;
 import net.minestom.testing.extension.MicrotusExtension;
-import net.theevilreaper.tamias.common.map.MapProvider;
+import net.theevilreaper.aves.map.MapProvider;
 import net.theevilreaper.tamias.game.map.GameMapProvider;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -28,7 +29,7 @@ class LobbyPhaseConditionIntegrationTest {
 
     @BeforeAll
     static void setup() {
-        MapProvider mapProvider = new GameMapProvider();
+        MapProvider mapProvider = new GameMapProvider(Paths.get(""));
         lobbyPhase = new LobbyPhase(mapProvider, value -> {}, () -> {}, 1, 2, LOBBY_PHASE_TIME);
     }
 

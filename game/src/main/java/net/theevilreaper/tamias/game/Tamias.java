@@ -1,5 +1,6 @@
 package net.theevilreaper.tamias.game;
 
+import net.theevilreaper.aves.map.MapProvider;
 import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.theevilreaper.aves.util.functional.VoidConsumer;
 import net.theevilreaper.xerus.api.phase.CyclicPhaseSeries;
@@ -24,10 +25,8 @@ import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.theevilreaper.tamias.common.ListenerHandling;
 import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.common.config.GameConfigReader;
-import net.theevilreaper.tamias.common.map.MapProvider;
 import net.theevilreaper.tamias.common.round.event.RoundEndEvent;
 import net.theevilreaper.tamias.common.round.event.RoundStartEvent;
-import net.theevilreaper.tamias.common.util.MapFilter;
 import net.theevilreaper.tamias.game.attribute.AttributeHelper;
 import net.theevilreaper.tamias.game.commands.StartCommand;
 import net.theevilreaper.tamias.game.commands.TestCommand;
@@ -61,6 +60,7 @@ import net.theevilreaper.tamias.game.util.FileChecker;
 import net.theevilreaper.tamias.game.util.Items;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
@@ -74,7 +74,7 @@ import java.util.function.Supplier;
  * @version 1.0.0
  * @since 1.0.0
  **/
-public class Tamias implements ListenerHandling, MapFilter {
+public class Tamias implements ListenerHandling {
 
     private final LinearPhaseSeries<Phase> phaseSeries;
     private final TeamService<Team> teamService;
@@ -87,10 +87,11 @@ public class Tamias implements ListenerHandling, MapFilter {
     private final MapProvider mapProvider;
 
     public Tamias() {
-        this.gameConfig = new GameConfigReader(ROOT_FOLDER).getConfig();
+        Path path = Paths.get("");
+        this.gameConfig = new GameConfigReader(path.resolve("config")).getConfig();
         this.phaseSeries = new LinearPhaseSeries<>();
         this.teamService = new TeamServiceImpl<>();
-        this.mapProvider = new GameMapProvider();
+        this.mapProvider = new GameMapProvider(path);
         TeamHelper.loadTeams(this.gameConfig.teamSize(), this.teamService);
         this.staminaService = new StaminaService();
         this.items = new Items();
