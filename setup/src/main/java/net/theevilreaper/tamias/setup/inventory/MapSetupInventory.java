@@ -14,6 +14,7 @@ import net.minestom.server.inventory.condition.InventoryConditionResult;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.theevilreaper.tamias.setup.event.MapSetupSelectEvent;
+import net.theevilreaper.tamias.setup.util.SetupItems;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -45,10 +46,9 @@ public class MapSetupInventory extends GlobalInventoryBuilder {
     public MapSetupInventory(@NotNull Supplier<List<MapEntry>> maps) {
         super(Component.text("Select map"), InventoryType.CHEST_4_ROW);
 
-        var layout = InventoryLayout.fromType(getType());
-        var decoration = ItemStack.builder(Material.GRAY_STAINED_GLASS_PANE).customName(Component.text("")).build();
-        layout.setItems(LayoutCalculator.fillRow(InventoryType.CHEST_1_ROW), decoration);
-        layout.setItems(LayoutCalculator.fillRow(InventoryType.CHEST_4_ROW), decoration);
+        InventoryLayout layout = InventoryLayout.fromType(getType());
+        layout.setItems(LayoutCalculator.fillRow(InventoryType.CHEST_1_ROW), SetupItems.DECORATION);
+        layout.setItems(LayoutCalculator.fillRow(InventoryType.CHEST_4_ROW), SetupItems.DECORATION);
 
         this.setLayout(layout);
 
