@@ -61,6 +61,7 @@ public final class TamiasSetup {
         this.setupDataService = new SetupDataService();
         this.setupItems = new SetupItems();
         this.mapSetupInventory = new MapSetupInventory(this.mapProvider::getEntries);
+        MinecraftServer.getSchedulerManager().buildShutdownTask(this::terminate);
     }
 
     public void initialize() {

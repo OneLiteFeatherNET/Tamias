@@ -1,9 +1,10 @@
 plugins {
     alias(libs.plugins.shadow)
+    application
 }
 
-group = "net.theevilreaper.tamias.setup"
-version = "1.0-SNAPSHOT"
+group = "net.theevilreaper.tamias"
+version = "0.1.0"
 
 dependencies {
     implementation(project(":common"))
@@ -21,6 +22,10 @@ dependencies {
     testImplementation(libs.junit.params)
     testImplementation(libs.junit.platform.launcher)
     testRuntimeOnly(libs.junit.engine)
+}
+
+application {
+    mainClass.set("net.theevilreaper.tamias.setup.SetupServer")
 }
 
 tasks {
