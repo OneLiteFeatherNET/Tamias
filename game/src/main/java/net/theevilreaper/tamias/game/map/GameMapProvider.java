@@ -1,9 +1,5 @@
 package net.theevilreaper.tamias.game.map;
 
-import de.icevizion.aves.file.FileHandler;
-import de.icevizion.aves.file.GsonFileHandler;
-import de.icevizion.aves.map.BaseMap;
-import de.icevizion.aves.map.MapEntry;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
@@ -11,6 +7,10 @@ import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.anvil.AnvilLoader;
 import net.minestom.server.timer.Task;
 import net.minestom.server.utils.validate.Check;
+import net.theevilreaper.aves.file.FileHandler;
+import net.theevilreaper.aves.file.GsonFileHandler;
+import net.theevilreaper.aves.map.BaseMap;
+import net.theevilreaper.aves.map.MapEntry;
 import net.theevilreaper.tamias.common.area.GameArea;
 import net.theevilreaper.tamias.common.area.SpawnArea;
 import net.theevilreaper.tamias.common.config.GameConfig;
@@ -78,7 +78,7 @@ public final class GameMapProvider implements MapProvider, MapFilter {
         activeInstance.setChunkLoader(new AnvilLoader(mapEntry.getDirectoryRoot()));
         activeInstance.enableAutoChunkLoad(true);
         if (this.lobbyMap.getSpawn() != null) {
-          //  loadChunks(activeInstance, this.lobbyMap.getSpawn());
+            //  loadChunks(activeInstance, this.lobbyMap.getSpawn());
         }
         this.activeMap = this.lobbyMap;
     }
@@ -91,9 +91,9 @@ public final class GameMapProvider implements MapProvider, MapFilter {
         this.gameMapInstance.setTimeRate(0);
         GameMap castetMap = ((GameMap) this.gameMap);
         //MapEntry mapEntry = castetMap.getMapEntry();
-       // Check.argCondition(mapEntry == null, "The game map contains no map entry reference");
-       // AnvilLoader anvilLoader = new AnvilLoader(mapEntry.getDirectoryRoot());
-      //  this.gameMapInstance.setChunkLoader();
+        // Check.argCondition(mapEntry == null, "The game map contains no map entry reference");
+        // AnvilLoader anvilLoader = new AnvilLoader(mapEntry.getDirectoryRoot());
+        //  this.gameMapInstance.setChunkLoader();
 
         //this.gameArea.excludeBlocks(this.gameMapInstance);
     }
