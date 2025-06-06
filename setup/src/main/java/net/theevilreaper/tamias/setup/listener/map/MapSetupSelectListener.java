@@ -1,5 +1,6 @@
 package net.theevilreaper.tamias.setup.listener.map;
 
+import net.onelitefeather.guira.SetupDataService;
 import net.theevilreaper.aves.file.FileHandler;
 import net.theevilreaper.aves.map.BaseMap;
 import net.theevilreaper.aves.map.MapEntry;
@@ -9,11 +10,11 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.timer.Task;
-import net.theevilreaper.tamias.common.map.GameMap;
 import net.theevilreaper.tamias.common.util.Messages;
 import net.theevilreaper.tamias.setup.TamiasSetup;
-import net.theevilreaper.tamias.setup.data.SetupData;
-import net.theevilreaper.tamias.setup.data.SetupDataService;
+import net.theevilreaper.tamias.setup.data.GameData;
+import net.theevilreaper.tamias.setup.data.InstanceSetupData;
+import net.theevilreaper.tamias.setup.data.LobbyData;
 import net.theevilreaper.tamias.setup.event.MapSetupSelectEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,9 +24,12 @@ import java.util.function.Consumer;
 public final class MapSetupSelectListener implements Consumer<MapSetupSelectEvent> {
 
     private final FileHandler fileHandler;
-    private final SetupDataService setupDataService;
+    private final SetupDataService<InstanceSetupData<? extends BaseMap>> setupDataService;
 
-    public MapSetupSelectListener(@NotNull FileHandler fileHandler, @NotNull SetupDataService setupDataService) {
+    public MapSetupSelectListener(
+            @NotNull FileHandler fileHandler,
+            @NotNull SetupDataService<InstanceSetupData<? extends BaseMap>> setupDataService
+    ) {
         this.fileHandler = fileHandler;
         this.setupDataService = setupDataService;
     }
@@ -34,50 +38,36 @@ public final class MapSetupSelectListener implements Consumer<MapSetupSelectEven
     public void accept(@NotNull MapSetupSelectEvent event) {
         Player player = event.getPlayer();
 
-        SetupData setupData = this.setupDataService.getSetupData(player);
+        InstanceSetupData<? extends BaseMap> setupData = this.setupDataService.get(player.getUuid()).get();
 
         if (setupData != null && setupData.hasMap()) {
             // If this condition is reached the setup is fucked up
             player.sendMessage("You already have a map selected");
         }
 
-        SetupData.Builder builder = setupData == null ? SetupData.builder().player(player) : SetupData.builder(setupData);
-
+        InstanceSetupData<? extends BaseMap> data;
         MapEntry mapEntry = event.getMapEntry();
+        if (event.isLobbyMode()) {
+            data = new LobbyData(player.getUuid(), mapEntry, this.fileHandler);
+        } else {
+            data = new GameData(player.getUuid(), mapEntry, this.fileHandler);
+        }
+
         Component message = Messages.withPrefix(Component.text("You selected the map: ", NamedTextColor.GRAY))
-                .append(Component.text(event.getMapEntry().getDirectoryRoot().getFileName().toString(), NamedTextColor.AQUA));
+                .append(Component.text(mapEntry.getDirectoryRoot().getFileName().toString(), NamedTextColor.AQUA));
         player.sendMessage(message);
-        BaseMap baseMap = loadData(mapEntry, event.isLobbyMode());
-        builder.mapEntry(mapEntry).baseMap(baseMap);
 
         player.setGameMode(GameMode.CREATIVE);
         player.setAllowFlying(true);
         player.setFlying(true);
 
-        SetupData updatedData = builder.build();
-        this.setupDataService.addSetupData(player, updatedData);
-
-        if (!updatedData.loadMap()) {
-            player.sendMessage(Messages.withPrefix(Component.text("An error occurred while loading the map", NamedTextColor.RED)));
-            return;
-        }
+        this.setupDataService.add(player.getUuid(), data);
 
         player.setTag(TamiasSetup.SETUP_TAG, (byte) 1);
-        getTeleportTask(updatedData::teleport).schedule();
+        getTeleportTask(() -> data.teleport(player)).schedule();
     }
 
     private @NotNull Task.Builder getTeleportTask(@NotNull Runnable runnable) {
         return MinecraftServer.getSchedulerManager().buildTask(runnable).delay(3, ChronoUnit.SECONDS);
-    }
-
-    private @NotNull BaseMap loadData(@NotNull MapEntry mapEntry, boolean lobbyMode) {
-
-        if (!mapEntry.hasMapFile()) {
-            return lobbyMode ? new BaseMap() : new GameMap();
-        }
-
-        Class<? extends BaseMap> mapClass = lobbyMode ? BaseMap.class : GameMap.class;
-
-        return this.fileHandler.load(mapEntry.getMapFile(), mapClass).get();
     }
 }

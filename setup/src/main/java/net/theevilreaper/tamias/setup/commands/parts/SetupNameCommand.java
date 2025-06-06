@@ -8,21 +8,23 @@ import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.ArgumentString;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.condition.Conditions;
-import net.minestom.server.entity.Player;
+import net.theevilreaper.aves.map.BaseMap;
 import net.theevilreaper.tamias.common.util.Messages;
 import net.theevilreaper.tamias.setup.TamiasSetup;
-import net.theevilreaper.tamias.setup.data.SetupData;
+import net.theevilreaper.tamias.setup.data.InstanceSetupData;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
 
 import static net.theevilreaper.tamias.setup.TamiasSetup.SELECT_MAP_FIRST;
 
 public final class SetupNameCommand extends Command {
 
-    private final Function<Player, SetupData> setupDataFunction;
+    private final Function<UUID, Optional<InstanceSetupData<? extends BaseMap>>> setupDataFunction;
 
-    public SetupNameCommand(@NotNull Function<Player, SetupData> setupDataFunction) {
+    public SetupNameCommand(@NotNull Function<UUID, Optional<InstanceSetupData<? extends BaseMap>>> setupDataFunction) {
         super("name");
         this.setupDataFunction = setupDataFunction;
         this.setCondition(Conditions::playerOnly);
@@ -42,16 +44,16 @@ public final class SetupNameCommand extends Command {
             return;
         }
 
-        SetupData setupData = this.setupDataFunction.apply((Player) sender);
-        if (setupData == null) {
+        Optional<InstanceSetupData<? extends BaseMap>> setupData = this.setupDataFunction.apply(sender.identity().uuid());
+        if (setupData.isEmpty()) {
             sender.sendMessage("An error occurred while setting up the map");
             return;
         }
 
-        setupData.getBaseMap().setName(name);
+        setupData.get().getMap().get().setName(name);
         Component message = Messages.withPrefix(Component.text("The name of the map now is: ", NamedTextColor.GRAY))
                 .append(Component.text(name, NamedTextColor.AQUA));
         sender.sendMessage(message);
-        setupData.triggerInventoryUpdate();
+        setupData.get().triggerUpdate();
     }
 }

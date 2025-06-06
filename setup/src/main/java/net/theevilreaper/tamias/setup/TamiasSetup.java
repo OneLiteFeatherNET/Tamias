@@ -1,7 +1,10 @@
 package net.theevilreaper.tamias.setup;
 
+import net.onelitefeather.guira.SetupDataService;
+import net.onelitefeather.guira.event.SetupFinishEvent;
 import net.theevilreaper.aves.file.FileHandler;
 import net.theevilreaper.aves.file.GsonFileHandler;
+import net.theevilreaper.aves.map.BaseMap;
 import net.theevilreaper.aves.map.MapProvider;
 import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.kyori.adventure.text.Component;
@@ -22,8 +25,7 @@ import net.theevilreaper.tamias.common.ListenerHandling;
 import net.theevilreaper.tamias.common.gson.GsonUtil;
 import net.theevilreaper.tamias.common.util.MapFilter;
 import net.theevilreaper.tamias.setup.commands.SetupCommand;
-import net.theevilreaper.tamias.setup.data.SetupDataService;
-import net.theevilreaper.tamias.setup.event.MapSetupFinishEvent;
+import net.theevilreaper.tamias.setup.data.InstanceSetupData;
 import net.theevilreaper.tamias.setup.event.MapSetupSelectEvent;
 import net.theevilreaper.tamias.setup.inventory.MapSetupInventory;
 import net.theevilreaper.tamias.setup.listener.PlayerChatListener;
@@ -32,7 +34,7 @@ import net.theevilreaper.tamias.setup.listener.PlayerDisconnectListener;
 import net.theevilreaper.tamias.setup.listener.PlayerSpawnListener;
 import net.theevilreaper.tamias.setup.listener.item.PlayerUseItemListener;
 import net.theevilreaper.tamias.setup.listener.entity.EntityAddToInstanceListener;
-import net.theevilreaper.tamias.setup.listener.map.MapSetupFinishListener;
+import net.theevilreaper.tamias.setup.listener.map.SetupFinishListener;
 import net.theevilreaper.tamias.setup.listener.map.MapSetupSelectListener;
 import net.theevilreaper.tamias.setup.map.SetupMapProvider;
 import net.theevilreaper.tamias.setup.util.SetupItems;
@@ -46,16 +48,16 @@ public final class TamiasSetup implements ListenerHandling {
     public static final Tag<Boolean> DELETE_TAG = Tag.Boolean("delete").defaultValue(false);
     public static final Component SELECT_MAP_FIRST = Component.text("Please select a map first!", NamedTextColor.RED);
 
+    private final SetupDataService<InstanceSetupData<? extends BaseMap>> setupDataService;
     private final FileHandler fileHandler;
     private final MapProvider mapProvider;
-    private final SetupDataService setupDataService;
     private final SetupItems setupItems;
     private final MapSetupInventory mapSetupInventory;
 
     public TamiasSetup() {
         this.fileHandler = new GsonFileHandler(GsonUtil.GSON);
         this.mapProvider = new SetupMapProvider(MapFilter.ROOT_FOLDER, this.fileHandler);
-        this.setupDataService = new SetupDataService();
+        this.setupDataService = SetupDataService.create();
         this.setupItems = new SetupItems();
         this.mapSetupInventory = new MapSetupInventory(this.mapProvider::getEntries);
         MinecraftServer.getSchedulerManager().buildShutdownTask(this::terminate);
@@ -83,12 +85,15 @@ public final class TamiasSetup implements ListenerHandling {
             setupMapProvider.teleportToSpawn(player, true);
             setupItems.setOverViewItem(player);
         };
-        manager.addListener(PlayerDisconnectEvent.class, new PlayerDisconnectListener(setupDataService::removeSetupData));
+        manager.addListener(PlayerDisconnectEvent.class, new PlayerDisconnectListener(setupDataService::remove));
         manager.addListener(AsyncPlayerConfigurationEvent.class, new PlayerConfigurationListener(instanceSupplier));
         manager.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(initialSpawnSupplier));
         manager.addListener(AddEntityToInstanceEvent.class, new EntityAddToInstanceListener(instanceSupplier, setupItems));
         manager.addListener(MapSetupSelectEvent.class, new MapSetupSelectListener(this.fileHandler, this.setupDataService));
-        manager.addListener(MapSetupFinishEvent.class, new MapSetupFinishListener(this.mapProvider::saveMap, instanceSwitcher));
+        manager.addListener(
+                (Class<SetupFinishEvent<InstanceSetupData<? extends BaseMap>>>) (Class<?>) SetupFinishEvent.class,
+                new SetupFinishListener(this.mapProvider::saveMap, instanceSwitcher)
+        );
         manager.addListener(PlayerChatEvent.class, new PlayerChatListener(this.setupDataService));
 
         // Item listener

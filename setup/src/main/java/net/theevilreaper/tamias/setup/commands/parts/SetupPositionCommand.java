@@ -1,7 +1,5 @@
 package net.theevilreaper.tamias.setup.commands.parts;
 
-import net.theevilreaper.aves.map.BaseMap;
-import net.theevilreaper.aves.util.Components;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
@@ -12,29 +10,29 @@ import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.arguments.ArgumentWord;
 import net.minestom.server.command.builder.condition.Conditions;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.utils.Direction;
-import net.minestom.server.utils.MathUtils;
+import net.theevilreaper.aves.map.BaseMap;
+import net.theevilreaper.aves.util.Components;
 import net.theevilreaper.tamias.common.map.GameMap;
-import net.theevilreaper.tamias.common.util.DirectionFaceHelper;
 import net.theevilreaper.tamias.common.util.Messages;
 import net.theevilreaper.tamias.setup.TamiasSetup;
 import net.theevilreaper.tamias.setup.commands.type.SpawnType;
-import net.theevilreaper.tamias.setup.data.SetupData;
+import net.theevilreaper.tamias.setup.data.InstanceSetupData;
 import net.theevilreaper.tamias.setup.util.DirectionUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
 
 import static net.theevilreaper.tamias.setup.TamiasSetup.SELECT_MAP_FIRST;
 
 public final class SetupPositionCommand extends Command {
 
-    private final Function<Player, SetupData> setupDataFunction;
+    private final Function<UUID, Optional<InstanceSetupData<? extends BaseMap>>> setupDataFunction;
 
-    public SetupPositionCommand(@NotNull Function<Player, SetupData> setupDataFunction) {
+    public SetupPositionCommand(@NotNull Function<UUID, Optional<InstanceSetupData<? extends BaseMap>>> setupDataFunction) {
         super("position");
         this.setCondition(Conditions::playerOnly);
         this.setupDataFunction = setupDataFunction;
@@ -58,13 +56,13 @@ public final class SetupPositionCommand extends Command {
             return;
         }
 
-        SetupData setupData = setupDataFunction.apply((Player) sender);
-        if (setupData == null) {
+        Optional<InstanceSetupData<? extends BaseMap>> setupData = setupDataFunction.apply(sender.identity().uuid());
+        if (setupData.isEmpty()) {
             sender.sendMessage("An error occurred while setting up the map");
             return;
         }
 
-        BaseMap map = setupData.getBaseMap();
+        BaseMap map = setupData.get().getMap().get();
         Player player = (Player) sender;
 
         switch (map) {
@@ -80,7 +78,7 @@ public final class SetupPositionCommand extends Command {
                 .append(posAsComponent)
         );
         sender.sendMessage(message);
-        setupData.triggerInventoryUpdate();
+        setupData.get().triggerUpdate();
     }
 
     private void handleGameSpawnSet(@NotNull Player sender, @NotNull GameMap gameMap, @NotNull SpawnType spawnType) {

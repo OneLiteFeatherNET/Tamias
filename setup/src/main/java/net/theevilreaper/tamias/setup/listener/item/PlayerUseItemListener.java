@@ -1,24 +1,31 @@
 package net.theevilreaper.tamias.setup.listener.item;
 
+import net.onelitefeather.guira.event.SetupFinishEvent;
+import net.theevilreaper.aves.map.BaseMap;
 import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.item.ItemStack;
 import net.theevilreaper.tamias.common.util.Tags;
-import net.theevilreaper.tamias.setup.data.SetupData;
-import net.theevilreaper.tamias.setup.event.MapSetupFinishEvent;
+import net.theevilreaper.tamias.setup.TamiasSetup;
+import net.theevilreaper.tamias.setup.data.InstanceSetupData;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 public final class PlayerUseItemListener implements Consumer<PlayerUseItemEvent> {
 
     private final PlayerConsumer invOpener;
-    private final Function<Player, SetupData> saveFunction;
+    private final Function<UUID, Optional<InstanceSetupData<? extends BaseMap>>> saveFunction;
 
-    public PlayerUseItemListener(@NotNull PlayerConsumer invOpener, @NotNull Function<Player, SetupData> saveFunction) {
+    public PlayerUseItemListener(
+            @NotNull PlayerConsumer invOpener,
+            @NotNull Function<UUID, Optional<InstanceSetupData<? extends BaseMap>>> saveFunction
+    ) {
         this.invOpener = invOpener;
         this.saveFunction = saveFunction;
     }
@@ -37,14 +44,17 @@ public final class PlayerUseItemListener implements Consumer<PlayerUseItemEvent>
             return;
         }
 
-        SetupData setupData = this.saveFunction.apply(player);
-        if (setupData == null) return;
+        if (!player.hasTag(TamiasSetup.SETUP_TAG)) return;
+
+        Optional<InstanceSetupData<? extends BaseMap>> fetchedData = this.saveFunction.apply(player.getUuid());
+        if (fetchedData.isEmpty()) return;
+
+        InstanceSetupData<? extends BaseMap> setupData = fetchedData.get();
 
         if (itemId == 0x02) {
-            setupData.openInventory();
+            setupData.openInventory(player);
             return;
         }
-
-        EventDispatcher.call(new MapSetupFinishEvent(setupData));
+        EventDispatcher.call(new SetupFinishEvent<>(setupData));
     }
 }
