@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 @SuppressWarnings("java:S3252")
 public final class Items {
 
-    private final ItemStack.Builder shootItem;
+    private final ItemStack shootItem;
     private final ItemStack bombItem;
 
     /**
@@ -25,7 +25,8 @@ public final class Items {
      */
     public Items() {
         this.shootItem = ItemStack.builder(Material.IRON_HOE)
-                .set(Tags.ITEM_TAG, (byte) 0);
+                .set(Tags.ITEM_TAG, (byte) 0)
+                .build();
         this.bombItem = ItemStack.builder(Material.TNT)
                 .set(Tags.ITEM_TAG, (byte) 1).build();
     }
@@ -37,7 +38,7 @@ public final class Items {
      */
     public void setShootItem(@NotNull Player player) {
         player.getInventory().clear();
-        player.getInventory().addItemStack(shootItem.build());
+        player.getInventory().addItemStack(shootItem);
     }
 
     /**
