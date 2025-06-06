@@ -2,66 +2,61 @@ package net.theevilreaper.tamias.game.map;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
-import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceContainer;
-import net.minestom.server.instance.anvil.AnvilLoader;
 import net.minestom.server.timer.Task;
 import net.minestom.server.utils.validate.Check;
-import net.theevilreaper.aves.file.FileHandler;
 import net.theevilreaper.aves.file.GsonFileHandler;
+import net.theevilreaper.aves.map.AbstractMapProvider;
 import net.theevilreaper.aves.map.BaseMap;
 import net.theevilreaper.aves.map.MapEntry;
 import net.theevilreaper.tamias.common.area.GameArea;
 import net.theevilreaper.tamias.common.area.SpawnArea;
-import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.common.explosion.ExplosionCreator;
 import net.theevilreaper.tamias.common.gson.GsonUtil;
 import net.theevilreaper.tamias.common.map.GameMap;
-import net.theevilreaper.tamias.common.map.MapPool;
-import net.theevilreaper.tamias.common.map.MapProvider;
 import net.theevilreaper.tamias.common.util.MapFilter;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnmodifiableView;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
 
-public final class GameMapProvider implements MapProvider, MapFilter {
+public final class GameMapProvider extends AbstractMapProvider implements MapFilter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GameMapProvider.class);
-    private final FileHandler fileHandler;
-    private final MapPool mapPool;
     private final BaseMap lobbyMap;
     private final BaseMap gameMap;
-
-    private InstanceContainer activeInstance;
-    private BaseMap activeMap;
 
     private InstanceContainer gameMapInstance;
 
     private SpawnArea spawnArea;
     private GameArea gameArea;
 
-    public GameMapProvider() {
-        this.mapPool = new MapPool(ROOT_FOLDER.resolve(GameConfig.MAP_FOLDER), MapFilter::filterMapsForGame);
-        this.fileHandler = new GsonFileHandler(GsonUtil.GSON);
+    public GameMapProvider(@NotNull Path path) {
+        super(new GsonFileHandler(GsonUtil.GSON), MapFilter::filterMapsForGame);
+        this.loadMapEntries(path.resolve("maps"));
         this.activeInstance = MinecraftServer.getInstanceManager().createInstanceContainer();
 
-        MapEntry lobbyEntry = this.mapPool.getMapEntry();
-        Check.argCondition(!lobbyEntry.hasMapFile(), "The lobby map doesn't contain a map file!");
+        MapEntry lobbyEntry = this.getEntries().stream().filter(this::isLobbyMap).findFirst().orElse(null);
+
+        if (lobbyEntry == null) {
+            throw new IllegalStateException("No lobby map found in the available maps");
+        }
+
         Optional<BaseMap> loadedLobbyMap = fileHandler.load(lobbyEntry.getMapFile(), BaseMap.class);
         Check.argCondition(loadedLobbyMap.isEmpty(), "The lobby map couldn't be loaded!");
         this.lobbyMap = loadedLobbyMap.get();
-        this.loadBaseMap(lobbyEntry);
+        this.registerInstance(this.activeInstance, lobbyEntry);
+        if (this.lobbyMap.getSpawn() != null) {
+            activeInstance.loadChunk(this.lobbyMap.getSpawn());
+        }
+        this.activeMap = this.lobbyMap;
 
-        MapEntry gameEntry = this.mapPool.getAvailableMaps().getFirst();
+        MapEntry gameEntry = this.getEntries().stream().filter(mapEntry -> !this.isLobbyMap(mapEntry))
+                        .skip(new Random().nextInt(0, this.getEntries().size() - 1)).findFirst().orElse(null);
 
+        Check.argCondition(gameEntry == null, "No game map found in the available maps");
         Check.argCondition(!gameEntry.hasMapFile(), "The game map doesn't contain a map file!");
         Optional<GameMap> loadedGameMap = fileHandler.load(gameEntry.getMapFile(), GameMap.class);
         Check.argCondition(loadedGameMap.isEmpty(), "The game map couldn't be loaded!");
@@ -72,15 +67,6 @@ public final class GameMapProvider implements MapProvider, MapFilter {
 
         MinecraftServer.getInstanceManager().registerInstance(this.activeInstance);
         this.createGameMapContainer();
-    }
-
-    private void loadBaseMap(@NotNull MapEntry mapEntry) {
-        activeInstance.setChunkLoader(new AnvilLoader(mapEntry.getDirectoryRoot()));
-        activeInstance.enableAutoChunkLoad(true);
-        if (this.lobbyMap.getSpawn() != null) {
-            //  loadChunks(activeInstance, this.lobbyMap.getSpawn());
-        }
-        this.activeMap = this.lobbyMap;
     }
 
     public void createGameMapContainer() {
@@ -126,7 +112,6 @@ public final class GameMapProvider implements MapProvider, MapFilter {
     }
 
     public @NotNull Task triggerGamePlacement() {
-        LOGGER.warn("Triggering game placement");
         this.gameArea.triggerPlacement();
         return this.gameArea.getTask();
     }
@@ -147,16 +132,6 @@ public final class GameMapProvider implements MapProvider, MapFilter {
         throw new UnsupportedOperationException("A game can't save a map");
     }
 
-    @Override
-    public @UnmodifiableView @NotNull List<MapEntry> getEntries() {
-        return this.mapPool.getAvailableMaps();
-    }
-
-    @Override
-    public @NotNull Supplier<@Nullable Instance> getActiveInstance() {
-        return () -> this.activeInstance;
-    }
-
     public @NotNull SpawnArea getSpawnArea() {
         return this.spawnArea;
     }
@@ -167,5 +142,15 @@ public final class GameMapProvider implements MapProvider, MapFilter {
 
     public @NotNull BaseMap getActiveMap() {
         return this.activeMap;
+    }
+
+    /**
+     * Checks if the given map is a lobby map.
+     *
+     * @param mapEntry the map entry to check
+     * @return true if the map is a lobby map
+     */
+    private boolean isLobbyMap(@NotNull MapEntry mapEntry) {
+        return mapEntry.getDirectoryRoot().endsWith("lobby");
     }
 }
