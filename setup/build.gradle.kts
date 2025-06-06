@@ -11,6 +11,7 @@ dependencies {
     implementation(platform(libs.mycelium.bom))
     implementation(platform(libs.game.bom))
     implementation(libs.adventure)
+    implementation(libs.guira)
     compileOnly(libs.minestom)
     compileOnly(libs.aves)
     compileOnly(libs.xerus)
