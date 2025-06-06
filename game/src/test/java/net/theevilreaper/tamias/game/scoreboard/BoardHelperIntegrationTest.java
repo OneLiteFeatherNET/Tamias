@@ -44,7 +44,7 @@ class BoardHelperIntegrationTest {
         Instance instance = env.createFlatInstance();
 
         TestConnection connection = env.createConnection();
-        Player player = connection.connect(instance, Pos.ZERO).join();
+        Player player = connection.connect(instance, Pos.ZERO);
 
         assertNotNull(player);
         tamiasScoreboard.switchBoard(TamiasScoreboard.BoardType.LOBBY);
@@ -72,7 +72,7 @@ class BoardHelperIntegrationTest {
         Instance instance = env.createFlatInstance();
 
         TestConnection connection = env.createConnection();
-        Player player = connection.connect(instance, Pos.ZERO).join();
+        Player player = connection.connect(instance, Pos.ZERO);
 
         assertNotNull(player);
 

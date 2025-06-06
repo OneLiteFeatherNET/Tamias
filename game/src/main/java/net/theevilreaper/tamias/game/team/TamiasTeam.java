@@ -1,7 +1,7 @@
 package net.theevilreaper.tamias.game.team;
 
-import de.icevizion.xerus.api.ColorData;
-import de.icevizion.xerus.api.team.TeamImpl;
+import net.theevilreaper.xerus.api.ColorData;
+import net.theevilreaper.xerus.api.team.TeamImpl;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.theevilreaper.tamias.common.util.Tags;

@@ -1,6 +1,6 @@
 package net.theevilreaper.tamias.game.listener;
 
-import de.icevizion.xerus.api.phase.Phase;
+import net.theevilreaper.xerus.api.phase.Phase;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;

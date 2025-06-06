@@ -26,8 +26,8 @@ public final class AttributeHelper {
      * @param player the player to disable the movement
      */
     public static void disableMovement(@NotNull Player player) {
-        player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).setBaseValue(ZERO_MOVEMENT);
-        player.getAttribute(Attribute.GENERIC_JUMP_STRENGTH).setBaseValue(ZERO_JUMP);
+        player.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(ZERO_MOVEMENT);
+        player.getAttribute(Attribute.JUMP_STRENGTH).setBaseValue(ZERO_JUMP);
     }
 
     /**
@@ -36,8 +36,8 @@ public final class AttributeHelper {
      * @param player the player to enable the movement
      */
     public static void enableMovement(@NotNull Player player) {
-        player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).setBaseValue(DEFAULT_MOVE_SPEED);
-        player.getAttribute(Attribute.GENERIC_JUMP_STRENGTH).setBaseValue(DEFAULT_JUMP_HEIGHT);
+        player.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(DEFAULT_MOVE_SPEED);
+        player.getAttribute(Attribute.JUMP_STRENGTH).setBaseValue(DEFAULT_JUMP_HEIGHT);
     }
 
     private AttributeHelper() {

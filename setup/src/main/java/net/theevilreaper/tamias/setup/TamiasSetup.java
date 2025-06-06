@@ -1,8 +1,8 @@
 package net.theevilreaper.tamias.setup;
 
-import de.icevizion.aves.file.FileHandler;
-import de.icevizion.aves.file.GsonFileHandler;
-import de.icevizion.aves.util.functional.PlayerConsumer;
+import net.theevilreaper.aves.file.FileHandler;
+import net.theevilreaper.aves.file.GsonFileHandler;
+import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
@@ -17,7 +17,6 @@ import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.event.player.PlayerUseItemEvent;
-import net.minestom.server.extensions.Extension;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.Tag;
 import net.theevilreaper.tamias.common.gson.GsonUtil;
@@ -44,7 +43,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
 
-public final class TamiasSetup extends Extension {
+public final class TamiasSetup {
 
     public static final Tag<Byte> SETUP_TAG = Tag.Transient("setup");
     public static final Tag<Boolean> DELETE_TAG = Tag.Boolean("delete").defaultValue(false);
@@ -64,13 +63,11 @@ public final class TamiasSetup extends Extension {
         this.mapSetupInventory = new MapSetupInventory(this.mapProvider::getEntries);
     }
 
-    @Override
     public void initialize() {
         this.registerListener();
         this.registerCommands();
     }
 
-    @Override
     public void terminate() {
         // Nothing to do here
     }

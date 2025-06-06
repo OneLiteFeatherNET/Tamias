@@ -1,7 +1,7 @@
 package net.theevilreaper.tamias.setup.data;
 
-import de.icevizion.aves.map.BaseMap;
-import de.icevizion.aves.map.MapEntry;
+import net.theevilreaper.aves.map.BaseMap;
+import net.theevilreaper.aves.map.MapEntry;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.entity.Player;

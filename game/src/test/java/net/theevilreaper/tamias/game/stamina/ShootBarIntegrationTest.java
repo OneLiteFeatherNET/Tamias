@@ -51,7 +51,7 @@ class ShootBarIntegrationTest {
         Instance instance = env.createFlatInstance();
 
         TestConnection connection = env.createConnection();
-        Player player = connection.connect(instance, Pos.ZERO).join();
+        Player player = connection.connect(instance, Pos.ZERO);
 
         env.destroyInstance(instance, true);
 
@@ -75,7 +75,7 @@ class ShootBarIntegrationTest {
     void testRegenerateFlow(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
         TestConnection connection = env.createConnection();
-        Player player = connection.connect(instance, Pos.ZERO).join();
+        Player player = connection.connect(instance, Pos.ZERO);
 
         StaminaBar shootBar = StaminaFactory.createShootBar(player);
 

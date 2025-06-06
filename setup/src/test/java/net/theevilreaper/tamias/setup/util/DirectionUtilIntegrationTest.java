@@ -26,7 +26,7 @@ class DirectionUtilIntegrationTest {
         Instance instance = env.createFlatInstance();
         TestConnection connection = env.createConnection();
         Pos spawnPos = Pos.ZERO.withPitch(pitch);
-        Player player = connection.connect(instance, spawnPos).join();
+        Player player = connection.connect(instance, spawnPos);
 
         assertNotNull(player);
         assertEquals(spawnPos, player.getPosition(), "The player should be spawned at " + spawnPos);
@@ -42,7 +42,7 @@ class DirectionUtilIntegrationTest {
         Instance instance = env.createFlatInstance();
         TestConnection connection = env.createConnection();
         Pos spawnPos = Pos.ZERO.withYaw(0);
-        Player player = connection.connect(instance, spawnPos).join();
+        Player player = connection.connect(instance, spawnPos);
 
         assertNotNull(player);
         assertEquals(spawnPos, player.getPosition(), "The player should be spawned at " + spawnPos);

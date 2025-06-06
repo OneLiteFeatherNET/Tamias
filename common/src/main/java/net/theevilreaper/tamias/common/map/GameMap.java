@@ -1,6 +1,6 @@
 package net.theevilreaper.tamias.common.map;
 
-import de.icevizion.aves.map.BaseMap;
+import net.theevilreaper.aves.map.BaseMap;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.utils.Direction;
 import net.theevilreaper.tamias.common.map.layer.GameAreaData;

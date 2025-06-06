@@ -41,7 +41,7 @@ class TamiasScoreboardIntegrationTest {
         Instance instance = env.createFlatInstance();
         TestConnection connection = env.createConnection();
 
-        Player player = connection.connect(instance, Pos.ZERO).join();
+        Player player = connection.connect(instance, Pos.ZERO);
 
         tamiasScoreboard.initDefaults();
 
@@ -75,7 +75,7 @@ class TamiasScoreboardIntegrationTest {
         Instance instance = env.createFlatInstance();
         TestConnection connection = env.createConnection();
 
-        Player player = connection.connect(instance, Pos.ZERO).join();
+        Player player = connection.connect(instance, Pos.ZERO);
 
         assertTrue(tamiasScoreboard.addViewer(player));
 
@@ -91,7 +91,7 @@ class TamiasScoreboardIntegrationTest {
         Instance instance = env.createFlatInstance();
         TestConnection connection = env.createConnection();
 
-        Player player = connection.connect(instance, Pos.ZERO).join();
+        Player player = connection.connect(instance, Pos.ZERO);
 
         tamiasScoreboard.addViewer(player);
         assertTrue(tamiasScoreboard.removeViewer(player));
@@ -109,7 +109,7 @@ class TamiasScoreboardIntegrationTest {
         Instance instance = env.createFlatInstance();
         TestConnection connection = env.createConnection();
 
-        Player player = connection.connect(instance, Pos.ZERO).join();
+        Player player = connection.connect(instance, Pos.ZERO);
 
         tamiasScoreboard.switchBoard(BoardType.GAME);
         tamiasScoreboard.addViewer(player);
@@ -128,7 +128,7 @@ class TamiasScoreboardIntegrationTest {
         Instance instance = env.createFlatInstance();
         TestConnection connection = env.createConnection();
 
-        Player player = connection.connect(instance, Pos.ZERO).join();
+        Player player = connection.connect(instance, Pos.ZERO);
 
         tamiasScoreboard.addViewer(player);
 

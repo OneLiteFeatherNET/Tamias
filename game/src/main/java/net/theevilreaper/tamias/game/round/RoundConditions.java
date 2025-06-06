@@ -1,9 +1,9 @@
 package net.theevilreaper.tamias.game.round;
 
-import de.icevizion.xerus.api.phase.LinearPhaseSeries;
-import de.icevizion.xerus.api.phase.Phase;
-import de.icevizion.xerus.api.team.Team;
-import de.icevizion.xerus.api.team.TeamService;
+import net.theevilreaper.xerus.api.phase.LinearPhaseSeries;
+import net.theevilreaper.xerus.api.phase.Phase;
+import net.theevilreaper.xerus.api.team.Team;
+import net.theevilreaper.xerus.api.team.TeamService;
 import net.theevilreaper.tamias.game.phase.playing.PlayingPhase;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;

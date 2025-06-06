@@ -1,8 +1,8 @@
 package net.theevilreaper.tamias.game.phase.playing;
 
-import de.icevizion.aves.util.functional.VoidConsumer;
-import de.icevizion.xerus.api.phase.TickDirection;
-import de.icevizion.xerus.api.phase.TimedPhase;
+import net.theevilreaper.aves.util.functional.VoidConsumer;
+import net.theevilreaper.xerus.api.phase.TickDirection;
+import net.theevilreaper.xerus.api.phase.TimedPhase;
 import net.minestom.server.event.Event;
 import org.jetbrains.annotations.NotNull;
 

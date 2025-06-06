@@ -1,6 +1,6 @@
 package net.theevilreaper.tamias.setup.data;
 
-import de.icevizion.aves.map.MapEntry;
+import net.theevilreaper.aves.map.MapEntry;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.testing.Env;

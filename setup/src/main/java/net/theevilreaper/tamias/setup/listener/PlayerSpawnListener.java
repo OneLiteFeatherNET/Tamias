@@ -1,6 +1,6 @@
 package net.theevilreaper.tamias.setup.listener;
 
-import de.icevizion.aves.util.functional.PlayerConsumer;
+import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;

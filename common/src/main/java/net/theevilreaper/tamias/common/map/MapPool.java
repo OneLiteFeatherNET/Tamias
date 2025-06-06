@@ -1,6 +1,6 @@
 package net.theevilreaper.tamias.common.map;
 
-import de.icevizion.aves.map.MapEntry;
+import net.theevilreaper.aves.map.MapEntry;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;

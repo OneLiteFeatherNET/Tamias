@@ -1,10 +1,10 @@
 package net.theevilreaper.tamias.setup.inventory.slot;
 
-import de.icevizion.aves.inventory.InventorySlot;
-import de.icevizion.aves.inventory.slot.ISlot;
-import de.icevizion.aves.inventory.util.InventoryConstants;
-import de.icevizion.aves.util.Components;
-import de.icevizion.aves.util.functional.PlayerConsumer;
+import net.theevilreaper.aves.inventory.InventorySlot;
+import net.theevilreaper.aves.inventory.slot.ISlot;
+import net.theevilreaper.aves.inventory.util.InventoryConstants;
+import net.theevilreaper.aves.util.Components;
+import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;

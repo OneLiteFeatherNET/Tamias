@@ -1,11 +1,11 @@
 package net.theevilreaper.tamias.game.team;
 
-import de.icevizion.aves.util.Players;
-import de.icevizion.aves.util.functional.PlayerConsumer;
-import de.icevizion.xerus.api.ColorData;
-import de.icevizion.xerus.api.team.Team;
-import de.icevizion.xerus.api.team.TeamCreator;
-import de.icevizion.xerus.api.team.TeamService;
+import net.theevilreaper.aves.util.Players;
+import net.theevilreaper.aves.util.functional.PlayerConsumer;
+import net.theevilreaper.xerus.api.ColorData;
+import net.theevilreaper.xerus.api.team.Team;
+import net.theevilreaper.xerus.api.team.TeamCreator;
+import net.theevilreaper.xerus.api.team.TeamService;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;

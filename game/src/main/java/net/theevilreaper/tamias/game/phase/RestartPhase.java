@@ -1,6 +1,6 @@
 package net.theevilreaper.tamias.game.phase;
 
-import de.icevizion.xerus.api.phase.TimedPhase;
+import net.theevilreaper.xerus.api.phase.TimedPhase;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;

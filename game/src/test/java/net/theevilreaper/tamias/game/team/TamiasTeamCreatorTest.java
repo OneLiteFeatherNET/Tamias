@@ -1,7 +1,7 @@
 package net.theevilreaper.tamias.game.team;
 
-import de.icevizion.xerus.api.ColorData;
-import de.icevizion.xerus.api.team.Team;
+import net.theevilreaper.xerus.api.ColorData;
+import net.theevilreaper.xerus.api.team.Team;
 import net.theevilreaper.tamias.common.config.GameConfig;
 import org.junit.jupiter.api.Test;
 

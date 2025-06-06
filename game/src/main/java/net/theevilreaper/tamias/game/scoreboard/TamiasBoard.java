@@ -1,7 +1,7 @@
 package net.theevilreaper.tamias.game.scoreboard;
 
-import de.icevizion.aves.util.Strings;
-import de.icevizion.aves.util.TimeFormat;
+import net.theevilreaper.aves.util.Strings;
+import net.theevilreaper.aves.util.TimeFormat;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.entity.Player;
