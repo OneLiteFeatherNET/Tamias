@@ -92,12 +92,12 @@ public final class TamiasSetup implements ListenerHandling {
         manager.addListener(MapSetupSelectEvent.class, new MapSetupSelectListener(this.fileHandler, this.setupDataService));
         manager.addListener(
                 (Class<SetupFinishEvent<InstanceSetupData<? extends BaseMap>>>) (Class<?>) SetupFinishEvent.class,
-                new SetupFinishListener(this.mapProvider::saveMap, instanceSwitcher)
+                new SetupFinishListener(instanceSwitcher)
         );
         manager.addListener(PlayerChatEvent.class, new PlayerChatListener(this.setupDataService));
 
         // Item listener
-        manager.addListener(PlayerUseItemEvent.class, new PlayerUseItemListener(this::updateMapInventory, setupDataService::getSetupData));
+        manager.addListener(PlayerUseItemEvent.class, new PlayerUseItemListener(this::updateMapInventory, setupDataService::get));
     }
 
     /**
