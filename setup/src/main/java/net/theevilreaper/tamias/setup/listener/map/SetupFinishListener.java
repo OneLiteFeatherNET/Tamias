@@ -8,8 +8,6 @@ import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.theevilreaper.tamias.setup.data.InstanceSetupData;
 import org.jetbrains.annotations.NotNull;
 
-import java.nio.file.Path;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class SetupFinishListener implements Consumer<SetupFinishEvent<InstanceSetupData<? extends BaseMap>>> {
