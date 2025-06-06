@@ -49,7 +49,7 @@ public final class GameMapProvider implements MapProvider, MapFilter {
     private GameArea gameArea;
 
     public GameMapProvider() {
-        this.mapPool = new MapPool(ROOT_FOLDER.resolve(GameConfig.MAP_FOLDER), this::filterMapsForGame);
+        this.mapPool = new MapPool(ROOT_FOLDER.resolve(GameConfig.MAP_FOLDER), MapFilter::filterMapsForGame);
         this.fileHandler = new GsonFileHandler(GsonUtil.GSON);
         this.activeInstance = MinecraftServer.getInstanceManager().createInstanceContainer();
 
