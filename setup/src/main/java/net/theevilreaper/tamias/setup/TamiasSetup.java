@@ -11,8 +11,6 @@ import net.minestom.server.command.CommandManager;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.instance.AddEntityToInstanceEvent;
-import net.minestom.server.event.item.ItemDropEvent;
-import net.minestom.server.event.item.PickupItemEvent;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
@@ -20,6 +18,7 @@ import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.Tag;
+import net.theevilreaper.tamias.common.ListenerHandling;
 import net.theevilreaper.tamias.common.gson.GsonUtil;
 import net.theevilreaper.tamias.common.util.MapFilter;
 import net.theevilreaper.tamias.setup.commands.SetupCommand;
@@ -31,8 +30,6 @@ import net.theevilreaper.tamias.setup.listener.PlayerChatListener;
 import net.theevilreaper.tamias.setup.listener.PlayerConfigurationListener;
 import net.theevilreaper.tamias.setup.listener.PlayerDisconnectListener;
 import net.theevilreaper.tamias.setup.listener.PlayerSpawnListener;
-import net.theevilreaper.tamias.setup.listener.item.PlayerDropItemListener;
-import net.theevilreaper.tamias.setup.listener.item.PlayerPickupItemListener;
 import net.theevilreaper.tamias.setup.listener.item.PlayerUseItemListener;
 import net.theevilreaper.tamias.setup.listener.entity.EntityAddToInstanceListener;
 import net.theevilreaper.tamias.setup.listener.map.MapSetupFinishListener;
@@ -43,7 +40,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
 
-public final class TamiasSetup {
+public final class TamiasSetup implements ListenerHandling {
 
     public static final Tag<Byte> SETUP_TAG = Tag.Transient("setup");
     public static final Tag<Boolean> DELETE_TAG = Tag.Boolean("delete").defaultValue(false);
@@ -65,6 +62,7 @@ public final class TamiasSetup {
     }
 
     public void initialize() {
+        this.registerCancelListener(MinecraftServer.getGlobalEventHandler());
         this.registerListener();
         this.registerCommands();
     }
@@ -95,8 +93,6 @@ public final class TamiasSetup {
 
         // Item listener
         manager.addListener(PlayerUseItemEvent.class, new PlayerUseItemListener(this::updateMapInventory, setupDataService::getSetupData));
-        manager.addListener(ItemDropEvent.class, new PlayerDropItemListener());
-        manager.addListener(PickupItemEvent.class, new PlayerPickupItemListener());
     }
 
     /**
