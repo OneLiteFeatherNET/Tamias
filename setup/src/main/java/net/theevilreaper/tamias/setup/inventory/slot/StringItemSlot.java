@@ -1,7 +1,7 @@
 package net.theevilreaper.tamias.setup.inventory.slot;
 
-import de.icevizion.aves.inventory.slot.Slot;
-import de.icevizion.aves.inventory.util.InventoryConstants;
+import net.theevilreaper.aves.inventory.slot.Slot;
+import net.theevilreaper.aves.inventory.util.InventoryConstants;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.item.ItemStack;

@@ -1,7 +1,7 @@
 package net.theevilreaper.tamias.setup.inventory.slot;
 
-import de.icevizion.aves.inventory.slot.Slot;
-import de.icevizion.aves.util.functional.PlayerConsumer;
+import net.theevilreaper.aves.inventory.slot.Slot;
+import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;

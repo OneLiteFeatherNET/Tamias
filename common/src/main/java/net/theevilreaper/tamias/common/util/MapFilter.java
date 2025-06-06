@@ -1,6 +1,6 @@
 package net.theevilreaper.tamias.common.util;
 
-import de.icevizion.aves.map.MapEntry;
+import net.theevilreaper.aves.map.MapEntry;
 import net.theevilreaper.tamias.common.config.GameConfig;
 import org.jetbrains.annotations.NotNull;
 

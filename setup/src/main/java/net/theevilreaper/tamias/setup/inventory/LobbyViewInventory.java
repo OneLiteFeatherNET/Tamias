@@ -1,10 +1,10 @@
 package net.theevilreaper.tamias.setup.inventory;
 
-import de.icevizion.aves.inventory.GlobalInventoryBuilder;
-import de.icevizion.aves.inventory.InventoryLayout;
-import de.icevizion.aves.inventory.slot.ISlot;
-import de.icevizion.aves.inventory.util.LayoutCalculator;
-import de.icevizion.aves.map.BaseMap;
+import net.theevilreaper.aves.inventory.GlobalInventoryBuilder;
+import net.theevilreaper.aves.inventory.InventoryLayout;
+import net.theevilreaper.aves.inventory.slot.ISlot;
+import net.theevilreaper.aves.inventory.util.LayoutCalculator;
+import net.theevilreaper.aves.map.BaseMap;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
@@ -18,7 +18,7 @@ import net.theevilreaper.tamias.setup.inventory.slot.StringItemSlot;
 import net.theevilreaper.tamias.setup.util.SetupItems;
 import org.jetbrains.annotations.NotNull;
 
-import static de.icevizion.aves.inventory.util.InventoryConstants.CANCEL_CLICK;
+import static net.theevilreaper.aves.inventory.util.InventoryConstants.CANCEL_CLICK;
 
 /**
  * The {@link LobbyViewInventory} is used to display the data from a lobby map.

@@ -1,6 +1,6 @@
 package net.theevilreaper.tamias.game.listener.game;
 
-import de.icevizion.aves.util.functional.PlayerConsumer;
+import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEvent;
 import net.theevilreaper.tamias.common.config.GameConfig;

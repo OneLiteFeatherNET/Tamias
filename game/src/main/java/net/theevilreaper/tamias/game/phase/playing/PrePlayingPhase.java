@@ -1,11 +1,11 @@
 package net.theevilreaper.tamias.game.phase.playing;
 
-import de.icevizion.aves.map.BaseMap;
-import de.icevizion.aves.util.functional.VoidConsumer;
-import de.icevizion.xerus.api.phase.TickDirection;
-import de.icevizion.xerus.api.phase.TimedPhase;
-import de.icevizion.xerus.api.team.Team;
-import de.icevizion.xerus.api.team.TeamService;
+import net.theevilreaper.aves.map.BaseMap;
+import net.theevilreaper.aves.util.functional.VoidConsumer;
+import net.theevilreaper.xerus.api.phase.TickDirection;
+import net.theevilreaper.xerus.api.phase.TimedPhase;
+import net.theevilreaper.xerus.api.team.Team;
+import net.theevilreaper.xerus.api.team.TeamService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.theevilreaper.tamias.common.config.GameConfig;

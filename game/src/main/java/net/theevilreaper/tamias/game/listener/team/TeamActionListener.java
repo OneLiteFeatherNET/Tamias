@@ -1,7 +1,7 @@
 package net.theevilreaper.tamias.game.listener.team;
 
-import de.icevizion.xerus.api.team.Team;
-import de.icevizion.xerus.api.team.event.MultiPlayerTeamEvent;
+import net.theevilreaper.xerus.api.team.Team;
+import net.theevilreaper.xerus.api.team.event.MultiPlayerTeamEvent;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 

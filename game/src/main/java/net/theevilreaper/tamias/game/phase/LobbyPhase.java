@@ -1,8 +1,8 @@
 package net.theevilreaper.tamias.game.phase;
 
-import de.icevizion.aves.util.functional.VoidConsumer;
-import de.icevizion.xerus.api.phase.TickDirection;
-import de.icevizion.xerus.api.phase.TimedPhase;
+import net.theevilreaper.aves.util.functional.VoidConsumer;
+import net.theevilreaper.xerus.api.phase.TickDirection;
+import net.theevilreaper.xerus.api.phase.TimedPhase;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.entity.Player;
 import net.minestom.server.sound.SoundEvent;

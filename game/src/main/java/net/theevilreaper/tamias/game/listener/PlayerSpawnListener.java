@@ -1,7 +1,7 @@
 package net.theevilreaper.tamias.game.listener;
 
-import de.icevizion.aves.util.functional.PlayerConsumer;
-import de.icevizion.xerus.api.phase.Phase;
+import net.theevilreaper.aves.util.functional.PlayerConsumer;
+import net.theevilreaper.xerus.api.phase.Phase;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.event.player.PlayerSpawnEvent;

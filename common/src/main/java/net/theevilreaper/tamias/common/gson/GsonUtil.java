@@ -1,9 +1,9 @@
 package net.theevilreaper.tamias.common.gson;
 
 import com.google.gson.Gson;
-import de.icevizion.aves.file.gson.PositionGsonAdapter;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
+import net.theevilreaper.aves.file.gson.PositionGsonAdapter;
 import net.theevilreaper.tamias.common.map.layer.GameAreaData;
 
 /**

@@ -1,6 +1,6 @@
 package net.theevilreaper.tamias.game.util;
 
-import de.icevizion.xerus.api.team.Team;
+import net.theevilreaper.xerus.api.team.Team;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;

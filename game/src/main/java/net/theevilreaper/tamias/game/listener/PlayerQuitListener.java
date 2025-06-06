@@ -1,8 +1,8 @@
 package net.theevilreaper.tamias.game.listener;
 
-import de.icevizion.aves.util.functional.VoidConsumer;
-import de.icevizion.xerus.api.phase.Phase;
-import de.icevizion.xerus.api.team.Team;
+import net.theevilreaper.aves.util.functional.VoidConsumer;
+import net.theevilreaper.xerus.api.phase.Phase;
+import net.theevilreaper.xerus.api.team.Team;
 import net.kyori.adventure.audience.Audience;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerDisconnectEvent;

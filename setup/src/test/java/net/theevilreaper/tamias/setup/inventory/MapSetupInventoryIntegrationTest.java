@@ -1,7 +1,7 @@
 package net.theevilreaper.tamias.setup.inventory;
 
-import de.icevizion.aves.inventory.slot.ISlot;
-import de.icevizion.aves.map.MapEntry;
+import net.theevilreaper.aves.inventory.slot.ISlot;
+import net.theevilreaper.aves.map.MapEntry;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
@@ -47,7 +47,7 @@ class MapSetupInventoryIntegrationTest extends MapDataTestBase {
     void testMapSetupInventory(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
         TestConnection connection = env.createConnection();
-        Player player = connection.connect(instance, Pos.ZERO).join();
+        Player player = connection.connect(instance, Pos.ZERO);
 
         assertEquals(1, mapEntries.get().size());
 

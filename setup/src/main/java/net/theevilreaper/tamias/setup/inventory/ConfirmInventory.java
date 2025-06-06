@@ -1,9 +1,9 @@
 package net.theevilreaper.tamias.setup.inventory;
 
-import de.icevizion.aves.inventory.GlobalInventoryBuilder;
-import de.icevizion.aves.inventory.InventoryLayout;
-import de.icevizion.aves.inventory.util.LayoutCalculator;
-import de.icevizion.aves.util.functional.PlayerConsumer;
+import net.theevilreaper.aves.inventory.GlobalInventoryBuilder;
+import net.theevilreaper.aves.inventory.InventoryLayout;
+import net.theevilreaper.aves.inventory.util.LayoutCalculator;
+import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.entity.Player;
@@ -16,7 +16,7 @@ import net.theevilreaper.tamias.setup.TamiasSetup;
 import net.theevilreaper.tamias.setup.util.SetupItems;
 import org.jetbrains.annotations.NotNull;
 
-import static de.icevizion.aves.inventory.util.InventoryConstants.CANCEL_CLICK;
+import static net.theevilreaper.aves.inventory.util.InventoryConstants.CANCEL_CLICK;
 
 @SuppressWarnings("java:S3252")
 public class ConfirmInventory extends GlobalInventoryBuilder {
@@ -50,7 +50,7 @@ public class ConfirmInventory extends GlobalInventoryBuilder {
 
         layout.setItems(CONFIRM_SLOTS, CONFIRM_STACK, (player, i, clickType, result) -> {
             player.setTag(TamiasSetup.DELETE_TAG, true);
-            EventDispatcher.call(new InventoryCloseEvent(player.getOpenInventory(), player));
+            EventDispatcher.call(new InventoryCloseEvent(player.getOpenInventory(), player, false));
             player.closeInventory();
         });
 

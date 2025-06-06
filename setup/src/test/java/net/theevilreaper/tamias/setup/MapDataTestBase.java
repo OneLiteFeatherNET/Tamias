@@ -1,6 +1,6 @@
 package net.theevilreaper.tamias.setup;
 
-import de.icevizion.aves.map.MapEntry;
+import net.theevilreaper.aves.map.MapEntry;
 
 import java.nio.file.Paths;
 

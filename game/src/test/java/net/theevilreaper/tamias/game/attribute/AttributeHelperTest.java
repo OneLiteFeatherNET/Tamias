@@ -20,8 +20,8 @@ class AttributeHelperTest {
         Player player = env.createPlayer(instance);
 
         AttributeHelper.disableMovement(player);
-        assertNotEquals(0.1, player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).getBaseValue());
-        assertEquals(0.0, player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).getBaseValue());
+        assertNotEquals(0.1, player.getAttribute(Attribute.MOVEMENT_SPEED).getBaseValue());
+        assertEquals(0.0, player.getAttribute(Attribute.MOVEMENT_SPEED).getBaseValue());
 
         env.destroyInstance(instance, true);
     }
@@ -32,11 +32,11 @@ class AttributeHelperTest {
         Player player = env.createPlayer(instance);
 
         AttributeHelper.disableMovement(player);
-        assertEquals(0.0, player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).getBaseValue());
+        assertEquals(0.0, player.getAttribute(Attribute.MOVEMENT_SPEED).getBaseValue());
 
         AttributeHelper.enableMovement(player);
-        assertNotEquals(0.0, player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).getBaseValue());
-        assertEquals(0.1, player.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).getBaseValue());
+        assertNotEquals(0.0, player.getAttribute(Attribute.MOVEMENT_SPEED).getBaseValue());
+        assertEquals(0.1, player.getAttribute(Attribute.MOVEMENT_SPEED).getBaseValue());
 
         env.destroyInstance(instance, true);
     }

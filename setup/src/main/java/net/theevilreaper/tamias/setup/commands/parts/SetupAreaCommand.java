@@ -1,6 +1,6 @@
 package net.theevilreaper.tamias.setup.commands.parts;
 
-import de.icevizion.aves.util.Components;
+import net.theevilreaper.aves.util.Components;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;

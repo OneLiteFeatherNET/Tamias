@@ -1,6 +1,6 @@
 package net.theevilreaper.tamias.game.listener.round;
 
-import de.icevizion.xerus.api.team.Team;
+import net.theevilreaper.xerus.api.team.Team;
 import net.theevilreaper.tamias.common.round.event.RoundEndEvent;
 import org.jetbrains.annotations.NotNull;
 

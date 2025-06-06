@@ -1,7 +1,7 @@
 package net.theevilreaper.tamias.common.map;
 
-import de.icevizion.aves.map.BaseMap;
-import de.icevizion.aves.map.MapEntry;
+import net.theevilreaper.aves.map.BaseMap;
+import net.theevilreaper.aves.map.MapEntry;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;

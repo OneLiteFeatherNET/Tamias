@@ -1,14 +1,14 @@
 package net.theevilreaper.tamias.game;
 
-import de.icevizion.aves.util.functional.PlayerConsumer;
-import de.icevizion.aves.util.functional.VoidConsumer;
-import de.icevizion.xerus.api.phase.CyclicPhaseSeries;
-import de.icevizion.xerus.api.phase.LinearPhaseSeries;
-import de.icevizion.xerus.api.phase.Phase;
-import de.icevizion.xerus.api.team.Team;
-import de.icevizion.xerus.api.team.TeamService;
-import de.icevizion.xerus.api.team.TeamServiceImpl;
-import de.icevizion.xerus.api.team.event.MultiPlayerTeamEvent;
+import net.theevilreaper.aves.util.functional.PlayerConsumer;
+import net.theevilreaper.aves.util.functional.VoidConsumer;
+import net.theevilreaper.xerus.api.phase.CyclicPhaseSeries;
+import net.theevilreaper.xerus.api.phase.LinearPhaseSeries;
+import net.theevilreaper.xerus.api.phase.Phase;
+import net.theevilreaper.xerus.api.team.Team;
+import net.theevilreaper.xerus.api.team.TeamService;
+import net.theevilreaper.xerus.api.team.TeamServiceImpl;
+import net.theevilreaper.xerus.api.team.event.MultiPlayerTeamEvent;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
@@ -21,7 +21,6 @@ import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.event.player.PlayerUseItemEvent;
-import net.minestom.server.extensions.Extension;
 import net.theevilreaper.tamias.common.ListenerHandling;
 import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.common.config.GameConfigReader;
@@ -62,6 +61,7 @@ import net.theevilreaper.tamias.game.util.FileChecker;
 import net.theevilreaper.tamias.game.util.Items;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +74,7 @@ import java.util.function.Supplier;
  * @version 1.0.0
  * @since 1.0.0
  **/
-public class Tamias extends Extension implements ListenerHandling, MapFilter {
+public class Tamias implements ListenerHandling, MapFilter {
 
     private final LinearPhaseSeries<Phase> phaseSeries;
     private final TeamService<Team> teamService;
@@ -99,9 +99,8 @@ public class Tamias extends Extension implements ListenerHandling, MapFilter {
         this.timeUpdater = this.scoreboard::updateTime;
     }
 
-    @Override
     public void initialize() {
-        FileChecker.checkFileIntegrity(getDataDirectory());
+        FileChecker.checkFileIntegrity(Paths.get(""));
         registerCancelListener(MinecraftServer.getGlobalEventHandler());
 
         MinecraftServer.getCommandManager().register(new StartCommand(this.phaseSeries::getCurrentPhase));
@@ -114,7 +113,6 @@ public class Tamias extends Extension implements ListenerHandling, MapFilter {
         this.scoreboard.updateMapName("Test");
     }
 
-    @Override
     public void terminate() {
 
     }

@@ -1,8 +1,8 @@
 package net.theevilreaper.tamias.setup.listener.map;
 
-import de.icevizion.aves.map.BaseMap;
-import de.icevizion.aves.map.MapEntry;
-import de.icevizion.aves.util.functional.PlayerConsumer;
+import net.theevilreaper.aves.map.BaseMap;
+import net.theevilreaper.aves.map.MapEntry;
+import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.theevilreaper.tamias.setup.data.SetupData;
 import net.theevilreaper.tamias.setup.event.MapSetupFinishEvent;
 import org.jetbrains.annotations.NotNull;

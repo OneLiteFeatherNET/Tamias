@@ -27,9 +27,9 @@ public final class PlayerChatListener implements Consumer<PlayerChatEvent> {
     public void accept(@NotNull PlayerChatEvent event) {
         Player player = event.getPlayer();
         if (!player.hasTag(TamiasSetup.SETUP_TAG)) {
-            event.setChatFormat(this::formatGeneral);
+            event.setFormattedMessage(formatGeneral(event));
         } else {
-            event.setChatFormat(this::formatSetup);
+            event.setFormattedMessage(formatSetup(event));
         }
     }
 
@@ -37,7 +37,7 @@ public final class PlayerChatListener implements Consumer<PlayerChatEvent> {
         Player player = event.getPlayer();
         return Component.text(player.getUsername(), NamedTextColor.GREEN).append(Component.space())
                 .append(CHAT_SEPARATOR).append(Component.space())
-                .append(Component.text(event.getMessage(), NamedTextColor.GRAY));
+                .append(Component.text(event.getRawMessage(), NamedTextColor.GRAY));
     }
 
     private @NotNull Component formatSetup(@NotNull PlayerChatEvent event) {

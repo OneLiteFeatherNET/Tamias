@@ -1,8 +1,8 @@
 package net.theevilreaper.tamias.common.map;
 
 import com.google.gson.Gson;
-import de.icevizion.aves.file.FileHandler;
-import de.icevizion.aves.file.GsonFileHandler;
+import net.theevilreaper.aves.file.FileHandler;
+import net.theevilreaper.aves.file.GsonFileHandler;
 import net.theevilreaper.tamias.common.gson.GsonUtil;
 import org.junit.jupiter.api.Test;
 

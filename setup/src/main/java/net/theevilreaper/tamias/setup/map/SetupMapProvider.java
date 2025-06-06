@@ -1,8 +1,8 @@
 package net.theevilreaper.tamias.setup.map;
 
-import de.icevizion.aves.file.FileHandler;
-import de.icevizion.aves.map.BaseMap;
-import de.icevizion.aves.map.MapEntry;
+import net.theevilreaper.aves.file.FileHandler;
+import net.theevilreaper.aves.map.BaseMap;
+import net.theevilreaper.aves.map.MapEntry;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
