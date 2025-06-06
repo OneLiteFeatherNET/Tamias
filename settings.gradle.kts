@@ -2,9 +2,8 @@ rootProject.name = "tamias"
 
 dependencyResolutionManagement {
     repositories {
-        maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
         mavenCentral()
-        maven("https://reposilite.worldseed.online/public")
+        maven("https://reposilite.atlasengine.ca/public")
         maven {
             name = "OneLiteFeatherRepository"
             url = uri("https://repo.onelitefeather.dev/onelitefeather")
@@ -23,28 +22,24 @@ dependencyResolutionManagement {
     }
     versionCatalogs {
         create("libs") {
-            version("minestom", "1.5.1")
             version("shadow", "8.3.6")
-            version("bom", "1.1.2")
+            version("bom", "1.2.3")
             version("projectiles", "2.1.1")
-            version("aonyx", "0.1.0")
+            version("aonyx", "0.3.1")
 
-            library("microtus.bom", "net.onelitefeather.microtus", "bom").versionRef("minestom")
-            library("mycelium.bom", "net.theevilreaper.mycelium.bom", "mycelium-bom").versionRef("bom")
-            library("game.bom", "net.onelitefeather.aonyx.bom", "aonyx-bom").versionRef("aonyx")
-
+            library("mycelium.bom", "net.onelitefeather", "mycelium-bom").versionRef("bom")
+            library("game.bom", "net.onelitefeather", "aonyx-bom").versionRef("aonyx")
 
             library("atlas.projectiles", "ca.atlasengine", "atlas-projectiles").versionRef("projectiles")
-
-            library("minestom", "net.onelitefeather.microtus", "Microtus").withoutVersion()
-            library("minestom-test", "net.onelitefeather.microtus.testing", "testing").withoutVersion()
+            library("minestom","net.minestom", "minestom-snapshots").withoutVersion()
+            library("adventure", "net.kyori", "adventure-text-minimessage").withoutVersion()
+            library("cyano", "net.onelitefeather", "cyano").withoutVersion()
             library("junit.api", "org.junit.jupiter", "junit-jupiter-api").withoutVersion()
             library("junit.engine", "org.junit.jupiter", "junit-jupiter-engine").withoutVersion()
-            library("mockito.core", "org.mockito", "mockito-core").withoutVersion()
-            library("mockito.junit", "org.mockito", "mockito-junit-jupiter").withoutVersion()
-
-            library("aves", "de.icevizion.lib", "aves").withoutVersion()
-            library("xerus", "net.theevilreaper.xerus", "xerus").withoutVersion()
+            library("junit.platform.launcher", "org.junit.platform", "junit-platform-launcher").withoutVersion()
+            library("junit.params", "org.junit.jupiter", "junit-jupiter-params").withoutVersion()
+            library("aves", "net.theevilreaper", "aves").withoutVersion()
+            library("xerus", "net.theevilreaper", "xerus").withoutVersion()
 
             plugin("shadow", "com.gradleup.shadow").versionRef("shadow")
         }
