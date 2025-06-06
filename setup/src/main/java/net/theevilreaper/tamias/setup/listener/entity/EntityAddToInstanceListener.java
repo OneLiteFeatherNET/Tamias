@@ -23,7 +23,7 @@ public class EntityAddToInstanceListener implements Consumer<AddEntityToInstance
     public void accept(@NotNull AddEntityToInstanceEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
         Instance mainInstance = this.instanceSupplier.get();
-        if (event.getInstance().getUniqueId().equals(mainInstance.getUniqueId())) {
+        if (event.getInstance().getUuid().equals(mainInstance.getUuid())) {
             items.setOverViewItem(player);
             return;
         }
