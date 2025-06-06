@@ -2,6 +2,7 @@ package net.theevilreaper.tamias.setup;
 
 import net.theevilreaper.aves.file.FileHandler;
 import net.theevilreaper.aves.file.GsonFileHandler;
+import net.theevilreaper.aves.map.MapProvider;
 import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -20,7 +21,6 @@ import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.Tag;
 import net.theevilreaper.tamias.common.gson.GsonUtil;
-import net.theevilreaper.tamias.common.map.MapProvider;
 import net.theevilreaper.tamias.common.util.MapFilter;
 import net.theevilreaper.tamias.setup.commands.SetupCommand;
 import net.theevilreaper.tamias.setup.data.SetupDataService;
