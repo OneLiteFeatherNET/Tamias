@@ -1,50 +1,71 @@
 package net.theevilreaper.tamias.setup.data;
 
+import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.Player;
+import net.minestom.server.instance.anvil.AnvilLoader;
+import net.theevilreaper.aves.file.FileHandler;
 import net.theevilreaper.aves.map.BaseMap;
 import net.theevilreaper.aves.map.MapEntry;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.minestom.server.entity.Player;
 import net.theevilreaper.tamias.setup.inventory.LobbyViewInventory;
 import org.jetbrains.annotations.NotNull;
 
-public final class LobbyData extends SetupDataImpl {
+import java.nio.file.Files;
+import java.util.Optional;
+import java.util.UUID;
 
-    private final LobbyViewInventory inventory;
+public final class LobbyData extends InstanceSetupData<BaseMap> {
 
-    LobbyData(@NotNull Player player, @NotNull MapEntry mapEntry, @NotNull BaseMap baseMap) {
-        super(player, mapEntry, baseMap);
-        this.inventory = new LobbyViewInventory(baseMap);
+    private final FileHandler fileHandler;
+    private final LobbyViewInventory viewInventory;
 
-        this.title = Component.text("Setup mode: ", NamedTextColor.GRAY)
-                .append(Component.text("Lobby", NamedTextColor.LIGHT_PURPLE))
-                .append(Component.text(", Map: ", NamedTextColor.GRAY))
-                .append(Component.text(mapEntry.getDirectoryRoot().getFileName().toString(), NamedTextColor.LIGHT_PURPLE));
+    public LobbyData(@NotNull UUID uuid, @NotNull MapEntry mapEntry, @NotNull FileHandler fileHandler) {
+        super(uuid, mapEntry);
+        this.fileHandler = fileHandler;
+        this.loadData();
+        Player player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(uuid);
+
+        if (player == null) {
+            throw new IllegalArgumentException("Player with UUID " + uuid + " is not online.");
+        }
+
+        this.viewInventory = new LobbyViewInventory(this.map);
     }
 
     @Override
-    public void swapAreaMode() {
-        throw new UnsupportedOperationException("A LobbyData can't swap the area mode");
+    public void openInventory(@NotNull Player player) {
+        player.openInventory(this.viewInventory.getInventory());
     }
 
     @Override
-    public void openInventory() {
-        player.openInventory(inventory.getInventory());
+    public void triggerUpdate() {
+        this.viewInventory.invalidateDataLayout();
     }
 
     @Override
-    public void triggerInventoryUpdate() {
-        inventory.invalidateDataLayout();
+    public void save() {
+        if (!Files.exists(mapEntry.getMapFile())) {
+            this.mapEntry.createFile();
+        }
+        this.fileHandler.save(mapEntry.getMapFile(), BaseMap.class);
     }
 
     @Override
     public void reset() {
         super.reset();
-        this.inventory.unregister();
+        this.viewInventory.unregister();
     }
 
     @Override
-    public boolean hasAreaMode() {
-        return false;
+    public void loadData() {
+        if (this.mapEntry != null) return;
+        Optional<BaseMap> mapData = fileHandler.load(mapEntry.getMapFile(), BaseMap.class);
+        // Initialize with a new BaseMap if loading fails
+        this.map = mapData.orElseGet(BaseMap::new);
+
+        this.instance = MinecraftServer.getInstanceManager().createInstanceContainer();
+        AnvilLoader anvilLoader = new AnvilLoader(this.mapEntry.getDirectoryRoot());
+        this.instance.setChunkLoader(anvilLoader);
+        this.updateTitle();
+        MinecraftServer.getInstanceManager().registerInstance(this.instance);
     }
 }

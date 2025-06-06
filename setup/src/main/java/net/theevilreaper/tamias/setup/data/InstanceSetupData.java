@@ -1,4 +1,4 @@
-package net.theevilreaper.tamias.setup.data.v2;
+package net.theevilreaper.tamias.setup.data;
 
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
@@ -38,6 +38,14 @@ public abstract class InstanceSetupData<T extends BaseMap> extends BaseSetupData
         Pos spawnPoint = map.getSpawnOrDefault(SPAWN_POINT);
         player.setInstance(this.instance, spawnPoint);
         player.showBossBar(this.bossBar);
+    }
+
+    public abstract void openInventory(@NotNull Player player);
+
+    public abstract void triggerUpdate();
+
+    public boolean hasMap() {
+        return this.map != null;
     }
 
     @Override
