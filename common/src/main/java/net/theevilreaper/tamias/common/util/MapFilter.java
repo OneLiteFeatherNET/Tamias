@@ -28,7 +28,7 @@ public interface MapFilter {
      * @param mapStream a stream of paths
      * @return a list which contains different maps which are available for the game
      */
-    default @NotNull List<MapEntry> filterMapsForGame(@NotNull Stream<Path> mapStream) {
+    static @NotNull List<MapEntry> filterMapsForGame(@NotNull Stream<Path> mapStream) {
         return mapStream
                 .filter(Files::isDirectory)
                 .filter(path -> Files.exists(path.resolve(REGION_FOLDER)))
@@ -43,7 +43,7 @@ public interface MapFilter {
      * @param mapStream a stream of paths
      * @return a list which contains different maps which are available for the setup
      */
-    default @NotNull List<MapEntry> filterMapsForSetup(@NotNull Stream<Path> mapStream) {
+    static @NotNull List<MapEntry> filterMapsForSetup(@NotNull Stream<Path> mapStream) {
         return mapStream
                 .filter(Files::isDirectory)
                 .filter(path -> Files.exists(path.resolve(REGION_FOLDER)))
