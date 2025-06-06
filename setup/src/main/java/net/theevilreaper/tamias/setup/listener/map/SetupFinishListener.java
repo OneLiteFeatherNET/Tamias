@@ -14,11 +14,9 @@ import java.util.function.Consumer;
 
 public class SetupFinishListener implements Consumer<SetupFinishEvent<InstanceSetupData<? extends BaseMap>>> {
 
-    private final BiConsumer<Path, BaseMap> saveCall;
     private final PlayerConsumer instanceSwitcher;
 
-    public SetupFinishListener(@NotNull BiConsumer<Path, BaseMap> saveCall, @NotNull PlayerConsumer instanceSwitcher) {
-        this.saveCall = saveCall;
+    public SetupFinishListener(@NotNull PlayerConsumer instanceSwitcher) {
         this.instanceSwitcher = instanceSwitcher;
     }
 
