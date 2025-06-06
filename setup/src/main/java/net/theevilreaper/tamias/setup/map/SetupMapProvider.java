@@ -16,7 +16,6 @@ import java.util.Optional;
 
 /**
  * SetupMapProvider is responsible for loading and managing maps in the game.
- * It implements the MapProvider and MapFilter interfaces to provide map-related functionalities.
  *
  * @author theEvilReaper
  * @version 1.0.0
