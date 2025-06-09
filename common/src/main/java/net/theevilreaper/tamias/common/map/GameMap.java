@@ -1,9 +1,9 @@
 package net.theevilreaper.tamias.common.map;
 
-import de.icevizion.aves.map.BaseMap;
-import de.icevizion.aves.map.MapEntry;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.utils.Direction;
+import net.theevilreaper.aves.map.BaseMap;
+import net.theevilreaper.aves.map.MapEntry;
 import net.theevilreaper.tamias.common.map.layer.AreaData;
 import net.theevilreaper.tamias.common.map.layer.SpawnLayer;
 import org.jetbrains.annotations.NotNull;

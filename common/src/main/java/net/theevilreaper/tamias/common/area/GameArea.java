@@ -20,7 +20,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.IntSupplier;
 
 /**
- * The GameArea class represents a playable area in a Minecraft world.
+ * The GameArea class represents a playable area in the Minecraft world.
  * It handles the calculation of positions, placement of blocks, and spawning of TNT entities.
  * This implementation focuses on performance optimization and thread safety.
  * The instance can be null during initialization and set later.
