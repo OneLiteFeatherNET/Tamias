@@ -1,25 +1,23 @@
 package net.theevilreaper.tamias.common.area;
 
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.timer.Task;
 import net.minestom.server.utils.Direction;
 import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.tamias.common.map.layer.SpawnLayer;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.function.BooleanSupplier;
-
-import static net.minestom.server.MinecraftServer.getConnectionManager;
+import java.util.stream.Collectors;
 
 /**
  * The class holds the data about the spawn area where each player will be spawned when the map is in the build phase.
@@ -31,24 +29,21 @@ import static net.minestom.server.MinecraftServer.getConnectionManager;
 @SuppressWarnings("java:S3252")
 public final class SpawnArea implements Area {
 
-    private static final Block SPAWN_BLOCK = Block.TNT;
+    public static final Block SPAWN_BLOCK = Block.TNT;
     private static final Vec Y_VEC = new Vec(0.5, 1, 0.5);
-    private final Instance instance;
     private final Pos[] positions;
     private final SpawnLayer spawnLayer;
 
     /**
      * Creates a new object reference from {@link SpawnArea} class with the given values.
      *
-     * @param instance     the involved instance to place the block
      * @param spawnLayer   the spawn layer which is used to calculate the spawn positions
      * @param maxPositions the maximum amount of possible positions
      */
-    public SpawnArea(@NotNull Instance instance, @NotNull SpawnLayer spawnLayer, int maxPositions) {
+    public SpawnArea(@NotNull SpawnLayer spawnLayer, int maxPositions) {
         Check.argCondition(maxPositions < 1, "The maximum position count must be higher than 0");
         Check.argCondition(spawnLayer.direction() == Direction.DOWN || spawnLayer.direction() == Direction.UP, "The direction must be horizontal");
         this.spawnLayer = spawnLayer;
-        this.instance = instance;
         this.positions = new Pos[maxPositions];
         Pos spawnLayerPos = spawnLayer.pos();
         this.positions[0] = new Pos(spawnLayerPos.blockX(), spawnLayerPos.blockY(), spawnLayerPos.blockZ(), spawnLayerPos.yaw(), spawnLayerPos.pitch());
@@ -98,33 +93,16 @@ public final class SpawnArea implements Area {
         }
     }
 
-    @Override
-    public void triggerPlacement() {
-        Collection<Player> onlinePlayers = getConnectionManager().getOnlinePlayers();
-        Iterator<Player> iterator = onlinePlayers.iterator();
-        int counter = 0;
-        while (iterator.hasNext() && counter < onlinePlayers.size()) {
-            instance.setBlock(positions[counter++], SPAWN_BLOCK);
-        }
-    }
-
     /**
      * Resets all blocks in the spawn area.
      */
     @Override
     public void reset() {
-        for (Pos position : positions) {
-            instance.setBlock(position, Block.AIR);
-        }
+        throw new UnsupportedOperationException("Not supported in this variant. Please use the holder instead");
     }
 
     @Override
-    public @NotNull Instance getInstance() {
-        return this.instance;
-    }
-
-    @Override
-    public @Nullable Task getTask() {
-        throw new UnsupportedOperationException("The spawn area doesn't support tasks");
+    public @NotNull Set<Point> getPositions() {
+        return Arrays.stream(this.positions).collect(Collectors.toUnmodifiableSet());
     }
 }

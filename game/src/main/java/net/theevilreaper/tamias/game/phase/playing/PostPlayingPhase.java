@@ -5,6 +5,7 @@ import net.theevilreaper.xerus.api.phase.TickDirection;
 import net.theevilreaper.xerus.api.phase.TimedPhase;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
+import net.theevilreaper.tamias.common.area.holder.Placement;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.temporal.ChronoUnit;
@@ -18,16 +19,16 @@ public final class PostPlayingPhase extends TimedPhase {
     private final BooleanSupplier lastRoundCheck;
     private final VoidConsumer roundUpdateTrigger;
     private final VoidConsumer scoreboardReset;
-    private final VoidConsumer mapResetConsumer;
-    private final VoidConsumer spawnAreaPlacement;
+    private final Placement spawnPlacement;
+    private final Placement gamePlacement;
     private final Consumer<List<Player>> teleportConsumer;
 
     public PostPlayingPhase(
             @NotNull BooleanSupplier lastRoundCheck,
             @NotNull VoidConsumer roundUpdateTrigger,
             @NotNull VoidConsumer scoreboardReset,
-            @NotNull VoidConsumer mapResetConsumer,
-            @NotNull VoidConsumer spawnAreaPlacement,
+            @NotNull Placement spawnPlacement,
+            @NotNull Placement gamePlacement,
             @NotNull Consumer<List<Player>> teleportConsumer
     ) {
         super("RoundEnd", ChronoUnit.SECONDS, 1);
@@ -37,8 +38,8 @@ public final class PostPlayingPhase extends TimedPhase {
         this.lastRoundCheck = lastRoundCheck;
         this.roundUpdateTrigger = roundUpdateTrigger;
         this.scoreboardReset = scoreboardReset;
-        this.mapResetConsumer = mapResetConsumer;
-        this.spawnAreaPlacement = spawnAreaPlacement;
+        this.spawnPlacement = spawnPlacement;
+        this.gamePlacement = gamePlacement;
         this.teleportConsumer = teleportConsumer;
     }
 
@@ -53,14 +54,14 @@ public final class PostPlayingPhase extends TimedPhase {
         if (this.lastRoundCheck.getAsBoolean()) return;
         //TODO: Yeet the players out of the current round
         System.out.println("Round finished");
-        this.mapResetConsumer.apply();
+        this.gamePlacement.clear();
     }
 
     @Override
     public void onUpdate() {
         if (this.lastRoundCheck.getAsBoolean()) return;
         if (this.getCurrentTicks() == 2) {
-            this.spawnAreaPlacement.apply();
+            this.spawnPlacement.triggerPlacement();
         }
         if (this.getCurrentTicks() == 1) {
             List<Player> onlinePlayers = new ArrayList<>(MinecraftServer.getConnectionManager().getOnlinePlayers());

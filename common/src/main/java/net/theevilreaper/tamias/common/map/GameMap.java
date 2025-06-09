@@ -1,6 +1,7 @@
 package net.theevilreaper.tamias.common.map;
 
-import net.theevilreaper.aves.map.BaseMap;
+import de.icevizion.aves.map.BaseMap;
+import de.icevizion.aves.map.MapEntry;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.utils.Direction;
 import net.theevilreaper.tamias.common.map.layer.GameAreaData;
@@ -20,6 +21,7 @@ public final class GameMap extends BaseMap {
     private SpawnLayer spawnLayer;
     private GameAreaData gameAreaData;
     private Pos bomberInitialSpawn;
+    private MapEntry mapEntry;
 
     public GameMap() {
         super("Not set", Pos.ZERO);
@@ -36,6 +38,10 @@ public final class GameMap extends BaseMap {
         this.bomberInitialSpawn = bomberInitialSpawn;
         this.spawnLayer = spawnLayer;
         this.gameAreaData = gameAreaData;
+    }
+
+    public void setMapEntry(MapEntry mapEntry) {
+        this.mapEntry = mapEntry;
     }
 
     /**
@@ -91,5 +97,9 @@ public final class GameMap extends BaseMap {
      */
     public @NotNull SpawnLayer getSpawnData() {
         return spawnLayer;
+    }
+
+    public MapEntry getMapEntry() {
+        return mapEntry;
     }
 }

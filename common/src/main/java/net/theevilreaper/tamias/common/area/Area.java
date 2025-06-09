@@ -1,9 +1,15 @@
 package net.theevilreaper.tamias.common.area;
 
+import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.timer.Task;
+import net.theevilreaper.tamias.common.map.layer.GameAreaData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnmodifiableView;
+
+import java.util.Set;
 
 /**
  * With an {@link Area} it is possible to get specific positions in an area between two points.
@@ -21,21 +27,11 @@ public interface Area {
     void calculatePositions();
 
     /**
-     * Triggers the placement of the area.
-     */
-    void triggerPlacement();
-
-    /**
      * Resets the area to the initial state.
      */
     void reset();
 
-    /**
-     * Returns the instance where the area is located.
-     *
-     * @return the given instance
-     */
-    @NotNull Instance getInstance();
+    @NotNull @UnmodifiableView
+    Set<Point> getPositions();
 
-    @Nullable Task getTask();
 }
