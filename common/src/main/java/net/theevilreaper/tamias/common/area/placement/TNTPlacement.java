@@ -16,8 +16,21 @@ import java.time.Duration;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * TNTPlacement is responsible for placing TNT blocks in the specified positions.
+ *
+ * @author theEvilReaper
+ * @version 1.0.0
+ * @since 0.1.0
+ */
 public class TNTPlacement extends AreaBasePlacement<Vec> {
 
+    /**
+     * Constructs a TNTPlacement instance.
+     *
+     * @param instance       the instance where the TNT will be placed
+     * @param blockPositions the positions where the TNT will be placed
+     */
     public TNTPlacement(@NotNull Instance instance, @NotNull List<Vec> blockPositions) {
         super(instance, blockPositions);
     }
@@ -33,6 +46,12 @@ public class TNTPlacement extends AreaBasePlacement<Vec> {
         }).delay(Duration.ofMillis(100)).schedule();
     }
 
+    /**
+     * Spawns a TNT entity at the specified position.
+     * The TNT will fall and explode when it reaches the ground.
+     *
+     * @param pos the position to spawn the TNT
+     */
     private void spawnTnt(@NotNull Vec pos) {
         Entity tntEntity = new Entity(EntityType.FALLING_BLOCK);
         FallingBlockMeta fallingBlockMeta = (FallingBlockMeta) tntEntity.getEntityMeta();
@@ -47,6 +66,12 @@ public class TNTPlacement extends AreaBasePlacement<Vec> {
                 .schedule();
     }
 
+    /**
+     * Checks if the entity is still falling.
+     *
+     * @param entity      the TNT entity to check
+     * @param originalPos the original position where the TNT was spawned
+     */
     private void checkIfStillFalling(@NotNull Entity entity, @NotNull Vec originalPos) {
         if (!entity.isOnGround()) {
             // Schedule with a longer delay to reduce resource usage
@@ -59,6 +84,13 @@ public class TNTPlacement extends AreaBasePlacement<Vec> {
         }
     }
 
+    /**
+     * Places a block at the specified position.
+     * This method is called when the TNT entity reaches the ground.
+     *
+     * @param position   the position to place the block
+     * @param groundData the ground data to use for placing the block
+     */
     protected void placeBlock(@NotNull Vec position, @NotNull GroundData groundData) {
         this.instance.setBlock(position, groundData.groundBlock());
     }
