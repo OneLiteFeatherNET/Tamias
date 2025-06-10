@@ -12,8 +12,10 @@ import net.minestom.testing.extension.MicrotusExtension;
 import net.theevilreaper.tamias.common.VoidGenerator;
 import net.theevilreaper.tamias.common.area.holder.Placement;
 import net.theevilreaper.tamias.common.area.holder.SpawnPlacement;
+import net.theevilreaper.tamias.common.ground.GroundData;
 import net.theevilreaper.tamias.common.map.layer.SpawnLayer;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -29,6 +31,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(MicrotusExtension.class)
 class SpawnAreaIntegrationTest {
 
+    private static GroundData spawnData;
+    private static Direction[] directionValues;
+
+    @BeforeAll
+    static void init() {
+        spawnData = new GroundData(Block.TNT, null);
+        directionValues = Direction.values();
+    }
+
     @ParameterizedTest(name = "Test spawn area block set usage with face {0}")
     @ValueSource(strings = {"NORTH", "SOUTH", "EAST", "WEST"})
     void testSpawnBlocks(String face, @NotNull Env env) {
@@ -38,7 +49,7 @@ class SpawnAreaIntegrationTest {
             env.createPlayer(instance);
         }
         instance.setGenerator(new VoidGenerator());
-        Optional<Direction> directionOptional = Arrays.stream(Direction.values()).filter(value -> value.name().equals(face)).findFirst();
+        Optional<Direction> directionOptional = Arrays.stream(directionValues).filter(value -> value.name().equals(face)).findFirst();
         assertTrue(directionOptional.isPresent());
 
         Pos startPos = Pos.ZERO;
@@ -57,7 +68,7 @@ class SpawnAreaIntegrationTest {
         Placement placement = new SpawnPlacement(instance, spawnArea);
 
         pos = Pos.fromPoint(startPos);
-        placement.triggerPlacement();
+        placement.triggerPlacement(spawnData);
         int currentPositions = 0;
 
         // Check the start position
@@ -85,7 +96,7 @@ class SpawnAreaIntegrationTest {
 
         Placement placement = new SpawnPlacement(instance, spawnArea);
 
-        placement.triggerPlacement();
+        placement.triggerPlacement(spawnData);
         placement.clear();
 
         int currentPositions = 0;
