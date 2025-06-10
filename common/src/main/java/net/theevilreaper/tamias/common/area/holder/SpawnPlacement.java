@@ -5,6 +5,7 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.theevilreaper.tamias.common.area.Area;
 import net.theevilreaper.tamias.common.area.SpawnArea;
+import net.theevilreaper.tamias.common.ground.GroundData;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -35,7 +36,7 @@ public final class SpawnPlacement implements Placement {
     }
 
     @Override
-    public void triggerPlacement() {
+    public void triggerPlacement(@NotNull GroundData groundData) {
         Iterator<Point> positionIterator = this.area.getPositions().iterator();
         int maxPositionsToBuild = getConnectionManager().getOnlinePlayerCount();
 

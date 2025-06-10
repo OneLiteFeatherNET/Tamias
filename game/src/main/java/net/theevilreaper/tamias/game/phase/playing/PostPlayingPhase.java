@@ -57,7 +57,7 @@ public final class PostPlayingPhase extends TimedPhase {
     public void onUpdate() {
         if (this.lastRoundCheck.getAsBoolean()) return;
         if (this.getCurrentTicks() == 2) {
-            EventDispatcher.call(new AreaSpawnTriggerEvent());
+            EventDispatcher.call(AreaSpawnTriggerEvent.empty());
         }
         if (this.getCurrentTicks() == 1) {
             List<Player> onlinePlayers = new ArrayList<>(MinecraftServer.getConnectionManager().getOnlinePlayers());

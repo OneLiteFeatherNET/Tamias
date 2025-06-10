@@ -2,27 +2,25 @@ package net.theevilreaper.tamias.common.area.placement;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.timer.Task;
+import net.theevilreaper.tamias.common.ground.GroundData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 public abstract non-sealed class AreaBasePlacement<T extends Point> implements AreaPlacement {
 
+    protected final Instance instance;
     protected final List<T> blockPositions;
-    protected final Supplier<List<T>> tntPositions;
-    protected final BlockPlaceFunction<T> blockPlaceFunction;
     protected Task buildTask;
 
-    AreaBasePlacement(@NotNull List<T> blockPositions, @NotNull Supplier<List<T>> tntPositions, @NotNull BlockPlaceFunction<T> blockPlaceFunction) {
+    AreaBasePlacement(@NotNull Instance instance, @NotNull List<T> blockPositions) {
+        this.instance = instance;
         this.blockPositions = new ArrayList<>(blockPositions);
-        this.tntPositions = tntPositions;
-        this.blockPlaceFunction = blockPlaceFunction;
     }
 
     protected void sendExpCount(int currentSize) {
@@ -33,6 +31,12 @@ public abstract non-sealed class AreaBasePlacement<T extends Point> implements A
         }
     }
 
+    /**
+     * Places a block at the given position
+     *
+     * @param position the position to place the block
+     */
+    protected abstract void placeBlock(@NotNull T position, @NotNull GroundData groundData);
 
     @Override
     public boolean isRunning() {

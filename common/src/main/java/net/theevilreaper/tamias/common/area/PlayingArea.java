@@ -1,6 +1,6 @@
 package net.theevilreaper.tamias.common.area;
 
-import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Vec;
 import net.theevilreaper.tamias.common.map.layer.AreaData;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,16 +20,16 @@ import java.util.function.IntSupplier;
 public interface PlayingArea extends Area {
 
     /**
-     * Calculates the positions amount of the special blocks.
+     * Calculates the position number of the special blocks.
      *
-     * @param specialBlockCount the amount of special blocks
+     * @param specialBlockCount the number of special blocks
      */
     void calculateSpecialBlockPositions(@NotNull IntSupplier specialBlockCount);
 
     /**
-     * Calculates the positions amount of the TNT blocks.
+     * Calculates the positions number of the TNT blocks.
      *
-     * @param tntCountCalculator the amount of TNT blocks
+     * @param tntCountCalculator the number of TNT blocks
      */
     void calculateTntPositions(@NotNull IntSupplier tntCountCalculator);
 
@@ -45,12 +45,12 @@ public interface PlayingArea extends Area {
      *
      * @return the tnt positions
      */
-    @NotNull Set<Point> getTntPositions();
+    @NotNull Set<Vec> getTntPositions();
 
     /**
      * Returns the positions of the special blocks.
      *
      * @return the special block positions
      */
-    @NotNull Set<Point> getSpecialPositions();
+    @NotNull Set<Vec> getSpecialPositions();
 }

@@ -1,5 +1,6 @@
 package net.theevilreaper.tamias.common.ground;
 
+import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
@@ -15,6 +16,8 @@ import java.util.List;
  * @since 1.0.0
  */
 public sealed interface GroundDataRegistry permits TamiasGroundDataRegistry {
+
+    GroundData DEFAULT_SPAWN_DATA = new GroundData(Block.TNT, null);
 
     /**
      * Returns the instance of the registry.

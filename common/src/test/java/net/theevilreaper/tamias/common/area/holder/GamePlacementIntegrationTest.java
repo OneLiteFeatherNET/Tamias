@@ -9,13 +9,17 @@ import net.minestom.testing.Env;
 import net.minestom.testing.extension.MicrotusExtension;
 import net.theevilreaper.tamias.common.area.GameArea;
 import net.theevilreaper.tamias.common.ground.GroundData;
+import net.theevilreaper.tamias.common.ground.GroundDataRegistry;
 import net.theevilreaper.tamias.common.map.layer.AreaData;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.time.Duration;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -37,7 +41,6 @@ class GamePlacementIntegrationTest {
         );
         assertNotNull(gameArea);
         gameArea.calculatePositions();
-        GroundData groundData = new GroundData(Block.BAMBOO_BLOCK, null);
         Placement placement = new GamePlacement(instance, gameArea);
         assertNotNull(placement);
         assertInstanceOf(GamePlacement.class, placement);
@@ -67,28 +70,23 @@ class GamePlacementIntegrationTest {
         assertPostions(gameArea.getPositions(), testPositions);
         assertBlock(instance, Block.BARRIER, gameArea.getPositions());
 
-        gameArea.calculateTntPositions(() -> (int) ((testPositions.size() / 2) * 0.5));
+        gameArea.calculateTntPositions(() -> 1);
+       // gameArea.calculateTntPositions(() -> (int) (((double) testPositions.size() / 2) * 0.5));
 
-        placement.triggerPlacement();
+        assertNotNull(gameArea.getTntPositions(), "The TNT positions should not be null");
 
-        // We need to tick the instance to apply the changes due to the scheduler task which runs behind the logic
-        for (int i = 0; i < 2000; i++) {
-            env.tick();
-        }
+        GroundData randomData = GroundDataRegistry.instance().getRandomData();
 
-        assertBlock(instance, groundData.groundBlock(), gameArea.getPositions());
-/*
-        int halfTime = testPositions.size() / 2;
+        placement.triggerPlacement(randomData);
 
+        env.tickWhile(gamePlacement::isRunning, Duration.ofSeconds(60));
 
-        // Wait for the tnt to spawn
-        for (int i = 0; i < halfTime; i++) {
-            env.tick();
-        }
+        assertBlock(instance, randomData.groundBlock(), gameArea.getPositions());
 
-        assertBlock(instance, Block.TNT, gameArea.getTntPositions());
+       // assertBlock(instance, Block.TNT, gameArea.getTntPositions());
+//        assertBlock(instance, Block.TNT, gameArea.getTntPositions().stream().map(tnt -> tnt.add(0, -1,0)).collect(Collectors.toSet()));
 
-        env.destroyInstance(instance);*/
+        env.destroyInstance(instance);
     }
 
     /**

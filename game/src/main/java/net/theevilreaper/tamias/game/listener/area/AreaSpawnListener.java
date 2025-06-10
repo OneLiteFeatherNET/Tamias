@@ -20,6 +20,6 @@ public final class AreaSpawnListener implements Consumer<AreaSpawnTriggerEvent> 
 
     @Override
     public void accept(@NotNull AreaSpawnTriggerEvent event) {
-        this.spawnPlacement.triggerPlacement();
+        this.spawnPlacement.triggerPlacement(event.data());
     }
 }

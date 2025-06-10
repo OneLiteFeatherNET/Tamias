@@ -35,9 +35,9 @@ public final class GameArea implements PlayingArea {
     private static final Logger LOGGER = LoggerFactory.getLogger(GameArea.class);
 
     private final AreaData areaData;
-    private final List<Point> areaPositions;
-    private final Set<Point> specialBlocks;
-    private final Set<Point> tntPositions;
+    private final List<Vec> areaPositions;
+    private final Set<Vec> specialBlocks;
+    private final Set<Vec> tntPositions;
 
     public GameArea(@NotNull AreaData areaData) {
         this.areaData = areaData;
@@ -71,7 +71,7 @@ public final class GameArea implements PlayingArea {
         LOGGER.info("Calculated {} potential area positions", areaPositions.size());
     }
 
-    public void flattenPositions(@NotNull Set<Point> positions) {
+    public void flattenPositions(@NotNull Set<Vec> positions) {
         this.areaPositions.removeAll(positions);
     }
 
@@ -93,7 +93,7 @@ public final class GameArea implements PlayingArea {
     @Override
     public void calculateSpecialBlockPositions(@NotNull IntSupplier specialBlockCount) {
         // Create a copy of the area positions to avoid modifying the original list
-        List<Point> availablePositions = new ArrayList<>(this.areaPositions);
+        List<Vec> availablePositions = new ArrayList<>(this.areaPositions);
 
         for (int i = 0; i < specialBlockCount.getAsInt(); i++) {
             // Get a random index within the remaining available positions
@@ -113,18 +113,18 @@ public final class GameArea implements PlayingArea {
     @Override
     public void calculateTntPositions(@NotNull IntSupplier tntCountCalculator) {
         int tntCount = tntCountCalculator.getAsInt();
-        System.out.println("TNT COUNT: " + tntCount);
 
         // Create a copy of the area positions to avoid modifying the original list
-        List<Point> availablePositions = new ArrayList<>(this.areaPositions);
+        List<Vec> availablePositions = new ArrayList<>(this.areaPositions);
 
         for (int i = 0; i < tntCount; i++) {
             // Get a random index within the remaining available positions
             int randomIndex = ThreadLocalRandom.current().nextInt(0, availablePositions.size());
             // Add the position to TNT positions
-            tntPositions.add(availablePositions.get(randomIndex));
-            // Remove the position to avoid duplicates
-            availablePositions.remove(randomIndex);
+            // Adjust the position to place TNT one block above the ground level
+            Vec point = availablePositions.remove(randomIndex);
+            System.out.println("Adding TNT at position: " + point);
+            tntPositions.add(point.add(0, 1, 0));
         }
 
         LOGGER.info("Calculated {} TNT positions", this.tntPositions.size());
@@ -157,12 +157,12 @@ public final class GameArea implements PlayingArea {
     }
 
     @Override
-    public @NotNull Set<Point> getTntPositions() {
+    public @NotNull Set<Vec> getTntPositions() {
         return this.tntPositions;
     }
 
     @Override
-    public @NotNull Set<Point> getSpecialPositions() {
+    public @NotNull Set<Vec> getSpecialPositions() {
         return this.specialBlocks;
     }
 }

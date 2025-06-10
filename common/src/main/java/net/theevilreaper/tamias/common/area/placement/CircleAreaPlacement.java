@@ -1,9 +1,12 @@
 package net.theevilreaper.tamias.common.area.placement;
 
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.event.EventDispatcher;
+import net.minestom.server.instance.Instance;
+import net.minestom.server.instance.block.Block;
 import net.theevilreaper.tamias.common.event.AreaFinishBuildEvent;
+import net.theevilreaper.tamias.common.ground.GroundData;
 import net.theevilreaper.tamias.common.util.Helper;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,28 +14,30 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.function.Supplier;
 
 import static net.theevilreaper.tamias.common.area.GameAreaHelper.BLOCKS_PER_STEP;
 
-public final class CircleAreaPlacement<T extends Point> extends AreaBasePlacement<T> {
+public final class CircleAreaPlacement extends AreaBasePlacement<Vec> {
+
+    private final List<Vec> specialPositions;
 
     public CircleAreaPlacement(
-            @NotNull List<T> blockPositions,
-            @NotNull Supplier<List<T>> tntPositions,
-            @NotNull BlockPlaceFunction<T> blockPlaceFunction) {
-        super(blockPositions, tntPositions, blockPlaceFunction);
+            @NotNull Instance instance,
+            @NotNull List<Vec> blockPositions,
+            @NotNull List<Vec> specialPositions) {
+        super(instance, blockPositions);
+        this.specialPositions = specialPositions;
     }
 
     @Override
-    public void place() {
+    public void place(@NotNull GroundData groundData) {
         if (this.buildTask != null) return;
-        List<T> posList = new ArrayList<>(this.blockPositions);
+        List<Vec> posList = new ArrayList<>(this.blockPositions);
         posList.sort(Helper.getComparator());
-        LinkedBlockingDeque<T> queue = new LinkedBlockingDeque<>(posList);
+        LinkedBlockingDeque<Vec> queue = new LinkedBlockingDeque<>(posList);
 
         this.buildTask = MinecraftServer.getSchedulerManager().buildTask(() -> {
-            List<T> positions = new ArrayList<>();
+            List<Vec> positions = new ArrayList<>();
             for (int i = 0; !queue.isEmpty() && i < BLOCKS_PER_STEP; i++) {
                 positions.add(queue.poll());
             }
@@ -40,10 +45,21 @@ public final class CircleAreaPlacement<T extends Point> extends AreaBasePlacemen
                 EventDispatcher.call(new AreaFinishBuildEvent());
                 return;
             }
-            for (T pos : positions) {
-                this.blockPlaceFunction.placeBlock(pos);
+            for (Vec pos : positions) {
+                this.placeBlock(pos, groundData);
             }
             sendExpCount(queue.size());
         }).repeat(5, ChronoUnit.MILLIS).schedule();
+    }
+
+    @Override
+    protected void placeBlock(@NotNull Vec position, @NotNull GroundData groundData) {
+        Block groundBlock;
+        if (this.specialPositions.contains(position)) {
+            groundBlock = groundData.getAddtionalBlock();
+        } else {
+            groundBlock = groundData.groundBlock();
+        }
+        this.instance.setBlock(position, groundBlock);
     }
 }
