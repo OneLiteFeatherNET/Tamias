@@ -3,7 +3,7 @@ subprojects {
     apply(plugin = "jacoco")
 
     tasks.withType<JavaCompile> {
-        options.release.set(23)
+        options.release.set(21)
         options.encoding = "UTF-8"
     }
 
