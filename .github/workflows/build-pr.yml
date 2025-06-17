@@ -21,3 +21,6 @@ jobs:
           java-version: 21
       - name: Build on ${{ matrix.os }}
         run: ./gradlew clean build
+        env:
+          ONELITEFEATHER_MAVEN_USERNAME: ${{ secrets.ONELITEFEATHER_MAVEN_USERNAME }}
+          ONELITEFEATHER_MAVEN_PASSWORD: ${{ secrets.ONELITEFEATHER_MAVEN_PASSWORD }}
