@@ -15,13 +15,14 @@ dependencies {
     compileOnly(libs.aves)
     compileOnly(libs.xerus)
 
+    testImplementation(platform(libs.mycelium.bom))
+    testImplementation(platform(libs.game.bom))
     testImplementation(libs.minestom)
     testImplementation(libs.cyano)
-    testImplementation(platform(libs.game.bom))
     testImplementation(libs.aves)
     testImplementation(libs.xerus)
     testImplementation(libs.junit.api)
-    testImplementation(libs.junit.engine)
+    testImplementation(libs.junit.params)
     testImplementation(libs.junit.platform.launcher)
     testRuntimeOnly(libs.junit.engine)
 }
