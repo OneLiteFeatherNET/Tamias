@@ -21,6 +21,8 @@ import org.jetbrains.annotations.NotNull;
 @SuppressWarnings("java:S3252")
 public final class SetupItems {
 
+    public static byte OVERVIEW_FLAG = 0x02;
+
     public static final ItemStack DECORATION = ItemStack.builder(Material.GRAY_STAINED_GLASS_PANE)
             .customName(Component.empty())
             .build();
@@ -40,7 +42,7 @@ public final class SetupItems {
                 .build();
         this.viewItem = ItemStack.builder(Material.COMPASS)
                 .customName(Component.text("View data", NamedTextColor.AQUA))
-                .set(Tags.ITEM_TAG, (byte) 0x02)
+                .set(Tags.ITEM_TAG, OVERVIEW_FLAG)
                 .build();
     }
 

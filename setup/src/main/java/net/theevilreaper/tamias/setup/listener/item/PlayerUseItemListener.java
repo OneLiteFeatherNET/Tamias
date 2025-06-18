@@ -17,6 +17,8 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static net.theevilreaper.tamias.setup.util.SetupItems.OVERVIEW_FLAG;
+
 public final class PlayerUseItemListener implements Consumer<PlayerUseItemEvent> {
 
     private final PlayerConsumer invOpener;
@@ -51,7 +53,7 @@ public final class PlayerUseItemListener implements Consumer<PlayerUseItemEvent>
 
         InstanceSetupData<? extends BaseMap> setupData = fetchedData.get();
 
-        if (itemId == 0x02) {
+        if (itemId == OVERVIEW_FLAG) {
             setupData.openInventory(player);
             return;
         }
