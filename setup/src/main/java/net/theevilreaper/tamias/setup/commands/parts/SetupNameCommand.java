@@ -50,10 +50,19 @@ public final class SetupNameCommand extends Command {
             return;
         }
 
-        setupData.get().getMap().get().setName(name);
+        InstanceSetupData<? extends BaseMap> data = setupData.get();
+
+        if (data.getMap().isEmpty()) {
+            sender.sendMessage("No map is currently selected. Please select a map first.");
+            return;
+        }
+
+        BaseMap baseMap = data.getMap().get();
+
+        baseMap.setName(name);
         Component message = Messages.withPrefix(Component.text("The name of the map now is: ", NamedTextColor.GRAY))
                 .append(Component.text(name, NamedTextColor.AQUA));
         sender.sendMessage(message);
-        setupData.get().triggerUpdate();
+        data.triggerUpdate();
     }
 }
