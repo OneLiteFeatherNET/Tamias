@@ -7,8 +7,6 @@ import net.theevilreaper.aves.file.GsonFileHandler;
 import net.theevilreaper.aves.map.BaseMap;
 import net.theevilreaper.aves.map.MapProvider;
 import net.theevilreaper.aves.util.functional.PlayerConsumer;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.entity.Player;
