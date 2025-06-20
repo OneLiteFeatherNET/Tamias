@@ -1,6 +1,7 @@
 package net.theevilreaper.tamias.setup.util;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.tag.PreProcess;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -9,6 +10,12 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
 public class SetupMessages extends Messages {
+
+    public static final Component SELECT_MAP_FIRST;
+
+    static {
+        SELECT_MAP_FIRST = Messages.withPrefix(Component.text("Please select a map first before executing this function", NamedTextColor.RED));
+    }
 
     @Contract(value = "_ -> new", pure = true)
     public static @NotNull Component getInvalidFace(@NotNull String face) {

@@ -46,7 +46,6 @@ public final class TamiasSetup implements ListenerHandling {
 
     public static final Tag<Byte> SETUP_TAG = Tag.Transient("setup");
     public static final Tag<Boolean> DELETE_TAG = Tag.Boolean("delete").defaultValue(false);
-    public static final Component SELECT_MAP_FIRST = Component.text("Please select a map first!", NamedTextColor.RED);
 
     private final SetupDataService<InstanceSetupData<? extends BaseMap>> setupDataService;
     private final FileHandler fileHandler;

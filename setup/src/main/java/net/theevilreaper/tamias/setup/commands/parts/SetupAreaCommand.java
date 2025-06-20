@@ -25,7 +25,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
-import static net.theevilreaper.tamias.setup.TamiasSetup.SELECT_MAP_FIRST;
+import static net.theevilreaper.tamias.setup.util.SetupMessages.SELECT_MAP_FIRST;
 
 /**
  * @author theEvilReaper
@@ -58,7 +58,7 @@ public class SetupAreaCommand extends Command {
         Optional<InstanceSetupData<? extends BaseMap>> setupData = this.setupDataFunction.apply(sender.identity().uuid());
 
         if (setupData.isEmpty()) {
-            sender.sendMessage("An error occurred while setting up the map");
+            sender.sendMessage(SELECT_MAP_FIRST);
             return;
         }
 
@@ -81,10 +81,9 @@ public class SetupAreaCommand extends Command {
         Optional<InstanceSetupData<? extends BaseMap>> setupData = this.setupDataFunction.apply(sender.identity().uuid());
 
         if (setupData.isEmpty()) {
-            sender.sendMessage("An error occurred while setting up the map");
+            sender.sendMessage(SELECT_MAP_FIRST);
             return;
         }
-
 
         GameData gameData = (GameData) setupData.get();
 

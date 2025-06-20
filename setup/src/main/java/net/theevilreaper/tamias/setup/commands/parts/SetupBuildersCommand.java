@@ -21,7 +21,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
-import static net.theevilreaper.tamias.setup.TamiasSetup.SELECT_MAP_FIRST;
+import static net.theevilreaper.tamias.setup.util.SetupMessages.SELECT_MAP_FIRST;
 
 /**
  * The command allows the set the creators of a map to a {@link BaseMap} reference.
@@ -58,7 +58,7 @@ public final class SetupBuildersCommand extends Command {
 
         Optional<InstanceSetupData<? extends BaseMap>> setupData = this.setupDataFunction.apply(sender.identity().uuid());
         if (setupData.isEmpty()) {
-            sender.sendMessage("An error occurred while setting up the map");
+            sender.sendMessage(SELECT_MAP_FIRST);
             return;
         }
 
