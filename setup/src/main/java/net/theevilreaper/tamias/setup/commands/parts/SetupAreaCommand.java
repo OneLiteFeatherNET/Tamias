@@ -1,6 +1,5 @@
 package net.theevilreaper.tamias.setup.commands.parts;
 
-import net.theevilreaper.aves.util.Components;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
@@ -13,17 +12,20 @@ import net.minestom.server.command.builder.condition.Conditions;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.utils.Direction;
+import net.theevilreaper.aves.map.BaseMap;
+import net.theevilreaper.aves.util.Components;
 import net.theevilreaper.tamias.common.util.Messages;
 import net.theevilreaper.tamias.setup.TamiasSetup;
 import net.theevilreaper.tamias.setup.data.GameData;
-import net.theevilreaper.tamias.setup.data.SetupData;
+import net.theevilreaper.tamias.setup.data.InstanceSetupData;
 import net.theevilreaper.tamias.setup.util.DirectionUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
 
-import static net.theevilreaper.tamias.setup.TamiasSetup.SELECT_MAP_FIRST;
+import static net.theevilreaper.tamias.setup.util.SetupMessages.SELECT_MAP_FIRST;
 
 /**
  * @author theEvilReaper
@@ -32,10 +34,10 @@ import static net.theevilreaper.tamias.setup.TamiasSetup.SELECT_MAP_FIRST;
  */
 public class SetupAreaCommand extends Command {
 
-    private final Function<Player, SetupData> setupDataFunction;
+    private final Function<UUID, Optional<InstanceSetupData<? extends BaseMap>>> setupDataFunction;
     private final ArgumentWord argumentWord;
 
-    public SetupAreaCommand(@NotNull Function<Player, SetupData> setupDataFunction) {
+    public SetupAreaCommand(@NotNull Function<UUID, Optional<InstanceSetupData<? extends BaseMap>>> setupDataFunction) {
         super("area");
         this.setCondition(Conditions::playerOnly);
         this.setupDataFunction = setupDataFunction;
@@ -53,18 +55,19 @@ public class SetupAreaCommand extends Command {
             return;
         }
 
-        SetupData setupData = this.setupDataFunction.apply((Player) sender);
+        Optional<InstanceSetupData<? extends BaseMap>> setupData = this.setupDataFunction.apply(sender.identity().uuid());
 
-        if (setupData == null) {
-            sender.sendMessage("An error occurred while setting up the map");
+        if (setupData.isEmpty()) {
+            sender.sendMessage(SELECT_MAP_FIRST);
             return;
         }
 
-        setupData.swapAreaMode();
+        GameData gameData = (GameData) setupData.get();
+        gameData.swapAreaMode();
 
-        sender.sendMessage("Area mode is now " + (setupData.hasAreaMode() ? "enabled" : "disabled"));
+        sender.sendMessage("Area mode is now " + (gameData.hasAreaMode() ? "enabled" : "disabled"));
 
-        if (setupData.hasAreaMode()) {
+        if (gameData.hasAreaMode()) {
             sender.sendMessage("Please disable this mode after you have set the area");
         }
     }
@@ -75,14 +78,16 @@ public class SetupAreaCommand extends Command {
             return;
         }
 
-        SetupData setupData = this.setupDataFunction.apply((Player) sender);
+        Optional<InstanceSetupData<? extends BaseMap>> setupData = this.setupDataFunction.apply(sender.identity().uuid());
 
-        if (setupData == null) {
-            sender.sendMessage("An error occurred while setting up the map");
+        if (setupData.isEmpty()) {
+            sender.sendMessage(SELECT_MAP_FIRST);
             return;
         }
 
-        if (!setupData.hasAreaMode()) {
+        GameData gameData = (GameData) setupData.get();
+
+        if (!gameData.hasAreaMode()) {
             sender.sendMessage("Area mode is not active");
             return;
         }
@@ -91,23 +96,22 @@ public class SetupAreaCommand extends Command {
 
 
         switch (argument) {
-            case "left" -> setLeftCorner((Player) sender, setupData);
-            case "right" -> setRightCorner((Player) sender, setupData);
+            case "left" -> setLeftCorner((Player) sender, gameData);
+            case "right" -> setRightCorner((Player) sender, gameData);
             default -> sender.sendMessage("Invalid argument");
         }
     }
 
-    private void setLeftCorner(@NotNull Player player, @NotNull SetupData setupData) {
+    private void setLeftCorner(@NotNull Player player, @NotNull GameData setupData) {
         Optional<Direction> directionOptional = DirectionUtil.parseDirection(player);
         if (directionOptional.isEmpty()) return;
 
-        Vec vec = Vec.fromPoint(player.getPosition()).sub(0, -1,0);
+        Vec vec = Vec.fromPoint(player.getPosition()).sub(0, -1, 0);
 
         Direction direction = directionOptional.get();
-        GameData gameData = ((GameData) setupData);
 
-        gameData.setLeftCorner(vec);
-        gameData.setDirection(direction);
+        setupData.setLeftCorner(vec);
+        setupData.setDirection(direction);
 
         Component component = Messages.withPrefix(Component.text("Left area corner is: ", NamedTextColor.GRAY)
                 .append(Components.convertPoint(vec).style(Style.style(NamedTextColor.GOLD)))
@@ -117,12 +121,10 @@ public class SetupAreaCommand extends Command {
 
     }
 
-    private void setRightCorner(@NotNull Player player, @NotNull SetupData setupData) {
+    private void setRightCorner(@NotNull Player player, @NotNull GameData setupData) {
         Vec vec = Vec.fromPoint(player.getPosition());
 
-        GameData gameData = ((GameData) setupData);
-
-        gameData.setRightCorner(vec);
+        setupData.setRightCorner(vec);
         Component component = Messages.withPrefix(Component.text("Right area corner is: ", NamedTextColor.GRAY)
                 .append(Components.convertPoint(vec).style(Style.style(NamedTextColor.GOLD))));
         player.sendMessage(component);

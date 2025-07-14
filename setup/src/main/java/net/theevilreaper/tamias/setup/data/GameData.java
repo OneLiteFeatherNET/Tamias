@@ -1,34 +1,41 @@
 package net.theevilreaper.tamias.setup.data;
 
-import net.theevilreaper.aves.map.BaseMap;
-import net.theevilreaper.aves.map.MapEntry;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
+import net.minestom.server.instance.anvil.AnvilLoader;
 import net.minestom.server.utils.Direction;
+import net.theevilreaper.aves.file.FileHandler;
+import net.theevilreaper.aves.map.BaseMap;
+import net.theevilreaper.aves.map.MapEntry;
 import net.theevilreaper.tamias.common.map.GameMap;
 import net.theevilreaper.tamias.common.map.layer.GameAreaData;
 import net.theevilreaper.tamias.setup.inventory.LobbyViewInventory;
 import org.jetbrains.annotations.NotNull;
 
-public final class GameData extends SetupDataImpl {
+import java.nio.file.Files;
+import java.util.Optional;
+import java.util.UUID;
 
-    private GameAreaData.Builder areaDataBuilder;
+public class GameData extends InstanceSetupData<GameMap> {
+
+    private final FileHandler fileHandler;
     private final LobbyViewInventory inventory;
-
+    private GameAreaData.Builder areaDataBuilder;
     private boolean areaMode;
 
-    GameData(@NotNull Player player, @NotNull MapEntry mapEntry, @NotNull BaseMap baseMap) {
-        super(player, mapEntry, baseMap);
-        this.inventory = new LobbyViewInventory(baseMap);
-        this.title = Component.text("Setup mode: ", NamedTextColor.GRAY)
-                .append(Component.text("Game", NamedTextColor.LIGHT_PURPLE))
-                .append(Component.text(", Map: ", NamedTextColor.GRAY))
-                .append(Component.text(mapEntry.getDirectoryRoot().getFileName().toString(), NamedTextColor.LIGHT_PURPLE));
+    public GameData(@NotNull UUID uuid, @NotNull MapEntry mapEntry, @NotNull FileHandler fileHandler) {
+        super(uuid, mapEntry);
+        this.fileHandler = fileHandler;
+        Player player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(uuid);
+
+        if (player == null) {
+            throw new IllegalArgumentException("Player with UUID " + uuid + " is not online.");
+        }
+
+        this.inventory = new LobbyViewInventory(this.map);
     }
 
-    @Override
     public void swapAreaMode() {
         this.areaMode = !this.areaMode;
 
@@ -36,8 +43,18 @@ public final class GameData extends SetupDataImpl {
             this.areaDataBuilder = GameAreaData.builder();
             return;
         }
-        GameMap gameMap = (GameMap) this.baseMap;
+        GameMap gameMap = (GameMap) this.map;
         gameMap.setGameAreaData(this.areaDataBuilder.build());
+    }
+
+    @Override
+    public void openInventory(@NotNull Player player) {
+        player.openInventory(this.inventory.getInventory());
+    }
+
+    @Override
+    public void triggerUpdate() {
+        this.inventory.invalidateDataLayout();
     }
 
     /**
@@ -68,13 +85,11 @@ public final class GameData extends SetupDataImpl {
     }
 
     @Override
-    public void openInventory() {
-        player.openInventory(inventory.getInventory());
-    }
-
-    @Override
-    public void triggerInventoryUpdate() {
-        this.inventory.invalidateDataLayout();
+    public void save() {
+        if (!Files.exists(mapEntry.getMapFile())) {
+            this.mapEntry.createFile();
+        }
+        this.fileHandler.save(mapEntry.getMapFile(), BaseMap.class);
     }
 
     @Override
@@ -84,7 +99,20 @@ public final class GameData extends SetupDataImpl {
     }
 
     @Override
+    public void loadData() {
+        if (this.mapEntry != null) return;
+        Optional<GameMap> mapData = fileHandler.load(mapEntry.getMapFile(), GameMap.class);
+        // Initialize with a new BaseMap if loading fails
+        this.map = mapData.orElseGet(GameMap::new);
+
+        this.instance = MinecraftServer.getInstanceManager().createInstanceContainer();
+        AnvilLoader anvilLoader = new AnvilLoader(this.mapEntry.getDirectoryRoot());
+        this.instance.setChunkLoader(anvilLoader);
+        this.updateTitle();
+        MinecraftServer.getInstanceManager().registerInstance(this.instance);
+    }
+
     public boolean hasAreaMode() {
-        return this.areaMode;
+        return areaMode;
     }
 }

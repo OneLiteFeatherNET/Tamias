@@ -2,11 +2,13 @@ package net.theevilreaper.tamias.setup.commands;
 
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.condition.Conditions;
+import net.onelitefeather.guira.SetupDataService;
+import net.theevilreaper.aves.map.BaseMap;
 import net.theevilreaper.tamias.setup.commands.parts.SetupAreaCommand;
 import net.theevilreaper.tamias.setup.commands.parts.SetupBuildersCommand;
 import net.theevilreaper.tamias.setup.commands.parts.SetupNameCommand;
 import net.theevilreaper.tamias.setup.commands.parts.SetupPositionCommand;
-import net.theevilreaper.tamias.setup.data.SetupDataService;
+import net.theevilreaper.tamias.setup.data.InstanceSetupData;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -19,12 +21,12 @@ import org.jetbrains.annotations.NotNull;
  */
 public final class SetupCommand extends Command {
 
-    public SetupCommand(@NotNull SetupDataService dataService) {
+    public SetupCommand(@NotNull SetupDataService<InstanceSetupData<? extends BaseMap>> dataService) {
         super("setup");
         this.setCondition(Conditions::playerOnly);
-        this.addSubcommand(new SetupNameCommand(dataService::getSetupData));
-        this.addSubcommand(new SetupBuildersCommand(dataService::getSetupData));
-        this.addSubcommand(new SetupPositionCommand(dataService::getSetupData));
-        this.addSubcommand(new SetupAreaCommand(dataService::getSetupData));
+        this.addSubcommand(new SetupNameCommand(dataService::get));
+        this.addSubcommand(new SetupBuildersCommand(dataService::get));
+        this.addSubcommand(new SetupPositionCommand(dataService::get));
+        this.addSubcommand(new SetupAreaCommand(dataService::get));
     }
 }
