@@ -23,15 +23,15 @@ dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
             version("shadow", "8.3.8")
-            version("bom", "1.2.3")
+            version("bom", "1.4.0")
             version("projectiles", "2.1.2")
-            version("aonyx", "0.3.1")
+            version("aonyx", "0.5.0")
 
             library("mycelium.bom", "net.onelitefeather", "mycelium-bom").versionRef("bom")
             library("game.bom", "net.onelitefeather", "aonyx-bom").versionRef("aonyx")
 
             library("atlas.projectiles", "ca.atlasengine", "atlas-projectiles").versionRef("projectiles")
-            library("minestom","net.minestom", "minestom-snapshots").withoutVersion()
+            library("minestom","net.minestom", "minestom").withoutVersion()
             library("adventure", "net.kyori", "adventure-text-minimessage").withoutVersion()
             library("cyano", "net.onelitefeather", "cyano").withoutVersion()
             library("guira", "net.onelitefeather", "guira").withoutVersion()
