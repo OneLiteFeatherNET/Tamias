@@ -7,9 +7,10 @@ import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockInteractEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.event.player.PlayerSwapItemEvent;
+import net.minestom.server.event.trait.CancellableEvent;
 import org.jetbrains.annotations.NotNull;
 
-import static net.theevilreaper.aves.inventory.util.InventoryConstants.CANCELLABLE_EVENT;
+import java.util.function.Consumer;
 
 /**
  * The interface provides a default method to register some listeners to cancel specific events.
@@ -19,6 +20,8 @@ import static net.theevilreaper.aves.inventory.util.InventoryConstants.CANCELLAB
  * @since 1.0.0
  */
 public interface ListenerHandling {
+
+    Consumer<CancellableEvent> CANCELLABLE_EVENT = (event) -> event.setCancelled(true);
 
     /**
      * Registers some {@link Event} listener to cancel specific default events.
