@@ -8,8 +8,8 @@ import net.minestom.server.utils.Direction;
 import net.theevilreaper.aves.file.FileHandler;
 import net.theevilreaper.aves.map.BaseMap;
 import net.theevilreaper.aves.map.MapEntry;
+import net.theevilreaper.tamias.common.area.GameArea;
 import net.theevilreaper.tamias.common.map.GameMap;
-import net.theevilreaper.tamias.common.map.layer.GameAreaData;
 import net.theevilreaper.tamias.setup.inventory.LobbyViewInventory;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,7 +21,7 @@ public class GameData extends InstanceSetupData<GameMap> {
 
     private final FileHandler fileHandler;
     private final LobbyViewInventory inventory;
-    private GameAreaData.Builder areaDataBuilder;
+   // private GameArea areaDataBuilder;
     private boolean areaMode;
 
     public GameData(@NotNull UUID uuid, @NotNull MapEntry mapEntry, @NotNull FileHandler fileHandler) {
@@ -40,11 +40,11 @@ public class GameData extends InstanceSetupData<GameMap> {
         this.areaMode = !this.areaMode;
 
         if (this.areaMode) {
-            this.areaDataBuilder = GameAreaData.builder();
+          //  this.areaDataBuilder = GameAreaData.builder();
             return;
         }
         GameMap gameMap = (GameMap) this.map;
-        gameMap.setGameAreaData(this.areaDataBuilder.build());
+      //  gameMap.setGameAreaData(this.areaDataBuilder.build());
     }
 
     @Override
@@ -63,7 +63,7 @@ public class GameData extends InstanceSetupData<GameMap> {
      * @param vec the left corner
      */
     public void setLeftCorner(@NotNull Vec vec) {
-        this.areaDataBuilder.lowerCorner(vec);
+    //    this.areaDataBuilder.lowerCorner(vec);
     }
 
     /**
@@ -72,7 +72,7 @@ public class GameData extends InstanceSetupData<GameMap> {
      * @param direction the direction of the area
      */
     public void setDirection(@NotNull Direction direction) {
-        this.areaDataBuilder.facing(direction);
+    //    this.areaDataBuilder.facing(direction);
     }
 
     /**
@@ -81,7 +81,7 @@ public class GameData extends InstanceSetupData<GameMap> {
      * @param vec the right corner
      */
     public void setRightCorner(@NotNull Vec vec) {
-        this.areaDataBuilder.upperCorner(vec);
+        // this.areaDataBuilder.upperCorner(vec);
     }
 
     @Override

@@ -38,6 +38,7 @@ import net.theevilreaper.tamias.setup.map.SetupMapProvider;
 import net.theevilreaper.tamias.setup.util.SetupItems;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.file.Paths;
 import java.util.function.Supplier;
 
 public final class TamiasSetup implements ListenerHandling {
@@ -53,7 +54,7 @@ public final class TamiasSetup implements ListenerHandling {
 
     public TamiasSetup() {
         this.fileHandler = new GsonFileHandler(GsonUtil.GSON);
-        this.mapProvider = new SetupMapProvider(MapFilter.ROOT_FOLDER, this.fileHandler);
+        this.mapProvider = new SetupMapProvider(Paths.get(""), this.fileHandler);
         this.setupDataService = SetupDataService.create();
         this.setupItems = new SetupItems();
         this.mapSetupInventory = new MapSetupInventory(this.mapProvider::getEntries);
