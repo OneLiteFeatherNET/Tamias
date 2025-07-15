@@ -1,6 +1,6 @@
 package net.theevilreaper.tamias.game.phase;
 
-import net.theevilreaper.aves.map.MapProvider;
+import net.theevilreaper.aves.map.provider.MapProvider;
 import net.theevilreaper.aves.util.functional.VoidConsumer;
 import net.theevilreaper.xerus.api.phase.TickDirection;
 import net.theevilreaper.xerus.api.phase.TimedPhase;

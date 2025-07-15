@@ -4,7 +4,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.testing.Env;
 import net.minestom.testing.extension.MicrotusExtension;
-import net.theevilreaper.aves.map.MapProvider;
+import net.theevilreaper.aves.map.provider.MapProvider;
 import net.theevilreaper.tamias.game.map.GameMapProvider;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;

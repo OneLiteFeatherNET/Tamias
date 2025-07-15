@@ -1,6 +1,6 @@
 package net.theevilreaper.tamias.game;
 
-import net.theevilreaper.aves.map.MapProvider;
+import net.theevilreaper.aves.map.provider.MapProvider;
 import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.theevilreaper.aves.util.functional.VoidConsumer;
 import net.theevilreaper.xerus.api.phase.CyclicPhaseSeries;

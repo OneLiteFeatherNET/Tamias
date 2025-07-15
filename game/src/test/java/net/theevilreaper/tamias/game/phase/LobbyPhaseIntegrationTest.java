@@ -1,7 +1,7 @@
 package net.theevilreaper.tamias.game.phase;
 
 import net.minestom.testing.extension.MicrotusExtension;
-import net.theevilreaper.aves.map.MapProvider;
+import net.theevilreaper.aves.map.provider.MapProvider;
 import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.game.map.GameMapProvider;
 import org.junit.jupiter.api.AfterEach;
@@ -9,7 +9,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
 
 import java.nio.file.Paths;
 
@@ -28,7 +27,9 @@ class LobbyPhaseIntegrationTest {
     @BeforeAll
     static void setup() {
         MapProvider mapProvider = new GameMapProvider(Paths.get(""));
-        lobbyPhase = new LobbyPhase(mapProvider, value -> {},  () -> {}, 1, 2, LOBBY_PHASE_TIME);
+        lobbyPhase = new LobbyPhase(mapProvider, value -> {
+        }, () -> {
+        }, 1, 2, LOBBY_PHASE_TIME);
     }
 
     @AfterEach
