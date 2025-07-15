@@ -1,12 +1,12 @@
 package net.theevilreaper.tamias.game.util;
 
+import net.minestom.server.component.DataComponents;
 import net.theevilreaper.xerus.api.team.Team;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.projectile.FireworkRocketMeta;
-import net.minestom.server.item.ItemComponent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.component.FireworkExplosion;
@@ -37,7 +37,7 @@ public final class FireworkUtil {
                    )
                 ));
                 ItemStack rocketInfo = ItemStack.builder(Material.FIREWORK_STAR)
-                                .set(ItemComponent.FIREWORKS, fireworkInfo)
+                                .set(DataComponents.FIREWORKS, fireworkInfo)
                         .build();
                 rocketMeta.setFireworkInfo(rocketInfo);
                 entity.setInstance(player.getInstance(), player.getPosition().add(0, 0.5, 0));
