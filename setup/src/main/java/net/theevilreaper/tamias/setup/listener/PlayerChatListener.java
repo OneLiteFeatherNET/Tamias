@@ -5,6 +5,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerChatEvent;
 import net.onelitefeather.guira.SetupDataService;
+import net.onelitefeather.guira.data.SetupData;
 import net.theevilreaper.aves.map.BaseMap;
 import net.theevilreaper.tamias.setup.TamiasSetup;
 import net.theevilreaper.tamias.setup.data.InstanceSetupData;
@@ -18,9 +19,9 @@ public final class PlayerChatListener implements Consumer<PlayerChatEvent> {
     private static final Component SQUARE_OPEN = Component.text("[", NamedTextColor.GRAY);
     private static final Component SQUARE_CLOSE = Component.text("]", NamedTextColor.GRAY);
 
-    private final SetupDataService<InstanceSetupData<? extends BaseMap>> setupDataService;
+    private final SetupDataService setupDataService;
 
-    public PlayerChatListener(@NotNull SetupDataService<InstanceSetupData<? extends BaseMap>> setupDataService) {
+    public PlayerChatListener(@NotNull SetupDataService setupDataService) {
         this.setupDataService = setupDataService;
     }
 
@@ -44,12 +45,15 @@ public final class PlayerChatListener implements Consumer<PlayerChatEvent> {
     private @NotNull Component formatSetup(@NotNull PlayerChatEvent event) {
         Player player = event.getPlayer();
         Component general = formatGeneral(event);
-        InstanceSetupData<? extends BaseMap> setupData = setupDataService.get(player.getUuid()).orElseGet(null);
-        if (null == setupData) return Component.empty();
+        SetupData setupData = setupDataService.get(player.getUuid()).orElse(null);
+        if (!(setupData instanceof InstanceSetupData instanceData)) {
+            return Component.empty();
+        }
         Component mapName;
-        BaseMap map = setupData.getMap().get();
 
-        if (setupData.hasMapFile() && map != null) {
+        BaseMap map = null;
+
+        if (instanceData.hasMapFile() && map != null) {
             String mapAsString = map.getName();
             mapName = SQUARE_OPEN
                     .append(Component.text(mapAsString, NamedTextColor.LIGHT_PURPLE))

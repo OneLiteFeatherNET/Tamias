@@ -5,6 +5,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.instance.anvil.AnvilLoader;
 import net.theevilreaper.aves.file.FileHandler;
 import net.theevilreaper.aves.map.BaseMap;
+import net.theevilreaper.aves.map.BaseMapBuilder;
 import net.theevilreaper.aves.map.MapEntry;
 import net.theevilreaper.tamias.setup.inventory.LobbyViewInventory;
 import org.jetbrains.annotations.NotNull;
@@ -13,10 +14,11 @@ import java.nio.file.Files;
 import java.util.Optional;
 import java.util.UUID;
 
-public final class LobbyData extends InstanceSetupData<BaseMap> {
+public final class LobbyData extends InstanceSetupData {
 
     private final FileHandler fileHandler;
     private final LobbyViewInventory viewInventory;
+    private BaseMapBuilder mapBuilder;
 
     public LobbyData(@NotNull UUID uuid, @NotNull MapEntry mapEntry, @NotNull FileHandler fileHandler) {
         super(uuid, mapEntry);
@@ -28,7 +30,7 @@ public final class LobbyData extends InstanceSetupData<BaseMap> {
             throw new IllegalArgumentException("Player with UUID " + uuid + " is not online.");
         }
 
-        this.viewInventory = new LobbyViewInventory(this.map);
+        this.viewInventory = null;//new LobbyViewInventory(this.map);
     }
 
     @Override
@@ -60,7 +62,7 @@ public final class LobbyData extends InstanceSetupData<BaseMap> {
         if (this.mapEntry != null) return;
         Optional<BaseMap> mapData = fileHandler.load(mapEntry.getMapFile(), BaseMap.class);
         // Initialize with a new BaseMap if loading fails
-        this.map = mapData.orElseGet(BaseMap::new);
+        //this.map = mapData.orElseGet(BaseMap::new);
 
         this.instance = MinecraftServer.getInstanceManager().createInstanceContainer();
         AnvilLoader anvilLoader = new AnvilLoader(this.mapEntry.getDirectoryRoot());

@@ -6,9 +6,8 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
-import net.theevilreaper.aves.map.BaseMap;
+import net.onelitefeather.guira.data.SetupData;
 import net.theevilreaper.tamias.common.util.Messages;
-import net.theevilreaper.tamias.setup.data.InstanceSetupData;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -18,9 +17,9 @@ import java.util.function.Function;
 
 public final class PlayerDisconnectListener implements Consumer<PlayerDisconnectEvent> {
 
-    private final Function<UUID, Optional<InstanceSetupData<? extends BaseMap>>> dataRemover;
+    private final Function<UUID, Optional<SetupData>> dataRemover;
 
-    public PlayerDisconnectListener(@NotNull Function<UUID, Optional<InstanceSetupData<? extends BaseMap>>> dataRemover) {
+    public PlayerDisconnectListener(@NotNull Function<UUID, Optional<SetupData>> dataRemover) {
         this.dataRemover = dataRemover;
     }
 
@@ -33,7 +32,7 @@ public final class PlayerDisconnectListener implements Consumer<PlayerDisconnect
         Audience.audience(MinecraftServer.getConnectionManager().getOnlinePlayers())
                 .sendMessage(joinMessage);
 
-        Optional<InstanceSetupData<? extends BaseMap>> removedData = dataRemover.apply(player.getUuid());
-        removedData.ifPresent(InstanceSetupData::reset);
+        Optional<SetupData> removedData = dataRemover.apply(player.getUuid());
+        removedData.ifPresent(SetupData::reset);
     }
 }

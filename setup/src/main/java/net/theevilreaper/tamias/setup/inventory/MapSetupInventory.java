@@ -1,7 +1,9 @@
 package net.theevilreaper.tamias.setup.inventory;
 
+import net.minestom.server.inventory.click.Click;
 import net.theevilreaper.aves.inventory.GlobalInventoryBuilder;
 import net.theevilreaper.aves.inventory.InventoryLayout;
+import net.theevilreaper.aves.inventory.click.ClickHolder;
 import net.theevilreaper.aves.inventory.util.LayoutCalculator;
 import net.theevilreaper.aves.map.MapEntry;
 import net.kyori.adventure.text.Component;
@@ -9,8 +11,6 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.inventory.InventoryType;
-import net.minestom.server.inventory.click.ClickType;
-import net.minestom.server.inventory.condition.InventoryConditionResult;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.theevilreaper.tamias.setup.event.MapSetupSelectEvent;
@@ -61,8 +61,8 @@ public class MapSetupInventory extends GlobalInventoryBuilder {
             List<MapEntry> mapEntries = maps.get();
             for (int i = 0; i < mapEntries.size(); i++) {
                 var currentMap = mapEntries.get(i);
-                dataLayout.setItem(MAP_SLOTS[i], getMapItem(currentMap.getDirectoryRoot()), (player, slot, clickType, result) ->
-                        this.handleClick(currentMap, player, slot, clickType, result));
+                dataLayout.setItem(MAP_SLOTS[i], getMapItem(currentMap.getDirectoryRoot()), (player, slot, click) ->
+                        this.handleClick(currentMap, player, slot, click));
             }
             return dataLayout;
         });
@@ -76,14 +76,12 @@ public class MapSetupInventory extends GlobalInventoryBuilder {
      * @param currentMap the current map being clicked
      * @param player     the player who clicked
      * @param ignored    the slot clicked
-     * @param clickType  the type of click
-     * @param result     the result of the inventory condition
+     * @param click      the click event
      */
-    private void handleClick(@NotNull MapEntry currentMap, @NotNull Player player, int ignored, @NotNull ClickType clickType, @NotNull InventoryConditionResult result) {
-        result.setCancel(true);
-        if (clickType != ClickType.LEFT_CLICK && clickType != ClickType.RIGHT_CLICK) return;
-        boolean lobbyMode = clickType == ClickType.LEFT_CLICK;
+    private ClickHolder handleClick(@NotNull MapEntry currentMap, @NotNull Player player, int ignored, @NotNull Click click) {
+        boolean lobbyMode = click instanceof Click.Left;
         EventDispatcher.callCancellable(new MapSetupSelectEvent(player, currentMap, lobbyMode), player::closeInventory);
+        return ClickHolder.cancelClick();
     }
 
     /**

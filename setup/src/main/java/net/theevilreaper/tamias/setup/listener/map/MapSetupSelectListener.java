@@ -1,8 +1,8 @@
 package net.theevilreaper.tamias.setup.listener.map;
 
 import net.onelitefeather.guira.SetupDataService;
+import net.onelitefeather.guira.data.SetupData;
 import net.theevilreaper.aves.file.FileHandler;
-import net.theevilreaper.aves.map.BaseMap;
 import net.theevilreaper.aves.map.MapEntry;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -13,7 +13,6 @@ import net.minestom.server.timer.Task;
 import net.theevilreaper.tamias.common.util.Messages;
 import net.theevilreaper.tamias.setup.TamiasSetup;
 import net.theevilreaper.tamias.setup.data.GameData;
-import net.theevilreaper.tamias.setup.data.InstanceSetupData;
 import net.theevilreaper.tamias.setup.data.LobbyData;
 import net.theevilreaper.tamias.setup.event.MapSetupSelectEvent;
 import org.jetbrains.annotations.NotNull;
@@ -24,11 +23,11 @@ import java.util.function.Consumer;
 public final class MapSetupSelectListener implements Consumer<MapSetupSelectEvent> {
 
     private final FileHandler fileHandler;
-    private final SetupDataService<InstanceSetupData<? extends BaseMap>> setupDataService;
+    private final SetupDataService setupDataService;
 
     public MapSetupSelectListener(
             @NotNull FileHandler fileHandler,
-            @NotNull SetupDataService<InstanceSetupData<? extends BaseMap>> setupDataService
+            @NotNull SetupDataService setupDataService
     ) {
         this.fileHandler = fileHandler;
         this.setupDataService = setupDataService;
@@ -38,14 +37,14 @@ public final class MapSetupSelectListener implements Consumer<MapSetupSelectEven
     public void accept(@NotNull MapSetupSelectEvent event) {
         Player player = event.getPlayer();
 
-        InstanceSetupData<? extends BaseMap> setupData = this.setupDataService.get(player.getUuid()).get();
+        SetupData setupData = this.setupDataService.get(player.getUuid()).get();
 
-        if (setupData != null && setupData.hasMap()) {
+        /*if (setupData != null && setupData.hasMap()) {
             // If this condition is reached the setup is fucked up
             player.sendMessage("You already have a map selected");
-        }
+        }*/
 
-        InstanceSetupData<? extends BaseMap> data;
+        SetupData data;
         MapEntry mapEntry = event.getMapEntry();
         if (event.isLobbyMode()) {
             data = new LobbyData(player.getUuid(), mapEntry, this.fileHandler);
@@ -64,7 +63,7 @@ public final class MapSetupSelectListener implements Consumer<MapSetupSelectEven
         this.setupDataService.add(player.getUuid(), data);
 
         player.setTag(TamiasSetup.SETUP_TAG, (byte) 1);
-        getTeleportTask(() -> data.teleport(player)).schedule();
+        //getTeleportTask(() -> data.teleport(player)).schedule();
     }
 
     private @NotNull Task.Builder getTeleportTask(@NotNull Runnable runnable) {

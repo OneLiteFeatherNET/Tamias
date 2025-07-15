@@ -8,7 +8,6 @@ import net.minestom.server.utils.Direction;
 import net.theevilreaper.aves.file.FileHandler;
 import net.theevilreaper.aves.map.BaseMap;
 import net.theevilreaper.aves.map.MapEntry;
-import net.theevilreaper.tamias.common.area.GameArea;
 import net.theevilreaper.tamias.common.map.GameMap;
 import net.theevilreaper.tamias.setup.inventory.LobbyViewInventory;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +16,7 @@ import java.nio.file.Files;
 import java.util.Optional;
 import java.util.UUID;
 
-public class GameData extends InstanceSetupData<GameMap> {
+public class GameData extends InstanceSetupData {
 
     private final FileHandler fileHandler;
     private final LobbyViewInventory inventory;
@@ -32,8 +31,8 @@ public class GameData extends InstanceSetupData<GameMap> {
         if (player == null) {
             throw new IllegalArgumentException("Player with UUID " + uuid + " is not online.");
         }
-
-        this.inventory = new LobbyViewInventory(this.map);
+        this.inventory = null;
+       // this.inventory = new LobbyViewInventory(this.map);
     }
 
     public void swapAreaMode() {
@@ -43,7 +42,7 @@ public class GameData extends InstanceSetupData<GameMap> {
           //  this.areaDataBuilder = GameAreaData.builder();
             return;
         }
-        GameMap gameMap = (GameMap) this.map;
+        // GameMap gameMap = (GameMap) this.map;
       //  gameMap.setGameAreaData(this.areaDataBuilder.build());
     }
 
@@ -103,7 +102,7 @@ public class GameData extends InstanceSetupData<GameMap> {
         if (this.mapEntry != null) return;
         Optional<GameMap> mapData = fileHandler.load(mapEntry.getMapFile(), GameMap.class);
         // Initialize with a new BaseMap if loading fails
-        this.map = mapData.orElseGet(GameMap::new);
+//        this.map = mapData.orElseGet(GameMap::new);
 
         this.instance = MinecraftServer.getInstanceManager().createInstanceContainer();
         AnvilLoader anvilLoader = new AnvilLoader(this.mapEntry.getDirectoryRoot());

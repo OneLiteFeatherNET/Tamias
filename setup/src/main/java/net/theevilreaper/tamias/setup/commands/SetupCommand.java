@@ -8,7 +8,6 @@ import net.theevilreaper.tamias.setup.commands.parts.SetupAreaCommand;
 import net.theevilreaper.tamias.setup.commands.parts.SetupBuildersCommand;
 import net.theevilreaper.tamias.setup.commands.parts.SetupNameCommand;
 import net.theevilreaper.tamias.setup.commands.parts.SetupPositionCommand;
-import net.theevilreaper.tamias.setup.data.InstanceSetupData;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -21,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public final class SetupCommand extends Command {
 
-    public SetupCommand(@NotNull SetupDataService<InstanceSetupData<? extends BaseMap>> dataService) {
+    public SetupCommand(@NotNull SetupDataService dataService) {
         super("setup");
         this.setCondition(Conditions::playerOnly);
         this.addSubcommand(new SetupNameCommand(dataService::get));

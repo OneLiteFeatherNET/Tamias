@@ -12,6 +12,7 @@ import net.minestom.server.command.builder.condition.Conditions;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.utils.Direction;
+import net.onelitefeather.guira.data.SetupData;
 import net.theevilreaper.aves.map.BaseMap;
 import net.theevilreaper.aves.util.Components;
 import net.theevilreaper.tamias.common.map.GameMap;
@@ -30,9 +31,9 @@ import static net.theevilreaper.tamias.setup.util.SetupMessages.SELECT_MAP_FIRST
 
 public final class SetupPositionCommand extends Command {
 
-    private final Function<UUID, Optional<InstanceSetupData<? extends BaseMap>>> setupDataFunction;
+    private final Function<UUID, Optional<SetupData>> setupDataFunction;
 
-    public SetupPositionCommand(@NotNull Function<UUID, Optional<InstanceSetupData<? extends BaseMap>>> setupDataFunction) {
+    public SetupPositionCommand(@NotNull Function<UUID, Optional<SetupData>> setupDataFunction) {
         super("position");
         this.setCondition(Conditions::playerOnly);
         this.setupDataFunction = setupDataFunction;
@@ -56,19 +57,19 @@ public final class SetupPositionCommand extends Command {
             return;
         }
 
-        Optional<InstanceSetupData<? extends BaseMap>> setupData = setupDataFunction.apply(sender.identity().uuid());
+        Optional<SetupData> setupData = setupDataFunction.apply(sender.identity().uuid());
         if (setupData.isEmpty()) {
             sender.sendMessage(SELECT_MAP_FIRST);
             return;
         }
 
-        BaseMap map = setupData.get().getMap().get();
+       // BaseMap map = setupData.get().getMap().get();
         Player player = (Player) sender;
 
-        switch (map) {
+        /*switch (map) {
             case GameMap gameMap -> this.handleGameSpawnSet(player, gameMap, spawnType);
             case BaseMap baseMap -> this.handleLobbySpawnSet(player, baseMap, spawnType);
-        }
+        }*/
         Component posAsComponent = Components.convertPoint(Pos.fromPoint(player.getPosition()));
         Component argComponent = Component.text(type, NamedTextColor.GREEN);
         Component message = Messages.withPrefix(Component.text("The ", NamedTextColor.GRAY)
@@ -78,7 +79,7 @@ public final class SetupPositionCommand extends Command {
                 .append(posAsComponent)
         );
         sender.sendMessage(message);
-        setupData.get().triggerUpdate();
+        //setupData.get().triggerUpdate();
     }
 
     private void handleGameSpawnSet(@NotNull Player sender, @NotNull GameMap gameMap, @NotNull SpawnType spawnType) {

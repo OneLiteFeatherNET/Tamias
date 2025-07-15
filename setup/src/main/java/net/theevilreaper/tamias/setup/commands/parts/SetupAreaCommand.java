@@ -12,12 +12,11 @@ import net.minestom.server.command.builder.condition.Conditions;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.utils.Direction;
-import net.theevilreaper.aves.map.BaseMap;
+import net.onelitefeather.guira.data.SetupData;
 import net.theevilreaper.aves.util.Components;
 import net.theevilreaper.tamias.common.util.Messages;
 import net.theevilreaper.tamias.setup.TamiasSetup;
 import net.theevilreaper.tamias.setup.data.GameData;
-import net.theevilreaper.tamias.setup.data.InstanceSetupData;
 import net.theevilreaper.tamias.setup.util.DirectionUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,10 +33,10 @@ import static net.theevilreaper.tamias.setup.util.SetupMessages.SELECT_MAP_FIRST
  */
 public class SetupAreaCommand extends Command {
 
-    private final Function<UUID, Optional<InstanceSetupData<? extends BaseMap>>> setupDataFunction;
+    private final Function<UUID, Optional<SetupData>> setupDataFunction;
     private final ArgumentWord argumentWord;
 
-    public SetupAreaCommand(@NotNull Function<UUID, Optional<InstanceSetupData<? extends BaseMap>>> setupDataFunction) {
+    public SetupAreaCommand(@NotNull Function<UUID, Optional<SetupData>> setupDataFunction) {
         super("area");
         this.setCondition(Conditions::playerOnly);
         this.setupDataFunction = setupDataFunction;
@@ -55,7 +54,7 @@ public class SetupAreaCommand extends Command {
             return;
         }
 
-        Optional<InstanceSetupData<? extends BaseMap>> setupData = this.setupDataFunction.apply(sender.identity().uuid());
+        Optional<SetupData> setupData = this.setupDataFunction.apply(sender.identity().uuid());
 
         if (setupData.isEmpty()) {
             sender.sendMessage(SELECT_MAP_FIRST);
@@ -78,7 +77,7 @@ public class SetupAreaCommand extends Command {
             return;
         }
 
-        Optional<InstanceSetupData<? extends BaseMap>> setupData = this.setupDataFunction.apply(sender.identity().uuid());
+        Optional<SetupData> setupData = this.setupDataFunction.apply(sender.identity().uuid());
 
         if (setupData.isEmpty()) {
             sender.sendMessage(SELECT_MAP_FIRST);

@@ -4,8 +4,7 @@ import net.onelitefeather.guira.SetupDataService;
 import net.onelitefeather.guira.event.SetupFinishEvent;
 import net.theevilreaper.aves.file.FileHandler;
 import net.theevilreaper.aves.file.GsonFileHandler;
-import net.theevilreaper.aves.map.BaseMap;
-import net.theevilreaper.aves.map.MapProvider;
+import net.theevilreaper.aves.map.provider.MapProvider;
 import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
@@ -21,9 +20,7 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.Tag;
 import net.theevilreaper.tamias.common.ListenerHandling;
 import net.theevilreaper.tamias.common.gson.GsonUtil;
-import net.theevilreaper.tamias.common.util.MapFilter;
 import net.theevilreaper.tamias.setup.commands.SetupCommand;
-import net.theevilreaper.tamias.setup.data.InstanceSetupData;
 import net.theevilreaper.tamias.setup.event.MapSetupSelectEvent;
 import net.theevilreaper.tamias.setup.inventory.MapSetupInventory;
 import net.theevilreaper.tamias.setup.listener.PlayerChatListener;
@@ -46,7 +43,7 @@ public final class TamiasSetup implements ListenerHandling {
     public static final Tag<Byte> SETUP_TAG = Tag.Transient("setup");
     public static final Tag<Boolean> DELETE_TAG = Tag.Boolean("delete").defaultValue(false);
 
-    private final SetupDataService<InstanceSetupData<? extends BaseMap>> setupDataService;
+    private final SetupDataService setupDataService;
     private final FileHandler fileHandler;
     private final MapProvider mapProvider;
     private final SetupItems setupItems;
@@ -88,10 +85,7 @@ public final class TamiasSetup implements ListenerHandling {
         manager.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(initialSpawnSupplier));
         manager.addListener(AddEntityToInstanceEvent.class, new EntityAddToInstanceListener(instanceSupplier, setupItems));
         manager.addListener(MapSetupSelectEvent.class, new MapSetupSelectListener(this.fileHandler, this.setupDataService));
-        manager.addListener(
-                (Class<SetupFinishEvent<InstanceSetupData<? extends BaseMap>>>) (Class<?>) SetupFinishEvent.class,
-                new SetupFinishListener(instanceSwitcher)
-        );
+        manager.addListener(SetupFinishEvent.class, new SetupFinishListener(instanceSwitcher));
         manager.addListener(PlayerChatEvent.class, new PlayerChatListener(this.setupDataService));
 
         // Item listener

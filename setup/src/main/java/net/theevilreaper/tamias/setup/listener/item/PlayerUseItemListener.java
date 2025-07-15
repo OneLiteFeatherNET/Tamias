@@ -1,7 +1,7 @@
 package net.theevilreaper.tamias.setup.listener.item;
 
+import net.onelitefeather.guira.data.SetupData;
 import net.onelitefeather.guira.event.SetupFinishEvent;
-import net.theevilreaper.aves.map.BaseMap;
 import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
@@ -22,11 +22,11 @@ import static net.theevilreaper.tamias.setup.util.SetupItems.OVERVIEW_FLAG;
 public final class PlayerUseItemListener implements Consumer<PlayerUseItemEvent> {
 
     private final PlayerConsumer invOpener;
-    private final Function<UUID, Optional<InstanceSetupData<? extends BaseMap>>> saveFunction;
+    private final Function<UUID, Optional<SetupData>> saveFunction;
 
     public PlayerUseItemListener(
             @NotNull PlayerConsumer invOpener,
-            @NotNull Function<UUID, Optional<InstanceSetupData<? extends BaseMap>>> saveFunction
+            @NotNull Function<UUID, Optional<SetupData>> saveFunction
     ) {
         this.invOpener = invOpener;
         this.saveFunction = saveFunction;
@@ -48,15 +48,15 @@ public final class PlayerUseItemListener implements Consumer<PlayerUseItemEvent>
 
         if (!player.hasTag(TamiasSetup.SETUP_TAG)) return;
 
-        Optional<InstanceSetupData<? extends BaseMap>> fetchedData = this.saveFunction.apply(player.getUuid());
+        Optional<SetupData> fetchedData = this.saveFunction.apply(player.getUuid());
         if (fetchedData.isEmpty()) return;
 
-        InstanceSetupData<? extends BaseMap> setupData = fetchedData.get();
+        SetupData setupData = fetchedData.get();
 
         if (itemId == OVERVIEW_FLAG) {
-            setupData.openInventory(player);
+            ((InstanceSetupData) setupData).openInventory(player);
             return;
         }
-        EventDispatcher.call(new SetupFinishEvent<>(setupData));
+        EventDispatcher.call(new SetupFinishEvent(setupData));
     }
 }

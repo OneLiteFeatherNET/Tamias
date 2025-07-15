@@ -10,9 +10,9 @@ import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.arguments.ArgumentStringArray;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.condition.Conditions;
+import net.onelitefeather.guira.data.SetupData;
 import net.theevilreaper.aves.map.BaseMap;
 import net.theevilreaper.tamias.setup.TamiasSetup;
-import net.theevilreaper.tamias.setup.data.InstanceSetupData;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -32,9 +32,9 @@ import static net.theevilreaper.tamias.setup.util.SetupMessages.SELECT_MAP_FIRST
  */
 public final class SetupBuildersCommand extends Command {
 
-    private final Function<UUID, Optional<InstanceSetupData<? extends BaseMap>>> setupDataFunction;
+    private final Function<UUID, Optional<SetupData>> setupDataFunction;
 
-    public SetupBuildersCommand(@NotNull Function<UUID, Optional<InstanceSetupData<? extends BaseMap>>> setupDataFunction) {
+    public SetupBuildersCommand(@NotNull Function<UUID, Optional<SetupData>> setupDataFunction) {
         super("builders");
         this.setupDataFunction = setupDataFunction;
         this.setCondition(Conditions::playerOnly);
@@ -56,13 +56,13 @@ public final class SetupBuildersCommand extends Command {
             return;
         }
 
-        Optional<InstanceSetupData<? extends BaseMap>> setupData = this.setupDataFunction.apply(sender.identity().uuid());
+        Optional<SetupData> setupData = this.setupDataFunction.apply(sender.identity().uuid());
         if (setupData.isEmpty()) {
             sender.sendMessage(SELECT_MAP_FIRST);
             return;
         }
 
-        setupData.get().getMap().get().setBuilders(builders);
+      //  setupData.get().getMap().get().setBuilders(builders);
         Component buildersAsComponent = Component.join(JoinConfiguration.arrayLike(), transformBuilders(builders));
         sender.sendMessage(Component.text("The creators of the map are: ").append(buildersAsComponent));
     }

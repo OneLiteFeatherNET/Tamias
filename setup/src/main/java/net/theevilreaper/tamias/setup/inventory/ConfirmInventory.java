@@ -2,6 +2,7 @@ package net.theevilreaper.tamias.setup.inventory;
 
 import net.theevilreaper.aves.inventory.GlobalInventoryBuilder;
 import net.theevilreaper.aves.inventory.InventoryLayout;
+import net.theevilreaper.aves.inventory.click.ClickHolder;
 import net.theevilreaper.aves.inventory.util.LayoutCalculator;
 import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.kyori.adventure.text.Component;
@@ -48,13 +49,17 @@ public class ConfirmInventory extends GlobalInventoryBuilder {
         InventoryLayout layout = InventoryLayout.fromType(getType());
         layout.setItems(DECO_SLOTS, SetupItems.DECORATION, CANCEL_CLICK);
 
-        layout.setItems(CONFIRM_SLOTS, CONFIRM_STACK, (player, i, clickType, result) -> {
+        layout.setItems(CONFIRM_SLOTS, CONFIRM_STACK, (player, i, click) -> {
             player.setTag(TamiasSetup.DELETE_TAG, true);
             EventDispatcher.call(new InventoryCloseEvent(player.getOpenInventory(), player, false));
             player.closeInventory();
+            return ClickHolder.cancelClick();
         });
 
-        layout.setItems(CANCEL_SLOTS, CANCEL_STACK, (player, i, clickType, result) -> player.closeInventory());
+        layout.setItems(CANCEL_SLOTS, CANCEL_STACK, (player, i, click) -> {
+            player.closeInventory();
+            return ClickHolder.cancelClick();
+        });
 
         setLayout(layout);
 

@@ -1,12 +1,12 @@
 package net.theevilreaper.tamias.setup.inventory.slot;
 
+import net.minestom.server.inventory.click.Click;
+import net.theevilreaper.aves.inventory.click.ClickHolder;
 import net.theevilreaper.aves.inventory.slot.Slot;
 import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
-import net.minestom.server.inventory.click.ClickType;
-import net.minestom.server.inventory.condition.InventoryConditionResult;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class PositionBaseSlot extends Slot {
@@ -19,23 +19,21 @@ public abstract class PositionBaseSlot extends Slot {
         this.rightClickAction = rightClickAction;
     }
 
-    protected void handleClick(
+    protected ClickHolder handleClick(
             @NotNull Player player,
             int ignore,
-            @NotNull ClickType type,
-            @NotNull InventoryConditionResult result
+            @NotNull Click type
     ) {
-        result.setCancel(true);
-        if (!(type == ClickType.LEFT_CLICK || type == ClickType.RIGHT_CLICK)) return;
-
-        if (type == ClickType.LEFT_CLICK) {
+        if (type instanceof Click.Left) {
             player.closeInventory();
             player.teleport(Pos.fromPoint(this.point));
-            return;
+            return ClickHolder.cancelClick();
         }
 
-        if (type == ClickType.RIGHT_CLICK && this.rightClickAction != null) {
+        if (type instanceof Click.Right && this.rightClickAction != null) {
             this.rightClickAction.accept(player);
         }
+
+        return ClickHolder.cancelClick();
     }
 }
