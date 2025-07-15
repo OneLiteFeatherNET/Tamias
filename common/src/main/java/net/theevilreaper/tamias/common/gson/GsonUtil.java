@@ -4,7 +4,8 @@ import com.google.gson.Gson;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.theevilreaper.aves.file.gson.PositionGsonAdapter;
-import net.theevilreaper.tamias.common.map.layer.GameAreaData;
+import net.theevilreaper.tamias.common.area.GameArea;
+import net.theevilreaper.tamias.common.map.layer.AreaData;
 
 /**
  * The utility class provides a {@link Gson} instance with some custom adapters.
@@ -24,7 +25,7 @@ public final class GsonUtil {
         GSON = new Gson().newBuilder()
                 .registerTypeAdapter(Pos.class, positionGsonAdapter)
                 .registerTypeAdapter(Vec.class, positionGsonAdapter)
-                .registerTypeAdapter(GameAreaData.class, new GameAreaAdapter())
+                .registerTypeAdapter(AreaData.class, new GameAreaAdapter())
                 .create();
     }
 

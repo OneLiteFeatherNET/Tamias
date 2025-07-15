@@ -62,8 +62,6 @@ public final class GameMapProvider extends AbstractMapProvider implements MapFil
         Check.argCondition(loadedGameMap.isEmpty(), "The game map couldn't be loaded!");
         this.gameMap = loadedGameMap.get();
         //((GameMap) this.gameMap).setMapEntry(gameEntry);
-        this.gameArea = new GameArea(null, ((GameMap) this.gameMap).getGameAreaData());
-        this.spawnArea = new SpawnArea(null, ((GameMap) this.gameMap).getSpawnData(), 16);
 
         MinecraftServer.getInstanceManager().registerInstance(this.activeInstance);
         this.createGameMapContainer();
@@ -92,7 +90,7 @@ public final class GameMapProvider extends AbstractMapProvider implements MapFil
     }
 
     public void teleportPlayers(@NotNull List<Player> players, BooleanSupplier switchInstance) {
-        this.spawnArea.teleport(this.gameMapInstance, players, switchInstance);
+      //  this.spawnArea.teleport(this.gameMapInstance, players, switchInstance);
     }
 
     public void resetSpawnArea() {
@@ -104,16 +102,16 @@ public final class GameMapProvider extends AbstractMapProvider implements MapFil
     }
 
     public void triggerSpawnPlacement() {
-        this.spawnArea.triggerPlacement();
+
+        //this.spawnArea.triggerPlacement();
     }
 
     public void cleanupMapPlacement() {
-        this.gameArea.getTask().cancel();
+      //  this.gameArea.getTask().cancel();
     }
 
     public @NotNull Task triggerGamePlacement() {
-        this.gameArea.triggerPlacement();
-        return this.gameArea.getTask();
+        return null;
     }
 
     public void loadGameChunks() {

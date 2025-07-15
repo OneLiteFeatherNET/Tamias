@@ -1,4 +1,4 @@
-package net.theevilreaper.tamias.common.area;
+package net.theevilreaper.tamias.common.ground;
 
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;

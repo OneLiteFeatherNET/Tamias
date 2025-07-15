@@ -10,8 +10,12 @@ import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.testing.Env;
 import net.minestom.testing.extension.MicrotusExtension;
 import net.theevilreaper.tamias.common.VoidGenerator;
+import net.theevilreaper.tamias.common.area.holder.Placement;
+import net.theevilreaper.tamias.common.area.holder.SpawnPlacement;
+import net.theevilreaper.tamias.common.ground.GroundData;
 import net.theevilreaper.tamias.common.map.layer.SpawnLayer;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -22,39 +26,18 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MicrotusExtension.class)
 class SpawnAreaIntegrationTest {
 
-    @ParameterizedTest(name = "Test invalid spawn area argument usage with face {0}")
-    @ValueSource(strings = {"DOWN", "UP"})
-    void testInvalidSpawnAreaArgumentUsage(String face, @NotNull Env env) {
-        Instance instance = env.createFlatInstance();
-        Optional<Direction> directionOptional = Arrays.stream(Direction.values()).filter(value -> value.name().equals(face)).findFirst();
-        assertTrue(directionOptional.isPresent());
+    private static GroundData spawnData;
+    private static Direction[] directionValues;
 
-        Direction direction = directionOptional.get();
-        SpawnLayer spawnLayer = new SpawnLayer(Pos.ZERO, direction);
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> new SpawnArea(instance, spawnLayer, 10),
-                "The direction must be horizontal"
-        );
-        env.destroyInstance(instance);
-    }
-
-    @Test
-    void testInvalidPositionUsage(@NotNull Env env) {
-        Instance instance = env.createFlatInstance();
-        SpawnLayer spawnLayer = new SpawnLayer(Pos.ZERO, Direction.UP);
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> new SpawnArea(instance, spawnLayer, 0),
-                "The direction must be horizontal"
-        );
-        env.destroyInstance(instance);
+    @BeforeAll
+    static void init() {
+        spawnData = new GroundData(Block.TNT, null);
+        directionValues = Direction.values();
     }
 
     @ParameterizedTest(name = "Test spawn area block set usage with face {0}")
@@ -66,11 +49,11 @@ class SpawnAreaIntegrationTest {
             env.createPlayer(instance);
         }
         instance.setGenerator(new VoidGenerator());
-        Optional<Direction> directionOptional = Arrays.stream(Direction.values()).filter(value -> value.name().equals(face)).findFirst();
+        Optional<Direction> directionOptional = Arrays.stream(directionValues).filter(value -> value.name().equals(face)).findFirst();
         assertTrue(directionOptional.isPresent());
 
         Pos startPos = Pos.ZERO;
-        SpawnArea spawnArea = new SpawnArea(instance, new SpawnLayer(Pos.ZERO, directionOptional.get()), maxPositions);
+        SpawnArea spawnArea = new SpawnArea(new SpawnLayer(Pos.ZERO, directionOptional.get()), maxPositions);
         instance.loadChunk(Pos.ZERO).join();
         assertNotNull(spawnArea);
 
@@ -82,8 +65,10 @@ class SpawnAreaIntegrationTest {
             assertBlockRegion(Block.STONE, instance, pos);
         }
 
+        Placement placement = new SpawnPlacement(instance, spawnArea);
+
         pos = Pos.fromPoint(startPos);
-        spawnArea.triggerPlacement();
+        placement.triggerPlacement(spawnData);
         int currentPositions = 0;
 
         // Check the start position
@@ -106,12 +91,13 @@ class SpawnAreaIntegrationTest {
         Direction northDir = Direction.NORTH;
         int maxPositions = 3;
         Pos startPos = Pos.ZERO.add(0, 1, 0);
-        SpawnArea spawnArea = new SpawnArea(instance, new SpawnLayer(Pos.ZERO, northDir), maxPositions);
+        SpawnArea spawnArea = new SpawnArea(new SpawnLayer(Pos.ZERO, northDir), maxPositions);
         assertNotNull(spawnArea);
 
-        spawnArea.triggerPlacement();
+        Placement placement = new SpawnPlacement(instance, spawnArea);
 
-        spawnArea.reset();
+        placement.triggerPlacement(spawnData);
+        placement.clear();
 
         int currentPositions = 0;
 

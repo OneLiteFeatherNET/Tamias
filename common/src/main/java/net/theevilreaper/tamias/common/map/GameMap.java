@@ -1,9 +1,10 @@
 package net.theevilreaper.tamias.common.map;
 
-import net.theevilreaper.aves.map.BaseMap;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.utils.Direction;
-import net.theevilreaper.tamias.common.map.layer.GameAreaData;
+import net.theevilreaper.aves.map.BaseMap;
+import net.theevilreaper.aves.map.MapEntry;
+import net.theevilreaper.tamias.common.map.layer.AreaData;
 import net.theevilreaper.tamias.common.map.layer.SpawnLayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -18,8 +19,9 @@ import org.jetbrains.annotations.UnknownNullability;
 public final class GameMap extends BaseMap {
 
     private SpawnLayer spawnLayer;
-    private GameAreaData gameAreaData;
+    private AreaData areaData;
     private Pos bomberInitialSpawn;
+    private MapEntry mapEntry;
 
     public GameMap() {
         super("Not set", Pos.ZERO);
@@ -30,21 +32,25 @@ public final class GameMap extends BaseMap {
             @Nullable Pos spawn,
             @NotNull Pos bomberInitialSpawn,
             @NotNull SpawnLayer spawnLayer,
-            @NotNull GameAreaData gameAreaData
+            @NotNull AreaData areaData
     ) {
         super(name, spawn, "Team");
         this.bomberInitialSpawn = bomberInitialSpawn;
         this.spawnLayer = spawnLayer;
-        this.gameAreaData = gameAreaData;
+        this.areaData = areaData;
+    }
+
+    public void setMapEntry(MapEntry mapEntry) {
+        this.mapEntry = mapEntry;
     }
 
     /**
      * Set's the game area data for the map.
      *
-     * @param gameAreaData the data to set
+     * @param areaData the data to set
      */
-    public void setGameAreaData(@NotNull GameAreaData gameAreaData) {
-        this.gameAreaData = gameAreaData;
+    public void setGameAreaData(@NotNull AreaData areaData) {
+        this.areaData = areaData;
     }
 
     /**
@@ -71,8 +77,8 @@ public final class GameMap extends BaseMap {
      *
      * @return the game area data
      */
-    public @Nullable GameAreaData getGameAreaData() {
-        return gameAreaData;
+    public @Nullable AreaData getGameAreaData() {
+        return areaData;
     }
 
     /**
@@ -91,5 +97,9 @@ public final class GameMap extends BaseMap {
      */
     public @NotNull SpawnLayer getSpawnData() {
         return spawnLayer;
+    }
+
+    public MapEntry getMapEntry() {
+        return mapEntry;
     }
 }

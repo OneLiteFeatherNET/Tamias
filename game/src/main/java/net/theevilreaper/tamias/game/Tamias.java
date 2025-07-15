@@ -175,8 +175,6 @@ public class Tamias implements ListenerHandling {
                         this.roundProvider::isLastRound,
                         this.roundProvider::triggerNextRound,
                         this.scoreboard::hideBoard,
-                        gameMapProvider::resetGameArea,
-                        gameMapProvider::triggerSpawnPlacement,
                         teleportConsumer
                 )
         );

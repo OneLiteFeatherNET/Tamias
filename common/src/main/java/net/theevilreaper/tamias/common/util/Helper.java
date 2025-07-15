@@ -1,6 +1,6 @@
 package net.theevilreaper.tamias.common.util;
 
-import net.minestom.server.coordinate.Vec;
+import net.minestom.server.coordinate.Point;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,7 +13,7 @@ public final class Helper {
         return pitch >= -50 && pitch <= 50;
     }
 
-    public static @NotNull Comparator<Vec> getComparator() {
+    public static <T extends Point>  @NotNull Comparator<T> getComparator() {
         return Comparator.comparing(pos -> {
             var x = pos.x();
             var z = pos.z();

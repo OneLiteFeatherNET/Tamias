@@ -1,7 +1,6 @@
-package net.theevilreaper.tamias.common.area.ground;
+package net.theevilreaper.tamias.common.ground;
 
 import net.minestom.server.instance.block.Block;
-import net.theevilreaper.tamias.common.area.GroundData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 

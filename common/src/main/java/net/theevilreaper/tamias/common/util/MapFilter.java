@@ -19,7 +19,6 @@ import java.util.stream.Stream;
  */
 public interface MapFilter {
 
-    Path ROOT_FOLDER = Path.of("");
     String REGION_FOLDER = "region";
 
     /**

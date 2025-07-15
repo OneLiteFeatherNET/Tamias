@@ -5,11 +5,11 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class FinishBuildEventTest {
+class AreaFinishBuildEventTest {
 
     @Test
     void testEventCreation() {
-        Event finishBuildEvent = new FinishBuildEvent();
-        assertInstanceOf(FinishBuildEvent.class, finishBuildEvent);
+        Event finishBuildEvent = new AreaFinishBuildEvent();
+        assertInstanceOf(AreaFinishBuildEvent.class, finishBuildEvent);
     }
 }

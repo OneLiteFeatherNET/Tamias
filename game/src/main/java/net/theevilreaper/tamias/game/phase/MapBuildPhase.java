@@ -6,7 +6,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
-import net.theevilreaper.tamias.common.event.FinishBuildEvent;
+import net.theevilreaper.tamias.common.event.AreaFinishBuildEvent;
 import net.theevilreaper.tamias.common.util.Messages;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -32,6 +32,7 @@ public final class MapBuildPhase extends GamePhase {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(MapBuildPhase.class);
     private static final Component MAP_READY = Messages.withMini("<green>Map is ready!");
     private static final Component MAP_BUILDING = Messages.withMini("<green>Map is building up...");
+
     private final VoidConsumer mapReferenceChange;
     private final Consumer<List<Player>> teleportConsumer;
     private final Supplier<VoidConsumer> mapPlacementTaskTrigger;
@@ -43,7 +44,7 @@ public final class MapBuildPhase extends GamePhase {
             @NotNull Supplier<VoidConsumer> mapPlacementTaskTrigger
     ) {
         super("MapBuild");
-        addListener(FinishBuildEvent.class, finishBuildEvent -> {
+        addListener(AreaFinishBuildEvent.class, areaFinishBuildEvent -> {
             Audience.audience(MinecraftServer.getConnectionManager().getOnlinePlayers())
                     .sendMessage(MAP_READY);
             finish();
@@ -51,11 +52,6 @@ public final class MapBuildPhase extends GamePhase {
         this.mapReferenceChange = mapReferenceChange;
         this.teleportConsumer = teleportConsumer;
         this.mapPlacementTaskTrigger = mapPlacementTaskTrigger;
-    }
-
-    @Override
-    public void start() {
-        super.start();
     }
 
     @Override

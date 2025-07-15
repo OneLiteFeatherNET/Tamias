@@ -5,13 +5,13 @@ import net.minestom.server.utils.Direction;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 
-public record GameAreaDataLayer(
+public record AreaDataLayer(
         @NotNull Vec lowerCorner,
         @NotNull Vec upperCorner,
         @NotNull Direction facing
-) implements GameAreaData {
+) implements AreaData {
 
-    public GameAreaDataLayer {
+    public AreaDataLayer {
         Vec distance = upperCorner.sub(lowerCorner);
         Check.argCondition(distance.equals(Vec.ZERO), "The distance between start and end can't be zero");
     }

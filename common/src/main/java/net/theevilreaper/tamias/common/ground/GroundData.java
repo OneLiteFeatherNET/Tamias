@@ -1,4 +1,4 @@
-package net.theevilreaper.tamias.common.area;
+package net.theevilreaper.tamias.common.ground;
 
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.validate.Check;
@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * A {@link GroundData} represents the definition of the ground in a specific area.
@@ -41,5 +42,17 @@ public record GroundData(@NotNull Block groundBlock, @Nullable List<Block> addit
      */
     public boolean hasAdditionalBlocks() {
         return additionalBlocks != null && !additionalBlocks.isEmpty();
+    }
+
+    /**
+     * Returns a random additional block from the list.
+     *
+     * @return the additional block
+     */
+    public @NotNull Block getAddtionalBlock() {
+        if (additionalBlocks == null || additionalBlocks.isEmpty()) return groundBlock();
+        if (additionalBlocks.size() == 1) return additionalBlocks.getFirst();
+        int index = ThreadLocalRandom.current().nextInt(0, this.additionalBlocks.size());
+        return additionalBlocks.get(index);
     }
 }

@@ -1,6 +1,8 @@
 package net.theevilreaper.tamias.common.area.placement;
 
 import net.minestom.server.timer.Task;
+import net.theevilreaper.tamias.common.ground.GroundData;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -8,16 +10,16 @@ import org.jetbrains.annotations.Nullable;
  * The implementation can be different and depends on the implementation.
  *
  * @author theEvilReaper
- * @version 1.0.0
+ * @version 1.1.0
  * @see AreaBasePlacement
- * @since 1.0.0
+ * @since 0.1.0
  */
 public sealed interface AreaPlacement permits AreaBasePlacement {
 
     /**
      * Stars the placement of the area.
      */
-    void place();
+    void place(@NotNull GroundData groundData);
 
     /**
      * Checks if the placement is running.
@@ -28,7 +30,7 @@ public sealed interface AreaPlacement permits AreaBasePlacement {
 
     /**
      * Returns the current task.
-     * The return type can be nullable, if the task is not running.
+     * The return type can be nullable if the task is not running.
      *
      * @return the current task
      */
