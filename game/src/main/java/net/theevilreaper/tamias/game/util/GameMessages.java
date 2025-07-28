@@ -27,6 +27,7 @@ public final class GameMessages extends Messages {
     private static final Component TITLE_TIME;
 
     public static final Component CHOOSING_NEW_TNT;
+    public static final Component GAME_END_KICK_MESSAGE;
 
     public static final Component ALREADY_FORCE_STARTED;
     public static final Component PHASE_NOT_RUNNING;
@@ -42,6 +43,7 @@ public final class GameMessages extends Messages {
         SHOT_PART = withMini("<yellow> You were shot by");
         CHOOSING_NEW_TNT = withMiniPrefix("<red>Choosing new tnt<gold>....");
         TITLE_TIME = Component.text("Time:", NamedTextColor.GOLD).append(Component.space());
+        GAME_END_KICK_MESSAGE = Component.text("The game is over. Thanks for playing it. <3", NamedTextColor.RED);
 
         int forceStartTime = GameConfig.FORCE_START_TIME;
         ALREADY_FORCE_STARTED = withMiniPrefix("<red>The game has already been force started!");
@@ -54,7 +56,13 @@ public final class GameMessages extends Messages {
         super();
     }
 
-    @Contract
+    /**
+     * Returns a time component for the lobby countdown.
+     *
+     * @param time the time in seconds to display
+     * @return a component with the lobby time message
+     */
+    @Contract(value = "_ -> new", pure = true)
     public static @NotNull Component getLobbyTime(int time) {
         return withMiniPrefix("<gold>Starting in... <red>" + time);
     }
@@ -68,6 +76,20 @@ public final class GameMessages extends Messages {
     @Contract(value = "_ -> new", pure = true)
     public static @NotNull Component getTitleTime(int time) {
         return TITLE_TIME.append(Component.text(time, NamedTextColor.YELLOW));
+    }
+
+    /**
+     * Returns a component that indicates the restart time.
+     *
+     * @param time the time in seconds until the restart
+     * @return a component with the restart time message
+     */
+    @Contract(value = "_ -> new", pure = true)
+    public static @NotNull Component getRestartTime(int time) {
+        if (time == 1) {
+            return withMiniPrefix("<gray>Restarting in <red>" + time + " <gray>second!");
+        }
+        return withMiniPrefix("<gray>Restarting in <red>" + time + " <gray>seconds!");
     }
 
     @Contract(value = "_ -> new", pure = true)
