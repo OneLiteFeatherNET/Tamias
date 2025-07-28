@@ -17,7 +17,7 @@ import java.util.UUID;
 public final class LobbyData extends InstanceSetupData {
 
     private final FileHandler fileHandler;
-    private final LobbyViewInventory viewInventory;
+    private LobbyViewInventory viewInventory;
     private BaseMapBuilder mapBuilder;
 
     public LobbyData(@NotNull UUID uuid, @NotNull MapEntry mapEntry, @NotNull FileHandler fileHandler) {
@@ -30,7 +30,7 @@ public final class LobbyData extends InstanceSetupData {
             throw new IllegalArgumentException("Player with UUID " + uuid + " is not online.");
         }
 
-        this.viewInventory = null;//new LobbyViewInventory(this.map);
+        this.viewInventory = null;
     }
 
     @Override
@@ -61,13 +61,21 @@ public final class LobbyData extends InstanceSetupData {
     public void loadData() {
         if (this.mapEntry != null) return;
         Optional<BaseMap> mapData = fileHandler.load(mapEntry.getMapFile(), BaseMap.class);
-        // Initialize with a new BaseMap if loading fails
-        //this.map = mapData.orElseGet(BaseMap::new);
+
+        mapData.ifPresentOrElse(baseMap -> {
+            this.mapBuilder = BaseMap.builder(baseMap);
+        }, () -> this.mapBuilder = BaseMap.builder());
+
+        this.viewInventory = new LobbyViewInventory(this.mapBuilder);
 
         this.instance = MinecraftServer.getInstanceManager().createInstanceContainer();
         AnvilLoader anvilLoader = new AnvilLoader(this.mapEntry.getDirectoryRoot());
         this.instance.setChunkLoader(anvilLoader);
         this.updateTitle();
         MinecraftServer.getInstanceManager().registerInstance(this.instance);
+    }
+
+    public BaseMapBuilder getMapBuilder() {
+        return mapBuilder;
     }
 }
