@@ -11,35 +11,44 @@ import org.jetbrains.annotations.NotNull;
 import java.time.temporal.ChronoUnit;
 
 import static net.minestom.server.MinecraftServer.getConnectionManager;
-import static net.theevilreaper.tamias.game.util.GameMessages.MINI_MESSAGE;
 
 /**
+ * The {@link RestartPhase} is a timed phase to handle the time before the server should be restarted.
+ *
  * @author theEvilReaper
- * @version 1.0.0
- * @since 1.0.0
+ * @version 1.0.1
+ * @since 0.1.0
  **/
 public final class RestartPhase extends TimedPhase {
 
-    private static final Component KICK_MESSAGE = MINI_MESSAGE.deserialize("<red>The game is over. Thanks for playing it. <3");
-
+    /**
+     * Constructs a new {@link RestartPhase} with a duration of 15 seconds.
+     */
     public RestartPhase() {
         super("Restart", ChronoUnit.SECONDS, 1);
         this.setCurrentTicks(15);
         this.setEndTicks(-1);
     }
 
+    /**
+     * Stops the server cleanly when the phase finishes.
+     */
     @Override
     protected void onFinish() {
         MinecraftServer.stopCleanly();
     }
 
+    /**
+     * Called every tick to update the phase.
+     * It broadcasts messages to players based on the current ticks.
+     */
     @Override
     public void onUpdate() {
         switch (getCurrentTicks()) {
-            case 10, 3, 2, 1 -> broadcast(GameMessages.getLobbyTime(getCurrentTicks()));
+            case 10, 3, 2, 1 -> broadcast(GameMessages.getRestartTime(getCurrentTicks()));
             case 0 -> {
                 for (Player onlinePlayer : getConnectionManager().getOnlinePlayers()) {
-                    onlinePlayer.kick(KICK_MESSAGE);
+                    onlinePlayer.kick(GameMessages.GAME_END_KICK_MESSAGE);
                 }
             }
             default -> {
@@ -48,6 +57,11 @@ public final class RestartPhase extends TimedPhase {
         }
     }
 
+    /**
+     * Broadcasts a message to all online players.
+     *
+     * @param component the message to broadcast
+     */
     private void broadcast(@NotNull Component component) {
         Audience.audience(getConnectionManager().getOnlinePlayers())
                 .sendMessage(component);
