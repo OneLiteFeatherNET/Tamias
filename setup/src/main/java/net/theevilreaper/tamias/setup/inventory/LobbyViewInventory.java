@@ -4,7 +4,6 @@ import net.theevilreaper.aves.inventory.GlobalInventoryBuilder;
 import net.theevilreaper.aves.inventory.InventoryLayout;
 import net.theevilreaper.aves.inventory.slot.ISlot;
 import net.theevilreaper.aves.inventory.util.LayoutCalculator;
-import net.theevilreaper.aves.map.BaseMap;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
@@ -12,6 +11,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.theevilreaper.aves.map.BaseMapBuilder;
 import net.theevilreaper.tamias.setup.inventory.slot.MultipleStringItemSlot;
 import net.theevilreaper.tamias.setup.inventory.slot.SpawnItemSlot;
 import net.theevilreaper.tamias.setup.inventory.slot.StringItemSlot;
@@ -38,17 +38,17 @@ public class LobbyViewInventory extends GlobalInventoryBuilder {
             .build();
 
     private static final int[] DATA_SLOTS = LayoutCalculator.from(11, 13, 15);
-    private final BaseMap lobbyMap;
     private final ConfirmInventory confirmInventory;
+    private final BaseMapBuilder mapBuilder;
 
     /**
      * Creates a new {@link LobbyViewInventory} instance.
      *
-     * @param lobbyMap the map to display
+     * @param mapBuilder the map to display
      */
-    public LobbyViewInventory(@NotNull BaseMap lobbyMap) {
+    public LobbyViewInventory(@NotNull BaseMapBuilder mapBuilder) {
         super(Component.text("Lobby data"), InventoryType.CHEST_3_ROW);
-        this.lobbyMap = lobbyMap;
+        this.mapBuilder = mapBuilder;
         this.confirmInventory = new ConfirmInventory(this::handleConfirmClick);
         InventoryLayout layout = InventoryLayout.fromType(getType());
         layout.setItems(LayoutCalculator.quad(0, getType().getSize() - 1), SetupItems.DECORATION, CANCEL_CLICK);
@@ -63,14 +63,14 @@ public class LobbyViewInventory extends GlobalInventoryBuilder {
                 dataLayout.setItem(DATA_SLOTS[2], SetupItems.DECORATION, CANCEL_CLICK);
                 return dataLayout;
             }
-            ISlot mapNameSlot = new StringItemSlot(Component.text("Map-Name", NamedTextColor.GOLD), lobbyMap.getName());
-            ISlot builderSlot = new MultipleStringItemSlot(Component.text("Builders", NamedTextColor.GOLD), lobbyMap.getBuilders());
+            ISlot mapNameSlot = new StringItemSlot(Component.text("Map-Name", NamedTextColor.GOLD), mapBuilder.getName());
+            ISlot builderSlot = new MultipleStringItemSlot(Component.text("Builders", NamedTextColor.GOLD), mapBuilder.getBuilders());
             ISlot spawnSlot;
 
-            if (!lobbyMap.hasSpawn()) {
+            if (mapBuilder.getSpawn() != null) {
                  spawnSlot = SpawnItemSlot.empty();
             } else {
-                spawnSlot = SpawnItemSlot.asSpawn(lobbyMap.getSpawn(), this::openConfirmInventory);
+                spawnSlot = SpawnItemSlot.asSpawn(mapBuilder.getSpawn(), this::openConfirmInventory);
             }
 
             dataLayout.setItem(DATA_SLOTS[0], mapNameSlot, CANCEL_CLICK);
@@ -102,7 +102,7 @@ public class LobbyViewInventory extends GlobalInventoryBuilder {
      */
     private void handleConfirmClick(@NotNull Player player) {
         player.closeInventory();
-        lobbyMap.setSpawn(null);
+        mapBuilder.spawn(null);
         invalidateDataLayout();
         MinecraftServer.getSchedulerManager().scheduleNextTick(() -> player.openInventory(this.getInventory()));
     }
@@ -113,7 +113,7 @@ public class LobbyViewInventory extends GlobalInventoryBuilder {
      * @return true if the map has no data otherwise false
      */
     private boolean hasNoData() {
-        boolean hasMapName = this.lobbyMap.getName() != null && !this.lobbyMap.getName().isEmpty();
-        return !this.lobbyMap.hasSpawn() && !hasMapName && (this.lobbyMap.getBuilders() == null || this.lobbyMap.getBuilders().length == 0);
+        boolean hasMapName = this.mapBuilder.getName() != null && !this.mapBuilder.getName().isEmpty();
+        return this.mapBuilder.getSpawn() != null && !hasMapName && (this.mapBuilder.getBuilders() == null || this.mapBuilder.getBuilders().isEmpty());
     }
 }

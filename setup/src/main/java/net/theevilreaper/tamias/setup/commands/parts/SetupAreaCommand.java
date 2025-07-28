@@ -101,16 +101,21 @@ public class SetupAreaCommand extends Command {
         }
     }
 
+    /**
+     * Sets the left corner of the area based on the player's position and direction.
+     *
+     * @param player    the player who executed the command
+     * @param setupData the game data containing the map builder
+     */
     private void setLeftCorner(@NotNull Player player, @NotNull GameData setupData) {
         Optional<Direction> directionOptional = DirectionUtil.parseDirection(player);
         if (directionOptional.isEmpty()) return;
 
-        Vec vec = Vec.fromPoint(player.getPosition()).sub(0, -1, 0);
-
+        Vec vec = player.getPosition().asVec().sub(0, -1, 0);
         Direction direction = directionOptional.get();
 
-        setupData.setLeftCorner(vec);
-        setupData.setDirection(direction);
+        setupData.getGameMapBuilder().areaLowerCorner(vec);
+        setupData.getGameMapBuilder().areaFacing(direction);
 
         Component component = Messages.withPrefix(Component.text("Left area corner is: ", NamedTextColor.GRAY)
                 .append(Components.convertPoint(vec).style(Style.style(NamedTextColor.GOLD)))
@@ -120,10 +125,16 @@ public class SetupAreaCommand extends Command {
 
     }
 
+    /**
+     * Sets the right corner of the area based on the player's position.
+     *
+     * @param player    the player who executed the command
+     * @param setupData the game data containing the map builder
+     */
     private void setRightCorner(@NotNull Player player, @NotNull GameData setupData) {
-        Vec vec = Vec.fromPoint(player.getPosition());
+        Vec vec = player.getPosition().asVec();
 
-        setupData.setRightCorner(vec);
+        setupData.getGameMapBuilder().areaUpperCorner(vec);
         Component component = Messages.withPrefix(Component.text("Right area corner is: ", NamedTextColor.GRAY)
                 .append(Components.convertPoint(vec).style(Style.style(NamedTextColor.GOLD))));
         player.sendMessage(component);
