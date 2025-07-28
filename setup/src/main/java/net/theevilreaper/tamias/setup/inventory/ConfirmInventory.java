@@ -49,16 +49,16 @@ public class ConfirmInventory extends GlobalInventoryBuilder {
         InventoryLayout layout = InventoryLayout.fromType(getType());
         layout.setItems(DECO_SLOTS, SetupItems.DECORATION, CANCEL_CLICK);
 
-        layout.setItems(CONFIRM_SLOTS, CONFIRM_STACK, (player, i, click) -> {
+        layout.setItems(CONFIRM_SLOTS, CONFIRM_STACK, (player, i, click, stack, result) -> {
+            result.accept(ClickHolder.cancelClick());
             player.setTag(TamiasSetup.DELETE_TAG, true);
             EventDispatcher.call(new InventoryCloseEvent(player.getOpenInventory(), player, false));
             player.closeInventory();
-            return ClickHolder.cancelClick();
         });
 
-        layout.setItems(CANCEL_SLOTS, CANCEL_STACK, (player, i, click) -> {
+        layout.setItems(CANCEL_SLOTS, CANCEL_STACK, (player, i, click, stack, result) -> {
+            result.accept(ClickHolder.cancelClick());
             player.closeInventory();
-            return ClickHolder.cancelClick();
         });
 
         setLayout(layout);

@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -61,8 +62,8 @@ public class MapSetupInventory extends GlobalInventoryBuilder {
             List<MapEntry> mapEntries = maps.get();
             for (int i = 0; i < mapEntries.size(); i++) {
                 var currentMap = mapEntries.get(i);
-                dataLayout.setItem(MAP_SLOTS[i], getMapItem(currentMap.getDirectoryRoot()), (player, slot, click) ->
-                        this.handleClick(currentMap, player, slot, click));
+                dataLayout.setItem(MAP_SLOTS[i], getMapItem(currentMap.getDirectoryRoot()), (player, slot, click, item, result) ->
+                        this.handleClick(currentMap, player, slot, click, item, result));
             }
             return dataLayout;
         });
@@ -75,10 +76,13 @@ public class MapSetupInventory extends GlobalInventoryBuilder {
      *
      * @param currentMap the current map being clicked
      * @param player     the player who clicked
-     * @param ignored    the slot clicked
-     * @param click      the click event
+     * @param slot       the slot that was clicked
+     * @param click      the type of click (left, right, etc.)
+     * @param stack      the item stack that was clicked
+     * @param result     a consumer to handle the result of the click
      */
-    private ClickHolder handleClick(@NotNull MapEntry currentMap, @NotNull Player player, int ignored, @NotNull Click click) {
+    private ClickHolder handleClick(@NotNull MapEntry currentMap, @NotNull Player player, int slot, @NotNull Click click, @NotNull ItemStack stack, @NotNull Consumer<ClickHolder> result) {
+        result.accept(ClickHolder.cancelClick());
         boolean lobbyMode = click instanceof Click.Left;
         EventDispatcher.callCancellable(new MapSetupSelectEvent(player, currentMap, lobbyMode), player::closeInventory);
         return ClickHolder.cancelClick();
