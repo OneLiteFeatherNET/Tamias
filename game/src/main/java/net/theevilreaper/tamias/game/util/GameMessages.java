@@ -29,6 +29,9 @@ public final class GameMessages extends Messages {
     public static final Component CHOOSING_NEW_TNT;
     public static final Component GAME_END_KICK_MESSAGE;
 
+    public static final Component MAP_READY;
+    public static final Component MAP_BUILDING;
+
     public static final Component ALREADY_FORCE_STARTED;
     public static final Component PHASE_NOT_RUNNING;
     public static final Component PHASE_FORCE_STARTED;
@@ -44,7 +47,8 @@ public final class GameMessages extends Messages {
         CHOOSING_NEW_TNT = withMiniPrefix("<red>Choosing new tnt<gold>....");
         TITLE_TIME = Component.text("Time:", NamedTextColor.GOLD).append(Component.space());
         GAME_END_KICK_MESSAGE = Component.text("The game is over. Thanks for playing it. <3", NamedTextColor.RED);
-
+        MAP_READY = Component.text("Map is ready!", NamedTextColor.GREEN);
+        MAP_BUILDING = Component.text("Map is building up...", NamedTextColor.GREEN);
         int forceStartTime = GameConfig.FORCE_START_TIME;
         ALREADY_FORCE_STARTED = withMiniPrefix("<red>The game has already been force started!");
         PHASE_NOT_RUNNING = withMiniPrefix("<red>The lobby countdown is not running!");

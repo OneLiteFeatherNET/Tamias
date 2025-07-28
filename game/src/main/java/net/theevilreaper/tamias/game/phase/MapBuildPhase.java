@@ -14,6 +14,10 @@ import org.slf4j.LoggerFactory;
 import java.time.temporal.ChronoUnit;
 import java.util.function.Supplier;
 
+import static net.minestom.server.MinecraftServer.getConnectionManager;
+import static net.theevilreaper.tamias.game.util.GameMessages.MAP_BUILDING;
+import static net.theevilreaper.tamias.game.util.GameMessages.MAP_READY;
+
 /**
  * The phase implementation handles each logic which should be executed during the period where the map builds up.
  * Its use only the {@link GamePhase} abstraction because the build process is not limited to a strict time duration.
@@ -25,8 +29,6 @@ import java.util.function.Supplier;
 public final class MapBuildPhase extends GamePhase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MapBuildPhase.class);
-    private static final Component MAP_READY = Messages.withMini("<green>Map is ready!");
-    private static final Component MAP_BUILDING = Messages.withMini("<green>Map is building up...");
 
     private final Supplier<VoidConsumer> mapPlacementTaskTrigger;
     private VoidConsumer taskReset;
