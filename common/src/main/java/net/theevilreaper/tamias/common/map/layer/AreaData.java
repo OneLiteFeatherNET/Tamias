@@ -4,6 +4,7 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.utils.Direction;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * The {@link AreaData} represents a holder class which holds additional information about an area.
@@ -24,6 +25,17 @@ public sealed interface AreaData permits AreaDataLayer {
     @Contract(pure = true)
     static @NotNull Builder builder() {
         return new AreaDataBuilder();
+    }
+
+    /**
+     * Creates a new builder reference to create a new {@link AreaData} with the given {@link AreaData}.
+     *
+     * @param areaData the area data to use for building
+     * @return a new builder instance
+     */
+    @Contract(value = "_ -> new", pure = true)
+    static @NotNull Builder builder(@NotNull AreaData areaData) {
+        return new AreaDataBuilder(areaData);
     }
 
     /**
@@ -87,5 +99,26 @@ public sealed interface AreaData permits AreaDataLayer {
          * @return the created {@link AreaData}
          */
         @NotNull AreaData build();
+
+        /**
+         * Returns the lower corner of the area.
+         *
+         * @return the lower corner
+         */
+        @Nullable Vec lowerCorner();
+
+        /**
+         * Returns the upper corner of the area.
+         *
+         * @return the upper corner
+         */
+        @Nullable Vec upperCorner();
+
+        /**
+         * Returns the facing direction of the area.
+         *
+         * @return the facing direction
+         */
+        @Nullable Direction facing();
     }
 }
