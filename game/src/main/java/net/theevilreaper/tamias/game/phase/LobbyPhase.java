@@ -69,13 +69,11 @@ public final class LobbyPhase extends TimedPhase {
     public void onUpdate() {
         setLevel();
         this.timeUpdater.accept(getCurrentTicks());
-
-        GameMapProvider gameMapProvider = (GameMapProvider) this.mapProvider;
         switch (getCurrentTicks()) {
             case 30, 20, 3, 1 -> broadcastTime();
             case 10 -> {
                 this.broadcastTime();
-                gameMapProvider.loadGameChunks();
+                ((GameMapProvider) this.mapProvider).loadGameChunks();
             }
             case 5 -> {
                 this.broadcastTime();
@@ -87,10 +85,17 @@ public final class LobbyPhase extends TimedPhase {
         }
     }
 
+    /**
+     * Sets the level of all online players to the current ticks.
+     */
     private void setLevel() {
         this.setLevel(getCurrentTicks());
     }
 
+    /**
+     * Broadcasts the current time to all online players.
+     * Plays a sound for each player to indicate the time update.
+     */
     private void broadcastTime() {
         for (Player onlinePlayer : getConnectionManager().getOnlinePlayers()) {
             onlinePlayer.sendMessage(GameMessages.getLobbyTime(getCurrentTicks()));
@@ -98,6 +103,11 @@ public final class LobbyPhase extends TimedPhase {
         }
     }
 
+    /**
+     * Sets the level of all online players to the given amount.
+     *
+     * @param amount the level to set
+     */
     private void setLevel(int amount) {
         if (amount < 0) return;
         float currentExpCount = (float) this.getCurrentTicks() / getLobbyOrForceTime();
@@ -121,7 +131,7 @@ public final class LobbyPhase extends TimedPhase {
     /**
      * Updates the state which indicates, if the phase is force started or not.
      *
-     * @param forceStarted true if the phase is force started otherwise false
+     * @param forceStarted true, if the phase is force started otherwise false
      */
     public void setForceStarted(boolean forceStarted) {
         if (forceStarted) {
@@ -130,12 +140,20 @@ public final class LobbyPhase extends TimedPhase {
         this.forceStarted = forceStarted;
     }
 
+    /**
+     * Checks if the start condition is met, which is when the number of online players
+     * is greater than or equal to the minimum number of players.
+     */
     public void checkStartCondition() {
         if (isPaused() && getConnectionManager().getOnlinePlayers().size() >= this.minPlayers) {
             this.setPaused(false);
         }
     }
 
+    /**
+     * Checks if the stop condition is met, which is when the number of online players
+     * minus one (the host) is less than or equal to the maximum number of players.
+     */
     public void checkStopCondition() {
         if (getConnectionManager().getOnlinePlayers().size() - 1 <= this.maxPlayers) {
             this.setPaused(true);
@@ -144,10 +162,20 @@ public final class LobbyPhase extends TimedPhase {
         }
     }
 
+    /**
+     * Returns the right time of the phase depending on if it is force started or not.
+     *
+     * @return the time of the phase
+     */
     private int getLobbyOrForceTime() {
         return isForceStarted() ? FORCE_START_TIME : this.lobbyPhaseTime;
     }
 
+    /**
+     * Returns an indication if the phase is force started or not.
+     *
+     * @return true if the phase is force started otherwise false
+     */
     public boolean isForceStarted() {
         return forceStarted;
     }
