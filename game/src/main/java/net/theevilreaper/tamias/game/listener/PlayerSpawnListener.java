@@ -1,5 +1,6 @@
 package net.theevilreaper.tamias.game.listener;
 
+import net.minestom.server.entity.Player;
 import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.theevilreaper.xerus.api.phase.Phase;
 import net.kyori.adventure.audience.Audience;
@@ -25,23 +26,27 @@ public final class PlayerSpawnListener implements Consumer<PlayerSpawnEvent> {
     private final Supplier<Phase> phaseSupplier;
     private final PlayerConsumer spawnConsumer;
     private final PlayerConsumer scoreboardConsumer;
-    private final IntConsumer playerCountUpdater;
 
+    /**
+     * Constructs a new PlayerSpawnListener.
+     *
+     * @param phaseSupplier      a supplier for the current game phase
+     * @param spawnConsumer      a consumer that handles player spawning logic
+     * @param scoreboardConsumer a consumer that handles scoreboard updates for the player
+     */
     public PlayerSpawnListener(
             @NotNull Supplier<Phase> phaseSupplier,
             @NotNull PlayerConsumer spawnConsumer,
-            @NotNull PlayerConsumer scoreboardConsumer,
-            @NotNull IntConsumer playerCountUpdater
+            @NotNull PlayerConsumer scoreboardConsumer
     ) {
         this.phaseSupplier = phaseSupplier;
         this.spawnConsumer = spawnConsumer;
         this.scoreboardConsumer = scoreboardConsumer;
-        this.playerCountUpdater = playerCountUpdater;
     }
 
     @Override
     public void accept(@NotNull PlayerSpawnEvent event) {
-        var player = event.getPlayer();
+        Player player = event.getPlayer();
         player.setDisplayName(Component.text(player.getUsername()));
 
         Phase phase = phaseSupplier.get();
@@ -52,7 +57,6 @@ public final class PlayerSpawnListener implements Consumer<PlayerSpawnEvent> {
             lobbyPhase.checkStartCondition();
             this.spawnConsumer.accept(player);
             this.scoreboardConsumer.accept(player);
-            this.playerCountUpdater.accept(getConnectionManager().getOnlinePlayers().size());
         }
     }
 }
