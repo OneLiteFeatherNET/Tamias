@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.shadow)
+    application
 }
 
 group = "net.theevilreaper.tamias.game"
@@ -27,6 +28,9 @@ dependencies {
     testRuntimeOnly(libs.junit.engine)
 }
 
+application {
+    mainClass.set("net.theevilreaper.tamias.TamiasLauncher")
+}
 
 tasks {
     jar {
