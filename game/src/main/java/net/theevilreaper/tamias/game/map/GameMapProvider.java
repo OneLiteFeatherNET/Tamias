@@ -36,7 +36,7 @@ public final class GameMapProvider extends AbstractMapProvider implements MapFil
 
     public GameMapProvider(@NotNull Path path) {
         super(new GsonFileHandler(GsonUtil.GSON), MapFilter::filterMapsForGame);
-        this.loadMapEntries(path.resolve("maps"));
+        this.mapEntries = this.loadMapEntries(path.resolve("maps"));
         this.activeInstance = MinecraftServer.getInstanceManager().createInstanceContainer();
 
         LobbyMapPredicate predicate = new LobbyMapPredicate();
