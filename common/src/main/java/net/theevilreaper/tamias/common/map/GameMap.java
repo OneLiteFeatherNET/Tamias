@@ -1,7 +1,6 @@
 package net.theevilreaper.tamias.common.map;
 
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.utils.Direction;
 import net.theevilreaper.aves.map.BaseMap;
 import net.theevilreaper.aves.map.MapEntry;
 import net.theevilreaper.tamias.common.map.layer.AreaData;
@@ -11,22 +10,29 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
 /**
+ * The {@link GameMap} class contains all relevant information about the map which is used during the game.
+ *
  * @author theEvilReaper
- * @version 1.0.0
+ * @version 1.1.0
  * @since 1.0.0
  **/
 @SuppressWarnings("java:S2065")
 public final class GameMap extends BaseMap {
 
-    private SpawnLayer spawnLayer;
-    private AreaData areaData;
-    private Pos bomberInitialSpawn;
+    private final SpawnLayer spawnLayer;
+    private final AreaData areaData;
+    private final Pos bomberInitialSpawn;
     private MapEntry mapEntry;
 
-    public GameMap() {
-        super("Not set", Pos.ZERO);
-    }
-
+    /**
+     * Constructs a new GameMap instance with the specified parameters.
+     *
+     * @param name               the name of the map
+     * @param spawn              the spawn position for the map, can be null
+     * @param bomberInitialSpawn the initial spawn position for the bomber, can be null
+     * @param spawnLayer         the spawn layer for the survivor team
+     * @param areaData           the game area data
+     */
     public GameMap(
             @NotNull String name,
             @Nullable Pos spawn,
@@ -38,38 +44,6 @@ public final class GameMap extends BaseMap {
         this.bomberInitialSpawn = bomberInitialSpawn;
         this.spawnLayer = spawnLayer;
         this.areaData = areaData;
-    }
-
-    public void setMapEntry(MapEntry mapEntry) {
-        this.mapEntry = mapEntry;
-    }
-
-    /**
-     * Set's the game area data for the map.
-     *
-     * @param areaData the data to set
-     */
-    public void setGameAreaData(@NotNull AreaData areaData) {
-        this.areaData = areaData;
-    }
-
-    /**
-     * Set's the initial spawn position for the bomber.
-     *
-     * @param bomberInitialSpawn the position to set
-     */
-    public void setBomberInitialSpawn(Pos bomberInitialSpawn) {
-        this.bomberInitialSpawn = bomberInitialSpawn;
-    }
-
-    /**
-     * Set's the left survivor spawn position.
-     *
-     * @param leftSurvivorSpawn the position to set
-     * @param direction         the direction to set
-     */
-    public void setLeftSurvivorSpawn(Pos leftSurvivorSpawn, @NotNull Direction direction) {
-        this.spawnLayer = new SpawnLayer(leftSurvivorSpawn, direction);
     }
 
     /**
@@ -97,9 +71,5 @@ public final class GameMap extends BaseMap {
      */
     public @NotNull SpawnLayer getSpawnData() {
         return spawnLayer;
-    }
-
-    public MapEntry getMapEntry() {
-        return mapEntry;
     }
 }

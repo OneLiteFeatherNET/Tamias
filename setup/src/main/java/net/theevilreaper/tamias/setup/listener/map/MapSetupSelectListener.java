@@ -13,6 +13,7 @@ import net.minestom.server.timer.Task;
 import net.theevilreaper.tamias.common.util.Messages;
 import net.theevilreaper.tamias.setup.TamiasSetup;
 import net.theevilreaper.tamias.setup.data.GameData;
+import net.theevilreaper.tamias.setup.data.InstanceSetupData;
 import net.theevilreaper.tamias.setup.data.LobbyData;
 import net.theevilreaper.tamias.setup.event.MapSetupSelectEvent;
 import org.jetbrains.annotations.NotNull;
@@ -44,7 +45,7 @@ public final class MapSetupSelectListener implements Consumer<MapSetupSelectEven
             player.sendMessage("You already have a map selected");
         }*/
 
-        SetupData data;
+        InstanceSetupData data;
         MapEntry mapEntry = event.getMapEntry();
         if (event.isLobbyMode()) {
             data = new LobbyData(player.getUuid(), mapEntry, this.fileHandler);
@@ -63,7 +64,7 @@ public final class MapSetupSelectListener implements Consumer<MapSetupSelectEven
         this.setupDataService.add(player.getUuid(), data);
 
         player.setTag(TamiasSetup.SETUP_TAG, (byte) 1);
-        //getTeleportTask(() -> data.teleport(player)).schedule();
+        getTeleportTask(() -> data.teleport(player)).schedule();
     }
 
     private @NotNull Task.Builder getTeleportTask(@NotNull Runnable runnable) {

@@ -14,6 +14,7 @@ import net.theevilreaper.tamias.common.area.SpawnArea;
 import net.theevilreaper.tamias.common.explosion.ExplosionCreator;
 import net.theevilreaper.tamias.common.gson.GsonUtil;
 import net.theevilreaper.tamias.common.map.GameMap;
+import net.theevilreaper.tamias.common.map.functional.LobbyMapPredicate;
 import net.theevilreaper.tamias.common.util.MapFilter;
 import org.jetbrains.annotations.NotNull;
 
@@ -38,7 +39,8 @@ public final class GameMapProvider extends AbstractMapProvider implements MapFil
         this.loadMapEntries(path.resolve("maps"));
         this.activeInstance = MinecraftServer.getInstanceManager().createInstanceContainer();
 
-        MapEntry lobbyEntry = this.getEntries().stream().filter(this::isLobbyMap).findFirst().orElse(null);
+        LobbyMapPredicate predicate = new LobbyMapPredicate();
+        MapEntry lobbyEntry = this.getEntries().stream().filter(predicate).findFirst().orElse(null);
 
         if (lobbyEntry == null) {
             throw new IllegalStateException("No lobby map found in the available maps");
@@ -53,7 +55,7 @@ public final class GameMapProvider extends AbstractMapProvider implements MapFil
         }
         this.activeMap = this.lobbyMap;
 
-        MapEntry gameEntry = this.getEntries().stream().filter(mapEntry -> !this.isLobbyMap(mapEntry))
+        MapEntry gameEntry = this.getEntries().stream().filter(entry -> !predicate.test(entry))
                         .skip(new Random().nextInt(0, this.getEntries().size() - 1)).findFirst().orElse(null);
 
         Check.argCondition(gameEntry == null, "No game map found in the available maps");
@@ -140,15 +142,5 @@ public final class GameMapProvider extends AbstractMapProvider implements MapFil
 
     public @NotNull BaseMap getActiveMap() {
         return this.activeMap;
-    }
-
-    /**
-     * Checks if the given map is a lobby map.
-     *
-     * @param mapEntry the map entry to check
-     * @return true if the map is a lobby map
-     */
-    private boolean isLobbyMap(@NotNull MapEntry mapEntry) {
-        return mapEntry.getDirectoryRoot().endsWith("lobby");
     }
 }

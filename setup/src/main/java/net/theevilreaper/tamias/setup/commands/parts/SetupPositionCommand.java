@@ -13,13 +13,16 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.utils.Direction;
 import net.onelitefeather.guira.data.SetupData;
-import net.theevilreaper.aves.map.BaseMap;
+import net.onelitefeather.guira.functional.OptionalSetupDataGetter;
+import net.theevilreaper.aves.map.BaseMapBuilder;
 import net.theevilreaper.aves.util.Components;
-import net.theevilreaper.tamias.common.map.GameMap;
+import net.theevilreaper.tamias.common.map.builder.GameMapBuilder;
 import net.theevilreaper.tamias.common.util.Messages;
 import net.theevilreaper.tamias.setup.TamiasSetup;
 import net.theevilreaper.tamias.setup.commands.type.SpawnType;
+import net.theevilreaper.tamias.setup.data.GameData;
 import net.theevilreaper.tamias.setup.data.InstanceSetupData;
+import net.theevilreaper.tamias.setup.data.LobbyData;
 import net.theevilreaper.tamias.setup.util.DirectionUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,9 +34,9 @@ import static net.theevilreaper.tamias.setup.util.SetupMessages.SELECT_MAP_FIRST
 
 public final class SetupPositionCommand extends Command {
 
-    private final Function<UUID, Optional<SetupData>> setupDataFunction;
+    private final OptionalSetupDataGetter setupDataFunction;
 
-    public SetupPositionCommand(@NotNull Function<UUID, Optional<SetupData>> setupDataFunction) {
+    public SetupPositionCommand(@NotNull OptionalSetupDataGetter setupDataFunction) {
         super("position");
         this.setCondition(Conditions::playerOnly);
         this.setupDataFunction = setupDataFunction;
@@ -57,20 +60,21 @@ public final class SetupPositionCommand extends Command {
             return;
         }
 
-        Optional<SetupData> setupData = setupDataFunction.apply(sender.identity().uuid());
+        Optional<SetupData> setupData = setupDataFunction.get(sender.identity().uuid());
         if (setupData.isEmpty()) {
             sender.sendMessage(SELECT_MAP_FIRST);
             return;
         }
 
-       // BaseMap map = setupData.get().getMap().get();
+        SetupData data = setupData.get();
         Player player = (Player) sender;
 
-        /*switch (map) {
-            case GameMap gameMap -> this.handleGameSpawnSet(player, gameMap, spawnType);
-            case BaseMap baseMap -> this.handleLobbySpawnSet(player, baseMap, spawnType);
-        }*/
-        Component posAsComponent = Components.convertPoint(Pos.fromPoint(player.getPosition()));
+        if (data instanceof LobbyData lobbyData) {
+            this.handleLobbySpawnSet(player, lobbyData.getMapBuilder(), spawnType);
+        } else {
+            this.handleGameSpawnSet(player, ((GameData)data).getGameMapBuilder(), spawnType);
+        }
+        Component posAsComponent = Components.convertPoint(player.getPosition());
         Component argComponent = Component.text(type, NamedTextColor.GREEN);
         Component message = Messages.withPrefix(Component.text("The ", NamedTextColor.GRAY)
                 .append(argComponent)
@@ -79,15 +83,22 @@ public final class SetupPositionCommand extends Command {
                 .append(posAsComponent)
         );
         sender.sendMessage(message);
-        //setupData.get().triggerUpdate();
+        ((InstanceSetupData)data).triggerUpdate();
     }
 
-    private void handleGameSpawnSet(@NotNull Player sender, @NotNull GameMap gameMap, @NotNull SpawnType spawnType) {
-        Pos position = Pos.fromPoint(sender.getPosition());
+    /**
+     * Handles the game spawn set.
+     *
+     * @param sender    the player who executed the command
+     * @param builder   the map builder to set the spawn
+     * @param spawnType the type of spawn to set
+     */
+    private void handleGameSpawnSet(@NotNull Player sender, @NotNull GameMapBuilder builder, @NotNull SpawnType spawnType) {
+        Pos position = sender.getPosition();
         switch (spawnType) {
-            case MAP_SPAWN, SPECTATOR -> gameMap.setSpawn(position);
-            case BOMBER -> gameMap.setBomberInitialSpawn(position);
-            case SURVIVOR -> this.handleSurvivorSpawnSet(sender, gameMap);
+            case MAP_SPAWN, SPECTATOR -> builder.spawn(position);
+            case BOMBER -> builder.bomberSpawn(position);
+            case SURVIVOR -> this.handleSurvivorSpawnSet(sender, builder);
         }
     }
 
@@ -95,17 +106,18 @@ public final class SetupPositionCommand extends Command {
      * Handles the survivor spawn set.
      *
      * @param player  the player who executed the command
-     * @param gameMap the map to set the spawn
+     * @param builder the map builder to set the spawn
      */
-    private void handleSurvivorSpawnSet(@NotNull Player player, @NotNull GameMap gameMap) {
+    private void handleSurvivorSpawnSet(@NotNull Player player, @NotNull GameMapBuilder builder) {
         Optional<Direction> determinedDirection = DirectionUtil.parseDirection(player);
 
         if (determinedDirection.isEmpty()) return;
 
-        Pos pos = Pos.fromPoint(player.getPosition());
+        Pos pos = player.getPosition();
         Direction direction = determinedDirection.get();
 
-        gameMap.setLeftSurvivorSpawn(pos, direction);
+        builder.spawnLayerDirection(direction);
+        builder.spawnLayerPos(pos);
 
         Component component = Messages.withPrefix(Component.text("Created round spawn at: ", NamedTextColor.GRAY)
                 .append(Components.convertPoint(pos).style(Style.style(NamedTextColor.GOLD)))
@@ -118,14 +130,14 @@ public final class SetupPositionCommand extends Command {
      * Handles the lobby spawn set.
      *
      * @param sender    the player who executed the command
-     * @param baseMap   the map to set the spawn
-     * @param spawnType the type of spawn
+     * @param builder   the map builder to set the spawn
+     * @param spawnType the type of spawn to set
      */
-    private void handleLobbySpawnSet(@NotNull Player sender, @NotNull BaseMap baseMap, @NotNull SpawnType spawnType) {
+    private void handleLobbySpawnSet(@NotNull Player sender, @NotNull BaseMapBuilder builder, @NotNull SpawnType spawnType) {
         if (spawnType != SpawnType.MAP_SPAWN) {
             sender.sendMessage("A lobby map can only have a spawn");
             return;
         }
-        baseMap.setSpawn(Pos.fromPoint(sender.getPosition()));
+        builder.spawn(Pos.fromPoint(sender.getPosition()));
     }
 }

@@ -8,6 +8,7 @@ import net.theevilreaper.aves.map.BaseMap;
 import net.theevilreaper.aves.map.MapEntry;
 import net.theevilreaper.aves.map.provider.AbstractMapProvider;
 import net.theevilreaper.tamias.common.map.GameMap;
+import net.theevilreaper.tamias.common.map.functional.LobbyMapPredicate;
 import net.theevilreaper.tamias.common.util.MapFilter;
 import org.jetbrains.annotations.NotNull;
 
@@ -36,7 +37,8 @@ public final class SetupMapProvider extends AbstractMapProvider {
         super(fileHandler, MapFilter::filterMapsForSetup);
         loadMapEntries(path.resolve("maps"));
 
-        Optional<MapEntry> lobbyEntry = getEntries().stream().filter(this::isLobbyMap).findFirst();
+        LobbyMapPredicate predicate = new LobbyMapPredicate();
+        Optional<MapEntry> lobbyEntry = getEntries().stream().filter(predicate).findFirst();
 
         if (lobbyEntry.isEmpty()) {
             throw new IllegalStateException("No lobby map found in the provided map entries.");
