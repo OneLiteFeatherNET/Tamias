@@ -22,7 +22,7 @@ class GameScoreboardIntegrationTest {
     @Test
     void testInvalidScoreTypeUsage() {
         assertThrowsExactly(
-                IllegalArgumentException.class,
+                UnsupportedOperationException.class,
                 () -> gameScoreboard.updateScore(ScoreType.MAP_TYPE, Component.empty()),
                         "Cannot update map score in GameScoreboard"
         );
