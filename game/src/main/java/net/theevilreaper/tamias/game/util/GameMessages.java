@@ -1,6 +1,7 @@
 package net.theevilreaper.tamias.game.util;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.entity.Player;
@@ -23,6 +24,7 @@ public final class GameMessages extends Messages {
     private static final Component JOIN_PART;
     private static final Component DEATH_PART;
     private static final Component SHOT_PART;
+    private static final Component TITLE_TIME;
 
     public static final Component CHOOSING_NEW_TNT;
 
@@ -39,6 +41,7 @@ public final class GameMessages extends Messages {
         DEATH_PART = withMini("<yellow>was blown up by");
         SHOT_PART = withMini("<yellow> You were shot by");
         CHOOSING_NEW_TNT = withMiniPrefix("<red>Choosing new tnt<gold>....");
+        TITLE_TIME = Component.text("Time:", NamedTextColor.GOLD).append(Component.space());
 
         int forceStartTime = GameConfig.FORCE_START_TIME;
         ALREADY_FORCE_STARTED = withMiniPrefix("<red>The game has already been force started!");
@@ -54,6 +57,17 @@ public final class GameMessages extends Messages {
     @Contract
     public static @NotNull Component getLobbyTime(int time) {
         return withMiniPrefix("<gold>Starting in... <red>" + time);
+    }
+
+    /**
+     * Creates a component for the title time.
+     *
+     * @param time the time to display
+     * @return a component with the title time
+     */
+    @Contract(value = "_ -> new", pure = true)
+    public static @NotNull Component getTitleTime(int time) {
+        return TITLE_TIME.append(Component.text(time, NamedTextColor.YELLOW));
     }
 
     @Contract(value = "_ -> new", pure = true)

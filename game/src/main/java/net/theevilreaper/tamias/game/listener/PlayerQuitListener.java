@@ -1,5 +1,6 @@
 package net.theevilreaper.tamias.game.listener;
 
+import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.theevilreaper.aves.util.functional.VoidConsumer;
 import net.theevilreaper.xerus.api.phase.Phase;
 import net.theevilreaper.xerus.api.team.Team;
@@ -33,18 +34,18 @@ public final class PlayerQuitListener implements Consumer<PlayerDisconnectEvent>
     private final Supplier<Phase> phaseSupplier;
     private final IntFunction<Team> teamFunction;
     private final VoidConsumer roundEndCheck;
-    private final IntConsumer playerCountUpdater;
+    private final PlayerConsumer scoreboardConsumer;
 
     public PlayerQuitListener(
             @NotNull Supplier<Phase> phaseSupplier,
             @NotNull IntFunction<Team> teamFunction,
             @NotNull VoidConsumer roundEndCheck,
-            @NotNull IntConsumer playerCountUpdater
+            @NotNull PlayerConsumer scoreboardConsumer
     ) {
         this.phaseSupplier = phaseSupplier;
         this.teamFunction = teamFunction;
         this.roundEndCheck = roundEndCheck;
-        this.playerCountUpdater = playerCountUpdater;
+        this.scoreboardConsumer = scoreboardConsumer;
     }
 
     @Override
@@ -88,7 +89,7 @@ public final class PlayerQuitListener implements Consumer<PlayerDisconnectEvent>
     private void handleLobbyQuit(@NotNull LobbyPhase lobbyPhase, @NotNull Player player) {
         lobbyPhase.checkStopCondition();
         Audience.audience(getConnectionManager().getOnlinePlayers()).sendMessage(GameMessages.getLeaveMessage(player));
-        this.playerCountUpdater.accept(getConnectionManager().getOnlinePlayerCount());
+        this.scoreboardConsumer.accept(player);
     }
 
     /**
