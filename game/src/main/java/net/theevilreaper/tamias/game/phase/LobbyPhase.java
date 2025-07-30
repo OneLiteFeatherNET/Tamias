@@ -1,7 +1,9 @@
 package net.theevilreaper.tamias.game.phase;
 
+import net.minestom.server.event.EventDispatcher;
 import net.theevilreaper.aves.map.provider.MapProvider;
-import net.theevilreaper.aves.util.functional.VoidConsumer;
+import net.theevilreaper.tamias.common.round.event.RoundPrepareEvent;
+import net.theevilreaper.tamias.game.util.phase.LobbyPhaseData;
 import net.theevilreaper.xerus.api.phase.TickDirection;
 import net.theevilreaper.xerus.api.phase.TimedPhase;
 import net.kyori.adventure.sound.Sound;
@@ -12,12 +14,12 @@ import net.theevilreaper.tamias.game.util.GameMessages;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.temporal.ChronoUnit;
-import java.util.function.IntConsumer;
 
 import static net.minestom.server.MinecraftServer.getConnectionManager;
 import static net.theevilreaper.tamias.common.config.GameConfig.FORCE_START_TIME;
 
 /**
+ * The {@link LobbyPhase} is the first phase which runs in the game.
  * @author theEvilReaper
  * @version 1.0.0
  * @since 1.0.0
@@ -27,31 +29,25 @@ public final class LobbyPhase extends TimedPhase {
 
     private static final Sound PLING = Sound.sound(SoundEvent.BLOCK_NOTE_BLOCK_BELL, Sound.Source.MASTER, 1.0f, 1.0f);
     private final MapProvider mapProvider;
-    private final VoidConsumer roundUpdateTrigger;
-    private final int minPlayers;
-    private final int maxPlayers;
-    private final int lobbyPhaseTime;
-    private final IntConsumer timeUpdater;
+    private final LobbyPhaseData phaseData;
     private boolean forceStarted;
 
+    /**
+     * Creates a new instance to this phase with the given values.
+     *
+     * @param mapProvider the provider to access map data
+     * @param phaseData   the data for the phase to get specific values from it
+     */
     public LobbyPhase(
             @NotNull MapProvider mapProvider,
-            @NotNull IntConsumer timeUpdater,
-            @NotNull VoidConsumer roundUpdateTrigger,
-            int minPlayers,
-            int maxPlayers,
-            int lobbyPhaseTime
+            @NotNull LobbyPhaseData phaseData
     ) {
         super("Lobby", ChronoUnit.SECONDS, 1);
         this.setPaused(true);
-        this.setCurrentTicks(lobbyPhaseTime);
+        this.setCurrentTicks(phaseData.lobbyTime());
         this.setTickDirection(TickDirection.DOWN);
-        this.minPlayers = minPlayers;
-        this.maxPlayers = maxPlayers;
         this.mapProvider = mapProvider;
-        this.lobbyPhaseTime = lobbyPhaseTime;
-        this.timeUpdater = timeUpdater;
-        this.roundUpdateTrigger = roundUpdateTrigger;
+        this.phaseData = phaseData;
     }
 
     @Override
@@ -62,13 +58,13 @@ public final class LobbyPhase extends TimedPhase {
 
     @Override
     protected void onFinish() {
-        this.roundUpdateTrigger.apply();
+        EventDispatcher.call(new RoundPrepareEvent());
     }
 
     @Override
     public void onUpdate() {
         setLevel();
-        this.timeUpdater.accept(getCurrentTicks());
+        this.phaseData.timeUpdater().accept(getCurrentTicks());
         switch (getCurrentTicks()) {
             case 30, 20, 3, 1 -> broadcastTime();
             case 10 -> {
@@ -145,7 +141,7 @@ public final class LobbyPhase extends TimedPhase {
      * is greater than or equal to the minimum number of players.
      */
     public void checkStartCondition() {
-        if (isPaused() && getConnectionManager().getOnlinePlayers().size() >= this.minPlayers) {
+        if (isPaused() && getConnectionManager().getOnlinePlayers().size() >= this.phaseData.minPlayers()) {
             this.setPaused(false);
         }
     }
@@ -155,9 +151,9 @@ public final class LobbyPhase extends TimedPhase {
      * minus one (the host) is less than or equal to the maximum number of players.
      */
     public void checkStopCondition() {
-        if (getConnectionManager().getOnlinePlayers().size() - 1 <= this.maxPlayers) {
+        if (getConnectionManager().getOnlinePlayers().size() - 1 <= this.phaseData.maxPlayers()) {
             this.setPaused(true);
-            this.setCurrentTicks(this.lobbyPhaseTime);
+            this.setCurrentTicks(this.phaseData.lobbyTime());
             setLevel();
         }
     }
@@ -168,7 +164,7 @@ public final class LobbyPhase extends TimedPhase {
      * @return the time of the phase
      */
     private int getLobbyOrForceTime() {
-        return isForceStarted() ? FORCE_START_TIME : this.lobbyPhaseTime;
+        return isForceStarted() ? FORCE_START_TIME : this.phaseData.lobbyTime();
     }
 
     /**
