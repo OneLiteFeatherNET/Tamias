@@ -3,31 +3,24 @@ package net.theevilreaper.tamias.game.phase.playing;
 import net.theevilreaper.aves.util.functional.VoidConsumer;
 import net.theevilreaper.xerus.api.phase.TickDirection;
 import net.theevilreaper.xerus.api.phase.TimedPhase;
-import net.minestom.server.MinecraftServer;
-import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.theevilreaper.tamias.common.event.AreaCleanupEvent;
 import net.theevilreaper.tamias.common.event.AreaSpawnTriggerEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
 
 public final class PostPlayingPhase extends TimedPhase {
 
     private final BooleanSupplier lastRoundCheck;
     private final VoidConsumer roundUpdateTrigger;
     private final VoidConsumer scoreboardReset;
-    private final Consumer<List<Player>> teleportConsumer;
 
     public PostPlayingPhase(
             @NotNull BooleanSupplier lastRoundCheck,
             @NotNull VoidConsumer roundUpdateTrigger,
-            @NotNull VoidConsumer scoreboardReset,
-            @NotNull Consumer<List<Player>> teleportConsumer
+            @NotNull VoidConsumer scoreboardReset
     ) {
         super("RoundEnd", ChronoUnit.SECONDS, 1);
         this.setPaused(false);
@@ -36,7 +29,6 @@ public final class PostPlayingPhase extends TimedPhase {
         this.lastRoundCheck = lastRoundCheck;
         this.roundUpdateTrigger = roundUpdateTrigger;
         this.scoreboardReset = scoreboardReset;
-        this.teleportConsumer = teleportConsumer;
     }
 
     @Override
@@ -60,8 +52,7 @@ public final class PostPlayingPhase extends TimedPhase {
             EventDispatcher.call(AreaSpawnTriggerEvent.empty());
         }
         if (this.getCurrentTicks() == 1) {
-            List<Player> onlinePlayers = new ArrayList<>(MinecraftServer.getConnectionManager().getOnlinePlayers());
-            this.teleportConsumer.accept(onlinePlayers);
+            //TODO: Teleport
         }
     }
 }

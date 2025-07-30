@@ -79,7 +79,7 @@ public final class LobbyPhase extends TimedPhase {
             }
             case 5 -> {
                 this.broadcastTime();
-                gameMapProvider.triggerSpawnPlacement();
+                //TODO: Add placement back
             }
             default -> {
                 // Nothing to do here
