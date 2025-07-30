@@ -142,10 +142,7 @@ public class Tamias implements ListenerHandling {
                 this.gameConfig.lobbyTime()
         ));
         CyclicPhaseSeries<Phase> gameSeries = new CyclicPhaseSeries<>("game");
-        Consumer<List<Player>> teleportConsumer = players -> gameMapProvider.teleportPlayers(players, this.roundProvider::isFirstRound);
         gameSeries.add(new MapBuildPhase(
-                gameMapProvider::switchInstanceHolding,
-                teleportConsumer,
                 () -> {
                     return null;
                 }
@@ -159,8 +156,6 @@ public class Tamias implements ListenerHandling {
 
         gameSeries.add(new PrePlayingPhase(
                 this.teamService,
-                gameMapProvider::getActiveMap,
-                gamePreparation,
                 this.items::setItemToPlayer,
                 () -> staminaService.createStaminaObjects(this.teamService)
         ));
@@ -170,7 +165,6 @@ public class Tamias implements ListenerHandling {
                 AttributeHelper.enableMovement(player);
                 this.scoreboard.addViewer(player);
             }
-            gameMapProvider.resetSpawnArea();
             this.staminaService.start();
         };
 
@@ -186,8 +180,7 @@ public class Tamias implements ListenerHandling {
                 new PostPlayingPhase(
                         this.roundProvider::isLastRound,
                         this.roundProvider::triggerNextRound,
-                        () -> {},
-                        teleportConsumer
+                        () -> {}
                 )
         );
         gameSeries.setMaxIterations(this.gameConfig.maxRounds());
