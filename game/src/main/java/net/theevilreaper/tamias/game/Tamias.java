@@ -53,7 +53,7 @@ import net.theevilreaper.tamias.game.listener.round.RoundStartListener;
 import net.theevilreaper.tamias.game.listener.team.TeamActionListener;
 import net.theevilreaper.tamias.game.map.GameMapProvider;
 import net.theevilreaper.tamias.game.phase.LobbyPhase;
-import net.theevilreaper.tamias.game.phase.MapBuildPhase;
+import net.theevilreaper.tamias.game.phase.GroundBuildPhase;
 import net.theevilreaper.tamias.game.phase.RestartPhase;
 import net.theevilreaper.tamias.game.phase.playing.PlayingPhase;
 import net.theevilreaper.tamias.game.phase.playing.PostPlayingPhase;
@@ -132,17 +132,12 @@ public class Tamias implements ListenerHandling {
     private void createPhaseStructure() {
         GameMapProvider gameMapProvider = (GameMapProvider) this.mapProvider;
 
-        this.phaseSeries.add(new LobbyPhase(
-                this.mapProvider,
-                timeUpdater,
-                this.roundProvider::triggerNextRound,
-                this.gameConfig.minPlayers(),
-                this.gameConfig.maxPlayers(),
-                this.gameConfig.lobbyTime()
-        ));
+        this.phaseSeries.add(new LobbyPhase(this.mapProvider, new LobbyPhaseData(this.timeUpdater, this.gameConfig)));
+
         CyclicPhaseSeries<Phase> gameSeries = new CyclicPhaseSeries<>("game");
         this.roundProvider = new RoundProvider(gameSeries);
-        gameSeries.add(new MapBuildPhase(
+        Consumer<List<Player>> teleportConsumer = players -> gameMapProvider.teleportPlayers(players, this.roundProvider::isFirstRound);
+        gameSeries.add(new GroundBuildPhase(
                 () -> {
                     return null;
                 }
