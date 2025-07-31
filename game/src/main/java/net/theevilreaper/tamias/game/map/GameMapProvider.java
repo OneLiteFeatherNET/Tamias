@@ -16,10 +16,19 @@ import org.jetbrains.annotations.NotNull;
 import java.nio.file.Path;
 import java.util.Optional;
 
+/**
+ * The {@link GameMapProvider} is responsible for the management of the instance which is required for the game.
+ * It holds also a reference to the active map and provides some additional methods.
+ *
+ * @author theEvilReaper
+ * @version 1.0.0
+ * @since 0.1.0
+ */
 public final class GameMapProvider extends AbstractMapProvider implements MapFilter {
 
     /**
-     * Creates a new instance from the provider with teh given parameters.
+     * Creates a new instance from the provider with the given parameters.
+     *
      * @param path the path to the map files
      */
     public GameMapProvider(@NotNull Path path) {
@@ -39,11 +48,20 @@ public final class GameMapProvider extends AbstractMapProvider implements MapFil
         MinecraftServer.getInstanceManager().registerInstance(this.activeInstance);
     }
 
+    /**
+     * Loads the chunks of the active map to ensure that the players can spawn without issues.
+     */
     public void loadGameChunks() {
         GameMap givenMap = (GameMap) this.activeMap;
         this.activeInstance.loadChunk(givenMap.getSpawn()).join();
     }
 
+    /**
+     * Teleports the player to the spawn of the active map.
+     *
+     * @param player      the player to teleport
+     * @param instanceSet if the instance should be set for the player
+     */
     @Override
     public void teleportToSpawn(@NotNull Player player, boolean instanceSet) {
         if (instanceSet) {
@@ -53,6 +71,14 @@ public final class GameMapProvider extends AbstractMapProvider implements MapFil
         player.teleport(this.activeMap.getSpawn());
     }
 
+    /**
+     * Saves the map to the given path.
+     * This method is not supported in the game context, as maps are not saved during gameplay.
+     *
+     * @param path     the path where the map should be saved
+     * @param baseMap  the map to save
+     * @throws UnsupportedOperationException if called
+     */
     @Override
     public void saveMap(@NotNull Path path, @NotNull BaseMap baseMap) {
         throw new UnsupportedOperationException("A game can't save a map");
