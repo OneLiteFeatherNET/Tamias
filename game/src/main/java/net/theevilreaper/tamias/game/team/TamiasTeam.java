@@ -17,23 +17,15 @@ import java.util.Objects;
 @SuppressWarnings("java:S3252")
 public final class TamiasTeam extends DefaultTeam {
 
-    private byte teamTagId;
+    private final byte teamTagId;
 
     /**
      * Creates a new instance from the team.
      *
      * @param name            the name which the team should have
      */
-    TamiasTeam(@NotNull Key name, int initialCapacity) {
+    TamiasTeam(@NotNull Key name, int initialCapacity, byte teamTagId) {
         super(name, initialCapacity);
-    }
-
-    /**
-     * Set's the team id which is required for the game.
-     *
-     * @param teamTagId the id to set
-     */
-    public void setTeamTagId(byte teamTagId) {
         this.teamTagId = teamTagId;
     }
 
