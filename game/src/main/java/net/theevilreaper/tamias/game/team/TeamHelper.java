@@ -1,7 +1,10 @@
 package net.theevilreaper.tamias.game.team;
 
+import net.kyori.adventure.key.Key;
 import net.theevilreaper.aves.util.Players;
 import net.theevilreaper.aves.util.functional.PlayerConsumer;
+import net.theevilreaper.xerus.api.ColorData;
+import net.theevilreaper.xerus.api.component.team.ColorComponent;
 import net.theevilreaper.xerus.api.team.Team;
 import net.theevilreaper.xerus.api.team.TeamService;
 import net.minestom.server.MinecraftServer;
@@ -38,15 +41,13 @@ public final class TeamHelper {
     public static void loadTeams(int teamSize, @NotNull TeamService teamService) {
         // Avoid loading teams multiple times
         if (teamService.hasTeams()) return;
-        //TODO: FIX ME
-        /*teamService.add(Team.builder(teamCreator)
-                .colorData(ColorData.GREEN).name(GameConfig.SURVIVOR_TEAM_NAME).capacity(teamSize)
-                .build()
-        );
-        teamService.add(Team.builder(teamCreator)
-                .colorData(ColorData.RED).name(GameConfig.BOMBER_TEAM).capacity(teamSize)
-                .build()
-        );*/
+        Team survivorTeam = new TamiasTeam(GameConfig.SURVIVOR_KEY, teamSize, GameConfig.SURVIVOR_ID);
+        survivorTeam.add(ColorComponent.class, new ColorComponent(ColorData.GREEN));
+        teamService.add(survivorTeam);
+
+        Team bomberTeam = new TamiasTeam(GameConfig.BOMBER_KEY, teamSize, GameConfig.TNT_ID);
+        bomberTeam.add(ColorComponent.class, new ColorComponent(ColorData.RED));
+        teamService.add(bomberTeam);
     }
 
     public static void switchToTNTTeam(@NotNull IntFunction<Team> teamIntFunction, @NotNull Player player) {

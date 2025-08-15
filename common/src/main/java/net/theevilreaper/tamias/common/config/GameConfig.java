@@ -1,5 +1,6 @@
 package net.theevilreaper.tamias.common.config;
 
+import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,6 +15,9 @@ import org.jetbrains.annotations.NotNull;
  * @since 1.0.0
  */
 public sealed interface GameConfig permits GameConfigImpl, InternalGameConfig {
+
+    Key BOMBER_KEY = Key.key("tamias", "bomber");
+    Key SURVIVOR_KEY = Key.key("tamias", "survivor");
 
     /* The name of the Slender team.
      */
