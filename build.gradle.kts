@@ -10,14 +10,14 @@ subprojects {
     tasks.withType<Test> {
         useJUnitPlatform()
         jvmArgs("-Dminestom.inside-test=true")
-        finalizedBy(project.tasks.findByPath("jacocoTestReport"))
+        finalizedBy("jacocoTestReport")
         testLogging {
             events("passed", "skipped", "failed")
         }
     }
 
     tasks.withType<JacocoReport> {
-        dependsOn(project.tasks.findByPath("test"))
+        dependsOn("test")
         reports {
             xml.required.set(true)
         }
