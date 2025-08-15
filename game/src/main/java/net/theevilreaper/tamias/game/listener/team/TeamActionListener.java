@@ -7,10 +7,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
-public final class TeamActionListener implements Consumer<MultiPlayerTeamEvent<Team>> {
+public final class TeamActionListener implements Consumer<MultiPlayerTeamEvent> {
 
     @Override
-    public void accept(@NotNull MultiPlayerTeamEvent<Team> event) {
+    public void accept(@NotNull MultiPlayerTeamEvent event) {
         switch (event.getAction()) {
             case ADD -> this.handleQuit(event.getTeam());
             case REMOVE -> this.handleQuit(event.getTeam());

@@ -1,10 +1,10 @@
 package net.theevilreaper.tamias.game.team;
 
-import net.theevilreaper.xerus.api.ColorData;
-import net.theevilreaper.xerus.api.team.TeamImpl;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.theevilreaper.tamias.common.util.Tags;
+import net.theevilreaper.xerus.api.team.DefaultTeam;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -15,7 +15,7 @@ import java.util.Objects;
  * @since 1.0.0
  **/
 @SuppressWarnings("java:S3252")
-public final class TamiasTeam extends TeamImpl {
+public final class TamiasTeam extends DefaultTeam {
 
     private byte teamTagId;
 
@@ -23,11 +23,9 @@ public final class TamiasTeam extends TeamImpl {
      * Creates a new instance from the team.
      *
      * @param name            the name which the team should have
-     * @param colorData       the {@link ColorData} which the team should have
-     * @param initialCapacity the capacity of the team
      */
-    TamiasTeam(@NotNull String name, @NotNull ColorData colorData, int initialCapacity) {
-        super(name, colorData, initialCapacity);
+    TamiasTeam(@NotNull Key name, int initialCapacity) {
+        super(name, initialCapacity);
     }
 
     /**

@@ -37,7 +37,7 @@ public final class StaminaService {
      *
      * @param teamService the service to get the teams
      */
-    public void createStaminaObjects(@NotNull TeamService<Team> teamService) {
+    public void createStaminaObjects(@NotNull TeamService teamService) {
         // There are just two teams in the game. So this should be fine but when changing the order of the teams this will break
         Team survivorTeam = teamService.getTeams().getFirst();
         Team bomberTeam = teamService.getTeams().getLast();

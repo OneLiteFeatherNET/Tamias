@@ -26,7 +26,7 @@ import java.util.function.BiConsumer;
  */
 public final class PrePlayingPhase extends TimedPhase {
 
-    private final TeamService<Team> teamService;
+    private final TeamService teamService;
     private final BiConsumer<Player, Integer> itemConsumer;
     private final VoidConsumer staminaCreation;
 
@@ -37,7 +37,7 @@ public final class PrePlayingPhase extends TimedPhase {
      * @param itemConsumer     the consumer which triggers the item set logic
      */
     public PrePlayingPhase(
-            @NotNull TeamService<Team> teamService,
+            @NotNull TeamService teamService,
             @NotNull BiConsumer<Player, Integer> itemConsumer,
             @NotNull VoidConsumer staminaCreation
     ) {
@@ -80,7 +80,8 @@ public final class PrePlayingPhase extends TimedPhase {
 
         Team team = this.teamService.getTeams().get(id);
 
-        Component displayName = Component.text(player.getUsername(), team.getColorData().getChatColor());
-        player.setDisplayName(displayName);
+        //TODO: FIX ME
+        /*Component displayName = Component.text(player.getUsername(), team.getColorData().getChatColor());
+        player.setDisplayName(displayName);*/
     }
 }

@@ -2,9 +2,7 @@ package net.theevilreaper.tamias.game.team;
 
 import net.theevilreaper.aves.util.Players;
 import net.theevilreaper.aves.util.functional.PlayerConsumer;
-import net.theevilreaper.xerus.api.ColorData;
 import net.theevilreaper.xerus.api.team.Team;
-import net.theevilreaper.xerus.api.team.TeamCreator;
 import net.theevilreaper.xerus.api.team.TeamService;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
@@ -37,18 +35,18 @@ public final class TeamHelper {
      * @param teamSize    the size of each team
      * @param teamService the service which provides access to the teams
      */
-    public static void loadTeams(int teamSize, @NotNull TeamService<Team> teamService) {
+    public static void loadTeams(int teamSize, @NotNull TeamService teamService) {
         // Avoid loading teams multiple times
         if (teamService.hasTeams()) return;
-        TeamCreator teamCreator = new TamiasTeamCreator();
-        teamService.add(Team.builder(teamCreator)
+        //TODO: FIX ME
+        /*teamService.add(Team.builder(teamCreator)
                 .colorData(ColorData.GREEN).name(GameConfig.SURVIVOR_TEAM_NAME).capacity(teamSize)
                 .build()
         );
         teamService.add(Team.builder(teamCreator)
                 .colorData(ColorData.RED).name(GameConfig.BOMBER_TEAM).capacity(teamSize)
                 .build()
-        );
+        );*/
     }
 
     public static void switchToTNTTeam(@NotNull IntFunction<Team> teamIntFunction, @NotNull Player player) {
@@ -66,7 +64,7 @@ public final class TeamHelper {
         EventDispatcher.call(new RoleToBomberChangeEvent(player));
     }
 
-    public static void allocateTeams(@NotNull TeamService<Team> teamService) {
+    public static void allocateTeams(@NotNull TeamService teamService) {
         Check.argCondition(!teamService.hasTeams(), "The team service must contain teams");
 
         final Set<Player> onlinePlayers = new HashSet<>(MinecraftServer.getConnectionManager().getOnlinePlayers());
@@ -91,7 +89,7 @@ public final class TeamHelper {
      * @param teamService the service which contains the teams
      * @param mapSupplier the supplier which provides the map
      */
-    public static void teleport(@NotNull TeamService<Team> teamService, @NotNull GameMap mapSupplier, @NotNull PlayerConsumer playerConsumer) {
+    public static void teleport(@NotNull TeamService teamService, @NotNull GameMap mapSupplier, @NotNull PlayerConsumer playerConsumer) {
         Team bomberTeam = teamService.getTeams().get(GameConfig.TNT_ID);
         Team survivorTeam = teamService.getTeams().get(GameConfig.SURVIVOR_ID);
 

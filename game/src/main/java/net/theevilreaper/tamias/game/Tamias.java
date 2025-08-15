@@ -16,7 +16,6 @@ import net.theevilreaper.xerus.api.phase.LinearPhaseSeries;
 import net.theevilreaper.xerus.api.phase.Phase;
 import net.theevilreaper.xerus.api.team.Team;
 import net.theevilreaper.xerus.api.team.TeamService;
-import net.theevilreaper.xerus.api.team.TeamServiceImpl;
 import net.theevilreaper.xerus.api.team.event.MultiPlayerTeamEvent;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
@@ -84,7 +83,7 @@ import java.util.function.Supplier;
 public class Tamias implements ListenerHandling {
 
     private final LinearPhaseSeries<Phase> phaseSeries;
-    private final TeamService<Team> teamService;
+    private final TeamService teamService;
     private final StaminaService staminaService;
     private final GameConfig gameConfig;
     private final Items items;
@@ -96,8 +95,8 @@ public class Tamias implements ListenerHandling {
     public Tamias() {
         Path path = Paths.get("");
         this.gameConfig = new GameConfigReader(path.resolve("config")).getConfig();
-        this.phaseSeries = new LinearPhaseSeries<>();
-        this.teamService = new TeamServiceImpl<>();
+        this.phaseSeries = new LinearPhaseSeries<>("game");
+        this.teamService = TeamService.of();
         this.mapProvider = new GameMapProvider(path);
         TeamHelper.loadTeams(this.gameConfig.teamSize(), this.teamService);
         this.staminaService = new StaminaService();
@@ -222,7 +221,7 @@ public class Tamias implements ListenerHandling {
         node.addListener(ProjectileCollideWithEntityEvent.class, new ProjectileEntityListener(player -> {
         }, this.staminaService::getStaminaBar));
         node.addListener(PlayerChatEvent.class, new PlayerChatListener());
-        node.addListener((Class<MultiPlayerTeamEvent<Team>>) (Class<?>) MultiPlayerTeamEvent.class, new TeamActionListener());
+        node.addListener(MultiPlayerTeamEvent.class, new TeamActionListener());
 
         // Listener for rounds
         node.addListener(RoundStartEvent.class, new RoundStartListener(this.scoreboard));

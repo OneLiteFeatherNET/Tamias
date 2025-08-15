@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 @ApiStatus.Internal
 public final class RoundConditions {
 
-    public static void checkRoundEnd(@NotNull LinearPhaseSeries<Phase> phaseSeries, @NotNull TeamService<Team> teamService) {
+    public static void checkRoundEnd(@NotNull LinearPhaseSeries<Phase> phaseSeries, @NotNull TeamService teamService) {
         Phase currentPhase = phaseSeries.getCurrentPhase();
         if (!(currentPhase instanceof PlayingPhase)) return;
 
