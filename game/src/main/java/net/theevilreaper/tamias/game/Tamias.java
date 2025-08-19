@@ -13,6 +13,7 @@ import net.theevilreaper.tamias.game.scoreboard.Scoreboard;
 import net.theevilreaper.tamias.game.util.GameMessages;
 import net.theevilreaper.tamias.game.round.event.RoundEndEvent;
 import net.theevilreaper.tamias.game.round.event.RoundStartEvent;
+import net.theevilreaper.tamias.game.util.phase.LobbyPhaseData;
 import net.theevilreaper.xerus.api.phase.CyclicPhaseSeries;
 import net.theevilreaper.xerus.api.phase.LinearPhaseSeries;
 import net.theevilreaper.xerus.api.phase.Phase;
@@ -52,7 +53,7 @@ import net.theevilreaper.tamias.game.listener.round.RoundStartListener;
 import net.theevilreaper.tamias.game.listener.team.TeamActionListener;
 import net.theevilreaper.tamias.game.map.GameMapProvider;
 import net.theevilreaper.tamias.game.phase.LobbyPhase;
-import net.theevilreaper.tamias.game.phase.MapBuildPhase;
+import net.theevilreaper.tamias.game.phase.GroundBuildPhase;
 import net.theevilreaper.tamias.game.phase.RestartPhase;
 import net.theevilreaper.tamias.game.phase.playing.PlayingPhase;
 import net.theevilreaper.tamias.game.phase.playing.PostPlayingPhase;
@@ -68,7 +69,6 @@ import org.jetbrains.annotations.NotNull;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
@@ -131,17 +131,11 @@ public class Tamias implements ListenerHandling {
     private void createPhaseStructure() {
         GameMapProvider gameMapProvider = (GameMapProvider) this.mapProvider;
 
-        this.phaseSeries.add(new LobbyPhase(
-                this.mapProvider,
-                timeUpdater,
-                this.roundProvider::triggerNextRound,
-                this.gameConfig.minPlayers(),
-                this.gameConfig.maxPlayers(),
-                this.gameConfig.lobbyTime()
-        ));
+        this.phaseSeries.add(new LobbyPhase(this.mapProvider, new LobbyPhaseData(this.timeUpdater, this.gameConfig)));
+
         CyclicPhaseSeries<Phase> gameSeries = new CyclicPhaseSeries<>("game");
         this.roundProvider = new RoundProvider(gameSeries);
-        gameSeries.add(new MapBuildPhase(
+        gameSeries.add(new GroundBuildPhase(
                 () -> {
                     return null;
                 }

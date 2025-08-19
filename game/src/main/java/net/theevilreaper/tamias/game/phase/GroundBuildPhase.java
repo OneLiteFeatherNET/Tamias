@@ -3,16 +3,18 @@ package net.theevilreaper.tamias.game.phase;
 import net.theevilreaper.aves.util.functional.VoidConsumer;
 import net.theevilreaper.xerus.api.phase.GamePhase;
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.theevilreaper.tamias.common.event.AreaFinishBuildEvent;
-import net.theevilreaper.tamias.common.util.Messages;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.temporal.ChronoUnit;
 import java.util.function.Supplier;
+
+import static net.minestom.server.MinecraftServer.getConnectionManager;
+import static net.theevilreaper.tamias.game.util.GameMessages.MAP_BUILDING;
+import static net.theevilreaper.tamias.game.util.GameMessages.MAP_READY;
 
 /**
  * The phase implementation handles each logic which should be executed during the period where the map builds up.
@@ -22,16 +24,14 @@ import java.util.function.Supplier;
  * @version 1.0.0
  * @since 1.0.0
  **/
-public final class MapBuildPhase extends GamePhase {
+public final class GroundBuildPhase extends GamePhase {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MapBuildPhase.class);
-    private static final Component MAP_READY = Messages.withMini("<green>Map is ready!");
-    private static final Component MAP_BUILDING = Messages.withMini("<green>Map is building up...");
+    private static final Logger LOGGER = LoggerFactory.getLogger(GroundBuildPhase.class);
 
     private final Supplier<VoidConsumer> mapPlacementTaskTrigger;
     private VoidConsumer taskReset;
 
-    public MapBuildPhase(
+    public GroundBuildPhase(
             @NotNull Supplier<VoidConsumer> mapPlacementTaskTrigger
     ) {
         super("MapBuild");
