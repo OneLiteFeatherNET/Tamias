@@ -14,11 +14,11 @@ import org.jetbrains.annotations.NotNull;
 public abstract class Messages {
 
     public static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
-    private static final Component PREFIX;
+    protected static final Component PREFIX;
     private static final Component SEPARATOR;
 
     static {
-        PREFIX = MINI_MESSAGE.deserialize("<gradient:#00ff33:#fffafe:0.2>Suicide<gradient:#fffafe:#ff0008>TNT</gradient></gradient>").append(Component.space());
+        PREFIX = MINI_MESSAGE.deserialize("<color:#FF6347>SuicideTNT</color>").append(Component.space());
         SEPARATOR = Component.space().append(Component.text(">>")).append(Component.space());
     }
 

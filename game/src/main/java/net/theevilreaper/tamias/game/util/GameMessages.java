@@ -18,7 +18,6 @@ import org.jetbrains.annotations.NotNull;
 public final class GameMessages extends Messages {
 
     public static final Component TNT_MESSAGE;
-    private static final Component PREFIX;
     private static final Component SEPARATOR;
     private static final Component LEAVE_PART;
     private static final Component JOIN_PART;
@@ -37,7 +36,6 @@ public final class GameMessages extends Messages {
     public static final Component PHASE_FORCE_STARTED;
 
     static {
-        PREFIX = MINI_MESSAGE.deserialize("<gradient:#00ff33:#fffafe:0.2>Suicide<gradient:#fffafe:#ff0008>TNT</gradient></gradient>").append(Component.space());
         TNT_MESSAGE = PREFIX.append(Component.space()).append(MINI_MESSAGE.deserialize("<red>You are now a TNT! <yellow>Right click <red>your TNT near players to blow them up!"));
         SEPARATOR = Component.space().append(Component.text(">>")).append(Component.space());
         LEAVE_PART = withMini("<gray>left the game!");
