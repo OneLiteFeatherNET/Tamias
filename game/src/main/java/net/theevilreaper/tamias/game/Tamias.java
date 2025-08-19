@@ -7,6 +7,8 @@ import net.theevilreaper.aves.util.Strings;
 import net.theevilreaper.aves.util.TimeFormat;
 import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.theevilreaper.aves.util.functional.VoidConsumer;
+import net.theevilreaper.tamias.game.event.placement.TriggerPlacementEvent;
+import net.theevilreaper.tamias.game.listener.placement.PlacementTriggerListener;
 import net.theevilreaper.tamias.game.scoreboard.LobbyScoreboard;
 import net.theevilreaper.tamias.game.scoreboard.ScoreType;
 import net.theevilreaper.tamias.game.scoreboard.Scoreboard;
@@ -97,7 +99,7 @@ public class Tamias implements ListenerHandling {
         this.gameConfig = new GameConfigReader(path.resolve("config")).getConfig();
         this.phaseSeries = new LinearPhaseSeries<>("game");
         this.teamService = TeamService.of();
-        this.mapProvider = new GameMapProvider(path);
+        this.mapProvider = new GameMapProvider(path, gameConfig.maxPlayers());
         TeamHelper.loadTeams(this.gameConfig.teamSize(), this.teamService);
         this.staminaService = new StaminaService();
         this.items = new Items();
@@ -167,7 +169,8 @@ public class Tamias implements ListenerHandling {
                 new PostPlayingPhase(
                         this.roundProvider::isLastRound,
                         this.roundProvider::triggerNextRound,
-                        () -> {}
+                        () -> {
+                        }
                 )
         );
         gameSeries.setMaxIterations(this.gameConfig.maxRounds());
@@ -210,6 +213,13 @@ public class Tamias implements ListenerHandling {
         }, this.staminaService::getStaminaBar));
         node.addListener(PlayerChatEvent.class, new PlayerChatListener());
         node.addListener(MultiPlayerTeamEvent.class, new TeamActionListener());
+
+        GameMapProvider gameMapProvider = (GameMapProvider) this.mapProvider;
+        node.addListener(TriggerPlacementEvent.class, new PlacementTriggerListener(
+                        gameMapProvider.getSpawnPlacement(),
+                        gameMapProvider.getGamePlacement()
+                )
+        );
 
         // Listener for rounds
         node.addListener(RoundStartEvent.class, new RoundStartListener(this.scoreboard, this.roundProvider));
