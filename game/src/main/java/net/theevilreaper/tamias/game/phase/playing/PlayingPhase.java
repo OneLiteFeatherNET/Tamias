@@ -1,7 +1,7 @@
 package net.theevilreaper.tamias.game.phase.playing;
 
 import net.theevilreaper.aves.util.functional.VoidConsumer;
-import net.theevilreaper.tamias.common.round.event.RoundEndEvent;
+import net.theevilreaper.tamias.game.round.event.RoundEndEvent;
 import net.theevilreaper.xerus.api.phase.TickDirection;
 import net.theevilreaper.xerus.api.phase.TimedPhase;
 import net.minestom.server.event.Event;
