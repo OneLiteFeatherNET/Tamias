@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
  * The {@link GameMap} class contains all relevant information about the map which is used during the game.
  *
  * @author theEvilReaper
- * @version 1.1.0
+ * @version 1.2.0
  * @since 1.0.0
  **/
 @SuppressWarnings("java:S2065")
