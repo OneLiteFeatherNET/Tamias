@@ -69,7 +69,6 @@ import org.jetbrains.annotations.NotNull;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
@@ -136,7 +135,6 @@ public class Tamias implements ListenerHandling {
 
         CyclicPhaseSeries<Phase> gameSeries = new CyclicPhaseSeries<>("game");
         this.roundProvider = new RoundProvider(gameSeries);
-        Consumer<List<Player>> teleportConsumer = players -> gameMapProvider.teleportPlayers(players, this.roundProvider::isFirstRound);
         gameSeries.add(new GroundBuildPhase(
                 () -> {
                     return null;
