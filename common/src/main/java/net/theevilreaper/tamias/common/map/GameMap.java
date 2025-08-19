@@ -2,18 +2,16 @@ package net.theevilreaper.tamias.common.map;
 
 import net.minestom.server.coordinate.Pos;
 import net.theevilreaper.aves.map.BaseMap;
-import net.theevilreaper.aves.map.MapEntry;
 import net.theevilreaper.tamias.common.map.layer.AreaData;
 import net.theevilreaper.tamias.common.map.layer.SpawnLayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnknownNullability;
 
 /**
  * The {@link GameMap} class contains all relevant information about the map which is used during the game.
  *
  * @author theEvilReaper
- * @version 1.1.0
+ * @version 1.2.0
  * @since 1.0.0
  **/
 @SuppressWarnings("java:S2065")
@@ -22,7 +20,6 @@ public final class GameMap extends BaseMap {
     private final SpawnLayer spawnLayer;
     private final AreaData areaData;
     private final Pos bomberInitialSpawn;
-    private MapEntry mapEntry;
 
     /**
      * Constructs a new GameMap instance with the specified parameters.
@@ -51,7 +48,7 @@ public final class GameMap extends BaseMap {
      *
      * @return the game area data
      */
-    public @Nullable AreaData getGameAreaData() {
+    public @NotNull AreaData getGameAreaData() {
         return areaData;
     }
 
@@ -60,7 +57,7 @@ public final class GameMap extends BaseMap {
      *
      * @return the bomber initial spawn position
      */
-    public @UnknownNullability Pos getBomberInitialSpawn() {
+    public @NotNull Pos getBomberInitialSpawn() {
         return bomberInitialSpawn;
     }
 
