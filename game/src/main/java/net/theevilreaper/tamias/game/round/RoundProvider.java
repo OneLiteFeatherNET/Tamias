@@ -2,9 +2,9 @@ package net.theevilreaper.tamias.game.round;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.minestom.server.event.EventDispatcher;
-import net.minestom.server.utils.validate.Check;
-import net.theevilreaper.tamias.common.round.event.RoundStartEvent;
+import net.theevilreaper.xerus.api.phase.CyclicPhaseSeries;
+import net.theevilreaper.xerus.api.phase.Phase;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * The {@link  RoundProvider} manages the current information about which round is active.
@@ -16,31 +16,31 @@ import net.theevilreaper.tamias.common.round.event.RoundStartEvent;
  */
 public final class RoundProvider {
 
+    private final CyclicPhaseSeries<Phase> phaseSeries;
     private final Component maxRoundComponent;
-    private final int maxRounds;
-    private int currentRound;
+
+    private Component roundComponent;
 
     /**
-     * Creates a new instance of the provider with the given max rounds
+     * Creates a new {@link RoundProvider} with the given phase series.
      *
-     * @param maxRounds the maximum amount of rounds
+     * @param phaseSeries the phase series to get the max rounds from
+     * @throws IllegalArgumentException if the phase series is null or has no iterations
      */
-    public RoundProvider(int maxRounds) {
-        Check.argCondition(maxRounds < 1, "The max rounds can't be negative or zero");
-        this.maxRounds = maxRounds;
+    public RoundProvider(@NotNull CyclicPhaseSeries<Phase> phaseSeries) {
+        this.phaseSeries = phaseSeries;
+        int maxRounds = phaseSeries.getMaxIterations();
         this.maxRoundComponent = Component.text(" / ", NamedTextColor.GRAY).append(Component.text(maxRounds, NamedTextColor.AQUA));
-        this.currentRound = 0;
     }
 
     /**
      * Triggers the next round if the current round is not the last round.
      */
     public void triggerNextRound() {
-        if (currentRound + 1 > maxRounds) return;
-        currentRound++;
-        Component roundComponent = Component.text(currentRound).append(maxRoundComponent);
-        EventDispatcher.call(new RoundStartEvent(currentRound, roundComponent));
+        int currentRound = phaseSeries.getIterations();
+        roundComponent = Component.text(currentRound).append(maxRoundComponent);
     }
+
 
     /**
      * Checks if the current round is the first round.
@@ -48,7 +48,7 @@ public final class RoundProvider {
      * @return {@code true} if the current round is the first round
      */
     public boolean isFirstRound() {
-        return currentRound == 1;
+        return phaseSeries.getIterations() == 1;
     }
 
     /**
@@ -57,6 +57,15 @@ public final class RoundProvider {
      * @return {@code true} if the current round is the last round
      */
     public boolean isLastRound() {
-        return currentRound == maxRounds;
+        return phaseSeries.getIterations() == phaseSeries.getMaxIterations();
+    }
+
+    /**
+     * Gets the current round component which represents the current round.
+     *
+     * @return the current round component
+     */
+    public @NotNull Component getCurrentRoundComponent() {
+        return this.roundComponent;
     }
 }
