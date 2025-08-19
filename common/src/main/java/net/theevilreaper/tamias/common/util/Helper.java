@@ -19,5 +19,7 @@ public final class Helper {
         });
     }
 
-    private Helper() { }
+    private Helper() {
+        // No instance allowed for a utility class
+    }
 }
