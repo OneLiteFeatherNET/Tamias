@@ -4,6 +4,7 @@ import net.minestom.server.event.EventDispatcher;
 import net.theevilreaper.aves.map.provider.MapProvider;
 import net.theevilreaper.tamias.common.map.event.MapPrepareEvent;
 import net.theevilreaper.tamias.common.round.event.RoundPrepareEvent;
+import net.theevilreaper.tamias.game.event.placement.TriggerPlacementEvent;
 import net.theevilreaper.tamias.game.util.phase.LobbyPhaseData;
 import net.theevilreaper.xerus.api.phase.TickDirection;
 import net.theevilreaper.xerus.api.phase.TimedPhase;
@@ -69,7 +70,7 @@ public final class LobbyPhase extends TimedPhase {
             }
             case 5 -> {
                 this.broadcastTime();
-                //TODO: Add placement back
+                EventDispatcher.call(new TriggerPlacementEvent(TriggerPlacementEvent.Type.SPAWN));
             }
             default -> {
                 // Nothing to do here
