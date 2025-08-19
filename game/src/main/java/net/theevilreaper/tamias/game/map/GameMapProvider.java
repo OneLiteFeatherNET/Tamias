@@ -7,6 +7,11 @@ import net.theevilreaper.aves.file.GsonFileHandler;
 import net.theevilreaper.aves.map.BaseMap;
 import net.theevilreaper.aves.map.MapEntry;
 import net.theevilreaper.aves.map.provider.AbstractMapProvider;
+import net.theevilreaper.tamias.common.area.GameArea;
+import net.theevilreaper.tamias.common.area.SpawnArea;
+import net.theevilreaper.tamias.common.area.holder.GamePlacement;
+import net.theevilreaper.tamias.common.area.holder.Placement;
+import net.theevilreaper.tamias.common.area.holder.SpawnPlacement;
 import net.theevilreaper.tamias.common.explosion.ExplosionCreator;
 import net.theevilreaper.tamias.common.gson.GsonUtil;
 import net.theevilreaper.tamias.common.map.GameMap;
@@ -26,12 +31,15 @@ import java.util.Optional;
  */
 public final class GameMapProvider extends AbstractMapProvider implements MapFilter {
 
+    private final Placement spawnPlacement;
+    private final Placement gamePlacement;
+
     /**
      * Creates a new instance from the provider with the given parameters.
      *
      * @param path the path to the map files
      */
-    public GameMapProvider(@NotNull Path path) {
+    public GameMapProvider(@NotNull Path path, int maxPlayers) {
         super(new GsonFileHandler(GsonUtil.GSON), MapFilter::filterMapsForGame);
         this.mapEntries = this.loadMapEntries(path.resolve("maps"));
         this.activeInstance = MinecraftServer.getInstanceManager().createInstanceContainer();
@@ -39,13 +47,18 @@ public final class GameMapProvider extends AbstractMapProvider implements MapFil
         MapEntry map = this.mapEntries.getFirst();
         Optional<GameMap> loadedLobbyMap = fileHandler.load(map.getMapFile(), GameMap.class);
         Check.argCondition(loadedLobbyMap.isEmpty(), "The map couldn't be loaded!");
-        this.activeMap = loadedLobbyMap.get();
+
+        GameMap gameMap = loadedLobbyMap.get();
+        this.activeMap = gameMap;
         this.activeInstance.setExplosionSupplier(new ExplosionCreator());
         this.registerInstance(this.activeInstance, map);
         if (this.activeMap.getSpawn() != null) {
             activeInstance.loadChunk(this.activeMap.getSpawn());
         }
         MinecraftServer.getInstanceManager().registerInstance(this.activeInstance);
+
+        this.spawnPlacement = new SpawnPlacement(this.activeInstance, new SpawnArea(gameMap.getSpawnData(), maxPlayers));
+        this.gamePlacement = new GamePlacement(this.activeInstance, new GameArea(gameMap.getGameAreaData()));
     }
 
     /**
@@ -53,6 +66,7 @@ public final class GameMapProvider extends AbstractMapProvider implements MapFil
      */
     public void loadGameChunks() {
         GameMap givenMap = (GameMap) this.activeMap;
+        if (givenMap.getSpawn() == null) return;
         this.activeInstance.loadChunk(givenMap.getSpawn()).join();
     }
 
@@ -75,8 +89,8 @@ public final class GameMapProvider extends AbstractMapProvider implements MapFil
      * Saves the map to the given path.
      * This method is not supported in the game context, as maps are not saved during gameplay.
      *
-     * @param path     the path where the map should be saved
-     * @param baseMap  the map to save
+     * @param path    the path where the map should be saved
+     * @param baseMap the map to save
      * @throws UnsupportedOperationException if called
      */
     @Override
@@ -91,5 +105,23 @@ public final class GameMapProvider extends AbstractMapProvider implements MapFil
      */
     public @NotNull BaseMap getActiveMap() {
         return this.activeMap;
+    }
+
+    /**
+     * Returns the placement for the spawn area.
+     *
+     * @return the spawn area placement
+     */
+    public @NotNull Placement getSpawnPlacement() {
+        return this.spawnPlacement;
+    }
+
+    /**
+     * Returns the placement for the game area.
+     *
+     * @return the game area placement
+     */
+    public @NotNull Placement getGamePlacement() {
+        return this.gamePlacement;
     }
 }
