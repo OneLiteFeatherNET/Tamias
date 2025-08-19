@@ -2,6 +2,7 @@ package net.theevilreaper.tamias.game.listener.round;
 
 import net.theevilreaper.tamias.game.round.RoundProvider;
 import net.theevilreaper.tamias.game.round.event.RoundStartEvent;
+import net.theevilreaper.tamias.game.scoreboard.ScoreType;
 import net.theevilreaper.tamias.game.scoreboard.Scoreboard;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,6 +27,6 @@ public final class RoundStartListener implements Consumer<RoundStartEvent> {
 
     @Override
     public void accept(@NotNull RoundStartEvent event) {
-        this.scoreboard.updateRound(roundProvider.getCurrentRoundComponent());
+        this.scoreboard.updateScore(ScoreType.ROUND_TYPE, roundProvider.getCurrentRoundComponent());
     }
 }

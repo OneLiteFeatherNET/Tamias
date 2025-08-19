@@ -16,7 +16,6 @@ import net.theevilreaper.tamias.game.round.event.RoundStartEvent;
 import net.theevilreaper.xerus.api.phase.CyclicPhaseSeries;
 import net.theevilreaper.xerus.api.phase.LinearPhaseSeries;
 import net.theevilreaper.xerus.api.phase.Phase;
-import net.theevilreaper.xerus.api.team.Team;
 import net.theevilreaper.xerus.api.team.TeamService;
 import net.theevilreaper.xerus.api.team.event.MultiPlayerTeamEvent;
 import net.minestom.server.MinecraftServer;
@@ -102,7 +101,7 @@ public class Tamias implements ListenerHandling {
         TeamHelper.loadTeams(this.gameConfig.teamSize(), this.teamService);
         this.staminaService = new StaminaService();
         this.items = new Items();
-        his.scoreboard = new LobbyScoreboard(GameMessages.getTitleTime(this.gameConfig.lobbyTime()));
+        this.scoreboard = new LobbyScoreboard(GameMessages.getTitleTime(this.gameConfig.lobbyTime()));
         this.timeUpdater = value -> {
             Component time = Component.text("Time:", NamedTextColor.GOLD).append(Component.space())
                     .append(Component.text(Strings.getTimeString(TimeFormat.MM_SS, value), NamedTextColor.YELLOW));
@@ -147,12 +146,6 @@ public class Tamias implements ListenerHandling {
                     return null;
                 }
         ));
-
-        VoidConsumer gamePreparation = () -> {
-            int survivorCount = this.teamService.getTeams().get(GameConfig.SURVIVOR_ID).getPlayers().size();
-            this.scoreboard.switchBoard(TamiasScoreboard.BoardType.GAME);
-            this.scoreboard.updateGameDefaults(10, survivorCount, 1);
-        };
 
         gameSeries.add(new PrePlayingPhase(
                 this.teamService,
