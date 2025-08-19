@@ -147,7 +147,7 @@ public final class GameArea implements PlayingArea {
             // Thread-safe removal from the list
             Point pos = internalPositions.remove(randomId);
             this.tntPositions.remove(pos);
-            return Pos.fromPoint(pos);
+            return pos.asPos();
         }
     }
 
