@@ -15,7 +15,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
 /**
@@ -78,7 +77,7 @@ public final class SpawnArea implements Area {
     }
 
     /**
-     * Calculates the spawn position for the area on the given {@link Direction} which is set a creation level.
+     * {@inheritDoc}
      */
     @Override
     public void calculatePositions() {
@@ -96,13 +95,16 @@ public final class SpawnArea implements Area {
     }
 
     /**
-     * Resets all blocks in the spawn area.
+     * {@inheritDoc}
      */
     @Override
     public void reset() {
         throw new UnsupportedOperationException("Not supported in this variant. Please use the holder instead");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Collection<Point> getPositions() {
         return Arrays.asList(this.positions);
