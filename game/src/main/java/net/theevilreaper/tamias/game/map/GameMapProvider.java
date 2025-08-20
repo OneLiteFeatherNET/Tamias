@@ -34,6 +34,8 @@ public final class GameMapProvider extends AbstractMapProvider implements MapFil
     private final Placement spawnPlacement;
     private final Placement gamePlacement;
 
+    private final SpawnArea spawnArea;
+
     /**
      * Creates a new instance from the provider with the given parameters.
      *
@@ -56,8 +58,8 @@ public final class GameMapProvider extends AbstractMapProvider implements MapFil
             activeInstance.loadChunk(this.activeMap.getSpawn());
         }
         MinecraftServer.getInstanceManager().registerInstance(this.activeInstance);
-
-        this.spawnPlacement = new SpawnPlacement(this.activeInstance, new SpawnArea(gameMap.getSpawnData(), maxPlayers));
+        this.spawnArea = new SpawnArea(gameMap.getSpawnData(), maxPlayers);
+        this.spawnPlacement = new SpawnPlacement(this.activeInstance, this.spawnArea);
         this.gamePlacement = new GamePlacement(this.activeInstance, new GameArea(gameMap.getGameAreaData()));
     }
 
@@ -123,5 +125,14 @@ public final class GameMapProvider extends AbstractMapProvider implements MapFil
      */
     public @NotNull Placement getGamePlacement() {
         return this.gamePlacement;
+    }
+
+    /**
+     * Returns the area for the spawn.
+     *
+     * @return the spawn area
+     */
+    public @NotNull SpawnArea getSpawnArea() {
+        return spawnArea;
     }
 }
