@@ -32,7 +32,7 @@ class ExplosionCreatorIntegrationTest {
         Player player = testConnection.connect(instance, pos);
 
         assertEquals(instance, player.getInstance());
-        assertEquals(pos, player.getPosition().asVec());
+        assertEquals(pos, player.getPosition());
         Collector<ExplosionPacket> explosionTracker = testConnection.trackIncoming(ExplosionPacket.class);
 
         instance.explode((float) pos.x(), (float) pos.y(), (float) pos.z(), 1F);
