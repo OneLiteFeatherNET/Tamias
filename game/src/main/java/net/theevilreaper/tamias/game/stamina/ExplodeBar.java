@@ -1,7 +1,6 @@
 package net.theevilreaper.tamias.game.stamina;
 
 import net.kyori.adventure.sound.Sound;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.sound.SoundEvent;
@@ -83,7 +82,7 @@ public final class ExplodeBar extends StaminaBar {
             player.playSound(TICK_SOUND);
             return;
         }
-        EventDispatcher.call(new BomberExplodeEvent(player, Vec.fromPoint(player.getPosition())));
+        EventDispatcher.call(new BomberExplodeEvent(player, player.getPosition().asVec()));
         this.player.playSound(EXPLODE_SOUND);
         this.status = Status.REGENERATING;
         // If the player explodes, we need to disable the movement and clear the inventory

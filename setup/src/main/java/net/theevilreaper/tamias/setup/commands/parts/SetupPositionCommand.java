@@ -138,6 +138,6 @@ public final class SetupPositionCommand extends Command {
             sender.sendMessage("A lobby map can only have a spawn");
             return;
         }
-        builder.spawn(Pos.fromPoint(sender.getPosition()));
+        builder.spawn(sender.getPosition().asPos());
     }
 }

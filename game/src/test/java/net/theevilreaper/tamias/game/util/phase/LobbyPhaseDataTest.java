@@ -1,6 +1,5 @@
 package net.theevilreaper.tamias.game.util.phase;
 
-import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.common.config.GameConfigReader;
 import org.junit.jupiter.api.Test;
 

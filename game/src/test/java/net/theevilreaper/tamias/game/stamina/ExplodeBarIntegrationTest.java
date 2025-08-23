@@ -6,7 +6,6 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.packet.server.play.SoundEffectPacket;
-import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.testing.Collector;
 import net.minestom.testing.Env;

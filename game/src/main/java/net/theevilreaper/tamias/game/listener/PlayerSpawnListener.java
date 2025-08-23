@@ -11,7 +11,6 @@ import net.theevilreaper.tamias.game.util.GameMessages;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
-import java.util.function.IntConsumer;
 import java.util.function.Supplier;
 
 import static net.minestom.server.MinecraftServer.getConnectionManager;

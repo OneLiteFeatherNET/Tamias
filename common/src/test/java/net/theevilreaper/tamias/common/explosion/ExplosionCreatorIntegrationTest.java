@@ -28,14 +28,14 @@ class ExplosionCreatorIntegrationTest {
         assertNotNull(instance.getExplosionSupplier());
 
         TestConnection testConnection = env.createConnection();
-        Vec vec = new Vec(100, 100, 100);
-        Player player = testConnection.connect(instance, Pos.fromPoint(vec));
+        Pos pos = new Pos(100, 100, 100);
+        Player player = testConnection.connect(instance, pos);
 
         assertEquals(instance, player.getInstance());
-        assertEquals(vec, player.getPosition().asVec());
+        assertEquals(pos, player.getPosition().asVec());
         Collector<ExplosionPacket> explosionTracker = testConnection.trackIncoming(ExplosionPacket.class);
 
-        instance.explode((float) vec.x(), (float) vec.y(), (float) vec.z(), 1F);
+        instance.explode((float) pos.x(), (float) pos.y(), (float) pos.z(), 1F);
 
         explosionTracker.assertCount(1);
         explosionTracker.assertSingle(packet -> {

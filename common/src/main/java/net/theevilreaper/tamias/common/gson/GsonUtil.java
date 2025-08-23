@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.theevilreaper.aves.file.gson.PositionGsonAdapter;
-import net.theevilreaper.tamias.common.area.GameArea;
 import net.theevilreaper.tamias.common.map.layer.AreaData;
 
 /**

@@ -20,7 +20,7 @@ public class BomberExplodeListener implements Consumer<BomberExplodeEvent> {
     public void accept(@NotNull BomberExplodeEvent event) {
         Player player = event.getPlayer();
         Instance instance = player.getInstance();
-        Pos pos = Pos.fromPoint(player.getPosition());
+        Pos pos = player.getPosition().asPos();
         instance.explode((float) pos.x(), (float) pos.y(), (float) pos.z(), 1);
         player.addEffect(BLINDNESS);
         AttributeHelper.disableMovement(player);

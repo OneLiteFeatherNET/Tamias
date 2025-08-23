@@ -32,7 +32,7 @@ public abstract class PositionBaseSlot extends Slot {
         result.accept(ClickHolder.cancelClick());
         if (click instanceof Click.Left) {
             player.closeInventory();
-            player.teleport(Pos.fromPoint(this.point));
+            player.teleport(this.point.asPos());
             return;
         }
 

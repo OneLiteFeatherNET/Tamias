@@ -3,7 +3,6 @@ package net.theevilreaper.tamias.common.area;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.instance.block.Block;
 import net.theevilreaper.tamias.common.map.layer.AreaData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
