@@ -1,7 +1,6 @@
 package net.theevilreaper.tamias.common.explosion;
 
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.packet.server.play.ExplosionPacket;

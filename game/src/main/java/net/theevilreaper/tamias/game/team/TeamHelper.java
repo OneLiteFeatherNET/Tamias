@@ -1,6 +1,5 @@
 package net.theevilreaper.tamias.game.team;
 
-import net.kyori.adventure.key.Key;
 import net.theevilreaper.aves.util.Players;
 import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.theevilreaper.xerus.api.ColorData;

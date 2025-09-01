@@ -57,7 +57,7 @@ class SpawnAreaIntegrationTest {
         instance.loadChunk(Pos.ZERO).join();
         assertNotNull(spawnArea);
 
-        Pos pos = Pos.fromPoint(startPos);
+        Pos pos = startPos.asPos();
 
         // Default is stone
         for (int i = 0; i < maxPositions; i++) {
@@ -67,7 +67,7 @@ class SpawnAreaIntegrationTest {
 
         Placement placement = new SpawnPlacement(instance, spawnArea);
 
-        pos = Pos.fromPoint(startPos);
+        pos = startPos.asPos();
         placement.triggerPlacement(spawnData);
         int currentPositions = 0;
 
@@ -101,7 +101,7 @@ class SpawnAreaIntegrationTest {
 
         int currentPositions = 0;
 
-        Pos areStart = Pos.fromPoint(startPos);
+        Pos areStart = startPos.asPos();
         for (int i = 0; i < maxPositions; i++) {
             areStart = updatedPos(areStart, northDir);
             assertBlockRegion(Block.AIR, instance, areStart);

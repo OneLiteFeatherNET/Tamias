@@ -6,7 +6,6 @@ import net.theevilreaper.aves.inventory.click.ClickHolder;
 import net.theevilreaper.aves.inventory.slot.Slot;
 import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.minestom.server.coordinate.Point;
-import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
