@@ -18,7 +18,7 @@ dependencies {
 
     testImplementation(project(":common"))
     testImplementation(platform(libs.mycelium.bom))
-    implementation(platform(libs.game.bom))
+    testImplementation(platform(libs.game.bom))
     testImplementation(libs.minestom)
     testImplementation(libs.aves)
     testImplementation(libs.cyano)

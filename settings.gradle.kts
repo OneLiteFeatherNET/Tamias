@@ -3,7 +3,7 @@ rootProject.name = "tamias"
 dependencyResolutionManagement {
     repositories {
         mavenCentral()
-        maven("https://reposilite.atlasengine.ca/#/public")
+        maven("https://reposilite.atlasengine.ca/public")
         maven {
             name = "OneLiteFeatherRepository"
             url = uri("https://repo.onelitefeather.dev/onelitefeather")
