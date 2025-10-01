@@ -142,6 +142,7 @@ public final class GameMapBuilder extends BaseMapBuilder {
      *
      * @return a new instance of GameMap
      */
+    @Override
     public @NotNull GameMap build() {
         return new GameMap(
                 this.name,
