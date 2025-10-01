@@ -1,5 +1,6 @@
 package net.theevilreaper.tamias.game.stamina;
 
+import net.kyori.adventure.key.Key;
 import net.theevilreaper.xerus.api.team.Team;
 import net.theevilreaper.xerus.api.team.TeamService;
 import net.minestom.server.entity.Player;
@@ -10,13 +11,11 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled("Needs migration")
 @ExtendWith(MicrotusExtension.class)
 class StaminaServiceIntegrationTest {
 
@@ -27,14 +26,10 @@ class StaminaServiceIntegrationTest {
     static void setUp() {
         staminaService = new StaminaService();
         teamService = TeamService.of();
-        /*teamService.add(Team.builder()
-                .colorData(ColorData.GREEN).name(GameConfig.SURVIVOR_TEAM_NAME).capacity(1)
-                .build()
-        );
-        teamService.add(Team.builder()
-                .colorData(ColorData.RED).name(GameConfig.BOMBER_TEAM).capacity(1)
-                .build()
-        );*/
+        Team testTeam = Team.of(Key.key("tamias", "shoot_team"), 1);
+        Team testTeam2 = Team.of(Key.key("tamias", "explode_team"), 1);
+        teamService.add(testTeam);
+        teamService.add(testTeam2);
     }
 
     @AfterEach
