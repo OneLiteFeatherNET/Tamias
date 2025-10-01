@@ -2,6 +2,7 @@ package net.theevilreaper.tamias.game.phase;
 
 import net.minestom.server.event.EventDispatcher;
 import net.theevilreaper.aves.map.provider.MapProvider;
+import net.theevilreaper.tamias.common.map.event.MapPrepareEvent;
 import net.theevilreaper.tamias.common.round.event.RoundPrepareEvent;
 import net.theevilreaper.tamias.game.util.phase.LobbyPhaseData;
 import net.theevilreaper.xerus.api.phase.TickDirection;
@@ -20,6 +21,7 @@ import static net.theevilreaper.tamias.common.config.GameConfig.FORCE_START_TIME
 
 /**
  * The {@link LobbyPhase} is the first phase which runs in the game.
+ *
  * @author theEvilReaper
  * @version 1.0.0
  * @since 1.0.0
@@ -28,25 +30,19 @@ import static net.theevilreaper.tamias.common.config.GameConfig.FORCE_START_TIME
 public final class LobbyPhase extends TimedPhase {
 
     private static final Sound PLING = Sound.sound(SoundEvent.BLOCK_NOTE_BLOCK_BELL, Sound.Source.MASTER, 1.0f, 1.0f);
-    private final MapProvider mapProvider;
     private final LobbyPhaseData phaseData;
     private boolean forceStarted;
 
     /**
      * Creates a new instance to this phase with the given values.
      *
-     * @param mapProvider the provider to access map data
-     * @param phaseData   the data for the phase to get specific values from it
+     * @param phaseData the data for the phase to get specific values from it
      */
-    public LobbyPhase(
-            @NotNull MapProvider mapProvider,
-            @NotNull LobbyPhaseData phaseData
-    ) {
+    public LobbyPhase(@NotNull LobbyPhaseData phaseData) {
         super("Lobby", ChronoUnit.SECONDS, 1);
         this.setPaused(true);
         this.setCurrentTicks(phaseData.lobbyTime());
         this.setTickDirection(TickDirection.DOWN);
-        this.mapProvider = mapProvider;
         this.phaseData = phaseData;
     }
 
@@ -69,7 +65,7 @@ public final class LobbyPhase extends TimedPhase {
             case 30, 20, 3, 1 -> broadcastTime();
             case 10 -> {
                 this.broadcastTime();
-                ((GameMapProvider) this.mapProvider).loadGameChunks();
+                EventDispatcher.call(new MapPrepareEvent());
             }
             case 5 -> {
                 this.broadcastTime();
