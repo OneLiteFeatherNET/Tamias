@@ -1,5 +1,6 @@
 package net.theevilreaper.tamias.setup.data;
 
+import net.kyori.adventure.bossbar.BossBar;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.anvil.AnvilLoader;
@@ -21,7 +22,7 @@ public final class LobbyData extends InstanceSetupData {
     private BaseMapBuilder mapBuilder;
 
     public LobbyData(@NotNull UUID uuid, @NotNull MapEntry mapEntry, @NotNull FileHandler fileHandler) {
-        super(uuid, mapEntry);
+        super(uuid, mapEntry, BossBar.Color.GREEN);
         this.fileHandler = fileHandler;
         this.loadData();
         Player player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(uuid);
