@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
 /**
@@ -49,8 +50,8 @@ public final class SpawnArea implements Area {
     }
 
     /**
-     * Teleports a given amount of players to the positions.
-     * If the player amount is higher than the maximum of position it will throw a {@link IllegalArgumentException}.
+     * Teleports a given number of players to the positions.
+     * If the player amount is higher than the maximum of position, it will throw a {@link IllegalArgumentException}.
      *
      * @param instance       the instance where the players should be teleported
      * @param players        the players to teleport
