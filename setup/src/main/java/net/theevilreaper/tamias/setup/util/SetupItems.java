@@ -7,7 +7,6 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.tag.Tag;
 import net.theevilreaper.tamias.common.util.Tags;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * The class holds all item reference which are required in the setup process of a map.
@@ -21,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
 @SuppressWarnings("java:S3252")
 public final class SetupItems {
 
-    public static byte OVERVIEW_FLAG = 0x02;
+    public static final byte OVERVIEW_FLAG = 0x02;
 
     public static final ItemStack DECORATION = ItemStack.builder(Material.GRAY_STAINED_GLASS_PANE)
             .customName(Component.empty())
@@ -51,7 +50,7 @@ public final class SetupItems {
      *
      * @param player the player to set the item
      */
-    public void setOverViewItem(@NotNull Player player) {
+    public void setOverViewItem(Player player) {
         player.getInventory().clear();
         player.getInventory().setItemStack(0x00, this.overview);
         player.setHeldItemSlot((byte) 0);
@@ -62,7 +61,7 @@ public final class SetupItems {
      *
      * @param player the player to set the item
      */
-    public void setSaveItem(@NotNull Player player) {
+    public void setSaveItem(Player player) {
         player.getInventory().clear();
         player.getInventory().setItemStack(0x06, this.save);
         player.getInventory().setItemStack(0x02, this.viewItem);

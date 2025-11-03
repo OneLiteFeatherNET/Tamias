@@ -1,7 +1,6 @@
 package net.theevilreaper.tamias.common.ground;
 
 import net.minestom.server.instance.block.Block;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.ArrayList;
@@ -27,19 +26,19 @@ public final class TamiasGroundDataRegistry implements GroundDataRegistry {
     }
 
     @Override
-    public void add(@NotNull GroundData groundData) {
+    public void add(GroundData groundData) {
         this.groundData.add(groundData);
     }
 
     @Override
-    public @NotNull GroundData getRandomData() {
+    public GroundData getRandomData() {
         Collections.shuffle(this.groundData);
         int randomId = ThreadLocalRandom.current().nextInt(0, this.groundData.size());
         return this.groundData.get(randomId);
     }
 
     @Override
-    public @NotNull @UnmodifiableView List<GroundData> getGroundData() {
+    public @UnmodifiableView List<GroundData> getGroundData() {
         return Collections.unmodifiableList(this.groundData);
     }
 

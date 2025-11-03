@@ -3,14 +3,13 @@ package net.theevilreaper.tamias.common.util;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 
 public final class PosHelper {
 
     private static final Vec Y_VEC = new Vec(0.5, 1, 0.5);
 
     @Contract(pure = true, value = "_ -> new")
-    public static @NotNull Point getCenter2D(@NotNull Point point) {
+    public static Point getCenter2D(Point point) {
         return point.add(Y_VEC);
     }
 

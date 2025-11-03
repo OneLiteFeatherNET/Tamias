@@ -5,7 +5,6 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.utils.Direction;
 import net.minestom.server.utils.MathUtils;
 import net.theevilreaper.tamias.common.util.DirectionFaceHelper;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
@@ -25,7 +24,7 @@ public final class DirectionUtil {
      * @param player the player to parse the direction from
      * @return the direction of the player
      */
-    public static @NotNull Optional<Direction> parseDirection(@NotNull Player player) {
+    public static Optional<Direction> parseDirection(Player player) {
         Direction direction = MathUtils.getHorizontalDirection(player.getPosition().yaw());
 
         Vec dir = player.getPosition().direction();

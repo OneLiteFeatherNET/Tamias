@@ -6,7 +6,6 @@ import net.minestom.server.instance.block.Block;
 import net.theevilreaper.tamias.common.area.Area;
 import net.theevilreaper.tamias.common.area.SpawnArea;
 import net.theevilreaper.tamias.common.ground.GroundData;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -19,7 +18,7 @@ public final class SpawnPlacement implements Placement {
     private final Instance instance;
     private final Area area;
 
-    public SpawnPlacement(@NotNull Instance instance, @NotNull Area area) {
+    public SpawnPlacement(Instance instance, Area area) {
         if (!(area instanceof SpawnArea)) {
             throw new IllegalArgumentException("The instance must be an instance");
         }
@@ -36,7 +35,7 @@ public final class SpawnPlacement implements Placement {
     }
 
     @Override
-    public void triggerPlacement(@NotNull GroundData groundData) {
+    public void triggerPlacement(GroundData groundData) {
         Iterator<Point> positionIterator = this.area.getPositions().iterator();
         int maxPositionsToBuild = getConnectionManager().getOnlinePlayerCount();
 

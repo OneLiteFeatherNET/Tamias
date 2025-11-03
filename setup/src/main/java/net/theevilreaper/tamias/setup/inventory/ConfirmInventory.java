@@ -15,7 +15,6 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.theevilreaper.tamias.setup.TamiasSetup;
 import net.theevilreaper.tamias.setup.util.SetupItems;
-import org.jetbrains.annotations.NotNull;
 
 import static net.theevilreaper.aves.inventory.util.InventoryConstants.CANCEL_CLICK;
 
@@ -43,7 +42,7 @@ public class ConfirmInventory extends GlobalInventoryBuilder {
                 .build();
     }
 
-    public ConfirmInventory(@NotNull PlayerConsumer consumer) {
+    public ConfirmInventory(PlayerConsumer consumer) {
         super(Component.text("Confirm"), InventoryType.CHEST_4_ROW);
 
         InventoryLayout layout = InventoryLayout.fromType(getType());

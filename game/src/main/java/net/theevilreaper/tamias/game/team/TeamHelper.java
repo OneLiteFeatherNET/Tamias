@@ -15,7 +15,6 @@ import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.common.map.GameMap;
 import net.theevilreaper.tamias.common.util.Tags;
 import net.theevilreaper.tamias.game.event.RoleToBomberChangeEvent;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
@@ -37,7 +36,7 @@ public final class TeamHelper {
      * @param teamSize    the size of each team
      * @param teamService the service which provides access to the teams
      */
-    public static void loadTeams(int teamSize, @NotNull TeamService teamService) {
+    public static void loadTeams(int teamSize, TeamService teamService) {
         // Avoid loading teams multiple times
         if (teamService.hasTeams()) return;
         Team survivorTeam = new TamiasTeam(GameConfig.SURVIVOR_KEY, teamSize, GameConfig.SURVIVOR_ID);
@@ -49,7 +48,7 @@ public final class TeamHelper {
         teamService.add(bomberTeam);
     }
 
-    public static void switchToTNTTeam(@NotNull IntFunction<Team> teamIntFunction, @NotNull Player player) {
+    public static void switchToTNTTeam(IntFunction<Team> teamIntFunction, Player player) {
         Check.argCondition(!player.hasTag(Tags.TEAM_ID), "Need a team tag for switching teams");
 
         int id = player.getTag(Tags.TEAM_ID);
@@ -64,7 +63,7 @@ public final class TeamHelper {
         EventDispatcher.call(new RoleToBomberChangeEvent(player));
     }
 
-    public static void allocateTeams(@NotNull TeamService teamService) {
+    public static void allocateTeams(TeamService teamService) {
         Check.argCondition(!teamService.hasTeams(), "The team service must contain teams");
 
         final Set<Player> onlinePlayers = new HashSet<>(MinecraftServer.getConnectionManager().getOnlinePlayers());
@@ -89,7 +88,7 @@ public final class TeamHelper {
      * @param teamService the service which contains the teams
      * @param mapSupplier the supplier which provides the map
      */
-    public static void teleport(@NotNull TeamService teamService, @NotNull GameMap mapSupplier, @NotNull PlayerConsumer playerConsumer) {
+    public static void teleport(TeamService teamService, GameMap mapSupplier, PlayerConsumer playerConsumer) {
         Team bomberTeam = teamService.getTeams().get(GameConfig.TNT_ID);
         Team survivorTeam = teamService.getTeams().get(GameConfig.SURVIVOR_ID);
 
@@ -97,7 +96,7 @@ public final class TeamHelper {
         teleport(survivorTeam, mapSupplier.getSpawn(), playerConsumer);
     }
 
-    public static void teleport(@NotNull Team team, @NotNull Pos pos) {
+    public static void teleport(Team team, Pos pos) {
         teleport(team, pos, null);
     }
 
@@ -107,7 +106,7 @@ public final class TeamHelper {
      * @param team the team to teleport
      * @param pos  the position to teleport the players
      */
-    private static void teleport(@NotNull Team team, @NotNull Pos pos, @Nullable PlayerConsumer callback) {
+    private static void teleport(Team team, Pos pos, @Nullable PlayerConsumer callback) {
         // Check.argCondition(team.getPlayers().isEmpty(), "The given team can't be empty");
         team.getPlayers().forEach(player -> {
             player.teleport(pos).join();

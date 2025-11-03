@@ -3,7 +3,6 @@ package net.theevilreaper.tamias.game.util;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.other.PrimedTntMeta;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * The {@link EntityHelper} provides some utility methods to handle entities.
@@ -24,7 +23,7 @@ public final class EntityHelper {
      *
      * @param player the player to switch
      */
-    public static void switchToTNT(@NotNull Player player) {
+    public static void switchToTNT(Player player) {
         player.switchEntityType(EntityType.TNT);
     }
 
@@ -33,7 +32,7 @@ public final class EntityHelper {
      *
      * @param player the player to switch
      */
-    public static void switchToPlayer(@NotNull Player player) {
+    public static void switchToPlayer(Player player) {
         player.switchEntityType(EntityType.PLAYER);
     }
 
@@ -42,7 +41,7 @@ public final class EntityHelper {
      *
      * @param player the player to update the meta
      */
-    public static void updateTNTMeta(@NotNull Player player) {
+    public static void updateTNTMeta(Player player) {
         if (player.getEntityType() != EntityType.TNT) return;
 
         player.editEntityMeta(PrimedTntMeta.class, meta -> meta.setFuseTime(TNT_FUSE_TIME));

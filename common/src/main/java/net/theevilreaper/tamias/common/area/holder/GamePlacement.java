@@ -10,7 +10,6 @@ import net.theevilreaper.tamias.common.area.PlayingArea;
 import net.theevilreaper.tamias.common.area.placement.AreaPlacement;
 import net.theevilreaper.tamias.common.area.placement.CircleAreaPlacement;
 import net.theevilreaper.tamias.common.ground.GroundData;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +28,7 @@ public final class GamePlacement implements Placement {
     private final PlayingArea area;
     private final Instance instance;
 
-    public GamePlacement(@NotNull Instance instance, @NotNull PlayingArea area) {
+    public GamePlacement(Instance instance, PlayingArea area) {
         this.instance = instance;
         this.area = area;
         this.placement = new CircleAreaPlacement(
@@ -47,14 +46,14 @@ public final class GamePlacement implements Placement {
         this.area.reset();
     }
 
-    private <T extends Point> void clearSet(@NotNull Collection<T> positions) {
+    private <T extends Point> void clearSet(Collection<T> positions) {
         for (T position : positions) {
             instance.setBlock(position, Block.AIR);
         }
     }
 
     @Override
-    public void triggerPlacement(@NotNull GroundData groundData) {
+    public void triggerPlacement(GroundData groundData) {
         if (this.placement.isRunning()) return;
         this.placement.place(groundData);
     }
@@ -96,7 +95,7 @@ public final class GamePlacement implements Placement {
      *
      * @param position the position to replace the block at
      */
-    private void replaceCornerBlock(@NotNull Point position) {
+    private void replaceCornerBlock(Point position) {
         Block block = instance.getBlock(position);
         if (block == Block.AIR || block == Block.BARRIER) return;
         instance.setBlock(position, Block.AIR);

@@ -2,7 +2,6 @@ package net.theevilreaper.tamias.game.attribute;
 
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.attribute.Attribute;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * The {@link AttributeHelper} is a helper class to adjust some attributes of the player.
@@ -21,11 +20,11 @@ public final class AttributeHelper {
     private static final double ZERO_JUMP = 0.0;
 
     /**
-     * Disables the movement for the player.
+     * Disables the movement of the player.
      *
      * @param player the player to disable the movement
      */
-    public static void disableMovement(@NotNull Player player) {
+    public static void disableMovement(Player player) {
         player.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(ZERO_MOVEMENT);
         player.getAttribute(Attribute.JUMP_STRENGTH).setBaseValue(ZERO_JUMP);
     }
@@ -35,7 +34,7 @@ public final class AttributeHelper {
      *
      * @param player the player to enable the movement
      */
-    public static void enableMovement(@NotNull Player player) {
+    public static void enableMovement(Player player) {
         player.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(DEFAULT_MOVE_SPEED);
         player.getAttribute(Attribute.JUMP_STRENGTH).setBaseValue(DEFAULT_JUMP_HEIGHT);
     }

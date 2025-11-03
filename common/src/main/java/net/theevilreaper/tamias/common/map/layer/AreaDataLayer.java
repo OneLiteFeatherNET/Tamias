@@ -16,9 +16,9 @@ import org.jetbrains.annotations.NotNull;
  * @since 1.0.0
  */
 public record AreaDataLayer(
-        @NotNull Vec lowerCorner,
-        @NotNull Vec upperCorner,
-        @NotNull Direction facing
+        Vec lowerCorner,
+        Vec upperCorner,
+        Direction facing
 ) implements AreaData {
 
     /**

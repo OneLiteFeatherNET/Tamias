@@ -6,7 +6,6 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.timer.Task;
 import net.theevilreaper.tamias.common.ground.GroundData;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -16,9 +15,9 @@ public abstract non-sealed class AreaBasePlacement<T extends Point> implements A
 
     protected final Instance instance;
     protected final List<T> blockPositions;
-    protected Task buildTask;
+    protected @Nullable Task buildTask;
 
-    AreaBasePlacement(@NotNull Instance instance, @NotNull List<T> blockPositions) {
+    AreaBasePlacement(Instance instance, List<T> blockPositions) {
         this.instance = instance;
         this.blockPositions = new ArrayList<>(blockPositions);
     }
@@ -36,7 +35,7 @@ public abstract non-sealed class AreaBasePlacement<T extends Point> implements A
      *
      * @param position the position to place the block
      */
-    protected abstract void placeBlock(@NotNull T position, @NotNull GroundData groundData);
+    protected abstract void placeBlock(T position, GroundData groundData);
 
     @Override
     public boolean isRunning() {

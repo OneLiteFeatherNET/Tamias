@@ -1,7 +1,6 @@
 package net.theevilreaper.tamias.common.ground;
 
 import net.minestom.server.instance.block.Block;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.List;
@@ -24,7 +23,7 @@ public sealed interface GroundDataRegistry permits TamiasGroundDataRegistry {
      *
      * @return the instance of the registry
      */
-    static @NotNull GroundDataRegistry instance() {
+    static GroundDataRegistry instance() {
         return TamiasGroundDataRegistry.RegistryInstance.INSTANCE;
     }
 
@@ -33,21 +32,20 @@ public sealed interface GroundDataRegistry permits TamiasGroundDataRegistry {
      *
      * @param groundData the data to add
      */
-    void add(@NotNull GroundData groundData);
+    void add(GroundData groundData);
 
     /**
      * Gets a random {@link GroundData} instance from the registry.
      *
      * @return the random data
      */
-    @NotNull GroundData getRandomData();
+    GroundData getRandomData();
 
     /**
      * Returns all available {@link GroundData} instances.
      *
      * @return the list of all available data
      */
-    @NotNull
     @UnmodifiableView
     List<GroundData> getGroundData();
 }

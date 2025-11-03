@@ -10,7 +10,6 @@ import net.theevilreaper.aves.map.provider.AbstractMapProvider;
 import net.theevilreaper.tamias.common.map.GameMap;
 import net.theevilreaper.tamias.common.map.functional.LobbyMapPredicate;
 import net.theevilreaper.tamias.common.util.MapFilter;
-import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 import java.util.Optional;
@@ -33,7 +32,7 @@ public final class SetupMapProvider extends AbstractMapProvider {
      * @param path        the path where the maps are stored
      * @param fileHandler the FileHandler used to load and save maps
      */
-    public SetupMapProvider(@NotNull Path path, @NotNull FileHandler fileHandler) {
+    public SetupMapProvider(Path path, FileHandler fileHandler) {
         super(fileHandler, MapFilter::filterMapsForSetup);
         loadMapEntries(path.resolve("maps"));
 
@@ -68,17 +67,17 @@ public final class SetupMapProvider extends AbstractMapProvider {
      * @param mapEntry the map entry to check
      * @return true if the map is a lobby map
      */
-    private boolean isLobbyMap(@NotNull MapEntry mapEntry) {
+    private boolean isLobbyMap(MapEntry mapEntry) {
         return mapEntry.getDirectoryRoot().endsWith(LOBBY_SUFFIX);
     }
 
     @Override
-    public void saveMap(@NotNull Path path, @NotNull BaseMap baseMap) {
+    public void saveMap(Path path, BaseMap baseMap) {
         this.fileHandler.save(path, baseMap instanceof GameMap mapToSave ? mapToSave : baseMap);
     }
 
     @Override
-    public void teleportToSpawn(@NotNull Player player, boolean instanceSet) {
+    public void teleportToSpawn(Player player, boolean instanceSet) {
         Pos pos = activeMap.getSpawnOrDefault(FALLBACK_POS);
         if (!instanceSet) {
             player.teleport(pos);

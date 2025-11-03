@@ -5,7 +5,6 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.theevilreaper.tamias.common.util.Tags;
 import net.theevilreaper.xerus.api.team.DefaultTeam;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
@@ -24,19 +23,19 @@ public final class TamiasTeam extends DefaultTeam {
      *
      * @param name            the name which the team should have
      */
-    TamiasTeam(@NotNull Key name, int initialCapacity, byte teamTagId) {
+    TamiasTeam(Key name, int initialCapacity, byte teamTagId) {
         super(name, initialCapacity);
         this.teamTagId = teamTagId;
     }
 
     @Override
-    public void addPlayer(@NotNull Player paramPlayer) {
+    public void addPlayer(Player paramPlayer) {
         super.addPlayer(paramPlayer);
         paramPlayer.setTag(Tags.TEAM_ID, teamTagId);
     }
 
     @Override
-    public void removePlayer(@NotNull Player paramPlayer) {
+    public void removePlayer(Player paramPlayer) {
         super.removePlayer(paramPlayer);
         paramPlayer.removeTag(Tags.TEAM_ID);
         paramPlayer.getInventory().clear();

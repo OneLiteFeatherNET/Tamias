@@ -4,10 +4,9 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.potion.Potion;
 import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.potion.TimedPotion;
-import org.jetbrains.annotations.NotNull;
 
 /**
- * The class contains some effects which are used during the game.
+ * The class contains some effects that are used during the game.
  * It has also some methods to add the effects to {@link Player}.
  *
  * @author theEvilReaper
@@ -32,7 +31,7 @@ public final class Effects {
      *
      * @param player the player who should receive the effects
      */
-    public static void setEffectForExplode(@NotNull Player player) {
+    public static void setEffectForExplode(Player player) {
         clearEffects(player);
         player.addEffect(NIGHT_VISION.potion());
     }
@@ -42,7 +41,7 @@ public final class Effects {
      *
      * @param player the player who should receive the effects
      */
-    public static void setExplodeOrHitEffect(@NotNull Player player) {
+    public static void setExplodeOrHitEffect(Player player) {
         clearEffects(player);
         player.addEffect(SLOWNESS.potion());
         player.addEffect(BLINDNESS.potion());
@@ -53,7 +52,7 @@ public final class Effects {
      *
      * @param player the player to clear the effects
      */
-    private static void clearEffects(@NotNull Player player) {
+    private static void clearEffects(Player player) {
         if (player.getActiveEffects().isEmpty()) return;
         for (TimedPotion activeEffect : player.getActiveEffects()) {
             player.removeEffect(activeEffect.potion().effect());

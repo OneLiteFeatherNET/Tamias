@@ -16,7 +16,6 @@ import net.theevilreaper.tamias.setup.inventory.slot.MultipleStringItemSlot;
 import net.theevilreaper.tamias.setup.inventory.slot.SpawnItemSlot;
 import net.theevilreaper.tamias.setup.inventory.slot.StringItemSlot;
 import net.theevilreaper.tamias.setup.util.SetupItems;
-import org.jetbrains.annotations.NotNull;
 
 import static net.theevilreaper.aves.inventory.util.InventoryConstants.CANCEL_CLICK;
 
@@ -46,7 +45,7 @@ public class LobbyViewInventory extends GlobalInventoryBuilder {
      *
      * @param mapBuilder the map to display
      */
-    public LobbyViewInventory(@NotNull BaseMapBuilder mapBuilder) {
+    public LobbyViewInventory(BaseMapBuilder mapBuilder) {
         super(Component.text("Lobby data"), InventoryType.CHEST_3_ROW);
         this.mapBuilder = mapBuilder;
         this.confirmInventory = new ConfirmInventory(this::handleConfirmClick);
@@ -89,7 +88,7 @@ public class LobbyViewInventory extends GlobalInventoryBuilder {
      *
      * @param player the player to open the inventory
      */
-    private void openConfirmInventory(@NotNull Player player) {
+    private void openConfirmInventory(Player player) {
         player.closeInventory();
         confirmInventory.register();
         player.openInventory(confirmInventory.getInventory());
@@ -100,7 +99,7 @@ public class LobbyViewInventory extends GlobalInventoryBuilder {
      *
      * @param player the player who clicked
      */
-    private void handleConfirmClick(@NotNull Player player) {
+    private void handleConfirmClick(Player player) {
         player.closeInventory();
         mapBuilder.spawn(null);
         invalidateDataLayout();

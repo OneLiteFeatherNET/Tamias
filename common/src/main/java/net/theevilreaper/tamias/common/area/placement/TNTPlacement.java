@@ -10,7 +10,6 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.theevilreaper.tamias.common.ground.GroundData;
 import net.theevilreaper.tamias.common.ground.GroundDataRegistry;
-import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
 import java.util.Iterator;
@@ -31,12 +30,12 @@ public class TNTPlacement extends AreaBasePlacement<Vec> {
      * @param instance       the instance where the TNT will be placed
      * @param blockPositions the positions where the TNT will be placed
      */
-    public TNTPlacement(@NotNull Instance instance, @NotNull List<Vec> blockPositions) {
+    public TNTPlacement(Instance instance, List<Vec> blockPositions) {
         super(instance, blockPositions);
     }
 
     @Override
-    public void place(@NotNull GroundData groundData) {
+    public void place(GroundData groundData) {
         if (this.buildTask != null) return;
         Iterator<Vec> iterator = blockPositions.iterator();
         this.buildTask = MinecraftServer.getSchedulerManager().buildTask(() -> {
@@ -52,7 +51,7 @@ public class TNTPlacement extends AreaBasePlacement<Vec> {
      *
      * @param pos the position to spawn the TNT
      */
-    private void spawnTnt(@NotNull Vec pos) {
+    private void spawnTnt(Vec pos) {
         Entity tntEntity = new Entity(EntityType.FALLING_BLOCK);
         FallingBlockMeta fallingBlockMeta = (FallingBlockMeta) tntEntity.getEntityMeta();
         fallingBlockMeta.setBlock(Block.TNT);
@@ -72,7 +71,7 @@ public class TNTPlacement extends AreaBasePlacement<Vec> {
      * @param entity      the TNT entity to check
      * @param originalPos the original position where the TNT was spawned
      */
-    private void checkIfStillFalling(@NotNull Entity entity, @NotNull Vec originalPos) {
+    private void checkIfStillFalling(Entity entity, Vec originalPos) {
         if (!entity.isOnGround()) {
             // Schedule with a longer delay to reduce resource usage
             entity.scheduler().buildTask(() -> checkIfStillFalling(entity, originalPos))
@@ -91,7 +90,7 @@ public class TNTPlacement extends AreaBasePlacement<Vec> {
      * @param position   the position to place the block
      * @param groundData the ground data to use for placing the block
      */
-    protected void placeBlock(@NotNull Vec position, @NotNull GroundData groundData) {
+    protected void placeBlock(Vec position, GroundData groundData) {
         this.instance.setBlock(position, groundData.groundBlock());
     }
 }

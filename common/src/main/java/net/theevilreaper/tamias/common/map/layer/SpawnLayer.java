@@ -3,7 +3,6 @@ package net.theevilreaper.tamias.common.map.layer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.utils.Direction;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -14,13 +13,13 @@ import org.jetbrains.annotations.Nullable;
  * @version 1.0.0
  * @since 0.1.0
  */
-public record SpawnLayer(@NotNull Pos pos, @NotNull Direction direction) {
+public record SpawnLayer(Pos pos, Direction direction) {
 
     /**
      * Builder for creating instances of {@link SpawnLayer}.
      */
     @Contract(pure = true)
-    public static @NotNull Builder builder() {
+    public static Builder builder() {
         return new Builder();
     }
 
@@ -31,7 +30,7 @@ public record SpawnLayer(@NotNull Pos pos, @NotNull Direction direction) {
      * @return a new instance of {@link Builder}
      */
     @Contract(value = "_ -> new", pure = true)
-    public static @NotNull Builder builder(@NotNull SpawnLayer spawnLayer) {
+    public static Builder builder(SpawnLayer spawnLayer) {
         return new Builder(spawnLayer);
     }
 
@@ -44,8 +43,8 @@ public record SpawnLayer(@NotNull Pos pos, @NotNull Direction direction) {
      */
     public static final class Builder {
 
-        private Pos pos;
-        private Direction direction;
+        private @Nullable Pos pos;
+        private @Nullable Direction direction;
 
         /**
          * Constructs a new Builder instance.
@@ -59,7 +58,7 @@ public record SpawnLayer(@NotNull Pos pos, @NotNull Direction direction) {
          *
          * @param spawnLayer the spawn layer to use for building
          */
-        private Builder(@NotNull SpawnLayer spawnLayer) {
+        private Builder(SpawnLayer spawnLayer) {
             this.pos = spawnLayer.pos();
             this.direction = spawnLayer.direction();
         }
@@ -92,7 +91,7 @@ public record SpawnLayer(@NotNull Pos pos, @NotNull Direction direction) {
          * @return a new instance of {@link SpawnLayer}
          * @throws IllegalStateException if position or direction is not set
          */
-        public @NotNull SpawnLayer build() {
+        public SpawnLayer build() {
             if (pos == null) {
                 throw new IllegalStateException("Position is required for SpawnLayer");
             }

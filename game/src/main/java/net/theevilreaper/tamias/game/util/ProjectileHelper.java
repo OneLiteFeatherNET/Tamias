@@ -9,7 +9,6 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.item.ThrownEggMeta;
 import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.tamias.common.util.Tags;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
 
@@ -24,7 +23,7 @@ public final class ProjectileHelper {
 
     private ProjectileHelper() { }
 
-    public static void spawnProjectile(@NotNull Player player, @NotNull Function<Player, EntityProjectile> projectTileMapper) {
+    public static void spawnProjectile(Player player, Function<Player, EntityProjectile> projectTileMapper) {
         Check.argCondition(player.getInstance() == null, "Can't shoot without a instance from a player");
         var projectile = projectTileMapper.apply(player);
 
@@ -43,7 +42,7 @@ public final class ProjectileHelper {
      * @param player the player who should shoot
      * @return a new instance of the {@link EntityProjectile}
      */
-    public static @NotNull EntityProjectile createProjectile(@NotNull Player player) {
+    public static EntityProjectile createProjectile(Player player) {
         EntityProjectile projectile = new EntityProjectile(player, EntityType.EGG);
         ThrownEggMeta eggMeta = (ThrownEggMeta) projectile.getEntityMeta();
         eggMeta.setOnFire(true);
@@ -51,7 +50,7 @@ public final class ProjectileHelper {
         return projectile;
     }
 
-    private static void checkIfStillFalling(@NotNull Entity entity) {
+    private static void checkIfStillFalling(Entity entity) {
         if (!entity.isOnGround()) {
             entity.scheduleNextTick(ProjectileHelper::checkIfStillFalling);
             return;

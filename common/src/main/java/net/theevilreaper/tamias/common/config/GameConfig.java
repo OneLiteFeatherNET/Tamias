@@ -2,12 +2,11 @@ package net.theevilreaper.tamias.common.config;
 
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * The {@link GameConfig} interface represents the structure for a configuration which is used by the game.
- * It contains some values which can be adjusted to change specific settings for the game.
- * There are also some static values in the interface which are also used in the game.
+ * It contains some values that can be adjusted to change specific settings for the game.
+ * There are also some static values in the interface that are also used in the game.
  * Each static value indicates that it is a constant value and should not be changed.
  *
  * @author theEvilReaper
@@ -42,7 +41,7 @@ public sealed interface GameConfig permits GameConfigImpl, InternalGameConfig {
      * @return the builder instance
      */
     @Contract(pure = true)
-    static @NotNull Builder builder() {
+    static Builder builder() {
         return new GameConfigBuilder();
     }
 
@@ -104,7 +103,7 @@ public sealed interface GameConfig permits GameConfigImpl, InternalGameConfig {
          * @param minPlayers the minimum number of players
          * @return the builder instance
          */
-        @NotNull Builder minPlayers(int minPlayers);
+        Builder minPlayers(int minPlayers);
 
         /**
          * Sets the maximum number of players allowed in the game.
@@ -112,7 +111,7 @@ public sealed interface GameConfig permits GameConfigImpl, InternalGameConfig {
          * @param maxPlayers the maximum number of players
          * @return the builder instance
          */
-        @NotNull Builder maxPlayers(int maxPlayers);
+        Builder maxPlayers(int maxPlayers);
 
         /**
          * Sets the lobby time in seconds.
@@ -121,7 +120,7 @@ public sealed interface GameConfig permits GameConfigImpl, InternalGameConfig {
          * @return the builder instance
          * @throws IllegalArgumentException if the lobby time is than the {@link GameConfig#FORCE_START_TIME}
          */
-        @NotNull Builder lobbyTime(int lobbyTime);
+        Builder lobbyTime(int lobbyTime);
 
         /**
          * Sets the maximum game time in seconds.
@@ -129,7 +128,7 @@ public sealed interface GameConfig permits GameConfigImpl, InternalGameConfig {
          * @param gameTime the maximum game time
          * @return the builder instance
          */
-        @NotNull Builder gameTime(int gameTime);
+        Builder gameTime(int gameTime);
 
         /**
          * Sets the general size for each team.
@@ -137,7 +136,7 @@ public sealed interface GameConfig permits GameConfigImpl, InternalGameConfig {
          * @param teamSize the size of the team
          * @return the builder instance
          */
-        @NotNull Builder teamSize(int teamSize);
+        Builder teamSize(int teamSize);
 
         /**
          * Sets the maximum rounds for the game.
@@ -145,14 +144,13 @@ public sealed interface GameConfig permits GameConfigImpl, InternalGameConfig {
          * @param maxRounds the maximum rounds
          * @return the builder instance
          */
-        @NotNull Builder maxRounds(int maxRounds);
+        Builder maxRounds(int maxRounds);
 
         /**
          * Builds the game configuration.
          *
          * @return the created configuration
          */
-        @NotNull GameConfig build();
+        GameConfig build();
     }
-
 }

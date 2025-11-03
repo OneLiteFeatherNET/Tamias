@@ -6,7 +6,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -17,11 +16,11 @@ public final class MultipleStringItemSlot extends Slot {
 
     private final ItemStack stack;
 
-    public MultipleStringItemSlot(@NotNull Component displayName, @Nullable String... data) {
+    public MultipleStringItemSlot(Component displayName, @Nullable String... data) {
         this(displayName, data == null ? List.of() : List.of(data));
     }
 
-    public MultipleStringItemSlot(@NotNull Component displayName, @NotNull List<String> data) {
+    public MultipleStringItemSlot(Component displayName, List<String> data) {
         if (data.isEmpty()) {
             this.stack = ItemStack.builder(Material.DARK_OAK_SIGN)
                     .customName(displayName)
@@ -50,7 +49,7 @@ public final class MultipleStringItemSlot extends Slot {
     }
 
     @Override
-    public @NotNull ItemStack getItem() {
+    public ItemStack getItem() {
         return this.stack;
     }
 }

@@ -6,14 +6,13 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("java:S3252")
 public final class StringItemSlot extends Slot {
 
     private final ItemStack stack;
 
-    public StringItemSlot(@NotNull Component displayName, @NotNull String data) {
+    public StringItemSlot(Component displayName, String data) {
         Component mainLoreComponent = Component.text("-", NamedTextColor.GRAY).append(Component.space()).append(Component.text(data, NamedTextColor.GOLD));
         this.stack = ItemStack.builder(Material.OAK_SIGN)
                 .customName(displayName)
@@ -23,7 +22,7 @@ public final class StringItemSlot extends Slot {
     }
 
     @Override
-    public @NotNull ItemStack getItem() {
+    public ItemStack getItem() {
         return this.stack;
     }
 }

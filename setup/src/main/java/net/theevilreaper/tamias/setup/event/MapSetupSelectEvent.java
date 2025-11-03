@@ -4,7 +4,6 @@ import net.theevilreaper.aves.map.MapEntry;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.trait.CancellableEvent;
 import net.minestom.server.event.trait.PlayerEvent;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * The {@link MapSetupSelectEvent} is called when a player selects a map for the setup process.
@@ -27,7 +26,7 @@ public final class MapSetupSelectEvent implements PlayerEvent, CancellableEvent 
      * @param mapEntry  the selected map
      * @param lobbyMode if the setup is for the lobby or the game
      */
-    public MapSetupSelectEvent(@NotNull Player player, @NotNull MapEntry mapEntry, boolean lobbyMode) {
+    public MapSetupSelectEvent(Player player, MapEntry mapEntry, boolean lobbyMode) {
         this.player = player;
         this.mapEntry = mapEntry;
         this.lobbyMode = lobbyMode;
@@ -58,7 +57,7 @@ public final class MapSetupSelectEvent implements PlayerEvent, CancellableEvent 
      *
      * @return the map entry
      */
-    public @NotNull MapEntry getMapEntry() {
+    public MapEntry getMapEntry() {
         return mapEntry;
     }
 
@@ -76,7 +75,7 @@ public final class MapSetupSelectEvent implements PlayerEvent, CancellableEvent 
      * @return the player
      */
     @Override
-    public @NotNull Player getPlayer() {
+    public Player getPlayer() {
         return this.player;
     }
 }
