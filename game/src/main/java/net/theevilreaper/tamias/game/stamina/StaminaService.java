@@ -3,7 +3,6 @@ package net.theevilreaper.tamias.game.stamina;
 import net.theevilreaper.xerus.api.team.Team;
 import net.theevilreaper.xerus.api.team.TeamService;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -37,7 +36,7 @@ public final class StaminaService {
      *
      * @param teamService the service to get the teams
      */
-    public void createStaminaObjects(@NotNull TeamService teamService) {
+    public void createStaminaObjects(TeamService teamService) {
         // There are just two teams in the game. So this should be fine but when changing the order of the teams this will break
         Team survivorTeam = teamService.getTeams().getFirst();
         Team bomberTeam = teamService.getTeams().getLast();
@@ -77,7 +76,7 @@ public final class StaminaService {
      * @param uuid       the unique identifier for the player
      * @param staminaBar the stamina bar to add
      */
-    public void add(@NotNull UUID uuid, @NotNull StaminaBar staminaBar) {
+    public void add(UUID uuid, StaminaBar staminaBar) {
         lock.lock();
         try {
             staminaBars.put(uuid, staminaBar);
@@ -92,7 +91,7 @@ public final class StaminaService {
      * @param uuid the unique identifier for the player
      * @return true if the {@link StaminaBar} was removed successfully
      */
-    public boolean removeStaminaBar(@NotNull UUID uuid) {
+    public boolean removeStaminaBar(UUID uuid) {
         try {
             lock.lock();
             StaminaBar staminaBar = staminaBars.get(uuid);
@@ -112,7 +111,7 @@ public final class StaminaService {
      * @param player the player to get the stamina bar
      * @return the {@link StaminaBar} or null if the player has no stamina bar
      */
-    public @Nullable StaminaBar getStaminaBar(@NotNull Player player) {
+    public @Nullable StaminaBar getStaminaBar(Player player) {
         return this.getStaminaBar(player.getUuid());
     }
 
@@ -122,7 +121,7 @@ public final class StaminaService {
      * @param uuid the unique identifier for the player
      * @return the {@link StaminaBar} or null if the player has no stamina bar
      */
-    public @Nullable StaminaBar getStaminaBar(@NotNull UUID uuid) {
+    public @Nullable StaminaBar getStaminaBar(UUID uuid) {
         try {
             lock.lock();
             return staminaBars.get(uuid);

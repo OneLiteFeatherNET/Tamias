@@ -3,7 +3,6 @@ package net.theevilreaper.tamias.setup.event.dialog;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.trait.CancellableEvent;
 import net.minestom.server.event.trait.PlayerEvent;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * The {@link SetupDialogRequestEvent} is triggered when a player requests to open a setup dialog.
@@ -25,7 +24,7 @@ public class SetupDialogRequestEvent implements PlayerEvent, CancellableEvent {
      * @param player the player who triggered the event
      * @param type   the type of dialog to be opened
      */
-    public SetupDialogRequestEvent(@NotNull Player player, @NotNull Type type) {
+    public SetupDialogRequestEvent(Player player, Type type) {
         this.player = player;
         this.type = type;
         this.cancelled = false;
@@ -57,7 +56,7 @@ public class SetupDialogRequestEvent implements PlayerEvent, CancellableEvent {
      * @return the player instance
      */
     @Override
-    public @NotNull Player getPlayer() {
+    public Player getPlayer() {
         return this.player;
     }
 
@@ -66,7 +65,7 @@ public class SetupDialogRequestEvent implements PlayerEvent, CancellableEvent {
      *
      * @return the type of dialog
      */
-    public @NotNull Type getType() {
+    public Type getType() {
         return type;
     }
 

@@ -16,9 +16,9 @@ import org.jetbrains.annotations.Nullable;
  */
 public final class AreaDataBuilder implements AreaData.Builder {
 
-    private Vec lowerCorner;
-    private Vec upperCorner;
-    private Direction facing;
+    private @Nullable Vec lowerCorner;
+    private @Nullable Vec upperCorner;
+    private @Nullable Direction facing;
 
     /**
      * Constructs a new AreaDataBuilder instance.
@@ -32,7 +32,7 @@ public final class AreaDataBuilder implements AreaData.Builder {
      *
      * @param areaData the area data to use for building
      */
-    AreaDataBuilder(@NotNull AreaData areaData) {
+    AreaDataBuilder(AreaData areaData) {
         this.lowerCorner = areaData.lowerCorner();
         this.upperCorner = areaData.upperCorner();
         this.facing = areaData.facing();
@@ -42,7 +42,7 @@ public final class AreaDataBuilder implements AreaData.Builder {
      * {@inheritDoc}
      */
     @Override
-    public AreaData.@NotNull Builder lowerCorner(@NotNull Vec lowerCorner) {
+    public AreaData.Builder lowerCorner(Vec lowerCorner) {
         this.lowerCorner = lowerCorner;
         return this;
     }
@@ -51,7 +51,7 @@ public final class AreaDataBuilder implements AreaData.Builder {
      * {@inheritDoc}
      */
     @Override
-    public AreaData.@NotNull Builder upperCorner(@NotNull Vec upperCorner) {
+    public AreaData.Builder upperCorner(Vec upperCorner) {
         this.upperCorner = upperCorner;
         return this;
     }
@@ -60,7 +60,7 @@ public final class AreaDataBuilder implements AreaData.Builder {
      * {@inheritDoc}
      */
     @Override
-    public AreaData.@NotNull Builder facing(@NotNull Direction facing) {
+    public AreaData.Builder facing(Direction facing) {
         this.facing = facing;
         return this;
     }
@@ -69,7 +69,7 @@ public final class AreaDataBuilder implements AreaData.Builder {
      * {@inheritDoc}
      */
     @Override
-    public @NotNull AreaData build() {
+    public AreaData build() {
         return new AreaDataLayer(lowerCorner, upperCorner, facing);
     }
 

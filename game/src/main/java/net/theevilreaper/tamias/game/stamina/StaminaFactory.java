@@ -2,7 +2,6 @@ package net.theevilreaper.tamias.game.stamina;
 
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * The factory class is responsible for creating new instances of the {@link StaminaBar}.
@@ -20,7 +19,7 @@ public abstract class StaminaFactory {
      * @param player the player which should receive the stamina bar
      * @return a new instance of the {@link StaminaBar}
      */
-    public static @NotNull StaminaBar createExplodeBar(@NotNull Player player) {
+    public static StaminaBar createExplodeBar(Player player) {
         return new ExplodeBar(player);
     }
 
@@ -30,7 +29,7 @@ public abstract class StaminaFactory {
      * @param player the player which should receive the stamina bar
      * @return a new instance of the {@link StaminaBar}
      */
-    public static @NotNull StaminaBar createShootBar(@NotNull Player player) {
+    public static StaminaBar createShootBar(Player player) {
         return new ShootBar(player);
     }
 

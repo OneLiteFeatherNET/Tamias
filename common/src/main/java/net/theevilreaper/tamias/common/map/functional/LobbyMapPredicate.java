@@ -1,7 +1,6 @@
 package net.theevilreaper.tamias.common.map.functional;
 
 import net.theevilreaper.aves.map.MapEntry;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Predicate;
 
@@ -22,7 +21,7 @@ public final class LobbyMapPredicate implements Predicate<MapEntry> {
      * @return true if the map entry is a lobby map, false otherwise
      */
     @Override
-    public boolean test(@NotNull MapEntry mapEntry) {
+    public boolean test(MapEntry mapEntry) {
         return mapEntry.getDirectoryRoot().endsWith("lobby");
     }
 }

@@ -4,6 +4,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.timer.Task;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
@@ -22,8 +23,8 @@ public abstract sealed class StaminaBar implements Runnable permits ShootBar, Ex
     protected final Player player;
     private final ChronoUnit chronoUnit;
     protected int period;
-    protected Status status;
-    private Task task;
+    protected @Nullable Status status;
+    private @Nullable Task task;
 
     /**
      * Creates a new reference from an {@link StaminaBar}.
@@ -32,7 +33,7 @@ public abstract sealed class StaminaBar implements Runnable permits ShootBar, Ex
      * @param chronoUnit the tick interval for the bar
      * @param period     the tick period for the par
      */
-    StaminaBar(@NotNull Player player, @NotNull ChronoUnit chronoUnit, int period) {
+    StaminaBar(Player player, ChronoUnit chronoUnit, int period) {
         this.player = player;
         this.chronoUnit = chronoUnit;
         this.period = period;

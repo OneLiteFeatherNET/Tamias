@@ -3,7 +3,6 @@ package net.theevilreaper.tamias.game.scoreboard;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.scoreboard.Sidebar;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * The GameScoreboard class implements the {@link Scoreboard} interface and provides a specific layout for the game scoreboard.
@@ -35,7 +34,7 @@ public final class GameScoreboard implements Scoreboard, DefaultScoreLayout {
      * {@inheritDoc}
      */
     @Override
-    public void updateTitle(@NotNull Component title) {
+    public void updateTitle(Component title) {
         this.sidebar.setTitle(title);
     }
 
@@ -43,7 +42,7 @@ public final class GameScoreboard implements Scoreboard, DefaultScoreLayout {
      * {@inheritDoc}
      */
     @Override
-    public void addViewer(@NotNull Player player) {
+    public void addViewer(Player player) {
         this.sidebar.addViewer(player);
     }
 
@@ -51,7 +50,7 @@ public final class GameScoreboard implements Scoreboard, DefaultScoreLayout {
      * {@inheritDoc}
      */
     @Override
-    public void removeViewer(@NotNull Player player) {
+    public void removeViewer(Player player) {
         this.sidebar.removeViewer(player);
     }
 
@@ -59,7 +58,7 @@ public final class GameScoreboard implements Scoreboard, DefaultScoreLayout {
      * {@inheritDoc}
      */
     @Override
-    public void updateScore(@NotNull ScoreType scoreType, @NotNull Component component) {
+    public void updateScore(ScoreType scoreType, Component component) {
         if (scoreType instanceof ScoreType.MapType) {
             throw new UnsupportedOperationException("Cannot update map score in GameScoreboard");
         }

@@ -2,7 +2,6 @@ package net.theevilreaper.tamias.game.scoreboard;
 
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * The interface represents the basic structure of a scoreboard for the game.
@@ -24,21 +23,21 @@ public interface Scoreboard {
      *
      * @param title the new title to set
      */
-    void updateTitle(@NotNull Component title);
+    void updateTitle(Component title);
 
     /**
      * Adds the player to the scoreboard viewers.
      *
      * @param player the player to add
      */
-    void addViewer(@NotNull Player player);
+    void addViewer(Player player);
 
     /**
      * Removes the player from the scoreboard viewers.
      *
      * @param player the player to remove
      */
-    void removeViewer(@NotNull Player player);
+    void removeViewer(Player player);
 
     /**
      * Updates a given score in the scoreboard with a new component.
@@ -46,5 +45,5 @@ public interface Scoreboard {
      * @param scoreType the type of score to update
      * @param component the new component to set for the score
      */
-    void updateScore(@NotNull ScoreType scoreType, @NotNull Component component);
+    void updateScore(ScoreType scoreType, Component component);
 }

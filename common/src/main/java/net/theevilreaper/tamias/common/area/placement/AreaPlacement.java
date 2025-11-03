@@ -2,7 +2,6 @@ package net.theevilreaper.tamias.common.area.placement;
 
 import net.minestom.server.timer.Task;
 import net.theevilreaper.tamias.common.ground.GroundData;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -19,7 +18,7 @@ public sealed interface AreaPlacement permits AreaBasePlacement {
     /**
      * Stars the placement of the area.
      */
-    void place(@NotNull GroundData groundData);
+    void place(GroundData groundData);
 
     /**
      * Checks if the placement is running.

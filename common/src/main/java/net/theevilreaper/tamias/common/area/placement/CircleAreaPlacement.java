@@ -8,7 +8,6 @@ import net.minestom.server.instance.block.Block;
 import net.theevilreaper.tamias.common.event.AreaFinishBuildEvent;
 import net.theevilreaper.tamias.common.ground.GroundData;
 import net.theevilreaper.tamias.common.util.Helper;
-import org.jetbrains.annotations.NotNull;
 
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -22,15 +21,15 @@ public final class CircleAreaPlacement extends AreaBasePlacement<Vec> {
     private final List<Vec> specialPositions;
 
     public CircleAreaPlacement(
-            @NotNull Instance instance,
-            @NotNull List<Vec> blockPositions,
-            @NotNull List<Vec> specialPositions) {
+            Instance instance,
+            List<Vec> blockPositions,
+            List<Vec> specialPositions) {
         super(instance, blockPositions);
         this.specialPositions = specialPositions;
     }
 
     @Override
-    public void place(@NotNull GroundData groundData) {
+    public void place(GroundData groundData) {
         if (this.buildTask != null) return;
         List<Vec> posList = new ArrayList<>(this.blockPositions);
         posList.sort(Helper.getComparator());
@@ -53,7 +52,7 @@ public final class CircleAreaPlacement extends AreaBasePlacement<Vec> {
     }
 
     @Override
-    protected void placeBlock(@NotNull Vec position, @NotNull GroundData groundData) {
+    protected void placeBlock(Vec position, GroundData groundData) {
         Block groundBlock;
         if (this.specialPositions.contains(position)) {
             groundBlock = groundData.getAddtionalBlock();

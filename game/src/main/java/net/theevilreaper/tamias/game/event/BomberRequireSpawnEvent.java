@@ -4,7 +4,6 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.trait.CancellableEvent;
 import net.minestom.server.event.trait.PlayerEvent;
 import net.theevilreaper.tamias.game.stamina.ExplodeBar;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * The {@link BomberRequireSpawnEvent} is called by the game everytime when a bomber player wants to spawn at a new tnt.
@@ -26,7 +25,7 @@ public final class BomberRequireSpawnEvent implements PlayerEvent, CancellableEv
      * @param player     the player who should spawn
      * @param explodeBar the reference to the {@link ExplodeBar}
      */
-    public BomberRequireSpawnEvent(@NotNull Player player, @NotNull ExplodeBar explodeBar) {
+    public BomberRequireSpawnEvent(Player player, ExplodeBar explodeBar) {
         this.player = player;
         this.explodeBar = explodeBar;
     }
@@ -56,7 +55,7 @@ public final class BomberRequireSpawnEvent implements PlayerEvent, CancellableEv
      *
      * @return the reference
      */
-    public @NotNull ExplodeBar getExplodeBar() {
+    public ExplodeBar getExplodeBar() {
         return this.explodeBar;
     }
 
@@ -66,7 +65,7 @@ public final class BomberRequireSpawnEvent implements PlayerEvent, CancellableEv
      * @return the player
      */
     @Override
-    public @NotNull Player getPlayer() {
+    public Player getPlayer() {
         return this.player;
     }
 }

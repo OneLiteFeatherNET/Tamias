@@ -8,7 +8,6 @@ import net.minestom.server.entity.Player;
 import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.common.util.Messages;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * @author theEvilReaper
@@ -65,7 +64,7 @@ public final class GameMessages extends Messages {
      * @return a component with the lobby time message
      */
     @Contract(value = "_ -> new", pure = true)
-    public static @NotNull Component getLobbyTime(int time) {
+    public static Component getLobbyTime(int time) {
         return withMiniPrefix("<gold>Starting in... <red>" + time);
     }
 
@@ -76,7 +75,7 @@ public final class GameMessages extends Messages {
      * @return a component with the title time
      */
     @Contract(value = "_ -> new", pure = true)
-    public static @NotNull Component getTitleTime(int time) {
+    public static Component getTitleTime(int time) {
         return TITLE_TIME.append(Component.text(time, NamedTextColor.YELLOW));
     }
 
@@ -87,7 +86,7 @@ public final class GameMessages extends Messages {
      * @return a component with the restart time message
      */
     @Contract(value = "_ -> new", pure = true)
-    public static @NotNull Component getRestartTime(int time) {
+    public static Component getRestartTime(int time) {
         if (time == 1) {
             return withMiniPrefix("<gray>Restarting in <red>" + time + " <gray>second!");
         }
@@ -95,30 +94,30 @@ public final class GameMessages extends Messages {
     }
 
     @Contract(value = "_ -> new", pure = true)
-    public static @NotNull Component getJoinMessage(@NotNull Player player) {
+    public static Component getJoinMessage(Player player) {
         return PREFIX.append(Component.space()).append(withMini("<color:#249D9F>" + player.getUsername() + "</color>"))
                 .append(Component.space()).append(JOIN_PART);
     }
 
     @Contract(value = "_ -> new", pure = true)
-    public static @NotNull Component getLeaveMessage(@NotNull Player player) {
+    public static Component getLeaveMessage(Player player) {
         return PREFIX.append(Component.space()).append(withMini("<color:#249D9F>" + player.getUsername() + "</color>"))
                 .append(Component.space()).append(LEAVE_PART);
     }
 
     @Contract(value = "_, _ -> new", pure = true)
-    public static @NotNull Component getDeathMessage(@NotNull Player target, @NotNull Player killer) {
+    public static Component getDeathMessage(Player target, Player killer) {
         return withPrefix(target.getDisplayName().append(Component.space()).append(DEATH_PART).append(Component.space())
                 .append(killer.getDisplayName()));
     }
 
     @Contract(value = "_ -> new", pure = true)
-    public static @NotNull Component getShotMessage(@NotNull Player killer) {
+    public static Component getShotMessage(Player killer) {
         return withPrefix(SHOT_PART.append(Component.space()).append(killer.getDisplayName()));
     }
 
     @Contract
-    public static @NotNull Component buildChatLayout(@NotNull Player player, @NotNull Component message) {
+    public static Component buildChatLayout(Player player, Component message) {
         return player.getDisplayName().append(SEPARATOR).append(message);
     }
 }

@@ -3,7 +3,6 @@ package net.theevilreaper.tamias.game.scoreboard;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.scoreboard.Sidebar;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * The interface contains methods, to load a specific default layout for a {@link Sidebar}.
@@ -22,7 +21,7 @@ sealed interface DefaultScoreLayout permits LobbyScoreboard, GameScoreboard {
      * @param lobbyScoreboard the scoreboard to initialize
      * @param mapName         the name of the map
      */
-    default void initLobbyScoreboard(@NotNull Sidebar lobbyScoreboard, @NotNull String mapName) {
+    default void initLobbyScoreboard(Sidebar lobbyScoreboard, String mapName) {
         lobbyScoreboard.createLine(new Sidebar.ScoreboardLine("empty-line-1", Component.empty(), 6));
         lobbyScoreboard.createLine(new Sidebar.ScoreboardLine("player-header", Component.text("Players:", NamedTextColor.GRAY), 5));
         lobbyScoreboard.createLine(new Sidebar.ScoreboardLine(ScoreType.PLAYER.key().asString(), Component.text("0", NamedTextColor.YELLOW), 4));
@@ -36,7 +35,7 @@ sealed interface DefaultScoreLayout permits LobbyScoreboard, GameScoreboard {
      *
      * @param gameScoreboard the scoreboard to initialize
      */
-    default void initGameScoreboard(@NotNull Sidebar gameScoreboard) {
+    default void initGameScoreboard(Sidebar gameScoreboard) {
         gameScoreboard.createLine(new Sidebar.ScoreboardLine("empty-line-1", Component.empty(), 8));
         gameScoreboard.createLine(new Sidebar.ScoreboardLine("tnt-header", Component.text("TNT:", NamedTextColor.RED), 7));
         gameScoreboard.createLine(new Sidebar.ScoreboardLine(ScoreType.TNT.key().asString(), SPACER.append(Component.text("0")), 6));

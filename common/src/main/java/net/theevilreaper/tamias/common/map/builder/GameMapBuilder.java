@@ -8,7 +8,6 @@ import net.theevilreaper.tamias.common.area.SpawnArea;
 import net.theevilreaper.tamias.common.map.GameMap;
 import net.theevilreaper.tamias.common.map.layer.AreaData;
 import net.theevilreaper.tamias.common.map.layer.SpawnLayer;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -21,7 +20,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public final class GameMapBuilder extends BaseMapBuilder {
 
-    private Pos bomberInitialSpawn;
+    private @Nullable Pos bomberInitialSpawn;
     private final SpawnLayer.Builder spawnLayerBuilder;
     private final AreaData.Builder areaDataBuilder;
 
@@ -38,7 +37,7 @@ public final class GameMapBuilder extends BaseMapBuilder {
      *
      * @param gameMap the game map to use for building
      */
-    public GameMapBuilder(@NotNull GameMap gameMap) {
+    public GameMapBuilder(GameMap gameMap) {
         super(gameMap);
         this.bomberInitialSpawn = gameMap.getBomberInitialSpawn();
         this.spawnLayerBuilder = SpawnLayer.builder(gameMap.getSpawnData());
@@ -124,7 +123,7 @@ public final class GameMapBuilder extends BaseMapBuilder {
      *
      * @return the layer builder
      */
-    public @NotNull SpawnLayer.Builder getSpawnLayerBuilder() {
+    public SpawnLayer.Builder getSpawnLayerBuilder() {
         return this.spawnLayerBuilder;
     }
 
@@ -133,7 +132,7 @@ public final class GameMapBuilder extends BaseMapBuilder {
      *
      * @return the area builder
      */
-    public @NotNull AreaData.Builder getAreaDataBuilder() {
+    public AreaData.Builder getAreaDataBuilder() {
         return this.areaDataBuilder;
     }
 
@@ -143,7 +142,7 @@ public final class GameMapBuilder extends BaseMapBuilder {
      * @return a new instance of GameMap
      */
     @Override
-    public @NotNull GameMap build() {
+    public GameMap build() {
         return new GameMap(
                 this.name,
                 this.spawn,

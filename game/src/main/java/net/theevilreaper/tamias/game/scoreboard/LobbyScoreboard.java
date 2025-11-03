@@ -5,7 +5,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.scoreboard.Sidebar;
-import org.jetbrains.annotations.NotNull;
 
 import static net.theevilreaper.tamias.game.scoreboard.ScoreType.PLAYER;
 
@@ -26,7 +25,7 @@ public final class LobbyScoreboard implements Scoreboard, DefaultScoreLayout {
      *
      * @param displayName the display name for the scoreboard
      */
-    public LobbyScoreboard(@NotNull Component displayName) {
+    public LobbyScoreboard(Component displayName) {
         this.sidebar = new Sidebar(displayName);
     }
 
@@ -34,7 +33,7 @@ public final class LobbyScoreboard implements Scoreboard, DefaultScoreLayout {
      * {@inheritDoc}
      */
     @Override
-    public void updateTitle(@NotNull Component title) {
+    public void updateTitle(Component title) {
         this.sidebar.setTitle(title);
     }
 
@@ -50,7 +49,7 @@ public final class LobbyScoreboard implements Scoreboard, DefaultScoreLayout {
      * {@inheritDoc}
      */
     @Override
-    public void addViewer(@NotNull Player player) {
+    public void addViewer(Player player) {
         if (this.sidebar.addViewer(player)) {
             int size = MinecraftServer.getConnectionManager().getOnlinePlayers().size();
             Component component = Component.text(size, NamedTextColor.YELLOW);
@@ -62,7 +61,7 @@ public final class LobbyScoreboard implements Scoreboard, DefaultScoreLayout {
      * {@inheritDoc}
      */
     @Override
-    public void removeViewer(@NotNull Player player) {
+    public void removeViewer(Player player) {
         if (this.sidebar.removeViewer(player)) {
             int size = MinecraftServer.getConnectionManager().getOnlinePlayers().size();
             Component component = Component.text(size, NamedTextColor.YELLOW);
@@ -74,7 +73,7 @@ public final class LobbyScoreboard implements Scoreboard, DefaultScoreLayout {
      * {@inheritDoc}
      */
     @Override
-    public void updateScore(@NotNull ScoreType scoreType, @NotNull Component component) {
+    public void updateScore(ScoreType scoreType, Component component) {
         if (scoreType instanceof ScoreType.TNTCount || scoreType instanceof ScoreType.RoundType) {
             throw new UnsupportedOperationException("Cannot update TNT or ROUND scores in LobbyScoreboard");
         }

@@ -13,8 +13,6 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.theevilreaper.tamias.setup.inventory.DataType;
 import net.theevilreaper.tamias.setup.util.FormatHelper;
-import org.jetbrains.annotations.NotNull;
-
 
 @SuppressWarnings("java:S3252")
 public final class SpawnItemSlot extends PositionBaseSlot {
@@ -31,7 +29,7 @@ public final class SpawnItemSlot extends PositionBaseSlot {
 
     private final ItemStack stack;
 
-    public static @NotNull ISlot empty() {
+    public static ISlot empty() {
         return EMPTY_SLOT;
     }
 
@@ -41,7 +39,7 @@ public final class SpawnItemSlot extends PositionBaseSlot {
      * @param point the point to teleport the player to
      * @return the created SpawnItemSlot instance
      */
-    public static @NotNull SpawnItemSlot asSpawn(@NotNull Point point, @NotNull PlayerConsumer rightClickAction) {
+    public static SpawnItemSlot asSpawn(Point point, PlayerConsumer rightClickAction) {
         return new SpawnItemSlot(point, DataType.SPAWN.getMaterial(), SPAWN_NAME, rightClickAction);
     }
 
@@ -51,7 +49,7 @@ public final class SpawnItemSlot extends PositionBaseSlot {
      * @param point the point to teleport the player to
      * @return the created SpawnItemSlot instance
      */
-    public static @NotNull SpawnItemSlot asBomber(@NotNull Point point, @NotNull PlayerConsumer rightClickAction) {
+    public static SpawnItemSlot asBomber(Point point, PlayerConsumer rightClickAction) {
         return new SpawnItemSlot(point, DataType.BOMBER.getMaterial(), BOMBER_NAME, rightClickAction);
     }
 
@@ -61,7 +59,7 @@ public final class SpawnItemSlot extends PositionBaseSlot {
      * @param point the point to teleport the player to
      * @return the created SpawnItemSlot instance
      */
-    public static @NotNull SpawnItemSlot asSurvivor(@NotNull Point point, @NotNull PlayerConsumer rightClickAction) {
+    public static SpawnItemSlot asSurvivor(Point point, PlayerConsumer rightClickAction) {
         return new SpawnItemSlot(point, DataType.SURVIVOR.getMaterial(), SURVIVOR_NAME, rightClickAction);
     }
 
@@ -72,7 +70,7 @@ public final class SpawnItemSlot extends PositionBaseSlot {
      * @param material    the material of the item
      * @param displayName the display name of the item
      */
-    SpawnItemSlot(@NotNull Point point, @NotNull Material material, @NotNull Component displayName, @NotNull PlayerConsumer rightClickAction) {
+    SpawnItemSlot(Point point, Material material, Component displayName, PlayerConsumer rightClickAction) {
         super(point, rightClickAction);
         this.stack = ItemStack.builder(material)
                 .customName(displayName)

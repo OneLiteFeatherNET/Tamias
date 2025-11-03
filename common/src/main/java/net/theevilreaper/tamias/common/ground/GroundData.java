@@ -2,7 +2,6 @@ package net.theevilreaper.tamias.common.ground;
 
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.validate.Check;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -20,7 +19,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * @since 1.0.0
  */
 @SuppressWarnings("java:S3252")
-public record GroundData(@NotNull Block groundBlock, @Nullable List<Block> additionalBlocks) {
+public record GroundData(Block groundBlock, @Nullable List<Block> additionalBlocks) {
 
     /**
      * Performs some checks on the given data to avoid invalid states.
@@ -49,7 +48,7 @@ public record GroundData(@NotNull Block groundBlock, @Nullable List<Block> addit
      *
      * @return the additional block
      */
-    public @NotNull Block getAddtionalBlock() {
+    public Block getAddtionalBlock() {
         if (additionalBlocks == null || additionalBlocks.isEmpty()) return groundBlock();
         if (additionalBlocks.size() == 1) return additionalBlocks.getFirst();
         int index = ThreadLocalRandom.current().nextInt(0, this.additionalBlocks.size());

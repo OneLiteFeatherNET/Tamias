@@ -2,7 +2,7 @@ package net.theevilreaper.tamias.common.util;
 
 import net.theevilreaper.aves.map.MapEntry;
 import net.theevilreaper.tamias.common.config.GameConfig;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,7 +27,7 @@ public interface MapFilter {
      * @param mapStream a stream of paths
      * @return a list which contains different maps which are available for the game
      */
-    static @NotNull List<MapEntry> filterMapsForGame(@NotNull Stream<Path> mapStream) {
+    static @Unmodifiable List<MapEntry> filterMapsForGame(Stream<Path> mapStream) {
         return mapStream
                 .filter(Files::isDirectory)
                 .filter(path -> Files.exists(path.resolve(REGION_FOLDER)))
@@ -42,7 +42,7 @@ public interface MapFilter {
      * @param mapStream a stream of paths
      * @return a list which contains different maps which are available for the setup
      */
-    static @NotNull List<MapEntry> filterMapsForSetup(@NotNull Stream<Path> mapStream) {
+    static @Unmodifiable List<MapEntry> filterMapsForSetup(Stream<Path> mapStream) {
         return mapStream
                 .filter(Files::isDirectory)
                 .filter(path -> Files.exists(path.resolve(REGION_FOLDER)))

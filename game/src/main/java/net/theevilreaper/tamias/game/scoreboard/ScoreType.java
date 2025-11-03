@@ -24,14 +24,14 @@ public interface ScoreType {
      *
      * @return the identifier
      */
-    @NotNull Key key();
+    Key key();
 
     /**
      * Represents the player score type.
      */
     record TNTCount() implements ScoreType {
         @Override
-        public @NotNull Key key() {
+        public Key key() {
             return Key.key("tamias:tnt-count");
         }
     }
@@ -41,7 +41,7 @@ public interface ScoreType {
      */
     record PlayerCount() implements ScoreType {
         @Override
-        public @NotNull Key key() {
+        public Key key() {
             return Key.key("tamias:player-count");
         }
     }
@@ -51,7 +51,7 @@ public interface ScoreType {
      */
     record RoundType() implements ScoreType {
         @Override
-        public @NotNull Key key() {
+        public Key key() {
             return Key.key("tamias:round");
         }
     }
@@ -61,7 +61,7 @@ public interface ScoreType {
      */
     record MapType() implements ScoreType {
         @Override
-        public @NotNull Key key() {
+        public Key key() {
             return Key.key("tamias:map");
         }
     }

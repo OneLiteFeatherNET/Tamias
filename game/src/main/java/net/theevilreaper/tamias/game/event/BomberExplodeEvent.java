@@ -3,7 +3,6 @@ package net.theevilreaper.tamias.game.event;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.trait.PlayerEvent;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * The {@link BomberExplodeEvent} is called when a bomber explodes after the {@link net.theevilreaper.tamias.game.stamina.ExplodeBar} timer is over.
@@ -24,7 +23,7 @@ public final class BomberExplodeEvent implements PlayerEvent {
      * @param player the player who triggered the event
      * @param vec    the position
      */
-    public BomberExplodeEvent(@NotNull Player player, @NotNull Vec vec) {
+    public BomberExplodeEvent(Player player, Vec vec) {
         this.player = player;
         this.vec = vec;
     }
@@ -34,7 +33,6 @@ public final class BomberExplodeEvent implements PlayerEvent {
      *
      * @return the position
      */
-    @NotNull
     public Vec getPosition() {
         return this.vec;
     }
@@ -45,7 +43,7 @@ public final class BomberExplodeEvent implements PlayerEvent {
      * @return the player
      */
     @Override
-    public @NotNull Player getPlayer() {
+    public Player getPlayer() {
         return this.player;
     }
 }

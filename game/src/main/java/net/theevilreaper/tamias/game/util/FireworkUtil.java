@@ -11,7 +11,6 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.component.FireworkExplosion;
 import net.minestom.server.item.component.FireworkList;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -20,7 +19,7 @@ public final class FireworkUtil {
 
     private static final int FIREWORK_ENTITY_SPAWN_COUNT = 3;
 
-    public static void spawnFireworkForWinner(@NotNull Team team) {
+    public static void spawnFireworkForWinner(Team team) {
         if (team.isEmpty()) return;
 
         for (int i = 0; i < FIREWORK_ENTITY_SPAWN_COUNT; i++) {

@@ -4,7 +4,6 @@ import net.kyori.adventure.sound.Sound;
 import net.minestom.server.entity.Player;
 import net.minestom.server.sound.SoundEvent;
 import net.theevilreaper.tamias.game.util.ProjectileHelper;
-import org.jetbrains.annotations.NotNull;
 
 import java.time.temporal.ChronoUnit;
 
@@ -29,7 +28,7 @@ public final class ShootBar extends StaminaBar {
      *
      * @param player the player who owns the bar
      */
-    ShootBar(@NotNull Player player) {
+    ShootBar(Player player) {
         super(player, ChronoUnit.MILLIS, 500);
         this.currentTime = MAX_TIME;
     }

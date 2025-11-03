@@ -4,7 +4,6 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.theevilreaper.tamias.common.map.layer.AreaData;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 import org.slf4j.Logger;
@@ -38,7 +37,7 @@ public final class GameArea implements PlayingArea {
     private final Set<Vec> specialBlocks;
     private final Set<Vec> tntPositions;
 
-    public GameArea(@NotNull AreaData areaData) {
+    public GameArea(AreaData areaData) {
         this.areaData = areaData;
         this.areaPositions = new ArrayList<>();
         this.specialBlocks = new HashSet<>();
@@ -70,7 +69,7 @@ public final class GameArea implements PlayingArea {
         LOGGER.info("Calculated {} potential area positions", areaPositions.size());
     }
 
-    public void flattenPositions(@NotNull Set<Vec> positions) {
+    public void flattenPositions(Set<Vec> positions) {
         this.areaPositions.removeAll(positions);
     }
 
@@ -81,7 +80,7 @@ public final class GameArea implements PlayingArea {
     }
 
     @Override
-    public @NotNull @UnmodifiableView Set<Point> getPositions() {
+    public @UnmodifiableView Set<Point> getPositions() {
         Set<Point> result = new HashSet<>(areaPositions);
         return Collections.unmodifiableSet(result);
     }
@@ -90,7 +89,7 @@ public final class GameArea implements PlayingArea {
      * Calculates the positions for the special blocks.
      */
     @Override
-    public void calculateSpecialBlockPositions(@NotNull IntSupplier specialBlockCount) {
+    public void calculateSpecialBlockPositions(IntSupplier specialBlockCount) {
         // Create a copy of the area positions to avoid modifying the original list
         List<Vec> availablePositions = new ArrayList<>(this.areaPositions);
 
@@ -110,7 +109,7 @@ public final class GameArea implements PlayingArea {
      * Calculates the positions for the tnt blocks.
      */
     @Override
-    public void calculateTntPositions(@NotNull IntSupplier tntCountCalculator) {
+    public void calculateTntPositions(IntSupplier tntCountCalculator) {
         int tntCount = tntCountCalculator.getAsInt();
 
         // Create a copy of the area positions to avoid modifying the original list
@@ -151,17 +150,17 @@ public final class GameArea implements PlayingArea {
     }
 
     @Override
-    public @NotNull AreaData getGameAreaData() {
+    public AreaData getGameAreaData() {
         return this.areaData;
     }
 
     @Override
-    public @NotNull Set<Vec> getTntPositions() {
+    public Set<Vec> getTntPositions() {
         return this.tntPositions;
     }
 
     @Override
-    public @NotNull Set<Vec> getSpecialPositions() {
+    public Set<Vec> getSpecialPositions() {
         return this.specialBlocks;
     }
 }

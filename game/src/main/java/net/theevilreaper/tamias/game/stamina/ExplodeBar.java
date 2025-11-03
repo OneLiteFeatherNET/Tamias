@@ -7,7 +7,6 @@ import net.minestom.server.sound.SoundEvent;
 import net.theevilreaper.tamias.game.attribute.AttributeHelper;
 import net.theevilreaper.tamias.game.event.BomberExplodeEvent;
 import net.theevilreaper.tamias.game.event.BomberRequireSpawnEvent;
-import org.jetbrains.annotations.NotNull;
 
 import java.time.temporal.ChronoUnit;
 
@@ -33,7 +32,7 @@ public final class ExplodeBar extends StaminaBar {
      *
      * @param player the player who owns the bar
      */
-    ExplodeBar(@NotNull Player player) {
+    ExplodeBar(Player player) {
         super(player, ChronoUnit.MILLIS, 250);
     }
 

@@ -3,7 +3,7 @@ package net.theevilreaper.tamias.common.round.event;
 import net.minestom.server.event.Event;
 
 /**
- * THe {@link RoundStartEvent} is called when a round should be prepared.
+ * THe {@link RoundPrepareEvent} is called when a round should be prepared.
  *
  * @author theevilreaper
  * @version 1.0.0

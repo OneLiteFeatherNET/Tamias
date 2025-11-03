@@ -1,7 +1,6 @@
 package net.theevilreaper.tamias.common.area;
 
 import net.minestom.server.coordinate.Point;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.Collection;
@@ -31,7 +30,6 @@ public interface Area {
      *
      * @return the positions
      */
-    @NotNull
     @UnmodifiableView
     Collection<Point> getPositions();
 

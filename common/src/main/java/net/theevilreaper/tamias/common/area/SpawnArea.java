@@ -10,7 +10,6 @@ import net.minestom.server.utils.Direction;
 import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.tamias.common.map.layer.SpawnLayer;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -38,9 +37,9 @@ public final class SpawnArea implements Area {
      * Creates a new object reference from {@link SpawnArea} class with the given values.
      *
      * @param spawnLayer   the spawn layer which is used to calculate the spawn positions
-     * @param maxPositions the maximum amount of possible positions
+     * @param maxPositions the maximum number of possible positions
      */
-    public SpawnArea(@NotNull SpawnLayer spawnLayer, int maxPositions) {
+    public SpawnArea(SpawnLayer spawnLayer, int maxPositions) {
         Check.argCondition(maxPositions < 1, "The maximum position count must be higher than 0");
         Check.argCondition(spawnLayer.direction() == Direction.DOWN || spawnLayer.direction() == Direction.UP, "The direction must be horizontal");
         this.spawnLayer = spawnLayer;
@@ -58,7 +57,7 @@ public final class SpawnArea implements Area {
      * @param players        the players to teleport
      * @param switchInstance if the player should be switched to the instance
      */
-    public void teleport(@NotNull Instance instance, @NotNull List<Player> players, BooleanSupplier switchInstance, Consumer<Player> callback) {
+    public void teleport(Instance instance, List<Player> players, BooleanSupplier switchInstance, Consumer<Player> callback) {
         Check.argCondition(players.size() > this.positions.length, "The amount of online players is higher then the maximum position count");
         if (!ChunkUtils.isLoaded(instance.getChunkAt(this.spawnLayer.pos()))) {
             instance.loadChunk(this.spawnLayer.pos()).join();
@@ -105,7 +104,7 @@ public final class SpawnArea implements Area {
     }
 
     @Override
-    public @NotNull Collection<Point> getPositions() {
+    public Collection<Point> getPositions() {
         return Arrays.asList(this.positions);
     }
 }

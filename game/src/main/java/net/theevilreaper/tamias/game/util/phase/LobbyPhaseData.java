@@ -1,7 +1,6 @@
 package net.theevilreaper.tamias.game.util.phase;
 
 import net.theevilreaper.tamias.common.config.GameConfig;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.function.IntConsumer;
 
@@ -17,7 +16,7 @@ import java.util.function.IntConsumer;
  * @version 1.0.0
  * @since 0.1.0
  */
-public record LobbyPhaseData(@NotNull IntConsumer timeUpdater, int maxPlayers, int minPlayers, int lobbyTime) {
+public record LobbyPhaseData(IntConsumer timeUpdater, int maxPlayers, int minPlayers, int lobbyTime) {
 
     /**
      * Creates a new LobbyPhaseData instance.
@@ -45,7 +44,7 @@ public record LobbyPhaseData(@NotNull IntConsumer timeUpdater, int maxPlayers, i
      * @param timeUpdater the consumer to update to time
      * @param config      the {@link GameConfig} to get some values from it
      */
-    public LobbyPhaseData(@NotNull IntConsumer timeUpdater, @NotNull GameConfig config) {
+    public LobbyPhaseData(IntConsumer timeUpdater, GameConfig config) {
         this(timeUpdater, config.maxPlayers(), config.minPlayers(), config.lobbyTime());
     }
 }

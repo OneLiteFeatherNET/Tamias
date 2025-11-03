@@ -11,14 +11,13 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.utils.Direction;
 import net.theevilreaper.tamias.common.map.layer.AreaData;
 import net.theevilreaper.tamias.common.util.DirectionFaceHelper;
-import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Type;
 
 public final class GameAreaAdapter implements JsonDeserializer<AreaData>, JsonSerializer<AreaData> {
 
     @Override
-    public AreaData deserialize(@NotNull JsonElement jsonElement, @NotNull Type type, @NotNull JsonDeserializationContext context) throws JsonParseException {
+    public AreaData deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext context) throws JsonParseException {
         JsonObject object = jsonElement.getAsJsonObject();
         Vec lowerCorner = context.deserialize(object.get("lowerCorner"), Vec.class);
         Vec upperCorner = context.deserialize(object.get("upperCorner"), Vec.class);
@@ -28,7 +27,7 @@ public final class GameAreaAdapter implements JsonDeserializer<AreaData>, JsonSe
     }
 
     @Override
-    public JsonElement serialize(@NotNull AreaData areaData, @NotNull Type type, @NotNull JsonSerializationContext context) {
+    public JsonElement serialize(AreaData areaData, Type type, JsonSerializationContext context) {
         JsonObject object = new JsonObject();
         object.add("lowerCorner", context.serialize(areaData.lowerCorner(), Vec.class));
         object.add("upperCorner", context.serialize(areaData.upperCorner(), Vec.class));

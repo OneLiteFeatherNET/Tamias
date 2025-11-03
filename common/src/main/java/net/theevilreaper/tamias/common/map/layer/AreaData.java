@@ -3,7 +3,6 @@ package net.theevilreaper.tamias.common.map.layer;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.utils.Direction;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -23,7 +22,7 @@ public sealed interface AreaData permits AreaDataLayer {
      * @return a new builder instance
      */
     @Contract(pure = true)
-    static @NotNull Builder builder() {
+    static Builder builder() {
         return new AreaDataBuilder();
     }
 
@@ -34,7 +33,7 @@ public sealed interface AreaData permits AreaDataLayer {
      * @return a new builder instance
      */
     @Contract(value = "_ -> new", pure = true)
-    static @NotNull Builder builder(@NotNull AreaData areaData) {
+    static Builder builder(AreaData areaData) {
         return new AreaDataBuilder(areaData);
     }
 
@@ -43,21 +42,21 @@ public sealed interface AreaData permits AreaDataLayer {
      *
      * @return the lower corner
      */
-    @NotNull Vec lowerCorner();
+    Vec lowerCorner();
 
     /**
      * The upper corner of the area as a {@link Vec}.
      *
      * @return the upper corner
      */
-    @NotNull Vec upperCorner();
+    Vec upperCorner();
 
     /**
      * The facing direction of the area.
      *
      * @return the facing direction
      */
-    @NotNull Direction facing();
+    Direction facing();
 
     /**
      * The builder interface to create a new {@link AreaData}.
@@ -75,7 +74,7 @@ public sealed interface AreaData permits AreaDataLayer {
          * @param lowerCorner the lower corner of the area
          * @return the current builder instance
          */
-        @NotNull Builder lowerCorner(@NotNull Vec lowerCorner);
+        Builder lowerCorner(Vec lowerCorner);
 
         /**
          * Sets the upper corner of the area.
@@ -83,7 +82,7 @@ public sealed interface AreaData permits AreaDataLayer {
          * @param upperCorner the upper corner of the area
          * @return the current builder instance
          */
-        @NotNull Builder upperCorner(@NotNull Vec upperCorner);
+        Builder upperCorner(Vec upperCorner);
 
         /**
          * Sets the facing direction of the area.
@@ -91,14 +90,14 @@ public sealed interface AreaData permits AreaDataLayer {
          * @param facing the facing direction of the area
          * @return the current builder instance
          */
-        @NotNull Builder facing(@NotNull Direction facing);
+        Builder facing(Direction facing);
 
         /**
          * Builds the {@link AreaData} instance.
          *
          * @return the created {@link AreaData}
          */
-        @NotNull AreaData build();
+        AreaData build();
 
         /**
          * Returns the lower corner of the area.

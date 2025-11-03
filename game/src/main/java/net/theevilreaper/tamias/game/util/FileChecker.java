@@ -1,7 +1,6 @@
 package net.theevilreaper.tamias.game.util;
 
 import net.theevilreaper.tamias.common.config.GameConfig;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +12,7 @@ public final class FileChecker {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileChecker.class);
 
-    public static void checkFileIntegrity(@NotNull Path rootPath) {
+    public static void checkFileIntegrity(Path rootPath) {
         var mapDirectory = rootPath.resolve(GameConfig.MAP_FOLDER);
         if (!Files.exists(rootPath)) {
             try {

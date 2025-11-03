@@ -1,7 +1,6 @@
 package net.theevilreaper.tamias.common.area.holder;
 
 import net.theevilreaper.tamias.common.ground.GroundData;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Represents a placement which can be triggered.
@@ -20,5 +19,5 @@ public interface Placement {
     /**
      * Triggers the placement.
      */
-    void triggerPlacement(@NotNull GroundData groundData);
+    void triggerPlacement(GroundData groundData);
 }

@@ -5,7 +5,6 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.common.util.Tags;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * The class provides some helper methods to set the items for the player.
@@ -36,7 +35,7 @@ public final class Items {
      *
      * @param player the player to set the item
      */
-    public void setShootItem(@NotNull Player player) {
+    public void setShootItem(Player player) {
         player.getInventory().clear();
         player.getInventory().addItemStack(shootItem);
     }
@@ -46,12 +45,12 @@ public final class Items {
      *
      * @param player the player to set the item
      */
-    public void setBombItem(@NotNull Player player) {
+    public void setBombItem(Player player) {
         player.getInventory().clear();
         player.getInventory().addItemStack(this.bombItem);
     }
 
-    public void setItemToPlayer(@NotNull Player player, int teamId) {
+    public void setItemToPlayer(Player player, int teamId) {
         if (teamId == GameConfig.SURVIVOR_ID) {
             setShootItem(player);
         } else {

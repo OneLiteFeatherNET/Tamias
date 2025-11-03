@@ -16,7 +16,6 @@ import net.minestom.server.item.Material;
 import net.theevilreaper.tamias.setup.event.MapSetupSelectEvent;
 import net.theevilreaper.tamias.setup.util.SetupItems;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -44,7 +43,7 @@ public class MapSetupInventory extends GlobalInventoryBuilder {
     private static final int[] MAP_SLOTS = LayoutCalculator
             .repeat(InventoryType.CHEST_1_ROW.getSize(), InventoryType.CHEST_3_ROW.getSize());
 
-    public MapSetupInventory(@NotNull Supplier<List<MapEntry>> maps) {
+    public MapSetupInventory(Supplier<List<MapEntry>> maps) {
         super(Component.text("Select map"), InventoryType.CHEST_4_ROW);
 
         InventoryLayout layout = InventoryLayout.fromType(getType());
@@ -81,7 +80,7 @@ public class MapSetupInventory extends GlobalInventoryBuilder {
      * @param stack      the item stack that was clicked
      * @param result     a consumer to handle the result of the click
      */
-    private ClickHolder handleClick(@NotNull MapEntry currentMap, @NotNull Player player, int slot, @NotNull Click click, @NotNull ItemStack stack, @NotNull Consumer<ClickHolder> result) {
+    private ClickHolder handleClick(MapEntry currentMap, Player player, int slot, Click click, ItemStack stack, Consumer<ClickHolder> result) {
         result.accept(ClickHolder.cancelClick());
         boolean lobbyMode = click instanceof Click.Left;
         EventDispatcher.callCancellable(new MapSetupSelectEvent(player, currentMap, lobbyMode), player::closeInventory);
@@ -95,7 +94,7 @@ public class MapSetupInventory extends GlobalInventoryBuilder {
      * @return the ItemStack representing the map item
      */
     @Contract(value = "_ -> new", pure = true)
-    private @NotNull ItemStack getMapItem(@NotNull Path path) {
+    private ItemStack getMapItem(Path path) {
         return ItemStack.builder(Material.PAPER)
                 .lore(LORE_COMPONENTS)
                 .customName(Component.text(path.getFileName().toString()))
@@ -107,7 +106,7 @@ public class MapSetupInventory extends GlobalInventoryBuilder {
      *
      * @param player the player to open the inventory for
      */
-    public void open(@NotNull Player player) {
+    public void open(Player player) {
         player.openInventory(this.getInventory());
     }
 }
