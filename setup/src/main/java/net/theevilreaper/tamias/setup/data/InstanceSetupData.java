@@ -22,10 +22,10 @@ public abstract class InstanceSetupData implements SetupData {
     protected BossBar bossBar;
     protected Component title;
 
-    protected InstanceSetupData(@NotNull UUID uuid, @NotNull MapEntry mapEntry) {
+    protected InstanceSetupData(@NotNull UUID uuid, @NotNull MapEntry mapEntry, @NotNull BossBar.Color color) {
         this.uuid = uuid;
         this.mapEntry = mapEntry;
-        this.bossBar = BossBar.bossBar(Component.empty(), 1, BossBar.Color.RED, BossBar.Overlay.PROGRESS);
+        this.bossBar = BossBar.bossBar(Component.empty(), 1, color, BossBar.Overlay.PROGRESS);
     }
 
 
