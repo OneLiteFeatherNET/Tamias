@@ -24,6 +24,7 @@ import net.theevilreaper.tamias.setup.data.GameData;
 import net.theevilreaper.tamias.setup.data.InstanceSetupData;
 import net.theevilreaper.tamias.setup.data.LobbyData;
 import net.theevilreaper.tamias.setup.util.DirectionUtil;
+import net.theevilreaper.tamias.setup.util.SetupTags;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -44,7 +45,7 @@ public final class SetupPositionCommand extends Command {
     }
 
     private void handleSpawnSet(@NotNull CommandSender sender, @NotNull CommandContext context) {
-        if (!sender.hasTag(TamiasSetup.SETUP_TAG)) {
+        if (!sender.hasTag(SetupTags.SETUP_TAG)) {
             sender.sendMessage(SELECT_MAP_FIRST);
             return;
         }

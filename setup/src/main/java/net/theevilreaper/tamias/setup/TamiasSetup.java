@@ -48,7 +48,6 @@ import java.util.function.Supplier;
 
 public final class TamiasSetup implements ListenerHandling {
 
-    public static final Tag<Byte> SETUP_TAG = Tag.Transient("setup");
     public static final Tag<Boolean> DELETE_TAG = Tag.Boolean("delete").defaultValue(false);
 
     private final SetupDataService setupDataService;

@@ -16,6 +16,7 @@ import net.theevilreaper.tamias.setup.data.GameData;
 import net.theevilreaper.tamias.setup.data.InstanceSetupData;
 import net.theevilreaper.tamias.setup.data.LobbyData;
 import net.theevilreaper.tamias.setup.event.MapSetupSelectEvent;
+import net.theevilreaper.tamias.setup.util.SetupTags;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.temporal.ChronoUnit;
@@ -64,7 +65,7 @@ public final class MapSetupSelectListener implements Consumer<MapSetupSelectEven
 
         this.setupDataService.add(player.getUuid(), data);
 
-        player.setTag(TamiasSetup.SETUP_TAG, (byte) 1);
+        player.setTag(SetupTags.SETUP_TAG,  1);
         getTeleportTask(() -> data.teleport(player)).schedule();
     }
 
