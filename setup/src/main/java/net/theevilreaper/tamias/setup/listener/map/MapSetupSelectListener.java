@@ -38,7 +38,7 @@ public final class MapSetupSelectListener implements Consumer<MapSetupSelectEven
     public void accept(@NotNull MapSetupSelectEvent event) {
         Player player = event.getPlayer();
 
-        SetupData setupData = this.setupDataService.get(player.getUuid()).get();
+       // SetupData setupData = this.setupDataService.get(player.getUuid()).get();
 
         /*if (setupData != null && setupData.hasMap()) {
             // If this condition is reached the setup is fucked up
@@ -52,6 +52,7 @@ public final class MapSetupSelectListener implements Consumer<MapSetupSelectEven
         } else {
             data = new GameData(player.getUuid(), mapEntry, this.fileHandler);
         }
+
 
         Component message = Messages.withPrefix(Component.text("You selected the map: ", NamedTextColor.GRAY))
                 .append(Component.text(mapEntry.getDirectoryRoot().getFileName().toString(), NamedTextColor.AQUA));

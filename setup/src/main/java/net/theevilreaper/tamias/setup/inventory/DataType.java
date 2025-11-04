@@ -12,6 +12,8 @@ import net.minestom.server.item.Material;
 @SuppressWarnings("java:S3252")
 public enum DataType {
 
+    NAME(Material.NAME_TAG),
+    AUTHOR(Material.OAK_SIGN),
     SPAWN(Material.GREEN_BED),
     BOMBER(Material.TNT),
     SURVIVOR(Material.GREEN_DYE);
@@ -34,6 +36,10 @@ public enum DataType {
      */
     public Material getMaterial() {
         return material;
+    }
+
+    public static DataType fromOrdinal(int ordinal) {
+        return values()[ordinal];
     }
 }
 

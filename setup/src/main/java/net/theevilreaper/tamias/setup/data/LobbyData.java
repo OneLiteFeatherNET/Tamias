@@ -2,6 +2,7 @@ package net.theevilreaper.tamias.setup.data;
 
 import net.kyori.adventure.bossbar.BossBar;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.anvil.AnvilLoader;
 import net.theevilreaper.aves.file.FileHandler;
@@ -53,6 +54,15 @@ public final class LobbyData extends InstanceSetupData {
     }
 
     @Override
+    public void teleport(@NotNull Player player) {
+        super.teleport(player);
+        Pos spawnPoint = this.mapBuilder.getSpawn() == null
+                ? SPAWN_POINT
+                : this.mapBuilder.getSpawn();
+        player.setInstance(this.instance, spawnPoint);
+    }
+
+    @Override
     public void reset() {
         super.reset();
         this.viewInventory.unregister();
@@ -60,12 +70,15 @@ public final class LobbyData extends InstanceSetupData {
 
     @Override
     public void loadData() {
-        if (this.mapEntry != null) return;
-        Optional<BaseMap> mapData = fileHandler.load(mapEntry.getMapFile(), BaseMap.class);
+        if (this.mapEntry == null) {
+            this.mapBuilder = BaseMap.builder();
+        } else {
+            Optional<BaseMap> mapData = fileHandler.load(mapEntry.getMapFile(), BaseMap.class);
 
-        mapData.ifPresentOrElse(baseMap -> {
-            this.mapBuilder = BaseMap.builder(baseMap);
-        }, () -> this.mapBuilder = BaseMap.builder());
+            mapData.ifPresentOrElse(baseMap -> {
+                this.mapBuilder = BaseMap.builder(baseMap);
+            }, () -> this.mapBuilder = BaseMap.builder());
+        }
 
         this.viewInventory = new LobbyViewInventory(this.mapBuilder);
 
@@ -76,6 +89,7 @@ public final class LobbyData extends InstanceSetupData {
         MinecraftServer.getInstanceManager().registerInstance(this.instance);
     }
 
+    @Override
     public BaseMapBuilder getMapBuilder() {
         return mapBuilder;
     }

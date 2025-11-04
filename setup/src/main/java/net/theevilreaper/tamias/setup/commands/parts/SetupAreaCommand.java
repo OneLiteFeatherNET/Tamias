@@ -14,6 +14,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.utils.Direction;
 import net.onelitefeather.guira.data.SetupData;
 import net.theevilreaper.aves.util.Components;
+import net.theevilreaper.tamias.common.map.builder.GameMapBuilder;
 import net.theevilreaper.tamias.common.util.Messages;
 import net.theevilreaper.tamias.setup.TamiasSetup;
 import net.theevilreaper.tamias.setup.data.GameData;
@@ -114,8 +115,10 @@ public class SetupAreaCommand extends Command {
         Vec vec = player.getPosition().asVec().sub(0, -1, 0);
         Direction direction = directionOptional.get();
 
-        setupData.getGameMapBuilder().areaLowerCorner(vec);
-        setupData.getGameMapBuilder().areaFacing(direction);
+        GameMapBuilder mapBuilder = (GameMapBuilder) setupData.getMapBuilder();
+
+        mapBuilder.areaLowerCorner(vec);
+        mapBuilder.areaFacing(direction);
 
         Component component = Messages.withPrefix(Component.text("Left area corner is: ", NamedTextColor.GRAY)
                 .append(Components.convertPoint(vec).style(Style.style(NamedTextColor.GOLD)))
@@ -134,7 +137,9 @@ public class SetupAreaCommand extends Command {
     private void setRightCorner(@NotNull Player player, @NotNull GameData setupData) {
         Vec vec = player.getPosition().asVec();
 
-        setupData.getGameMapBuilder().areaUpperCorner(vec);
+        GameMapBuilder mapBuilder = (GameMapBuilder) setupData.getMapBuilder();
+
+        mapBuilder.areaUpperCorner(vec);
         Component component = Messages.withPrefix(Component.text("Right area corner is: ", NamedTextColor.GRAY)
                 .append(Components.convertPoint(vec).style(Style.style(NamedTextColor.GOLD))));
         player.sendMessage(component);

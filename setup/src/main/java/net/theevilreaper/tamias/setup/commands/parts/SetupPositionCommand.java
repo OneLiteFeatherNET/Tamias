@@ -70,7 +70,7 @@ public final class SetupPositionCommand extends Command {
         if (data instanceof LobbyData lobbyData) {
             this.handleLobbySpawnSet(player, lobbyData.getMapBuilder(), spawnType);
         } else {
-            this.handleGameSpawnSet(player, ((GameData)data).getGameMapBuilder(), spawnType);
+            this.handleGameSpawnSet(player, ((InstanceSetupData)data).getMapBuilder(), spawnType);
         }
         Component posAsComponent = Components.convertPoint(player.getPosition());
         Component argComponent = Component.text(type, NamedTextColor.GREEN);
@@ -91,11 +91,11 @@ public final class SetupPositionCommand extends Command {
      * @param builder   the map builder to set the spawn
      * @param spawnType the type of spawn to set
      */
-    private void handleGameSpawnSet(@NotNull Player sender, @NotNull GameMapBuilder builder, @NotNull SpawnType spawnType) {
+    private void handleGameSpawnSet(@NotNull Player sender, @NotNull BaseMapBuilder builder, @NotNull SpawnType spawnType) {
         Pos position = sender.getPosition();
         switch (spawnType) {
             case MAP_SPAWN, SPECTATOR -> builder.spawn(position);
-            case BOMBER -> builder.bomberSpawn(position);
+            case BOMBER -> ((GameMapBuilder)builder).bomberSpawn(position);
             case SURVIVOR -> this.handleSurvivorSpawnSet(sender, builder);
         }
     }
@@ -106,7 +106,7 @@ public final class SetupPositionCommand extends Command {
      * @param player  the player who executed the command
      * @param builder the map builder to set the spawn
      */
-    private void handleSurvivorSpawnSet(@NotNull Player player, @NotNull GameMapBuilder builder) {
+    private void handleSurvivorSpawnSet(@NotNull Player player, @NotNull BaseMapBuilder builder) {
         Optional<Direction> determinedDirection = DirectionUtil.parseDirection(player);
 
         if (determinedDirection.isEmpty()) return;
@@ -114,8 +114,8 @@ public final class SetupPositionCommand extends Command {
         Pos pos = player.getPosition();
         Direction direction = determinedDirection.get();
 
-        builder.spawnLayerDirection(direction);
-        builder.spawnLayerPos(pos);
+        ((GameMapBuilder)builder).spawnLayerDirection(direction);
+        ((GameMapBuilder)builder).spawnLayerPos(pos);
 
         Component component = Messages.withPrefix(Component.text("Created round spawn at: ", NamedTextColor.GRAY)
                 .append(Components.convertPoint(pos).style(Style.style(NamedTextColor.GOLD)))

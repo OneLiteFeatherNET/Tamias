@@ -34,7 +34,7 @@ public final class SetupMapProvider extends AbstractMapProvider {
      */
     public SetupMapProvider(Path path, FileHandler fileHandler) {
         super(fileHandler, MapFilter::filterMapsForSetup);
-        loadMapEntries(path.resolve("maps"));
+        this.mapEntries = loadMapEntries(path.resolve("maps"));
 
         LobbyMapPredicate predicate = new LobbyMapPredicate();
         Optional<MapEntry> lobbyEntry = getEntries().stream().filter(predicate).findFirst();
