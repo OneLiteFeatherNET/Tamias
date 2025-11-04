@@ -1,5 +1,6 @@
 package net.theevilreaper.tamias.setup;
 
+import net.minestom.server.event.player.PlayerCustomClickEvent;
 import net.onelitefeather.guira.SetupDataService;
 import net.onelitefeather.guira.event.SetupFinishEvent;
 import net.theevilreaper.aves.file.FileHandler;
@@ -21,12 +22,19 @@ import net.minestom.server.tag.Tag;
 import net.theevilreaper.tamias.common.ListenerHandling;
 import net.theevilreaper.tamias.common.gson.GsonUtil;
 import net.theevilreaper.tamias.setup.commands.SetupCommand;
+import net.theevilreaper.tamias.setup.dialog.DialogRegistry;
+import net.theevilreaper.tamias.setup.dialog.SetupDialogRegistry;
+import net.theevilreaper.tamias.setup.dialog.event.PlayerDeletePromptEvent;
+import net.theevilreaper.tamias.setup.dialog.event.PlayerDialogRequestEvent;
 import net.theevilreaper.tamias.setup.event.MapSetupSelectEvent;
 import net.theevilreaper.tamias.setup.inventory.MapSetupInventory;
 import net.theevilreaper.tamias.setup.listener.PlayerChatListener;
 import net.theevilreaper.tamias.setup.listener.PlayerConfigurationListener;
 import net.theevilreaper.tamias.setup.listener.PlayerDisconnectListener;
 import net.theevilreaper.tamias.setup.listener.PlayerSpawnListener;
+import net.theevilreaper.tamias.setup.listener.dialog.PlayerCustomClickEventListener;
+import net.theevilreaper.tamias.setup.listener.dialog.PlayerDeletePromptListener;
+import net.theevilreaper.tamias.setup.listener.dialog.PlayerDialogRequestListener;
 import net.theevilreaper.tamias.setup.listener.item.PlayerUseItemListener;
 import net.theevilreaper.tamias.setup.listener.entity.EntityAddToInstanceListener;
 import net.theevilreaper.tamias.setup.listener.map.SetupFinishListener;
@@ -47,12 +55,14 @@ public final class TamiasSetup implements ListenerHandling {
     private final FileHandler fileHandler;
     private final MapProvider mapProvider;
     private final MapSetupInventory mapSetupInventory;
+    private final DialogRegistry dialogRegistry;
 
     public TamiasSetup() {
         this.fileHandler = new GsonFileHandler(GsonUtil.GSON);
         this.mapProvider = new SetupMapProvider(Paths.get(""), this.fileHandler);
         this.setupDataService = SetupDataService.create();
         this.mapSetupInventory = new MapSetupInventory(this.mapProvider::getEntries);
+        this.dialogRegistry = new SetupDialogRegistry();
         MinecraftServer.getSchedulerManager().buildShutdownTask(this::terminate);
     }
 
@@ -67,7 +77,7 @@ public final class TamiasSetup implements ListenerHandling {
     }
 
     private void registerListener() {
-        GlobalEventHandler manager = MinecraftServer.getGlobalEventHandler();
+        GlobalEventHandler node = MinecraftServer.getGlobalEventHandler();
         Supplier<Instance> instanceSupplier = mapProvider.getActiveInstance();
         SetupMapProvider setupMapProvider = (SetupMapProvider) mapProvider;
         PlayerConsumer initialSpawnSupplier = player -> {
@@ -78,16 +88,22 @@ public final class TamiasSetup implements ListenerHandling {
             setupMapProvider.teleportToSpawn(player, true);
             SetupItems.setOverViewItem(player);
         };
-        manager.addListener(PlayerDisconnectEvent.class, new PlayerDisconnectListener(setupDataService::remove));
-        manager.addListener(AsyncPlayerConfigurationEvent.class, new PlayerConfigurationListener(instanceSupplier));
-        manager.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(initialSpawnSupplier));
-        manager.addListener(AddEntityToInstanceEvent.class, new EntityAddToInstanceListener(instanceSupplier));
-        manager.addListener(MapSetupSelectEvent.class, new MapSetupSelectListener(this.fileHandler, this.setupDataService));
-        manager.addListener(SetupFinishEvent.class, new SetupFinishListener(instanceSwitcher));
-        manager.addListener(PlayerChatEvent.class, new PlayerChatListener(this.setupDataService));
+        node.addListener(PlayerDisconnectEvent.class, new PlayerDisconnectListener(setupDataService::remove));
+        node.addListener(AsyncPlayerConfigurationEvent.class, new PlayerConfigurationListener(instanceSupplier));
+        node.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(initialSpawnSupplier));
+        node.addListener(AddEntityToInstanceEvent.class, new EntityAddToInstanceListener(instanceSupplier));
+        node.addListener(MapSetupSelectEvent.class, new MapSetupSelectListener(this.fileHandler, this.setupDataService));
+        node.addListener(SetupFinishEvent.class, new SetupFinishListener(instanceSwitcher));
+        node.addListener(PlayerChatEvent.class, new PlayerChatListener(this.setupDataService));
 
         // Item listener
-        manager.addListener(PlayerUseItemEvent.class, new PlayerUseItemListener(this::updateMapInventory, setupDataService::get));
+        node.addListener(PlayerUseItemEvent.class, new PlayerUseItemListener(this::updateMapInventory, setupDataService::get));
+
+        //Dialogs
+        node.addListener(PlayerDeletePromptEvent.class, new PlayerDeletePromptListener(dialogRegistry));
+        node.addListener(PlayerCustomClickEvent.class, new PlayerCustomClickEventListener(this.dialogRegistry, this.setupDataService::get));
+        node.addListener(PlayerDialogRequestEvent.class, new PlayerDialogRequestListener(this.dialogRegistry));
+
     }
 
     /**
