@@ -20,7 +20,7 @@ import java.util.List;
 
 public final class NameInputDialog implements DialogTemplate<String> {
 
-    public static final Key DIALOG_KEY = Key.key("bounce", "name_setup_dialog");
+    public static final Key DIALOG_KEY = Key.key("suicide", "name_setup_dialog");
 
     private final Component header;
     private final Component submitComponent;

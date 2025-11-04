@@ -21,7 +21,7 @@ import java.util.List;
 
 public class DeleteDialog extends AbstractDialogTemplate<DataType> {
 
-    public static final Key DIALOG_KEY = Key.key("bounce", "delete_dialog");
+    public static final Key DIALOG_KEY = Key.key("suicide", "delete_dialog");
 
     public DeleteDialog() {
         super(Component.text("Confirm data deletion"), Component.text("Yes"), Component.text("No"));

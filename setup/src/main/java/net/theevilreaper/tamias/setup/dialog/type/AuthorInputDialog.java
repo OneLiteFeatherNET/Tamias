@@ -23,7 +23,7 @@ import java.util.List;
 
 public class AuthorInputDialog implements DialogTemplate<List<String>> {
 
-    public static final Key DIALOG_KEY = Key.key("bounce", "bounce_author_setup");
+    public static final Key DIALOG_KEY = Key.key("suicide", "bounce_author_setup");
 
     private final Component header;
     private final Component submitComponent;
