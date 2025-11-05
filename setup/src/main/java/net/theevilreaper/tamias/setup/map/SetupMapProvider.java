@@ -24,7 +24,6 @@ import java.util.Optional;
 public final class SetupMapProvider extends AbstractMapProvider {
 
     private static final Pos FALLBACK_POS = new Pos(0, 100, 0);
-    private static final String LOBBY_SUFFIX = "lobby"; // Constant for lobby suffix
 
     /**
      * Constructs a SetupMapProvider with the specified FileHandler.
@@ -58,17 +57,6 @@ public final class SetupMapProvider extends AbstractMapProvider {
         this.activeMap = baseMap.get();
         this.activeInstance = MinecraftServer.getInstanceManager().createInstanceContainer();
         this.registerInstance(this.activeInstance, lobbyEntry.get());
-    }
-
-
-    /**
-     * Checks if the given map is a lobby map.
-     *
-     * @param mapEntry the map entry to check
-     * @return true if the map is a lobby map
-     */
-    private boolean isLobbyMap(MapEntry mapEntry) {
-        return mapEntry.getDirectoryRoot().endsWith(LOBBY_SUFFIX);
     }
 
     @Override
