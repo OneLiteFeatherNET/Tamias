@@ -45,7 +45,7 @@ public class LobbyViewInventory extends GlobalInventoryBuilder {
      * @param mapBuilder the map to display
      */
     public LobbyViewInventory(BaseMapBuilder mapBuilder) {
-        super(Component.text("Lobby data"), InventoryType.CHEST_3_ROW);
+        super(Component.text("Generic data"), InventoryType.CHEST_3_ROW);
         this.mapBuilder = mapBuilder;
         this.confirmInventory = new ConfirmInventory(this::handleConfirmClick);
         InventoryLayout layout = InventoryLayout.fromType(getType());
@@ -74,7 +74,6 @@ public class LobbyViewInventory extends GlobalInventoryBuilder {
      */
     private void setMapNameItem(InventoryLayout dataLayout, @Nullable String name) {
         if (name == null) {
-            System.out.println("Name is null");
             dataLayout.setItem(DATA_SLOTS[0], new EmptyItemSlot(Target.SETUP_NAME));
             return;
         }
