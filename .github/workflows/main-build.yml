@@ -28,3 +28,18 @@ jobs:
           java-version: 25
       - name: Build on ${{ matrix.os }}
         run: ./gradlew test
+      - name: CycloneDX BOM Generation
+        if: always() && matrix.os == 'ubuntu-latest'
+        run: ./gradlew cyclonedxBom
+      - name: Upload BOM to Dependency-Track
+        if: always() && matrix.os == 'ubuntu-latest'
+        uses: DependencyTrack/gh-upload-sbom@v3
+        with:
+          serverhostname: ${{ secrets.DEPENDENCYTRACK_HOSTNAME }}
+          apikey: ${{ secrets.DEPENDENCYTRACK_APIKEY }}
+          projectname: "Tamias"
+          projectversion: 'develop'
+          projecttags: 'minestom,java,minigame'
+          bomfilename: "build/reports/cyclonedx/bom.xml"
+          autocreate: true
+          parent: '82dce036-36bd-4450-b36b-18cc71e4e0f4'
