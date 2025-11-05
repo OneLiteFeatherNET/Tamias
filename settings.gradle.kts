@@ -26,6 +26,7 @@ dependencyResolutionManagement {
             version("bom", "1.5.0")
             version("projectiles", "2.1.5")
             version("aonyx", "0.6.0")
+            version("cyclonedx", "3.0.1")
 
             library("mycelium.bom", "net.onelitefeather", "mycelium-bom").versionRef("bom")
             library("game.bom", "net.onelitefeather", "aonyx-bom").versionRef("aonyx")
@@ -43,6 +44,7 @@ dependencyResolutionManagement {
             library("xerus", "net.theevilreaper", "xerus").withoutVersion()
 
             plugin("shadow", "com.gradleup.shadow").versionRef("shadow")
+            plugin("cyclonedx", "org.cyclonedx.bom").versionRef("cyclonedx")
         }
     }
 }
