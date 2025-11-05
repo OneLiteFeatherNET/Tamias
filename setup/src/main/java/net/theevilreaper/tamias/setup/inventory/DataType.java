@@ -1,6 +1,7 @@
 package net.theevilreaper.tamias.setup.inventory;
 
 import net.minestom.server.item.Material;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * The {@link DataType} enum contains all data types which can be selected in the setup process.
@@ -18,6 +19,7 @@ public enum DataType {
     BOMBER(Material.TNT),
     SURVIVOR(Material.GREEN_DYE);
 
+    private static final DataType[] VALUES = values();
     private final Material material;
 
     /**
@@ -38,8 +40,15 @@ public enum DataType {
         return material;
     }
 
-    public static DataType fromOrdinal(int ordinal) {
-        return values()[ordinal];
+    /**
+     * Returns the data type for the given ordinal.
+     *
+     * @param ordinal the ordinal
+     * @return the data type or null if the ordinal is out of range
+     */
+    public static @Nullable DataType fromOrdinal(int ordinal) {
+        if (ordinal < 0 || ordinal >= VALUES.length) return null;
+        return VALUES[ordinal];
     }
 }
 
