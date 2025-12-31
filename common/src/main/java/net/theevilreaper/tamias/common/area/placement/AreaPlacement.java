@@ -1,8 +1,6 @@
 package net.theevilreaper.tamias.common.area.placement;
 
-import net.minestom.server.timer.Task;
 import net.theevilreaper.tamias.common.ground.GroundData;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * The {@link AreaPlacement} is used to place blocks in a specific area.
@@ -26,12 +24,4 @@ public sealed interface AreaPlacement permits AreaBasePlacement {
      * @return {@code true} if the placement is running
      */
     boolean isRunning();
-
-    /**
-     * Returns the current task.
-     * The return type can be nullable if the task is not running.
-     *
-     * @return the current task
-     */
-    @Nullable Task getTask();
 }

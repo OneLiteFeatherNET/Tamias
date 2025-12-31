@@ -27,19 +27,13 @@ public final class GroundBuildPhase extends GamePhase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GroundBuildPhase.class);
 
-    private final Supplier<VoidConsumer> mapPlacementTaskTrigger;
-    private VoidConsumer taskReset;
-
-    public GroundBuildPhase(
-            @NotNull Supplier<VoidConsumer> mapPlacementTaskTrigger
-    ) {
+    public GroundBuildPhase() {
         super("MapBuild");
         addListener(AreaFinishBuildEvent.class, areaFinishBuildEvent -> {
             Audience.audience(MinecraftServer.getConnectionManager().getOnlinePlayers())
                     .sendMessage(MAP_READY);
             finish();
         });
-        this.mapPlacementTaskTrigger = mapPlacementTaskTrigger;
     }
 
     @Override
@@ -48,7 +42,6 @@ public final class GroundBuildPhase extends GamePhase {
             Audience.audience(MinecraftServer.getConnectionManager().getOnlinePlayers())
                     .sendMessage(MAP_BUILDING);
             LOGGER.info("Map is building up...");
-            this.taskReset = this.mapPlacementTaskTrigger.get();
             LOGGER.info("Map placement task started");
         }).delay(10, ChronoUnit.SECONDS).schedule();
     }
@@ -56,6 +49,5 @@ public final class GroundBuildPhase extends GamePhase {
     @Override
     public void finish() {
         super.finish();
-        this.taskReset.apply();
     }
 }

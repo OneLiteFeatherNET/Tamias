@@ -8,7 +8,7 @@ import net.minestom.server.instance.block.Block;
 import net.theevilreaper.tamias.common.area.GameArea;
 import net.theevilreaper.tamias.common.area.PlayingArea;
 import net.theevilreaper.tamias.common.area.placement.AreaPlacement;
-import net.theevilreaper.tamias.common.area.placement.CircleAreaPlacement;
+import net.theevilreaper.tamias.common.area.placement.types.RandomBlockPlacement;
 import net.theevilreaper.tamias.common.ground.GroundData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +31,7 @@ public final class GamePlacement implements Placement {
     public GamePlacement(Instance instance, PlayingArea area) {
         this.instance = instance;
         this.area = area;
-        this.placement = new CircleAreaPlacement(
+        this.placement = new RandomBlockPlacement(
                 this.instance,
                 this.area.getPositions().stream().map(it -> (Vec) it).toList(),
                 new ArrayList<>(this.area.getSpecialPositions())

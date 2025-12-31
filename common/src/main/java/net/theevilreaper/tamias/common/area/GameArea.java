@@ -35,13 +35,13 @@ public final class GameArea implements PlayingArea {
     private final AreaData areaData;
     private final List<Vec> areaPositions;
     private final Set<Vec> specialBlocks;
-    private final Set<Vec> tntPositions;
+    private final List<Vec> tntPositions;
 
     public GameArea(AreaData areaData) {
         this.areaData = areaData;
         this.areaPositions = new ArrayList<>();
         this.specialBlocks = new HashSet<>();
-        this.tntPositions = new HashSet<>();
+        this.tntPositions = new ArrayList<>();
     }
 
     @Override
@@ -134,17 +134,12 @@ public final class GameArea implements PlayingArea {
      *
      * @return a random position or null if the list is empty
      */
-    public synchronized @Nullable Pos getRandomPosition() {
-        synchronized (this.tntPositions) {
-            if (this.tntPositions.isEmpty()) return null;
+    public @Nullable Pos getRandomPosition() {
+        synchronized (tntPositions) {
+            if (tntPositions.isEmpty()) return null;
 
-            List<Point> internalPositions = new ArrayList<>(this.tntPositions);
-
-            int randomId = ThreadLocalRandom.current().nextInt(0, this.tntPositions.size());
-
-            // Thread-safe removal from the list
-            Point pos = internalPositions.remove(randomId);
-            this.tntPositions.remove(pos);
+            int index = ThreadLocalRandom.current().nextInt(tntPositions.size());
+            Vec pos = tntPositions.remove(index);
             return pos.asPos();
         }
     }
@@ -155,12 +150,12 @@ public final class GameArea implements PlayingArea {
     }
 
     @Override
-    public Set<Vec> getTntPositions() {
-        return this.tntPositions;
+    public List<Vec> getTntPositions() {
+        return List.copyOf(this.tntPositions);
     }
 
     @Override
     public Set<Vec> getSpecialPositions() {
-        return this.specialBlocks;
+        return Set.copyOf(this.specialBlocks);
     }
 }

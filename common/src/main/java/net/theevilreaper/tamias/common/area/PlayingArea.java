@@ -3,6 +3,7 @@ package net.theevilreaper.tamias.common.area;
 import net.minestom.server.coordinate.Vec;
 import net.theevilreaper.tamias.common.map.layer.AreaData;
 
+import java.util.List;
 import java.util.Set;
 import java.util.function.IntSupplier;
 
@@ -44,7 +45,7 @@ public interface PlayingArea extends Area {
      *
      * @return the tnt positions
      */
-    Set<Vec> getTntPositions();
+    List<Vec> getTntPositions();
 
     /**
      * Returns the positions of the special blocks.

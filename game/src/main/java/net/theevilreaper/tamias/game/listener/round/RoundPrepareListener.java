@@ -24,6 +24,6 @@ public class RoundPrepareListener implements Consumer<RoundPrepareEvent> {
     @Override
     public void accept(@NotNull RoundPrepareEvent event) {
         Collection<@NotNull Player> onlinePlayers = MinecraftServer.getConnectionManager().getOnlinePlayers();
-        spawnArea.teleport(instance, new ArrayList<>(onlinePlayers), player -> {});
+        spawnArea.teleport(instance, new ArrayList<>(onlinePlayers), false);
     }
 }

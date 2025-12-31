@@ -11,6 +11,7 @@ import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.tamias.common.map.layer.SpawnLayer;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -57,23 +58,21 @@ public final class SpawnArea implements Area {
      * @param players        the players to teleport
      * @param switchInstance if the player should be switched to the instance
      */
-    public void teleport(Instance instance, List<Player> players, BooleanSupplier switchInstance, Consumer<Player> callback) {
-        Check.argCondition(players.size() > this.positions.length, "The amount of online players is higher then the maximum position count");
+    public void teleport(Instance instance, List<Player> players, boolean switchInstance) {
+        Check.argCondition(players.size() > this.positions.length, "The amount of online players is higher than the maximum position count");
         if (!ChunkUtils.isLoaded(instance.getChunkAt(this.spawnLayer.pos()))) {
             instance.loadChunk(this.spawnLayer.pos()).join();
         }
-        Collections.shuffle(players);
+        List<Player> shuffled = new ArrayList<>(players);
+        Collections.shuffle(shuffled);
         for (int i = 0; i < players.size(); i++) {
             Pos position = this.positions[i].add(Y_VEC);
             Player player = players.get(i);
-            if (switchInstance.getAsBoolean()) {
+            if (switchInstance) {
                 player.setInstance(instance, position).join();
-                if (callback == null) return;
-                callback.accept(player);
-                return;
+            } else {
+                player.teleport(position);
             }
-            player.teleport(position);
-            callback.accept(player);
         }
     }
 

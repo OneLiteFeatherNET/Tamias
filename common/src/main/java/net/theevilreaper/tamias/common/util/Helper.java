@@ -14,7 +14,7 @@ public final class Helper {
         return Comparator.comparing(pos -> {
             var x = pos.x();
             var z = pos.z();
-            return Math.sqrt(x * x + z * z);
+            return x * x + z * z;
         });
     }
 

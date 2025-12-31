@@ -133,17 +133,11 @@ public class Tamias implements ListenerHandling {
     }
 
     private void createPhaseStructure() {
-        GameMapProvider gameMapProvider = (GameMapProvider) this.mapProvider;
-
         this.phaseSeries.add(new LobbyPhase(new LobbyPhaseData(this.timeUpdater, this.gameConfig)));
 
         CyclicPhaseSeries<Phase> gameSeries = new CyclicPhaseSeries<>("game");
         this.roundProvider = new RoundProvider(gameSeries);
-        gameSeries.add(new GroundBuildPhase(
-                () -> {
-                    return null;
-                }
-        ));
+        gameSeries.add(new GroundBuildPhase());
 
         gameSeries.add(new PrePlayingPhase(
                 this.teamService,

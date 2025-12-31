@@ -17,7 +17,7 @@ public abstract non-sealed class AreaBasePlacement<T extends Point> implements A
     protected final List<T> blockPositions;
     protected @Nullable Task buildTask;
 
-    AreaBasePlacement(Instance instance, List<T> blockPositions) {
+    protected AreaBasePlacement(Instance instance, List<T> blockPositions) {
         this.instance = instance;
         this.blockPositions = new ArrayList<>(blockPositions);
     }
