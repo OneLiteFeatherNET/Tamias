@@ -12,7 +12,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Assertion utility class for blocks and positions.
+ * @version 1.0.0
+ * @since 0.1.0
+ * @author theEvilReaper
+ */
 public class BlockAssertions {
+
+    private BlockAssertions() {
+        // Nothing to do here in this utility class
+    }
 
     /**
      * Asserts that the given block is present at the specified positions.
@@ -37,7 +47,7 @@ public class BlockAssertions {
      * @param given    the given positions
      * @param <T>      the type of the position
      */
-    public static <T extends Point> void assertPostions(@NotNull Set<T> expected, @NotNull Set<T> given) {
+    public static <T extends Point> void assertPositions(@NotNull Set<T> expected, @NotNull Set<T> given) {
         assertEquals(expected.size(), given.size());
 
         for (T point : expected) {
