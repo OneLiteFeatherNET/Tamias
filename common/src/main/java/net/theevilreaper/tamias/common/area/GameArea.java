@@ -69,6 +69,11 @@ public final class GameArea implements PlayingArea {
         LOGGER.info("Calculated {} potential area positions", areaPositions.size());
     }
 
+    /**
+     * Flattens the given positions from the area positions.
+     *
+     * @param positions the positions to flatten
+     */
     public void flattenPositions(Set<Vec> positions) {
         this.areaPositions.removeAll(positions);
     }
@@ -121,7 +126,7 @@ public final class GameArea implements PlayingArea {
             // Add the position to TNT positions
             // Adjust the position to place TNT one block above the ground level
             Vec point = availablePositions.remove(randomIndex);
-            System.out.println("Adding TNT at position: " + point);
+            LOGGER.info("Adding TNT at position: {}", point);
             tntPositions.add(point.add(0, 1, 0));
         }
 
