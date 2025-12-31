@@ -3,25 +3,19 @@ package net.theevilreaper.tamias.common.area.holder;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
-import net.theevilreaper.tamias.common.area.Area;
 import net.theevilreaper.tamias.common.area.SpawnArea;
 import net.theevilreaper.tamias.common.ground.GroundData;
 
 import java.util.Collection;
-import java.util.Iterator;
 
 import static net.minestom.server.MinecraftServer.getConnectionManager;
-import static net.theevilreaper.tamias.common.area.SpawnArea.SPAWN_BLOCK;
 
 public final class SpawnPlacement implements Placement {
 
     private final Instance instance;
-    private final Area area;
+    private final SpawnArea area;
 
-    public SpawnPlacement(Instance instance, Area area) {
-        if (!(area instanceof SpawnArea)) {
-            throw new IllegalArgumentException("The instance must be an instance");
-        }
+    public SpawnPlacement(Instance instance, SpawnArea area) {
         this.instance = instance;
         this.area = area;
     }
@@ -30,18 +24,20 @@ public final class SpawnPlacement implements Placement {
     public void clear() {
         Collection<Point> positions = this.area.getPositions();
         for (Point position : positions) {
-            this.instance.setBlock(position, Block.AIR);
+            if (instance.getBlock(position) != Block.AIR) {
+                instance.setBlock(position, Block.AIR);
+            }
         }
     }
 
     @Override
-    public void triggerPlacement(GroundData groundData) {
-        Iterator<Point> positionIterator = this.area.getPositions().iterator();
-        int maxPositionsToBuild = getConnectionManager().getOnlinePlayerCount();
+    public void triggerPlacement(GroundData data) {
+        int intMaxPlayerCount = getConnectionManager().getOnlinePlayerCount();
+        int i = 0;
 
-        for (int i = 0; i < maxPositionsToBuild && positionIterator.hasNext(); i++) {
-            Point point = positionIterator.next();
-            instance.setBlock(point, SPAWN_BLOCK);
+        for (Point point : area.getPositions()) {
+            if (i++ >= intMaxPlayerCount) break;
+            instance.setBlock(point, data.groundBlock());
         }
     }
 }

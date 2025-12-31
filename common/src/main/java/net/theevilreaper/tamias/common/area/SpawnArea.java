@@ -27,7 +27,6 @@ import java.util.List;
 @SuppressWarnings("java:S3252")
 public final class SpawnArea implements Area {
 
-    public static final Block SPAWN_BLOCK = Block.TNT;
     private static final Vec Y_VEC = new Vec(0.5, 1, 0.5);
     private final Pos[] positions;
     private final SpawnLayer spawnLayer;

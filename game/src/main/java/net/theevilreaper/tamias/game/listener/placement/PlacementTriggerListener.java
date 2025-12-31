@@ -27,7 +27,7 @@ public final class PlacementTriggerListener implements Consumer<TriggerPlacement
     @Override
     public void accept(@NotNull TriggerPlacementEvent event) {
         if (event.type() == TriggerPlacementEvent.Type.SPAWN) {
-            this.spawnPlacement.triggerPlacement(null);
+            this.spawnPlacement.triggerPlacement(GroundDataRegistry.DEFAULT_SPAWN_DATA);
             return;
         }
         GroundData randomData = GroundDataRegistry.instance().getRandomData();
