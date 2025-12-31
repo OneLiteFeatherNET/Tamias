@@ -16,8 +16,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.BooleanSupplier;
-import java.util.function.Consumer;
 
 /**
  * The class holds the data about the spawn area where each player will be spawned when the map is in the build phase.
