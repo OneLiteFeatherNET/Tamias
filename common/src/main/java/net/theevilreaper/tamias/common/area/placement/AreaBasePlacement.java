@@ -41,9 +41,4 @@ public abstract non-sealed class AreaBasePlacement<T extends Point> implements A
     public boolean isRunning() {
         return buildTask != null && buildTask.isAlive();
     }
-
-    @Override
-    public @Nullable Task getTask() {
-        return this.buildTask;
-    }
 }
