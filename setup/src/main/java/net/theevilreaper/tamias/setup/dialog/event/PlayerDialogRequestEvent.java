@@ -2,7 +2,6 @@ package net.theevilreaper.tamias.setup.dialog.event;
 
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.trait.PlayerEvent;
-import org.jetbrains.annotations.NotNull;
 
 public class PlayerDialogRequestEvent implements PlayerEvent {
 
@@ -15,7 +14,7 @@ public class PlayerDialogRequestEvent implements PlayerEvent {
      * @param player the player who requested the dialog
      * @param target the target of the dialog request
      */
-    public PlayerDialogRequestEvent(@NotNull Player player, @NotNull Target target) {
+    public PlayerDialogRequestEvent(Player player, Target target) {
         this.player = player;
         this.target = target;
     }
@@ -25,7 +24,7 @@ public class PlayerDialogRequestEvent implements PlayerEvent {
      *
      * @return the target of the dialog request
      */
-    public @NotNull Target getTarget() {
+    public Target getTarget() {
         return this.target;
     }
 
@@ -35,7 +34,7 @@ public class PlayerDialogRequestEvent implements PlayerEvent {
      * @return the player who requested the dialog
      */
     @Override
-    public @NotNull Player getPlayer() {
+    public Player getPlayer() {
         return this.player;
     }
 

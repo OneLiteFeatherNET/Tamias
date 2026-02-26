@@ -14,7 +14,6 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.network.packet.server.common.ShowDialogPacket;
 import net.theevilreaper.tamias.setup.dialog.AbstractDialogTemplate;
 import net.theevilreaper.tamias.setup.inventory.DataType;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -28,7 +27,7 @@ public class DeleteDialog extends AbstractDialogTemplate<DataType> {
     }
 
     @Override
-    public void open(@NotNull Player player, @Nullable DataType data) {
+    public void open(Player player, @Nullable DataType data) {
         var packet = new ShowDialogPacket(new Dialog.Confirmation(
                 new DialogMetadata(
                         header,
@@ -64,7 +63,7 @@ public class DeleteDialog extends AbstractDialogTemplate<DataType> {
     }
 
     @Override
-    public @NotNull Key key() {
+    public Key key() {
         return DIALOG_KEY;
     }
 }

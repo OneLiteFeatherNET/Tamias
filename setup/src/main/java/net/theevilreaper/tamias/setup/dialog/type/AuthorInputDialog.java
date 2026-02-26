@@ -15,7 +15,6 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.network.packet.server.common.ShowDialogPacket;
 import net.theevilreaper.tamias.setup.dialog.DialogTemplate;
 import net.theevilreaper.tamias.setup.util.SetupTags;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -29,14 +28,14 @@ public class AuthorInputDialog implements DialogTemplate<List<String>> {
     private final Component submitComponent;
     private final Component cancelComponent;
 
-    public AuthorInputDialog(@NotNull Component header, @NotNull Component submitComponent, @NotNull Component cancelComponent) {
+    public AuthorInputDialog(Component header, Component submitComponent, Component cancelComponent) {
         this.header = header;
         this.submitComponent = submitComponent;
         this.cancelComponent = cancelComponent;
     }
 
     @Override
-    public void open(@NotNull Player player, @Nullable List<String> data) {
+    public void open(Player player, @Nullable List<String> data) {
         int amount = player.getTag(SetupTags.AUTHOR_AMOUNT_TAG);
         List<DialogInput> inputFields = new ArrayList<>();
         for (int i = 0; i < amount; i++) {
@@ -85,7 +84,7 @@ public class AuthorInputDialog implements DialogTemplate<List<String>> {
     }
 
     @Override
-    public @NotNull Key key() {
+    public Key key() {
         return DIALOG_KEY;
     }
 }

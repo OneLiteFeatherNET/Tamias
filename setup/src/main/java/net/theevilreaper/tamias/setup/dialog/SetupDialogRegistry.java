@@ -6,7 +6,6 @@ import net.theevilreaper.tamias.setup.dialog.type.AuthorInputDialog;
 import net.theevilreaper.tamias.setup.dialog.type.AuthorRequestDialog;
 import net.theevilreaper.tamias.setup.dialog.type.DeleteDialog;
 import net.theevilreaper.tamias.setup.dialog.type.NameInputDialog;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -43,17 +42,17 @@ public class SetupDialogRegistry implements DialogRegistry {
         this.registerDialog(new DeleteDialog());
     }
 
-    private void registerDialog(@NotNull DialogTemplate<?> dialog) {
+    private void registerDialog(DialogTemplate<?> dialog) {
         dialogMap.put(dialog.key(), dialog);
     }
 
     @Override
-    public @Nullable DialogTemplate get(@Nullable Key key) {
+    public @Nullable DialogTemplate<?> get(@Nullable Key key) {
         return this.dialogMap.getOrDefault(key, null);
     }
 
     @Override
-    public boolean contains(@NotNull Key key) {
-        return false;
+    public boolean contains(Key key) {
+        return this.dialogMap.containsKey(key);
     }
 }

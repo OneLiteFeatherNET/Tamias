@@ -13,7 +13,6 @@ import net.minestom.server.dialog.DialogMetadata;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.packet.server.common.ShowDialogPacket;
 import net.theevilreaper.tamias.setup.dialog.DialogTemplate;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -26,7 +25,7 @@ public final class NameInputDialog implements DialogTemplate<String> {
     private final Component submitComponent;
     private final Component cancelComponent;
 
-    public NameInputDialog(@NotNull Component header, @NotNull Component submitComponent, @NotNull Component cancelComponent) {
+    public NameInputDialog(Component header, Component submitComponent, Component cancelComponent) {
         this.header = header;
         this.submitComponent = submitComponent;
         this.cancelComponent = cancelComponent;
@@ -34,10 +33,11 @@ public final class NameInputDialog implements DialogTemplate<String> {
 
     /**
      * Opens the name input dialog for the given player with the provided data.
+     *
      * @param player the player to open the dialog for
-     * @param data the initial data to pre-fill the input field, can be null
+     * @param data   the initial data to pre-fill the input field, can be null
      */
-    public void open(@NotNull Player player, @Nullable String  data) {
+    public void open(Player player, @Nullable String data) {
         String initialName = data == null ? "" : data;
         var packet = new ShowDialogPacket(new Dialog.Confirmation(
                 new DialogMetadata(
@@ -70,7 +70,7 @@ public final class NameInputDialog implements DialogTemplate<String> {
     }
 
     @Override
-    public @NotNull Key key() {
+    public Key key() {
         return DIALOG_KEY;
     }
 }

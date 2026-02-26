@@ -14,7 +14,7 @@ import net.minestom.server.dialog.DialogMetadata;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.packet.server.common.ShowDialogPacket;
 import net.theevilreaper.tamias.setup.dialog.DialogTemplate;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -26,14 +26,14 @@ public class AuthorRequestDialog implements DialogTemplate<Void> {
     private final Component submitComponent;
     private final Component cancelComponent;
 
-    public AuthorRequestDialog(@NotNull Component header, @NotNull Component submitComponent, @NotNull Component cancelComponent) {
+    public AuthorRequestDialog(Component header, Component submitComponent, Component cancelComponent) {
         this.header = header;
         this.submitComponent = submitComponent;
         this.cancelComponent = cancelComponent;
     }
 
     @Override
-    public void open(@NotNull Player player, Void test) {
+    public void open(Player player, @Nullable Void data) {
         var packet = new ShowDialogPacket(new Dialog.Confirmation(
                 new DialogMetadata(
                         header,
@@ -65,7 +65,7 @@ public class AuthorRequestDialog implements DialogTemplate<Void> {
     }
 
     @Override
-    public @NotNull Key key() {
+    public Key key() {
         return DIALOG_KEY;
     }
 }
