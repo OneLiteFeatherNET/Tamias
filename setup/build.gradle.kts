@@ -8,7 +8,6 @@ version = "0.1.0"
 
 dependencies {
     implementation(project(":common"))
-    implementation(platform(libs.mycelium.bom))
     implementation(platform(libs.game.bom))
     implementation(libs.adventure)
     implementation(libs.guira)
@@ -17,7 +16,6 @@ dependencies {
     compileOnly(libs.xerus)
 
     testImplementation(project(":common"))
-    testImplementation(platform(libs.mycelium.bom))
     testImplementation(platform(libs.game.bom))
     testImplementation(libs.minestom)
     testImplementation(libs.aves)

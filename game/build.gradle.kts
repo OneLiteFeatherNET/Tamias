@@ -8,7 +8,6 @@ version = "1.0-SNAPSHOT"
 
 dependencies {
     implementation(project(":common"))
-    implementation(platform(libs.mycelium.bom))
     implementation(platform(libs.game.bom))
     implementation(libs.atlas.projectiles)
     implementation(libs.adventure)
@@ -16,7 +15,6 @@ dependencies {
     compileOnly(libs.aves)
     compileOnly(libs.xerus)
 
-    testImplementation(platform(libs.mycelium.bom))
     testImplementation(platform(libs.game.bom))
     testImplementation(libs.minestom)
     testImplementation(libs.cyano)
