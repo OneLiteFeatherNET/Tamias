@@ -1,6 +1,5 @@
 package net.theevilreaper.tamias.setup.commands.type;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public enum SpawnType {
@@ -13,15 +12,15 @@ public enum SpawnType {
     private static final SpawnType[] VALUES = values();
     private final String displayName;
 
-    SpawnType(@NotNull String displayName) {
+    SpawnType(String displayName) {
         this.displayName = displayName;
     }
 
-    public @NotNull String getDisplayName() {
+    public String getDisplayName() {
         return displayName;
     }
 
-    public static @Nullable SpawnType fromString(@NotNull String name) {
+    public static @Nullable SpawnType fromString(String name) {
         SpawnType type = null;
         for (int i = 0; i < VALUES.length && type == null; i++) {
             SpawnType current = VALUES[i];
@@ -32,7 +31,7 @@ public enum SpawnType {
         return type;
     }
 
-    public static @NotNull String[] getAsArray() {
+    public static String[] getAsArray() {
         String[] array = new String[VALUES.length];
         for (int i = 0; i < VALUES.length; i++) {
             array[i] = VALUES[i].getDisplayName();

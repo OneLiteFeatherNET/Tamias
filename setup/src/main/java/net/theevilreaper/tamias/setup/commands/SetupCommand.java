@@ -5,7 +5,6 @@ import net.minestom.server.command.builder.condition.Conditions;
 import net.onelitefeather.guira.SetupDataService;
 import net.theevilreaper.tamias.setup.commands.parts.SetupAreaCommand;
 import net.theevilreaper.tamias.setup.commands.parts.SetupPositionCommand;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * The {@link SetupCommand} is the main command for the setup process.
@@ -17,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public final class SetupCommand extends Command {
 
-    public SetupCommand(@NotNull SetupDataService dataService) {
+    public SetupCommand(SetupDataService dataService) {
         super("setup");
         this.setCondition(Conditions::playerOnly);
         this.addSubcommand(new SetupPositionCommand(dataService::get));

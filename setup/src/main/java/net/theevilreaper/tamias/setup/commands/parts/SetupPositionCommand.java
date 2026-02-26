@@ -18,14 +18,11 @@ import net.theevilreaper.aves.map.BaseMapBuilder;
 import net.theevilreaper.aves.util.Components;
 import net.theevilreaper.tamias.common.map.builder.GameMapBuilder;
 import net.theevilreaper.tamias.common.util.Messages;
-import net.theevilreaper.tamias.setup.TamiasSetup;
 import net.theevilreaper.tamias.setup.commands.type.SpawnType;
-import net.theevilreaper.tamias.setup.data.GameData;
 import net.theevilreaper.tamias.setup.data.InstanceSetupData;
 import net.theevilreaper.tamias.setup.data.LobbyData;
 import net.theevilreaper.tamias.setup.util.DirectionUtil;
 import net.theevilreaper.tamias.setup.util.SetupTags;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
@@ -35,7 +32,7 @@ public final class SetupPositionCommand extends Command {
 
     private final OptionalSetupDataGetter setupDataFunction;
 
-    public SetupPositionCommand(@NotNull OptionalSetupDataGetter setupDataFunction) {
+    public SetupPositionCommand(OptionalSetupDataGetter setupDataFunction) {
         super("position");
         this.setCondition(Conditions::playerOnly);
         this.setupDataFunction = setupDataFunction;
@@ -44,7 +41,7 @@ public final class SetupPositionCommand extends Command {
         this.addSyntax(this::handleSpawnSet, spawnType);
     }
 
-    private void handleSpawnSet(@NotNull CommandSender sender, @NotNull CommandContext context) {
+    private void handleSpawnSet(CommandSender sender, CommandContext context) {
         if (!sender.hasTag(SetupTags.SETUP_TAG)) {
             sender.sendMessage(SELECT_MAP_FIRST);
             return;
@@ -92,7 +89,7 @@ public final class SetupPositionCommand extends Command {
      * @param builder   the map builder to set the spawn
      * @param spawnType the type of spawn to set
      */
-    private void handleGameSpawnSet(@NotNull Player sender, @NotNull BaseMapBuilder builder, @NotNull SpawnType spawnType) {
+    private void handleGameSpawnSet(Player sender, BaseMapBuilder builder, SpawnType spawnType) {
         Pos position = sender.getPosition();
         switch (spawnType) {
             case MAP_SPAWN, SPECTATOR -> builder.spawn(position);
@@ -107,7 +104,7 @@ public final class SetupPositionCommand extends Command {
      * @param player  the player who executed the command
      * @param builder the map builder to set the spawn
      */
-    private void handleSurvivorSpawnSet(@NotNull Player player, @NotNull BaseMapBuilder builder) {
+    private void handleSurvivorSpawnSet(Player player, BaseMapBuilder builder) {
         Optional<Direction> determinedDirection = DirectionUtil.parseDirection(player);
 
         if (determinedDirection.isEmpty()) return;
@@ -132,7 +129,7 @@ public final class SetupPositionCommand extends Command {
      * @param builder   the map builder to set the spawn
      * @param spawnType the type of spawn to set
      */
-    private void handleLobbySpawnSet(@NotNull Player sender, @NotNull BaseMapBuilder builder, @NotNull SpawnType spawnType) {
+    private void handleLobbySpawnSet(Player sender, BaseMapBuilder builder, SpawnType spawnType) {
         if (spawnType != SpawnType.MAP_SPAWN) {
             sender.sendMessage("A lobby map can only have a spawn");
             return;
