@@ -8,7 +8,6 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.theevilreaper.tamias.common.util.Messages;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
@@ -16,12 +15,12 @@ public final class PlayerSpawnListener implements Consumer<PlayerSpawnEvent> {
 
     private final PlayerConsumer spawnSupplier;
 
-    public PlayerSpawnListener(@NotNull PlayerConsumer spawnSupplier) {
+    public PlayerSpawnListener(PlayerConsumer spawnSupplier) {
         this.spawnSupplier = spawnSupplier;
     }
 
     @Override
-    public void accept(@NotNull PlayerSpawnEvent event) {
+    public void accept(PlayerSpawnEvent event) {
         Player player = event.getPlayer();
 
         if (event.isFirstSpawn()) {

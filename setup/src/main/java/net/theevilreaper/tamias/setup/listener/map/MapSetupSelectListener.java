@@ -1,7 +1,6 @@
 package net.theevilreaper.tamias.setup.listener.map;
 
 import net.onelitefeather.guira.SetupDataService;
-import net.onelitefeather.guira.data.SetupData;
 import net.theevilreaper.aves.file.FileHandler;
 import net.theevilreaper.aves.map.MapEntry;
 import net.kyori.adventure.text.Component;
@@ -11,13 +10,11 @@ import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.timer.Task;
 import net.theevilreaper.tamias.common.util.Messages;
-import net.theevilreaper.tamias.setup.TamiasSetup;
 import net.theevilreaper.tamias.setup.data.GameData;
 import net.theevilreaper.tamias.setup.data.InstanceSetupData;
 import net.theevilreaper.tamias.setup.data.LobbyData;
 import net.theevilreaper.tamias.setup.event.MapSetupSelectEvent;
 import net.theevilreaper.tamias.setup.util.SetupTags;
-import org.jetbrains.annotations.NotNull;
 
 import java.time.temporal.ChronoUnit;
 import java.util.function.Consumer;
@@ -28,15 +25,15 @@ public final class MapSetupSelectListener implements Consumer<MapSetupSelectEven
     private final SetupDataService setupDataService;
 
     public MapSetupSelectListener(
-            @NotNull FileHandler fileHandler,
-            @NotNull SetupDataService setupDataService
+            FileHandler fileHandler,
+            SetupDataService setupDataService
     ) {
         this.fileHandler = fileHandler;
         this.setupDataService = setupDataService;
     }
 
     @Override
-    public void accept(@NotNull MapSetupSelectEvent event) {
+    public void accept(MapSetupSelectEvent event) {
         Player player = event.getPlayer();
 
        // SetupData setupData = this.setupDataService.get(player.getUuid()).get();
@@ -69,7 +66,7 @@ public final class MapSetupSelectListener implements Consumer<MapSetupSelectEven
         getTeleportTask(() -> data.teleport(player)).schedule();
     }
 
-    private @NotNull Task.Builder getTeleportTask(@NotNull Runnable runnable) {
+    private Task.Builder getTeleportTask(Runnable runnable) {
         return MinecraftServer.getSchedulerManager().buildTask(runnable).delay(3, ChronoUnit.SECONDS);
     }
 }

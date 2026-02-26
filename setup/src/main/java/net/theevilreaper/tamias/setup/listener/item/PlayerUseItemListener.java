@@ -10,7 +10,6 @@ import net.minestom.server.item.ItemStack;
 import net.theevilreaper.tamias.common.util.Tags;
 import net.theevilreaper.tamias.setup.data.InstanceSetupData;
 import net.theevilreaper.tamias.setup.util.SetupTags;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -25,15 +24,15 @@ public final class PlayerUseItemListener implements Consumer<PlayerUseItemEvent>
     private final Function<UUID, Optional<SetupData>> saveFunction;
 
     public PlayerUseItemListener(
-            @NotNull PlayerConsumer invOpener,
-            @NotNull Function<UUID, Optional<SetupData>> saveFunction
+            PlayerConsumer invOpener,
+            Function<UUID, Optional<SetupData>> saveFunction
     ) {
         this.invOpener = invOpener;
         this.saveFunction = saveFunction;
     }
 
     @Override
-    public void accept(@NotNull PlayerUseItemEvent event) {
+    public void accept(PlayerUseItemEvent event) {
         ItemStack stack = event.getItemStack();
 
         if (!stack.hasTag(Tags.ITEM_TAG)) return;

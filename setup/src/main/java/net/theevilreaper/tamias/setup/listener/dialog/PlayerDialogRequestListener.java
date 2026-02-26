@@ -7,7 +7,6 @@ import net.theevilreaper.tamias.setup.dialog.event.PlayerDialogRequestEvent;
 import net.theevilreaper.tamias.setup.dialog.type.AuthorInputDialog;
 import net.theevilreaper.tamias.setup.dialog.type.AuthorRequestDialog;
 import net.theevilreaper.tamias.setup.dialog.type.NameInputDialog;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
@@ -17,12 +16,12 @@ public final class PlayerDialogRequestListener implements Consumer<PlayerDialogR
 
     private final DialogRegistry dialogRegistry;
 
-    public PlayerDialogRequestListener(@NotNull DialogRegistry dialogRegistry) {
+    public PlayerDialogRequestListener(DialogRegistry dialogRegistry) {
         this.dialogRegistry = dialogRegistry;
     }
 
     @Override
-    public void accept(@NotNull PlayerDialogRequestEvent event) {
+    public void accept(PlayerDialogRequestEvent event) {
         Player player = event.getPlayer();
         Target target = event.getTarget();
         DialogTemplate<?> dialogTemplate;

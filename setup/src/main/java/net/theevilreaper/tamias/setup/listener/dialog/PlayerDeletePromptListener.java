@@ -4,7 +4,6 @@ import net.theevilreaper.tamias.setup.dialog.DialogRegistry;
 import net.theevilreaper.tamias.setup.dialog.DialogTemplate;
 import net.theevilreaper.tamias.setup.dialog.event.PlayerDeletePromptEvent;
 import net.theevilreaper.tamias.setup.dialog.type.DeleteDialog;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
@@ -12,12 +11,12 @@ public class PlayerDeletePromptListener implements Consumer<PlayerDeletePromptEv
 
     private final DialogRegistry dialogRegistry;
 
-    public PlayerDeletePromptListener(@NotNull DialogRegistry dialogRegistry) {
+    public PlayerDeletePromptListener(DialogRegistry dialogRegistry) {
         this.dialogRegistry = dialogRegistry;
     }
 
     @Override
-    public void accept(@NotNull PlayerDeletePromptEvent event) {
+    public void accept(PlayerDeletePromptEvent event) {
         DialogTemplate<?> dialog = dialogRegistry.get(DeleteDialog.DIALOG_KEY);
 
         if (dialog == null) {

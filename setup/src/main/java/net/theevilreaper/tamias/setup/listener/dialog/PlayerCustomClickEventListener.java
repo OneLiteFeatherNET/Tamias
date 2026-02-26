@@ -15,7 +15,6 @@ import net.theevilreaper.tamias.setup.dialog.type.DeleteDialog;
 import net.theevilreaper.tamias.setup.dialog.type.NameInputDialog;
 import net.theevilreaper.tamias.setup.inventory.DataType;
 import net.theevilreaper.tamias.setup.util.SetupTags;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
@@ -24,16 +23,13 @@ public class PlayerCustomClickEventListener implements Consumer<PlayerCustomClic
     private final DialogRegistry dialogRegistry;
     private final OptionalSetupDataGetter setupDataGetter;
 
-    public PlayerCustomClickEventListener(
-            @NotNull DialogRegistry dialogRegistry,
-            @NotNull OptionalSetupDataGetter setupDataGetter
-    ) {
+    public PlayerCustomClickEventListener(DialogRegistry dialogRegistry, OptionalSetupDataGetter setupDataGetter) {
         this.dialogRegistry = dialogRegistry;
         this.setupDataGetter = setupDataGetter;
     }
 
     @Override
-    public void accept(@NotNull PlayerCustomClickEvent event) {
+    public void accept(PlayerCustomClickEvent event) {
         Player player = event.getPlayer();
 
         if (!player.hasTag(SetupTags.SETUP_TAG)) return;
@@ -60,9 +56,9 @@ public class PlayerCustomClickEventListener implements Consumer<PlayerCustomClic
             InstanceSetupData data = (InstanceSetupData) setupData;
 
             switch (dialogTemplate) {
-                case NameInputDialog ignored -> this.handleNameSet(data, dialogData);
-                case AuthorInputDialog ignored -> handleAuthorSet(data, dialogData);
-                case DeleteDialog ignored -> this.handleDataDelete(data, dialogData);
+                case NameInputDialog _ -> this.handleNameSet(data, dialogData);
+                case AuthorInputDialog _ -> handleAuthorSet(data, dialogData);
+                case DeleteDialog _ -> this.handleDataDelete(data, dialogData);
                 default ->
                         throw new IllegalStateException("Unexpected dialog type: " + dialogTemplate.getClass().getCanonicalName());
             }
@@ -75,14 +71,13 @@ public class PlayerCustomClickEventListener implements Consumer<PlayerCustomClic
      * @param data       the BounceData instance containing the map builder
      * @param dialogData the dialog data containing the authors to set
      */
-    private void handleNameSet(@NotNull InstanceSetupData data, @NotNull CompoundBinaryTag dialogData) {
+    private void handleNameSet(InstanceSetupData data, CompoundBinaryTag dialogData) {
         System.out.println("Trgiger name part");
         String name = dialogData.getString("name");
         System.out.println("Trgiger name part");
         if (name.trim().isEmpty()) return;
         System.out.println("Trgiger name part 11");
         data.getMapBuilder().name(name);
-        System.out.println("Trgiger name part 111");
         data.triggerUpdate();
     }
 
@@ -92,7 +87,7 @@ public class PlayerCustomClickEventListener implements Consumer<PlayerCustomClic
      * @param data       the BounceData instance containing the map builder
      * @param dialogData the dialog data containing the authors to set
      */
-    private void handleAuthorSet(@NotNull InstanceSetupData data, @NotNull CompoundBinaryTag dialogData) {
+    private void handleAuthorSet(InstanceSetupData data, CompoundBinaryTag dialogData) {
         int amount = dialogData.getInt("amount", 1);
 
         for (int i = 0; i < amount; i++) {
@@ -109,10 +104,9 @@ public class PlayerCustomClickEventListener implements Consumer<PlayerCustomClic
      * @param data       the BounceData instance containing the map builder
      * @param dialogData the dialog data containing the type of data to delete
      */
-    private void handleDataDelete(@NotNull InstanceSetupData data, @NotNull CompoundBinaryTag dialogData) {
+    private void handleDataDelete(InstanceSetupData data, CompoundBinaryTag dialogData) {
         int type = dialogData.getInt("type");
         DataType mappedType = DataType.fromOrdinal(type);
-
         switch (mappedType) {
             case NAME -> data.getMapBuilder().name(null);
             case SPAWN -> data.getMapBuilder().spawn(null);
