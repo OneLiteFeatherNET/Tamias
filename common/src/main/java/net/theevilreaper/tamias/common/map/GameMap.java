@@ -2,12 +2,9 @@ package net.theevilreaper.tamias.common.map;
 
 import net.minestom.server.coordinate.Pos;
 import net.theevilreaper.aves.map.BaseMap;
-import net.theevilreaper.aves.map.MapEntry;
 import net.theevilreaper.tamias.common.map.layer.AreaData;
 import net.theevilreaper.tamias.common.map.layer.SpawnLayer;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnknownNullability;
 
 /**
  * The {@link GameMap} class contains all relevant information about the map which is used during the game.
@@ -22,7 +19,6 @@ public final class GameMap extends BaseMap {
     private final SpawnLayer spawnLayer;
     private final AreaData areaData;
     private final Pos bomberInitialSpawn;
-    private MapEntry mapEntry;
 
     /**
      * Constructs a new GameMap instance with the specified parameters.
@@ -34,11 +30,11 @@ public final class GameMap extends BaseMap {
      * @param areaData           the game area data
      */
     public GameMap(
-            @NotNull String name,
+            String name,
             @Nullable Pos spawn,
-            @NotNull Pos bomberInitialSpawn,
-            @NotNull SpawnLayer spawnLayer,
-            @NotNull AreaData areaData
+            Pos bomberInitialSpawn,
+            SpawnLayer spawnLayer,
+            AreaData areaData
     ) {
         super(name, spawn, "Team");
         this.bomberInitialSpawn = bomberInitialSpawn;
@@ -51,7 +47,7 @@ public final class GameMap extends BaseMap {
      *
      * @return the game area data
      */
-    public @Nullable AreaData getGameAreaData() {
+    public AreaData getGameAreaData() {
         return areaData;
     }
 
@@ -60,7 +56,7 @@ public final class GameMap extends BaseMap {
      *
      * @return the bomber initial spawn position
      */
-    public @UnknownNullability Pos getBomberInitialSpawn() {
+    public Pos getBomberInitialSpawn() {
         return bomberInitialSpawn;
     }
 
@@ -69,7 +65,7 @@ public final class GameMap extends BaseMap {
      *
      * @return the spawn data
      */
-    public @NotNull SpawnLayer getSpawnData() {
+    public SpawnLayer getSpawnData() {
         return spawnLayer;
     }
 }
