@@ -1,7 +1,6 @@
 package net.theevilreaper.tamias.game.scoreboard;
 
 import net.kyori.adventure.key.Key;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * The {@link ScoreType} interface represents different types of scores that can be displayed on the scoreboard.

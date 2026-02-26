@@ -3,7 +3,6 @@ package net.theevilreaper.tamias.setup.commands;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.condition.Conditions;
 import net.onelitefeather.guira.SetupDataService;
-import net.theevilreaper.aves.map.BaseMap;
 import net.theevilreaper.tamias.setup.commands.parts.SetupAreaCommand;
 import net.theevilreaper.tamias.setup.commands.parts.SetupBuildersCommand;
 import net.theevilreaper.tamias.setup.commands.parts.SetupNameCommand;

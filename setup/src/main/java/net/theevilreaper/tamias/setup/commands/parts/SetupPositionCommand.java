@@ -27,8 +27,6 @@ import net.theevilreaper.tamias.setup.util.DirectionUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
-import java.util.UUID;
-import java.util.function.Function;
 
 import static net.theevilreaper.tamias.setup.util.SetupMessages.SELECT_MAP_FIRST;
 

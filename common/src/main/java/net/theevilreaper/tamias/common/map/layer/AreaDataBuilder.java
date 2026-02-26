@@ -2,7 +2,6 @@ package net.theevilreaper.tamias.common.map.layer;
 
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.utils.Direction;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**

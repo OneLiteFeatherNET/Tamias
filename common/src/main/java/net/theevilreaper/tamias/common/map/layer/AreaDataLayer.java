@@ -3,7 +3,6 @@ package net.theevilreaper.tamias.common.map.layer;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.utils.Direction;
 import net.minestom.server.utils.validate.Check;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * The {@link AreaDataLayer} is a record class that implements the {@link AreaData} interface.

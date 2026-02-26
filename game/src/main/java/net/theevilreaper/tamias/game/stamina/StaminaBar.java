@@ -3,7 +3,6 @@ package net.theevilreaper.tamias.game.stamina;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.timer.Task;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.temporal.ChronoUnit;
