@@ -4,7 +4,7 @@ import net.minestom.server.MinecraftServer;
 
 public final class SetupServer {
 
-    public static void main(String[] args) {
+    static void main() {
         MinecraftServer server = MinecraftServer.init();
 
         TamiasSetup tamiasSetup = new TamiasSetup();

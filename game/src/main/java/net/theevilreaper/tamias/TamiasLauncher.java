@@ -5,7 +5,7 @@ import net.theevilreaper.tamias.game.Tamias;
 
 public class TamiasLauncher {
 
-    public static void main(String[] args) {
+    static void main() {
         MinecraftServer minecraftServer = MinecraftServer.init();
         Tamias tamias = new Tamias();
         tamias.initialize();
