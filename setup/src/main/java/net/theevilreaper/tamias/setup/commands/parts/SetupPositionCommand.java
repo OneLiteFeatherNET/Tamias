@@ -111,9 +111,10 @@ public final class SetupPositionCommand extends Command {
 
         Pos pos = player.getPosition();
         Direction direction = determinedDirection.get();
+        GameMapBuilder gameMapBuilder = (GameMapBuilder) builder;
 
-        ((GameMapBuilder)builder).spawnLayerDirection(direction);
-        ((GameMapBuilder)builder).spawnLayerPos(pos);
+        gameMapBuilder.spawnLayerDirection(direction);
+        gameMapBuilder.spawnLayerPos(pos);
 
         Component component = Messages.withPrefix(Component.text("Created round spawn at: ", NamedTextColor.GRAY)
                 .append(Components.convertPoint(pos).style(Style.style(NamedTextColor.GOLD)))
