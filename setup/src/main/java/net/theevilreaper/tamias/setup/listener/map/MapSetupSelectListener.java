@@ -1,6 +1,7 @@
 package net.theevilreaper.tamias.setup.listener.map;
 
 import net.onelitefeather.guira.SetupDataService;
+import net.onelitefeather.guira.data.SetupData;
 import net.theevilreaper.aves.file.FileHandler;
 import net.theevilreaper.aves.map.MapEntry;
 import net.kyori.adventure.text.Component;
@@ -17,6 +18,7 @@ import net.theevilreaper.tamias.setup.event.MapSetupSelectEvent;
 import net.theevilreaper.tamias.setup.util.SetupTags;
 
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public final class MapSetupSelectListener implements Consumer<MapSetupSelectEvent> {
@@ -24,10 +26,7 @@ public final class MapSetupSelectListener implements Consumer<MapSetupSelectEven
     private final FileHandler fileHandler;
     private final SetupDataService setupDataService;
 
-    public MapSetupSelectListener(
-            FileHandler fileHandler,
-            SetupDataService setupDataService
-    ) {
+    public MapSetupSelectListener(FileHandler fileHandler, SetupDataService setupDataService) {
         this.fileHandler = fileHandler;
         this.setupDataService = setupDataService;
     }
@@ -36,12 +35,11 @@ public final class MapSetupSelectListener implements Consumer<MapSetupSelectEven
     public void accept(MapSetupSelectEvent event) {
         Player player = event.getPlayer();
 
-       // SetupData setupData = this.setupDataService.get(player.getUuid()).get();
+        Optional<SetupData> setupData = this.setupDataService.get(player.getUuid());
 
-        /*if (setupData != null && setupData.hasMap()) {
-            // If this condition is reached the setup is fucked up
+        if (setupData.isPresent()) {
             player.sendMessage("You already have a map selected");
-        }*/
+        }
 
         InstanceSetupData data;
         MapEntry mapEntry = event.getMapEntry();
@@ -50,7 +48,6 @@ public final class MapSetupSelectListener implements Consumer<MapSetupSelectEven
         } else {
             data = new GameData(player.getUuid(), mapEntry, this.fileHandler);
         }
-
 
         Component message = Messages.withPrefix(Component.text("You selected the map: ", NamedTextColor.GRAY))
                 .append(Component.text(mapEntry.getDirectoryRoot().getFileName().toString(), NamedTextColor.AQUA));
@@ -62,10 +59,16 @@ public final class MapSetupSelectListener implements Consumer<MapSetupSelectEven
 
         this.setupDataService.add(player.getUuid(), data);
 
-        player.setTag(SetupTags.SETUP_TAG,  1);
+        player.setTag(SetupTags.SETUP_TAG, 1);
         getTeleportTask(() -> data.teleport(player)).schedule();
     }
 
+    /**
+     * Creates a task that teleports the player after a delay of 3 seconds.
+     *
+     * @param runnable the runnable to execute after the delay, which should contain the teleportation logic
+     * @return a Task.Builder that can be scheduled to execute the teleportation after the specified delay
+     */
     private Task.Builder getTeleportTask(Runnable runnable) {
         return MinecraftServer.getSchedulerManager().buildTask(runnable).delay(3, ChronoUnit.SECONDS);
     }
