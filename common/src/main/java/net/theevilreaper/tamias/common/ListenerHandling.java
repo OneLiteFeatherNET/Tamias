@@ -20,7 +20,7 @@ import java.util.function.Consumer;
  */
 public interface ListenerHandling {
 
-    Consumer<CancellableEvent> CANCELLABLE_EVENT = (event) -> event.setCancelled(true);
+    Consumer<CancellableEvent> CANCELLABLE_EVENT = event -> event.setCancelled(true);
 
     /**
      * Registers some {@link Event} listener to cancel specific default events.
