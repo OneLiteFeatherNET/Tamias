@@ -13,8 +13,8 @@ import net.minestom.server.event.inventory.InventoryCloseEvent;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.theevilreaper.tamias.setup.TamiasSetup;
 import net.theevilreaper.tamias.setup.util.SetupItems;
+import net.theevilreaper.tamias.setup.util.SetupTags;
 
 import static net.theevilreaper.aves.inventory.util.InventoryConstants.CANCEL_CLICK;
 
@@ -50,7 +50,7 @@ public class ConfirmInventory extends GlobalInventoryBuilder {
 
         layout.setItems(CONFIRM_SLOTS, CONFIRM_STACK, (player, i, click, stack, result) -> {
             result.accept(ClickHolder.cancelClick());
-            player.setTag(TamiasSetup.DELETE_TAG, true);
+            player.setTag(SetupTags.DELETE_TAG, true);
             EventDispatcher.call(new InventoryCloseEvent(player.getOpenInventory(), player, false));
             player.closeInventory();
         });
@@ -64,9 +64,9 @@ public class ConfirmInventory extends GlobalInventoryBuilder {
 
         setCloseFunction(closeEvent -> {
             Player player = closeEvent.getPlayer();
-            if (!player.hasTag(TamiasSetup.DELETE_TAG)) return;
+            if (!player.hasTag(SetupTags.DELETE_TAG)) return;
             consumer.accept(player);
-            player.removeTag(TamiasSetup.DELETE_TAG);
+            player.removeTag(SetupTags.DELETE_TAG);
         });
 
         this.invalidateDataLayout();
