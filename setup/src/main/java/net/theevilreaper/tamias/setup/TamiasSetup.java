@@ -3,8 +3,6 @@ package net.theevilreaper.tamias.setup;
 import net.minestom.server.event.player.PlayerCustomClickEvent;
 import net.onelitefeather.guira.SetupDataService;
 import net.onelitefeather.guira.event.SetupFinishEvent;
-import net.theevilreaper.aves.file.FileHandler;
-import net.theevilreaper.aves.file.GsonFileHandler;
 import net.theevilreaper.aves.map.provider.MapProvider;
 import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.minestom.server.MinecraftServer;
@@ -18,9 +16,7 @@ import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.tag.Tag;
 import net.theevilreaper.tamias.common.ListenerHandling;
-import net.theevilreaper.tamias.common.gson.GsonUtil;
 import net.theevilreaper.tamias.setup.commands.SetupCommand;
 import net.theevilreaper.tamias.setup.dialog.DialogRegistry;
 import net.theevilreaper.tamias.setup.dialog.SetupDialogRegistry;
@@ -49,14 +45,12 @@ import java.util.function.Supplier;
 public final class TamiasSetup implements ListenerHandling {
 
     private final SetupDataService setupDataService;
-    private final FileHandler fileHandler;
     private final MapProvider mapProvider;
     private final MapSetupInventory mapSetupInventory;
     private final DialogRegistry dialogRegistry;
 
     public TamiasSetup() {
-        this.fileHandler = new GsonFileHandler(GsonUtil.GSON);
-        this.mapProvider = new SetupMapProvider(Paths.get(""), this.fileHandler);
+        this.mapProvider = new SetupMapProvider(Paths.get(""));
         this.setupDataService = SetupDataService.create();
         this.mapSetupInventory = new MapSetupInventory(this.mapProvider::getEntries);
         this.dialogRegistry = new SetupDialogRegistry();
