@@ -2,7 +2,6 @@ package net.theevilreaper.tamias.setup.listener.map;
 
 import net.onelitefeather.guira.SetupDataService;
 import net.onelitefeather.guira.data.SetupData;
-import net.theevilreaper.aves.file.FileHandler;
 import net.theevilreaper.aves.map.MapEntry;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -21,13 +20,13 @@ import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import static net.theevilreaper.tamias.setup.map.SetupMapProvider.FILE_HANDLER;
+
 public final class MapSetupSelectListener implements Consumer<MapSetupSelectEvent> {
 
-    private final FileHandler fileHandler;
     private final SetupDataService setupDataService;
 
-    public MapSetupSelectListener(FileHandler fileHandler, SetupDataService setupDataService) {
-        this.fileHandler = fileHandler;
+    public MapSetupSelectListener(SetupDataService setupDataService) {
         this.setupDataService = setupDataService;
     }
 
@@ -44,9 +43,9 @@ public final class MapSetupSelectListener implements Consumer<MapSetupSelectEven
         InstanceSetupData data;
         MapEntry mapEntry = event.getMapEntry();
         if (event.isLobbyMode()) {
-            data = new LobbyData(player.getUuid(), mapEntry, this.fileHandler);
+            data = new LobbyData(player.getUuid(), mapEntry);
         } else {
-            data = new GameData(player.getUuid(), mapEntry, this.fileHandler);
+            data = new GameData(player.getUuid(), mapEntry);
         }
 
         Component message = Messages.withPrefix(Component.text("You selected the map: ", NamedTextColor.GRAY))

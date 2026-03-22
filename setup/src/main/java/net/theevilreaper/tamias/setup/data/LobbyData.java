@@ -5,7 +5,6 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.anvil.AnvilLoader;
-import net.theevilreaper.aves.file.FileHandler;
 import net.theevilreaper.aves.map.BaseMap;
 import net.theevilreaper.aves.map.BaseMapBuilder;
 import net.theevilreaper.aves.map.MapEntry;
@@ -16,15 +15,15 @@ import java.nio.file.Files;
 import java.util.Optional;
 import java.util.UUID;
 
+import static net.theevilreaper.tamias.setup.map.SetupMapProvider.FILE_HANDLER;
+
 public final class LobbyData extends InstanceSetupData {
 
-    private final FileHandler fileHandler;
     private LobbyViewInventory viewInventory;
     private BaseMapBuilder mapBuilder;
 
-    public LobbyData(@NotNull UUID uuid, @NotNull MapEntry mapEntry, @NotNull FileHandler fileHandler) {
+    public LobbyData(@NotNull UUID uuid, @NotNull MapEntry mapEntry) {
         super(uuid, mapEntry, BossBar.Color.GREEN);
-        this.fileHandler = fileHandler;
         this.loadData();
         Player player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(uuid);
 
@@ -50,7 +49,7 @@ public final class LobbyData extends InstanceSetupData {
         if (!Files.exists(mapEntry.getMapFile())) {
             this.mapEntry.createFile();
         }
-        this.fileHandler.save(mapEntry.getMapFile(), BaseMap.class);
+        FILE_HANDLER.save(mapEntry.getMapFile(), BaseMap.class);
     }
 
     @Override
@@ -73,7 +72,7 @@ public final class LobbyData extends InstanceSetupData {
         if (this.mapEntry == null) {
             this.mapBuilder = BaseMap.builder();
         } else {
-            Optional<BaseMap> mapData = fileHandler.load(mapEntry.getMapFile(), BaseMap.class);
+            Optional<BaseMap> mapData = FILE_HANDLER.load(mapEntry.getMapFile(), BaseMap.class);
 
             mapData.ifPresentOrElse(baseMap -> {
                 this.mapBuilder = BaseMap.builder(baseMap);

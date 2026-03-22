@@ -3,6 +3,7 @@ package net.theevilreaper.tamias.setup.map;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
+import net.theevilreaper.aves.file.FileHandler;
 import net.theevilreaper.aves.file.GsonFileHandler;
 import net.theevilreaper.aves.map.BaseMap;
 import net.theevilreaper.aves.map.MapEntry;
@@ -24,6 +25,7 @@ import java.util.Optional;
  */
 public final class SetupMapProvider extends AbstractMapProvider {
 
+    public static final FileHandler FILE_HANDLER = new GsonFileHandler(GsonUtil.GSON);
     private static final Pos FALLBACK_POS = new Pos(0, 100, 0);
 
     /**
@@ -32,7 +34,7 @@ public final class SetupMapProvider extends AbstractMapProvider {
      * @param path        the path where the maps are stored
      */
     public SetupMapProvider(Path path) {
-        super(new GsonFileHandler(GsonUtil.GSON), MapFilter::filterMapsForSetup);
+        super(FILE_HANDLER, MapFilter::filterMapsForSetup);
         this.mapEntries = loadMapEntries(path.resolve("maps"));
 
         LobbyMapPredicate predicate = new LobbyMapPredicate();
