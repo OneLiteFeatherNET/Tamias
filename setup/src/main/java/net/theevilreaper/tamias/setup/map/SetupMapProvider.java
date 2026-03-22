@@ -30,7 +30,6 @@ public final class SetupMapProvider extends AbstractMapProvider {
      * Constructs a SetupMapProvider with the specified FileHandler.
      *
      * @param path        the path where the maps are stored
-     * @param fileHandler the FileHandler used to load and save maps
      */
     public SetupMapProvider(Path path) {
         super(new GsonFileHandler(GsonUtil.GSON), MapFilter::filterMapsForSetup);
