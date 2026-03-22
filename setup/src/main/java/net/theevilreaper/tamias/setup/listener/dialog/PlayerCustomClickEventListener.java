@@ -72,11 +72,8 @@ public class PlayerCustomClickEventListener implements Consumer<PlayerCustomClic
      * @param dialogData the dialog data containing the authors to set
      */
     private void handleNameSet(InstanceSetupData data, CompoundBinaryTag dialogData) {
-        System.out.println("Trgiger name part");
         String name = dialogData.getString("name");
-        System.out.println("Trgiger name part");
         if (name.trim().isEmpty()) return;
-        System.out.println("Trgiger name part 11");
         data.getMapBuilder().name(name);
         data.triggerUpdate();
     }
