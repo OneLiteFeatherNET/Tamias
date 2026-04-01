@@ -25,7 +25,7 @@ dependencyResolutionManagement {
             version("shadow", "9.4.1")
             version("projectiles", "2.1.6")
             version("aonyx", "0.7.0")
-            version("cyclonedx", "3.2.2")
+            version("cyclonedx", "3.2.3")
 
             library("game.bom", "net.onelitefeather", "aonyx-bom").versionRef("aonyx")
 
