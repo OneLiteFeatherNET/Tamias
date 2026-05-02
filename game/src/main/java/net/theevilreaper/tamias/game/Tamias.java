@@ -85,7 +85,6 @@ public class Tamias implements ListenerHandling {
     private final TeamService teamService;
     private final StaminaService staminaService;
     private final GameConfig gameConfig;
-    private final Items items;
     private final IntConsumer timeUpdater;
     private final Scoreboard scoreboard;
     private final MapProvider mapProvider;
@@ -100,7 +99,6 @@ public class Tamias implements ListenerHandling {
         this.mapProvider = new GameMapProvider(path);
         TeamHelper.loadTeams(this.gameConfig.teamSize(), this.teamService);
         this.staminaService = new StaminaService();
-        this.items = new Items();
         this.scoreboard = new LobbyScoreboard(GameMessages.getTitleTime(this.gameConfig.lobbyTime()));
         this.timeUpdater = value -> {
             Component time = Component.text("Time:", NamedTextColor.GOLD).append(Component.space())
@@ -143,7 +141,6 @@ public class Tamias implements ListenerHandling {
 
         gameSeries.add(new PrePlayingPhase(
                 this.teamService,
-                this.items::setItemToPlayer,
                 () -> staminaService.createStaminaObjects(this.teamService)
         ));
 
@@ -182,7 +179,7 @@ public class Tamias implements ListenerHandling {
 
         Supplier<Pos> randomPos = () -> Pos.ZERO;//gameMapProvider.getGameArea()::getRandomPosition;
         listenerMap.put(PlayerUseItemEvent.class, new PlayerInteractItemListener(staminaService::getStaminaBar));
-        listenerMap.put(BomberRequireSpawnEvent.class, new BomberReviveListener(this.staminaService::getStaminaBar, randomPos, items::setBombItem));
+        listenerMap.put(BomberRequireSpawnEvent.class, new BomberReviveListener(this.staminaService::getStaminaBar, randomPos));
         listenerMap.put(BomberExplodeEvent.class, new BomberExplodeListener());
         listenerMap.put(ProjectileCollideWithBlockEvent.class, new ProjectileBlockListener());
         PlayerConsumer teamUpdater = player -> TeamHelper.switchToTNTTeam(this.teamService.getTeams()::get, player);

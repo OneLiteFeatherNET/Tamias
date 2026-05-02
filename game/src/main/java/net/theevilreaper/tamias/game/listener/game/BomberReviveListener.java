@@ -1,6 +1,5 @@
 package net.theevilreaper.tamias.game.listener.game;
 
-import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
@@ -14,6 +13,7 @@ import net.theevilreaper.tamias.game.attribute.AttributeHelper;
 import net.theevilreaper.tamias.game.event.BomberRequireSpawnEvent;
 import net.theevilreaper.tamias.game.stamina.ExplodeBar;
 import net.theevilreaper.tamias.game.stamina.StaminaBar;
+import net.theevilreaper.tamias.game.util.Items;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -29,16 +29,13 @@ public final class BomberReviveListener implements Consumer<BomberRequireSpawnEv
 
     private final Function<Player, StaminaBar> barGetter;
     private final Supplier<Pos> spawnPos;
-    private final PlayerConsumer itemSetter;
 
     public BomberReviveListener(
             @NotNull Function<Player, StaminaBar> barGetter,
-            @NotNull Supplier<Pos>  spawnPos,
-            @NotNull PlayerConsumer itemSetter
+            @NotNull Supplier<Pos>  spawnPos
     ) {
         this.barGetter = barGetter;
         this.spawnPos = spawnPos;
-        this.itemSetter = itemSetter;
     }
 
     @Override
@@ -72,6 +69,6 @@ public final class BomberReviveListener implements Consumer<BomberRequireSpawnEv
         player.teleport(newSpawnPos.add(0.5, 1, 0.5));
         player.playSound(RESPAWN);
         AttributeHelper.enableMovement(player);
-        this.itemSetter.accept(player);
+        Items.setBombItem(player);
     }
 }
