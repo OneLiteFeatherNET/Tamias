@@ -16,17 +16,14 @@ import net.theevilreaper.tamias.common.util.Tags;
 @SuppressWarnings("java:S3252")
 public final class Items {
 
-    private final ItemStack shootItem;
-    private final ItemStack bombItem;
+    private static final ItemStack SHOOT_ITEM;
+    private static final ItemStack BOMB_ITEM;
 
-    /**
-     * Constructs a new instance from this class.
-     */
-    public Items() {
-        this.shootItem = ItemStack.builder(Material.IRON_HOE)
+    static {
+        SHOOT_ITEM = ItemStack.builder(Material.IRON_HOE)
                 .set(Tags.ITEM_TAG, (byte) 0)
                 .build();
-        this.bombItem = ItemStack.builder(Material.TNT)
+        BOMB_ITEM = ItemStack.builder(Material.TNT)
                 .set(Tags.ITEM_TAG, (byte) 1).build();
     }
 
@@ -35,9 +32,9 @@ public final class Items {
      *
      * @param player the player to set the item
      */
-    public void setShootItem(Player player) {
+    public static void setShootItem(Player player) {
         player.getInventory().clear();
-        player.getInventory().addItemStack(shootItem);
+        player.getInventory().addItemStack(SHOOT_ITEM);
     }
 
     /**
@@ -45,16 +42,26 @@ public final class Items {
      *
      * @param player the player to set the item
      */
-    public void setBombItem(Player player) {
+    public static void setBombItem(Player player) {
         player.getInventory().clear();
-        player.getInventory().addItemStack(this.bombItem);
+        player.getInventory().addItemStack(BOMB_ITEM);
     }
 
-    public void setItemToPlayer(Player player, int teamId) {
+    /**
+     * Sets the item to the player based on the team id.
+     *
+     * @param player who should get the item
+     * @param teamId the team id
+     */
+    public static void setItemToPlayer(Player player, int teamId) {
         if (teamId == GameConfig.SURVIVOR_ID) {
             setShootItem(player);
         } else {
-           setBombItem(player);
+            setBombItem(player);
         }
+    }
+
+    private Items() {
+        throw new UnsupportedOperationException("Utility class");
     }
 }
