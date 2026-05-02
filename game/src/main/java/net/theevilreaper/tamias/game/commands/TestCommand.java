@@ -24,14 +24,12 @@ public class TestCommand extends Command {
 
     private final ArgumentWord argumentWord;
 
-    private final Items items;
 
     private StaminaBar staminaBar;
 
     public TestCommand() {
         super("test", "t");
         this.argumentWord = ArgumentType.Word("test").from("A", "B");
-        this.items = new Items();
         addSyntax(this::onCommand, argumentWord);
         MinecraftServer.getGlobalEventHandler().addListener(PlayerUseItemEvent.class, new PlayerInteractItemListener(unused -> this.staminaBar));
     }
@@ -41,11 +39,11 @@ public class TestCommand extends Command {
         var argument = context.get(argumentWord);
 
         if ("A".equals(argument)) {
-            this.items.setBombItem(player);
+            Items.setBombItem(player);
             player.sendMessage("Test A");
             this.staminaBar = StaminaFactory.createExplodeBar(player);
         } else {
-            this.items.setShootItem(player);
+            Items.setShootItem(player);
             player.sendMessage("Test B");
             this.staminaBar = StaminaFactory.createShootBar(player);
         }
