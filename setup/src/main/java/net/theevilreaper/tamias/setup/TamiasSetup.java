@@ -46,14 +46,12 @@ public final class TamiasSetup implements ListenerHandling {
     private final SetupDataService setupDataService;
     private final FileHandler fileHandler;
     private final MapProvider mapProvider;
-    private final SetupItems setupItems;
     private final MapSetupInventory mapSetupInventory;
 
     public TamiasSetup() {
         this.fileHandler = new GsonFileHandler(GsonUtil.GSON);
         this.mapProvider = new SetupMapProvider(Paths.get(""), this.fileHandler);
         this.setupDataService = SetupDataService.create();
-        this.setupItems = new SetupItems();
         this.mapSetupInventory = new MapSetupInventory(this.mapProvider::getEntries);
         MinecraftServer.getSchedulerManager().buildShutdownTask(this::terminate);
     }
@@ -74,16 +72,16 @@ public final class TamiasSetup implements ListenerHandling {
         SetupMapProvider setupMapProvider = (SetupMapProvider) mapProvider;
         PlayerConsumer initialSpawnSupplier = player -> {
             setupMapProvider.teleportToSpawn(player, false);
-            setupItems.setOverViewItem(player);
+            SetupItems.setOverViewItem(player);
         };
         PlayerConsumer instanceSwitcher = player -> {
             setupMapProvider.teleportToSpawn(player, true);
-            setupItems.setOverViewItem(player);
+            SetupItems.setOverViewItem(player);
         };
         manager.addListener(PlayerDisconnectEvent.class, new PlayerDisconnectListener(setupDataService::remove));
         manager.addListener(AsyncPlayerConfigurationEvent.class, new PlayerConfigurationListener(instanceSupplier));
         manager.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(initialSpawnSupplier));
-        manager.addListener(AddEntityToInstanceEvent.class, new EntityAddToInstanceListener(instanceSupplier, setupItems));
+        manager.addListener(AddEntityToInstanceEvent.class, new EntityAddToInstanceListener(instanceSupplier));
         manager.addListener(MapSetupSelectEvent.class, new MapSetupSelectListener(this.fileHandler, this.setupDataService));
         manager.addListener(SetupFinishEvent.class, new SetupFinishListener(instanceSwitcher));
         manager.addListener(PlayerChatEvent.class, new PlayerChatListener(this.setupDataService));

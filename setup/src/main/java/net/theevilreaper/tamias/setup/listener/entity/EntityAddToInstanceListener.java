@@ -12,11 +12,9 @@ import java.util.function.Supplier;
 public class EntityAddToInstanceListener implements Consumer<AddEntityToInstanceEvent> {
 
     private final Supplier<Instance> instanceSupplier;
-    private final SetupItems items;
 
-    public EntityAddToInstanceListener(@NotNull Supplier<Instance> instanceSupplier, @NotNull SetupItems items) {
+    public EntityAddToInstanceListener(@NotNull Supplier<Instance> instanceSupplier) {
         this.instanceSupplier = instanceSupplier;
-        this.items = items;
     }
 
     @Override
@@ -24,9 +22,9 @@ public class EntityAddToInstanceListener implements Consumer<AddEntityToInstance
         if (!(event.getEntity() instanceof Player player)) return;
         Instance mainInstance = this.instanceSupplier.get();
         if (event.getInstance().getUuid().equals(mainInstance.getUuid())) {
-            items.setOverViewItem(player);
+            SetupItems.setOverViewItem(player);
             return;
         }
-        items.setSaveItem(player);
+        SetupItems.setSaveItem(player);
     }
 }

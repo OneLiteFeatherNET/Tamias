@@ -20,25 +20,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @ExtendWith(MicrotusExtension.class)
 class SetupItemsTest {
 
-    private static SetupItems setupItems;
-
-    @BeforeAll
-    static void setUp() {
-        setupItems = new SetupItems();
-    }
-
-    @AfterAll
-    static void tearDown() {
-        setupItems = null;
-    }
-
     @Test
     void testOverViewItem(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
         Player player = env.createPlayer(instance);
         assertNotNull(player);
 
-        setupItems.setOverViewItem(player);
+        SetupItems.setOverViewItem(player);
         ItemStack overViewItem = player.getInventory().getItemStack(0x00);
         assertNotNull(overViewItem);
         assertNotEquals(Material.AIR, overViewItem.material());
@@ -56,7 +44,7 @@ class SetupItemsTest {
         Player player = env.createPlayer(instance);
         assertNotNull(player);
 
-        setupItems.setSaveItem(player);
+        SetupItems.setSaveItem(player);
         ItemStack saveItem = player.getInventory().getItemStack(0x06);
         assertNotNull(saveItem);
         assertNotEquals(Material.AIR, saveItem.material());

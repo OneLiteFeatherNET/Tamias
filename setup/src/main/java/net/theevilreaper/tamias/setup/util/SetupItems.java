@@ -9,7 +9,7 @@ import net.minestom.server.tag.Tag;
 import net.theevilreaper.tamias.common.util.Tags;
 
 /**
- * The class holds all item reference which are required in the setup process of a map.
+ * The class holds all item references that are required in the setup process of a map.
  * Each item uses a {@link Tag<Byte>} to identify which functionality the item has.
  * This behaviour is easier to use because it doesn't require additional references in the event class to check the item.
  *
@@ -26,20 +26,20 @@ public final class SetupItems {
             .customName(Component.empty())
             .build();
 
-    private final ItemStack overview;
-    private final ItemStack save;
-    private final ItemStack viewItem;
+    private static final ItemStack OVERVIEW;
+    private static final ItemStack SAVE;
+    private static final ItemStack VIEW_ITEM;
 
-    public SetupItems() {
-        this.overview = ItemStack.builder(Material.CHEST)
+    static {
+        OVERVIEW = ItemStack.builder(Material.CHEST)
                 .customName(Component.text("Maps", NamedTextColor.GREEN))
                 .set(Tags.ITEM_TAG, (byte) 0x00)
                 .build();
-        this.save = ItemStack.builder(Material.BELL)
+        SAVE = ItemStack.builder(Material.BELL)
                 .customName(Component.text("Save map", NamedTextColor.RED))
                 .set(Tags.ITEM_TAG, (byte) 0x01)
                 .build();
-        this.viewItem = ItemStack.builder(Material.COMPASS)
+        VIEW_ITEM = ItemStack.builder(Material.COMPASS)
                 .customName(Component.text("View data", NamedTextColor.AQUA))
                 .set(Tags.ITEM_TAG, OVERVIEW_FLAG)
                 .build();
@@ -50,9 +50,9 @@ public final class SetupItems {
      *
      * @param player the player to set the item
      */
-    public void setOverViewItem(Player player) {
+    public static void setOverViewItem(Player player) {
         player.getInventory().clear();
-        player.getInventory().setItemStack(0x00, this.overview);
+        player.getInventory().setItemStack(0x00, OVERVIEW);
         player.setHeldItemSlot((byte) 0);
     }
 
@@ -61,10 +61,14 @@ public final class SetupItems {
      *
      * @param player the player to set the item
      */
-    public void setSaveItem(Player player) {
+    public static void setSaveItem(Player player) {
         player.getInventory().clear();
-        player.getInventory().setItemStack(0x06, this.save);
-        player.getInventory().setItemStack(0x02, this.viewItem);
+        player.getInventory().setItemStack(0x06, SAVE);
+        player.getInventory().setItemStack(0x02, VIEW_ITEM);
         player.setHeldItemSlot((byte) 0);
+    }
+
+    private SetupItems() {
+
     }
 }
