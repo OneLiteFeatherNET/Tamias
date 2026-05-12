@@ -1,6 +1,8 @@
 package net.theevilreaper.tamias.game.phase.playing;
 
+import net.minestom.server.event.EventDispatcher;
 import net.theevilreaper.aves.util.functional.VoidConsumer;
+import net.theevilreaper.tamias.game.stamina.event.StaminaCreateEvent;
 import net.theevilreaper.tamias.game.util.Items;
 import net.theevilreaper.xerus.api.phase.TickDirection;
 import net.theevilreaper.xerus.api.phase.TimedPhase;
@@ -27,22 +29,17 @@ import java.util.function.BiConsumer;
 public final class PrePlayingPhase extends TimedPhase {
 
     private final TeamService teamService;
-    private final VoidConsumer staminaCreation;
 
     /**
      * Creates a new instance from the phase
      *
-     * @param teamService     the service which provides access to the teams
+     * @param teamService the service that provides access to the teams
      */
-    public PrePlayingPhase(
-            @NotNull TeamService teamService,
-            @NotNull VoidConsumer staminaCreation
-    ) {
+    public PrePlayingPhase(@NotNull TeamService teamService) {
         super("Pre-Playing", ChronoUnit.SECONDS, 1);
         this.setCurrentTicks(5);
         this.setTickDirection(TickDirection.DOWN);
         this.teamService = teamService;
-        this.staminaCreation = staminaCreation;
     }
 
     @Override
@@ -56,7 +53,7 @@ public final class PrePlayingPhase extends TimedPhase {
         //Teleportation
         Team tntTeam = this.teamService.getTeams().get(GameConfig.TNT_ID);
         EntityHelper.switchToTNT(tntTeam.getPlayers().stream().findFirst().get());
-        this.staminaCreation.apply();
+        EventDispatcher.call(new StaminaCreateEvent());
     }
 
     @Override

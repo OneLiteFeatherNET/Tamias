@@ -10,6 +10,7 @@ import net.theevilreaper.aves.util.functional.VoidConsumer;
 import net.theevilreaper.tamias.game.scoreboard.LobbyScoreboard;
 import net.theevilreaper.tamias.game.scoreboard.ScoreType;
 import net.theevilreaper.tamias.game.scoreboard.Scoreboard;
+import net.theevilreaper.tamias.game.stamina.event.StaminaCreateEvent;
 import net.theevilreaper.tamias.game.util.GameMessages;
 import net.theevilreaper.tamias.game.round.event.RoundEndEvent;
 import net.theevilreaper.tamias.game.round.event.RoundStartEvent;
@@ -139,10 +140,7 @@ public class Tamias implements ListenerHandling {
                 }
         ));
 
-        gameSeries.add(new PrePlayingPhase(
-                this.teamService,
-                () -> staminaService.createStaminaObjects(this.teamService)
-        ));
+        gameSeries.add(new PrePlayingPhase(this.teamService));
 
         VoidConsumer startLogic = () -> {
             for (Player player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
@@ -164,7 +162,8 @@ public class Tamias implements ListenerHandling {
                 new PostPlayingPhase(
                         this.roundProvider::isLastRound,
                         this.roundProvider::triggerNextRound,
-                        () -> {}
+                        () -> {
+                        }
                 )
         );
         gameSeries.setMaxIterations(this.gameConfig.maxRounds());
@@ -210,5 +209,10 @@ public class Tamias implements ListenerHandling {
 
         // Listener for rounds
         node.addListener(RoundStartEvent.class, new RoundStartListener(this.scoreboard, this.roundProvider));
+
+        //Stamina listeners
+        node.addListener(StaminaCreateEvent.class, _ ->
+                this.staminaService.createStaminaObjects(this.teamService)
+        );
     }
 }
