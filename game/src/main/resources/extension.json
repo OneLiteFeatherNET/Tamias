@@ -1,9 +1,0 @@
-{
-  "entrypoint": "net.theevilreaper.tamias.game.Tamias",
-  "name": "Tamias",
-  "version": "1.0.0",
-  "dependencies": [
-    "Aves",
-    "Xerus"
-  ]
-}
