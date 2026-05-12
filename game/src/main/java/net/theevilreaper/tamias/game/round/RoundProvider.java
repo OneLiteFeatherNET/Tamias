@@ -4,7 +4,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.theevilreaper.xerus.api.phase.CyclicPhaseSeries;
 import net.theevilreaper.xerus.api.phase.Phase;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * The {@link  RoundProvider} manages the current information about which round is active.
@@ -27,7 +26,7 @@ public final class RoundProvider {
      * @param phaseSeries the phase series to get the max rounds from
      * @throws IllegalArgumentException if the phase series is null or has no iterations
      */
-    public RoundProvider(@NotNull CyclicPhaseSeries<Phase> phaseSeries) {
+    public RoundProvider(CyclicPhaseSeries<Phase> phaseSeries) {
         this.phaseSeries = phaseSeries;
         int maxRounds = phaseSeries.getMaxIterations();
         this.maxRoundComponent = Component.text(" / ", NamedTextColor.GRAY).append(Component.text(maxRounds, NamedTextColor.AQUA));
@@ -65,7 +64,7 @@ public final class RoundProvider {
      *
      * @return the current round component
      */
-    public @NotNull Component getCurrentRoundComponent() {
+    public Component getCurrentRoundComponent() {
         return this.roundComponent;
     }
 }
