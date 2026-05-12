@@ -1,16 +1,14 @@
 package net.theevilreaper.tamias.game.phase;
 
 import net.minestom.server.event.EventDispatcher;
-import net.theevilreaper.aves.map.provider.MapProvider;
 import net.theevilreaper.tamias.common.map.event.MapPrepareEvent;
-import net.theevilreaper.tamias.common.round.event.RoundPrepareEvent;
+import net.theevilreaper.tamias.game.round.event.RoundPrepareEvent;
 import net.theevilreaper.tamias.game.util.phase.LobbyPhaseData;
 import net.theevilreaper.xerus.api.phase.TickDirection;
 import net.theevilreaper.xerus.api.phase.TimedPhase;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.entity.Player;
 import net.minestom.server.sound.SoundEvent;
-import net.theevilreaper.tamias.game.map.GameMapProvider;
 import net.theevilreaper.tamias.game.util.GameMessages;
 import org.jetbrains.annotations.NotNull;
 
