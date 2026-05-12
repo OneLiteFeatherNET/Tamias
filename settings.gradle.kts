@@ -26,6 +26,7 @@ dependencyResolutionManagement {
             version("projectiles", "2.1.6")
             version("aonyx", "0.7.1")
             version("cyclonedx", "3.2.4")
+            version("pica", "0.0.2")
 
             library("game.bom", "net.onelitefeather", "aonyx-bom").versionRef("aonyx")
 
@@ -40,6 +41,7 @@ dependencyResolutionManagement {
             library("junit.params", "org.junit.jupiter", "junit-jupiter-params").withoutVersion()
             library("aves", "net.theevilreaper", "aves").withoutVersion()
             library("xerus", "net.theevilreaper", "xerus").withoutVersion()
+            library("pica", "net.onelitefeather", "pica").versionRef("pica")
 
             plugin("shadow", "com.gradleup.shadow").versionRef("shadow")
             plugin("cyclonedx", "org.cyclonedx.bom").versionRef("cyclonedx")
