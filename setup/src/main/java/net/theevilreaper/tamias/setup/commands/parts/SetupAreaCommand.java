@@ -14,11 +14,11 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.utils.Direction;
 import net.onelitefeather.guira.data.SetupData;
 import net.theevilreaper.aves.util.Components;
+import net.theevilreaper.tamias.common.map.builder.GameMapBuilder;
 import net.theevilreaper.tamias.common.util.Messages;
-import net.theevilreaper.tamias.setup.TamiasSetup;
 import net.theevilreaper.tamias.setup.data.GameData;
 import net.theevilreaper.tamias.setup.util.DirectionUtil;
-import org.jetbrains.annotations.NotNull;
+import net.theevilreaper.tamias.setup.util.SetupTags;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -36,7 +36,7 @@ public class SetupAreaCommand extends Command {
     private final Function<UUID, Optional<SetupData>> setupDataFunction;
     private final ArgumentWord argumentWord;
 
-    public SetupAreaCommand(@NotNull Function<UUID, Optional<SetupData>> setupDataFunction) {
+    public SetupAreaCommand(Function<UUID, Optional<SetupData>> setupDataFunction) {
         super("area");
         this.setCondition(Conditions::playerOnly);
         this.setupDataFunction = setupDataFunction;
@@ -48,8 +48,8 @@ public class SetupAreaCommand extends Command {
         this.addSyntax(this::handleStateChange, stateChange);
     }
 
-    private void handleStateChange(@NotNull CommandSender sender, @NotNull CommandContext context) {
-        if (!sender.hasTag(TamiasSetup.SETUP_TAG)) {
+    private void handleStateChange(CommandSender sender, CommandContext context) {
+        if (!sender.hasTag(SetupTags.SETUP_TAG)) {
             sender.sendMessage(SELECT_MAP_FIRST);
             return;
         }
@@ -71,8 +71,8 @@ public class SetupAreaCommand extends Command {
         }
     }
 
-    private void handlePositionSet(@NotNull CommandSender sender, @NotNull CommandContext context) {
-        if (!sender.hasTag(TamiasSetup.SETUP_TAG)) {
+    private void handlePositionSet(CommandSender sender, CommandContext context) {
+        if (!sender.hasTag(SetupTags.SETUP_TAG)) {
             sender.sendMessage(SELECT_MAP_FIRST);
             return;
         }
@@ -107,15 +107,17 @@ public class SetupAreaCommand extends Command {
      * @param player    the player who executed the command
      * @param setupData the game data containing the map builder
      */
-    private void setLeftCorner(@NotNull Player player, @NotNull GameData setupData) {
+    private void setLeftCorner(Player player, GameData setupData) {
         Optional<Direction> directionOptional = DirectionUtil.parseDirection(player);
         if (directionOptional.isEmpty()) return;
 
         Vec vec = player.getPosition().asVec().sub(0, -1, 0);
         Direction direction = directionOptional.get();
 
-        setupData.getGameMapBuilder().areaLowerCorner(vec);
-        setupData.getGameMapBuilder().areaFacing(direction);
+        GameMapBuilder mapBuilder = (GameMapBuilder) setupData.getMapBuilder();
+
+        mapBuilder.areaLowerCorner(vec);
+        mapBuilder.areaFacing(direction);
 
         Component component = Messages.withPrefix(Component.text("Left area corner is: ", NamedTextColor.GRAY)
                 .append(Components.convertPoint(vec).style(Style.style(NamedTextColor.GOLD)))
@@ -131,10 +133,12 @@ public class SetupAreaCommand extends Command {
      * @param player    the player who executed the command
      * @param setupData the game data containing the map builder
      */
-    private void setRightCorner(@NotNull Player player, @NotNull GameData setupData) {
+    private void setRightCorner(Player player, GameData setupData) {
         Vec vec = player.getPosition().asVec();
 
-        setupData.getGameMapBuilder().areaUpperCorner(vec);
+        GameMapBuilder mapBuilder = (GameMapBuilder) setupData.getMapBuilder();
+
+        mapBuilder.areaUpperCorner(vec);
         Component component = Messages.withPrefix(Component.text("Right area corner is: ", NamedTextColor.GRAY)
                 .append(Components.convertPoint(vec).style(Style.style(NamedTextColor.GOLD))));
         player.sendMessage(component);

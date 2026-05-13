@@ -4,9 +4,11 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.theevilreaper.aves.file.FileHandler;
+import net.theevilreaper.aves.file.GsonFileHandler;
 import net.theevilreaper.aves.map.BaseMap;
 import net.theevilreaper.aves.map.MapEntry;
 import net.theevilreaper.aves.map.provider.AbstractMapProvider;
+import net.theevilreaper.tamias.common.gson.GsonUtil;
 import net.theevilreaper.tamias.common.map.GameMap;
 import net.theevilreaper.tamias.common.map.functional.LobbyMapPredicate;
 import net.theevilreaper.tamias.common.util.MapFilter;
@@ -23,18 +25,17 @@ import java.util.Optional;
  */
 public final class SetupMapProvider extends AbstractMapProvider {
 
+    public static final FileHandler FILE_HANDLER = new GsonFileHandler(GsonUtil.GSON);
     private static final Pos FALLBACK_POS = new Pos(0, 100, 0);
-    private static final String LOBBY_SUFFIX = "lobby"; // Constant for lobby suffix
 
     /**
      * Constructs a SetupMapProvider with the specified FileHandler.
      *
      * @param path        the path where the maps are stored
-     * @param fileHandler the FileHandler used to load and save maps
      */
-    public SetupMapProvider(Path path, FileHandler fileHandler) {
-        super(fileHandler, MapFilter::filterMapsForSetup);
-        loadMapEntries(path.resolve("maps"));
+    public SetupMapProvider(Path path) {
+        super(FILE_HANDLER, MapFilter::filterMapsForSetup);
+        this.mapEntries = loadMapEntries(path.resolve("maps"));
 
         LobbyMapPredicate predicate = new LobbyMapPredicate();
         Optional<MapEntry> lobbyEntry = getEntries().stream().filter(predicate).findFirst();
@@ -58,17 +59,6 @@ public final class SetupMapProvider extends AbstractMapProvider {
         this.activeMap = baseMap.get();
         this.activeInstance = MinecraftServer.getInstanceManager().createInstanceContainer();
         this.registerInstance(this.activeInstance, lobbyEntry.get());
-    }
-
-
-    /**
-     * Checks if the given map is a lobby map.
-     *
-     * @param mapEntry the map entry to check
-     * @return true if the map is a lobby map
-     */
-    private boolean isLobbyMap(MapEntry mapEntry) {
-        return mapEntry.getDirectoryRoot().endsWith(LOBBY_SUFFIX);
     }
 
     @Override

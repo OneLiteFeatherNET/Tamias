@@ -2,10 +2,11 @@ package net.theevilreaper.tamias.setup.data;
 
 import net.kyori.adventure.bossbar.BossBar;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.anvil.AnvilLoader;
-import net.theevilreaper.aves.file.FileHandler;
 import net.theevilreaper.aves.map.BaseMap;
+import net.theevilreaper.aves.map.BaseMapBuilder;
 import net.theevilreaper.aves.map.MapEntry;
 import net.theevilreaper.tamias.common.map.GameMap;
 import net.theevilreaper.tamias.common.map.builder.GameMapBuilder;
@@ -16,9 +17,10 @@ import java.nio.file.Files;
 import java.util.Optional;
 import java.util.UUID;
 
+import static net.theevilreaper.tamias.setup.map.SetupMapProvider.FILE_HANDLER;
+
 public class GameData extends InstanceSetupData {
 
-    private final FileHandler fileHandler;
     private LobbyViewInventory inventory;
     private GameMapBuilder gameMapBuilder;
     private boolean areaMode;
@@ -28,13 +30,11 @@ public class GameData extends InstanceSetupData {
      *
      * @param uuid       the UUID of the player
      * @param mapEntry   the map entry associated with this game data
-     * @param fileHandler the file handler for saving and loading game data
      */
-    public GameData(@NotNull UUID uuid, @NotNull MapEntry mapEntry, @NotNull FileHandler fileHandler) {
+    public GameData(@NotNull UUID uuid, @NotNull MapEntry mapEntry) {
         super(uuid, mapEntry, BossBar.Color.RED);
-        this.fileHandler = fileHandler;
         Player player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(uuid);
-
+        this.loadData();
         if (player == null) {
             throw new IllegalArgumentException("Player with UUID " + uuid + " is not online.");
         }
@@ -71,7 +71,16 @@ public class GameData extends InstanceSetupData {
         if (!Files.exists(mapEntry.getMapFile())) {
             this.mapEntry.createFile();
         }
-        this.fileHandler.save(mapEntry.getMapFile(), BaseMap.class);
+        FILE_HANDLER.save(mapEntry.getMapFile(), BaseMap.class);
+    }
+
+    @Override
+    public void teleport(@NotNull Player player) {
+        super.teleport(player);
+        Pos spawnPoint = this.gameMapBuilder.getSpawn() == null
+                ? SPAWN_POINT
+                : this.gameMapBuilder.getSpawn();
+        player.setInstance(this.instance, spawnPoint);
     }
 
     /**
@@ -88,14 +97,16 @@ public class GameData extends InstanceSetupData {
      */
     @Override
     public void loadData() {
-        if (this.mapEntry != null) return;
-        Optional<GameMap> mapData = fileHandler.load(mapEntry.getMapFile(), GameMap.class);
-        mapData.ifPresentOrElse(gameMap ->
-                        this.gameMapBuilder = new GameMapBuilder(gameMap),
-                () -> this.gameMapBuilder = new GameMapBuilder()
-        );
+        if (this.mapEntry == null || !this.mapEntry.hasMapFile()) {
+            this.gameMapBuilder = new GameMapBuilder();
+        } else {
+            Optional<GameMap> mapData = FILE_HANDLER.load(mapEntry.getMapFile(), GameMap.class);
+            mapData.ifPresentOrElse(gameMap ->
+                            this.gameMapBuilder = new GameMapBuilder(gameMap),
+                    () -> this.gameMapBuilder = new GameMapBuilder()
+            );
+        }
         this.inventory = new LobbyViewInventory(this.gameMapBuilder);
-
         this.instance = MinecraftServer.getInstanceManager().createInstanceContainer();
         AnvilLoader anvilLoader = new AnvilLoader(this.mapEntry.getDirectoryRoot());
         this.instance.setChunkLoader(anvilLoader);
@@ -117,7 +128,8 @@ public class GameData extends InstanceSetupData {
      *
      * @return the builder instance
      */
-    public GameMapBuilder getGameMapBuilder() {
+    @Override
+    public BaseMapBuilder getMapBuilder() {
         return this.gameMapBuilder;
     }
 }

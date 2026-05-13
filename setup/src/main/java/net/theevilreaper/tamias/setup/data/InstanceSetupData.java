@@ -8,6 +8,7 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.InstanceContainer;
 import net.onelitefeather.guira.data.SetupData;
+import net.theevilreaper.aves.map.BaseMapBuilder;
 import net.theevilreaper.aves.map.MapEntry;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,8 +38,6 @@ public abstract class InstanceSetupData implements SetupData {
     }
 
     public void teleport(@NotNull Player player) {
-        //Pos spawnPoint = map.getSpawnOrDefault(SPAWN_POINT);
-       // player.setInstance(this.instance, spawnPoint);
         player.showBossBar(this.bossBar);
     }
 
@@ -60,4 +59,6 @@ public abstract class InstanceSetupData implements SetupData {
     public @NotNull UUID getId() {
         return this.uuid;
     }
+
+    public abstract BaseMapBuilder getMapBuilder();
 }

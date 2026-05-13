@@ -2,9 +2,9 @@ package net.theevilreaper.tamias.setup.data;
 
 import net.kyori.adventure.bossbar.BossBar;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.anvil.AnvilLoader;
-import net.theevilreaper.aves.file.FileHandler;
 import net.theevilreaper.aves.map.BaseMap;
 import net.theevilreaper.aves.map.BaseMapBuilder;
 import net.theevilreaper.aves.map.MapEntry;
@@ -15,15 +15,15 @@ import java.nio.file.Files;
 import java.util.Optional;
 import java.util.UUID;
 
+import static net.theevilreaper.tamias.setup.map.SetupMapProvider.FILE_HANDLER;
+
 public final class LobbyData extends InstanceSetupData {
 
-    private final FileHandler fileHandler;
     private LobbyViewInventory viewInventory;
     private BaseMapBuilder mapBuilder;
 
-    public LobbyData(@NotNull UUID uuid, @NotNull MapEntry mapEntry, @NotNull FileHandler fileHandler) {
+    public LobbyData(@NotNull UUID uuid, @NotNull MapEntry mapEntry) {
         super(uuid, mapEntry, BossBar.Color.GREEN);
-        this.fileHandler = fileHandler;
         this.loadData();
         Player player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(uuid);
 
@@ -49,7 +49,16 @@ public final class LobbyData extends InstanceSetupData {
         if (!Files.exists(mapEntry.getMapFile())) {
             this.mapEntry.createFile();
         }
-        this.fileHandler.save(mapEntry.getMapFile(), BaseMap.class);
+        FILE_HANDLER.save(mapEntry.getMapFile(), BaseMap.class);
+    }
+
+    @Override
+    public void teleport(@NotNull Player player) {
+        super.teleport(player);
+        Pos spawnPoint = this.mapBuilder.getSpawn() == null
+                ? SPAWN_POINT
+                : this.mapBuilder.getSpawn();
+        player.setInstance(this.instance, spawnPoint);
     }
 
     @Override
@@ -60,12 +69,15 @@ public final class LobbyData extends InstanceSetupData {
 
     @Override
     public void loadData() {
-        if (this.mapEntry != null) return;
-        Optional<BaseMap> mapData = fileHandler.load(mapEntry.getMapFile(), BaseMap.class);
+        if (this.mapEntry == null) {
+            this.mapBuilder = BaseMap.builder();
+        } else {
+            Optional<BaseMap> mapData = FILE_HANDLER.load(mapEntry.getMapFile(), BaseMap.class);
 
-        mapData.ifPresentOrElse(baseMap -> {
-            this.mapBuilder = BaseMap.builder(baseMap);
-        }, () -> this.mapBuilder = BaseMap.builder());
+            mapData.ifPresentOrElse(baseMap -> {
+                this.mapBuilder = BaseMap.builder(baseMap);
+            }, () -> this.mapBuilder = BaseMap.builder());
+        }
 
         this.viewInventory = new LobbyViewInventory(this.mapBuilder);
 
@@ -76,6 +88,7 @@ public final class LobbyData extends InstanceSetupData {
         MinecraftServer.getInstanceManager().registerInstance(this.instance);
     }
 
+    @Override
     public BaseMapBuilder getMapBuilder() {
         return mapBuilder;
     }

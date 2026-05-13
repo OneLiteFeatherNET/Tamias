@@ -1,23 +1,27 @@
 package net.theevilreaper.tamias.setup.inventory;
 
+import net.minestom.server.coordinate.Point;
+import net.minestom.server.event.EventDispatcher;
 import net.theevilreaper.aves.inventory.GlobalInventoryBuilder;
 import net.theevilreaper.aves.inventory.InventoryLayout;
-import net.theevilreaper.aves.inventory.slot.ISlot;
 import net.theevilreaper.aves.inventory.util.LayoutCalculator;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.InventoryType;
-import net.minestom.server.item.ItemStack;
-import net.minestom.server.item.Material;
 import net.theevilreaper.aves.map.BaseMapBuilder;
+import net.theevilreaper.tamias.setup.dialog.event.PlayerDeletePromptEvent;
+import net.theevilreaper.tamias.setup.inventory.slot.EmptyItemSlot;
 import net.theevilreaper.tamias.setup.inventory.slot.MultipleStringItemSlot;
 import net.theevilreaper.tamias.setup.inventory.slot.SpawnItemSlot;
 import net.theevilreaper.tamias.setup.inventory.slot.StringItemSlot;
 import net.theevilreaper.tamias.setup.util.SetupItems;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 import static net.theevilreaper.aves.inventory.util.InventoryConstants.CANCEL_CLICK;
+import static net.theevilreaper.tamias.setup.dialog.event.PlayerDialogRequestEvent.*;
 
 /**
  * The {@link LobbyViewInventory} is used to display the data from a lobby map.
@@ -32,13 +36,7 @@ import static net.theevilreaper.aves.inventory.util.InventoryConstants.CANCEL_CL
 @SuppressWarnings("java:S3252")
 public class LobbyViewInventory extends GlobalInventoryBuilder {
 
-    private static final ItemStack NO_SPAWN = ItemStack.builder(Material.BARRIER)
-            .customName(Component.text("No spawn set", NamedTextColor.RED))
-            .build();
-
     private static final int[] DATA_SLOTS = LayoutCalculator.from(11, 13, 15);
-    private final ConfirmInventory confirmInventory;
-    private final BaseMapBuilder mapBuilder;
 
     /**
      * Creates a new {@link LobbyViewInventory} instance.
@@ -46,9 +44,7 @@ public class LobbyViewInventory extends GlobalInventoryBuilder {
      * @param mapBuilder the map to display
      */
     public LobbyViewInventory(BaseMapBuilder mapBuilder) {
-        super(Component.text("Lobby data"), InventoryType.CHEST_3_ROW);
-        this.mapBuilder = mapBuilder;
-        this.confirmInventory = new ConfirmInventory(this::handleConfirmClick);
+        super(Component.text("Generic data"), InventoryType.CHEST_3_ROW);
         InventoryLayout layout = InventoryLayout.fromType(getType());
         layout.setItems(LayoutCalculator.quad(0, getType().getSize() - 1), SetupItems.DECORATION, CANCEL_CLICK);
         this.setLayout(layout);
@@ -56,25 +52,9 @@ public class LobbyViewInventory extends GlobalInventoryBuilder {
         this.setDataLayoutFunction(dataLayout -> {
             dataLayout = dataLayout == null ? InventoryLayout.fromType(getType()) : dataLayout;
             dataLayout.blank(DATA_SLOTS);
-            if (hasNoData()) {
-                dataLayout.setItem(DATA_SLOTS[0], SetupItems.DECORATION, CANCEL_CLICK);
-                dataLayout.setItem(DATA_SLOTS[1], NO_SPAWN, CANCEL_CLICK);
-                dataLayout.setItem(DATA_SLOTS[2], SetupItems.DECORATION, CANCEL_CLICK);
-                return dataLayout;
-            }
-            ISlot mapNameSlot = new StringItemSlot(Component.text("Map-Name", NamedTextColor.GOLD), mapBuilder.getName());
-            ISlot builderSlot = new MultipleStringItemSlot(Component.text("Builders", NamedTextColor.GOLD), mapBuilder.getBuilders());
-            ISlot spawnSlot;
-
-            if (mapBuilder.getSpawn() != null) {
-                 spawnSlot = SpawnItemSlot.empty();
-            } else {
-                spawnSlot = SpawnItemSlot.asSpawn(mapBuilder.getSpawn(), this::openConfirmInventory);
-            }
-
-            dataLayout.setItem(DATA_SLOTS[0], mapNameSlot, CANCEL_CLICK);
-            dataLayout.setItem(DATA_SLOTS[1], spawnSlot);
-            dataLayout.setItem(DATA_SLOTS[2], builderSlot, CANCEL_CLICK);
+            this.setMapNameItem(dataLayout, mapBuilder.getName());
+            this.setSpawnItem(dataLayout, mapBuilder.getSpawn());
+            this.setAuthorItem(dataLayout, mapBuilder.getBuilders());
             return dataLayout;
         });
 
@@ -84,35 +64,54 @@ public class LobbyViewInventory extends GlobalInventoryBuilder {
     }
 
     /**
-     * Opens the confirmation inventory.
+     * Sets the map name item.
      *
-     * @param player the player to open the inventory
+     * @param dataLayout the layout which should receive the item
+     * @param name       the name of the map
+     */
+    private void setMapNameItem(InventoryLayout dataLayout, @Nullable String name) {
+        if (name == null) {
+            dataLayout.setItem(DATA_SLOTS[0], new EmptyItemSlot(Target.SETUP_NAME));
+            return;
+        }
+        dataLayout.setItem(DATA_SLOTS[0], new StringItemSlot(Component.text("Name", NamedTextColor.GOLD), name));
+    }
+
+    /**
+     * Sets the spawn item.
+     *
+     * @param layout the layout which should receive the item
+     * @param spawn  the spawn point
+     */
+    private void setSpawnItem(InventoryLayout layout, @Nullable Point spawn) {
+        if (spawn == null) {
+            layout.setItem(DATA_SLOTS[1], new EmptyItemSlot(Target.SETUP_BLOCK_BOUNCE));
+        } else {
+            layout.setItem(DATA_SLOTS[1], SpawnItemSlot.asSpawn(spawn, this::openConfirmInventory));
+        }
+    }
+
+    /**
+     * Sets the author item.
+     *
+     * @param layout the layout which should receive the item
+     * @param author the author of the map
+     */
+    private void setAuthorItem(InventoryLayout layout, @Nullable List<String> author) {
+        if (author == null || author.isEmpty()) {
+            layout.setItem(DATA_SLOTS[2], new EmptyItemSlot(Target.SETUP_REQUEST_AUTHOR));
+        } else {
+            layout.setItem(DATA_SLOTS[2], new MultipleStringItemSlot(Component.text("Author", NamedTextColor.GOLD), author));
+        }
+    }
+
+    /**
+     * Handles the delete request for the spawn item.
+     *
+     * @param player the player who should get the dialog
      */
     private void openConfirmInventory(Player player) {
         player.closeInventory();
-        confirmInventory.register();
-        player.openInventory(confirmInventory.getInventory());
-    }
-
-    /**
-     * Handles the confirmation logic.
-     *
-     * @param player the player who clicked
-     */
-    private void handleConfirmClick(Player player) {
-        player.closeInventory();
-        mapBuilder.spawn(null);
-        invalidateDataLayout();
-        MinecraftServer.getSchedulerManager().scheduleNextTick(() -> player.openInventory(this.getInventory()));
-    }
-
-    /**
-     * Checks if the map has no data.
-     *
-     * @return true if the map has no data otherwise false
-     */
-    private boolean hasNoData() {
-        boolean hasMapName = this.mapBuilder.getName() != null && !this.mapBuilder.getName().isEmpty();
-        return this.mapBuilder.getSpawn() != null && !hasMapName && (this.mapBuilder.getBuilders() == null || this.mapBuilder.getBuilders().isEmpty());
+        EventDispatcher.call(new PlayerDeletePromptEvent(player, DataType.SPAWN));
     }
 }

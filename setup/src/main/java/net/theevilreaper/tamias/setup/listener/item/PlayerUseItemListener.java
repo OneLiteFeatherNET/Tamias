@@ -8,9 +8,8 @@ import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.item.ItemStack;
 import net.theevilreaper.tamias.common.util.Tags;
-import net.theevilreaper.tamias.setup.TamiasSetup;
 import net.theevilreaper.tamias.setup.data.InstanceSetupData;
-import org.jetbrains.annotations.NotNull;
+import net.theevilreaper.tamias.setup.util.SetupTags;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -25,15 +24,15 @@ public final class PlayerUseItemListener implements Consumer<PlayerUseItemEvent>
     private final Function<UUID, Optional<SetupData>> saveFunction;
 
     public PlayerUseItemListener(
-            @NotNull PlayerConsumer invOpener,
-            @NotNull Function<UUID, Optional<SetupData>> saveFunction
+            PlayerConsumer invOpener,
+            Function<UUID, Optional<SetupData>> saveFunction
     ) {
         this.invOpener = invOpener;
         this.saveFunction = saveFunction;
     }
 
     @Override
-    public void accept(@NotNull PlayerUseItemEvent event) {
+    public void accept(PlayerUseItemEvent event) {
         ItemStack stack = event.getItemStack();
 
         if (!stack.hasTag(Tags.ITEM_TAG)) return;
@@ -46,7 +45,7 @@ public final class PlayerUseItemListener implements Consumer<PlayerUseItemEvent>
             return;
         }
 
-        if (!player.hasTag(TamiasSetup.SETUP_TAG)) return;
+        if (!player.hasTag(SetupTags.SETUP_TAG)) return;
 
         Optional<SetupData> fetchedData = this.saveFunction.apply(player.getUuid());
         if (fetchedData.isEmpty()) return;
