@@ -4,7 +4,6 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.instance.AddEntityToInstanceEvent;
 import net.minestom.server.instance.Instance;
 import net.theevilreaper.tamias.setup.util.SetupItems;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;

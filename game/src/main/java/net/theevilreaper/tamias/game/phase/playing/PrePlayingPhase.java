@@ -1,7 +1,6 @@
 package net.theevilreaper.tamias.game.phase.playing;
 
 import net.minestom.server.event.EventDispatcher;
-import net.theevilreaper.aves.util.functional.VoidConsumer;
 import net.theevilreaper.tamias.game.stamina.event.StaminaCreateEvent;
 import net.theevilreaper.tamias.game.util.Items;
 import net.theevilreaper.xerus.api.phase.TickDirection;
@@ -16,7 +15,6 @@ import net.theevilreaper.tamias.game.util.EntityHelper;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.temporal.ChronoUnit;
-import java.util.function.BiConsumer;
 
 /**
  * The {@link PrePlayingPhase} deals each code logic that should be executed before the {@link PlayingPhase} begins.

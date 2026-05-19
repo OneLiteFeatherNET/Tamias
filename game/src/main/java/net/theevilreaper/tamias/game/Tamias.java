@@ -64,7 +64,6 @@ import net.theevilreaper.tamias.game.round.RoundProvider;
 import net.theevilreaper.tamias.game.stamina.StaminaService;
 import net.theevilreaper.tamias.game.team.TeamHelper;
 import net.theevilreaper.tamias.game.util.FileChecker;
-import net.theevilreaper.tamias.game.util.Items;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
