@@ -12,14 +12,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MicrotusExtension.class)
-class MapSetupSelectEventIntegrationTest extends MapDataTestBase {
+class PlayerMapSelectEventIntegrationTest extends MapDataTestBase {
 
     @Test
     void testEventConstruction(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
         Player player = env.createPlayer(instance);
 
-        MapSetupSelectEvent event = new MapSetupSelectEvent(player, testMapEntry, false);
+        PlayerMapSelectEvent event = new PlayerMapSelectEvent(player, testMapEntry, false);
 
         assertNotNull(event);
         assertEquals(player, event.getPlayer());

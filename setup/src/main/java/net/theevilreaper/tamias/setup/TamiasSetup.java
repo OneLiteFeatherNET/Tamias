@@ -21,7 +21,7 @@ import net.minestom.server.tag.Tag;
 import net.theevilreaper.tamias.common.ListenerHandling;
 import net.theevilreaper.tamias.common.gson.GsonUtil;
 import net.theevilreaper.tamias.setup.commands.SetupCommand;
-import net.theevilreaper.tamias.setup.event.MapSetupSelectEvent;
+import net.theevilreaper.tamias.setup.event.PlayerMapSelectEvent;
 import net.theevilreaper.tamias.setup.inventory.MapSetupInventory;
 import net.theevilreaper.tamias.setup.listener.PlayerChatListener;
 import net.theevilreaper.tamias.setup.listener.PlayerConfigurationListener;
@@ -82,7 +82,7 @@ public final class TamiasSetup implements ListenerHandling {
         manager.addListener(AsyncPlayerConfigurationEvent.class, new PlayerConfigurationListener(instanceSupplier));
         manager.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(initialSpawnSupplier));
         manager.addListener(AddEntityToInstanceEvent.class, new EntityAddToInstanceListener(instanceSupplier));
-        manager.addListener(MapSetupSelectEvent.class, new MapSetupSelectListener(this.fileHandler, this.setupDataService));
+        manager.addListener(PlayerMapSelectEvent.class, new MapSetupSelectListener(this.fileHandler, this.setupDataService));
         manager.addListener(SetupFinishEvent.class, new SetupFinishListener(instanceSwitcher));
         manager.addListener(PlayerChatEvent.class, new PlayerChatListener(this.setupDataService));
 

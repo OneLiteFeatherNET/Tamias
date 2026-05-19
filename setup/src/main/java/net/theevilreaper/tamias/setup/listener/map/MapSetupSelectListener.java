@@ -12,16 +12,14 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.timer.Task;
 import net.theevilreaper.tamias.common.util.Messages;
 import net.theevilreaper.tamias.setup.TamiasSetup;
-import net.theevilreaper.tamias.setup.data.GameData;
 import net.theevilreaper.tamias.setup.data.InstanceSetupData;
-import net.theevilreaper.tamias.setup.data.LobbyData;
 import net.theevilreaper.tamias.setup.data.SetupDataFactory;
-import net.theevilreaper.tamias.setup.event.MapSetupSelectEvent;
+import net.theevilreaper.tamias.setup.event.PlayerMapSelectEvent;
 
 import java.time.temporal.ChronoUnit;
 import java.util.function.Consumer;
 
-public final class MapSetupSelectListener implements Consumer<MapSetupSelectEvent> {
+public final class MapSetupSelectListener implements Consumer<PlayerMapSelectEvent> {
 
     private final FileHandler fileHandler;
     private final SetupDataService setupDataService;
@@ -32,7 +30,7 @@ public final class MapSetupSelectListener implements Consumer<MapSetupSelectEven
     }
 
     @Override
-    public void accept(MapSetupSelectEvent event) {
+    public void accept(PlayerMapSelectEvent event) {
         Player player = event.getPlayer();
 
         SetupData setupData = this.setupDataService.get(player.getUuid()).get();

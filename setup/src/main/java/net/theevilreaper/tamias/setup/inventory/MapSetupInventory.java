@@ -13,7 +13,7 @@ import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.theevilreaper.tamias.setup.event.MapSetupSelectEvent;
+import net.theevilreaper.tamias.setup.event.PlayerMapSelectEvent;
 import net.theevilreaper.tamias.setup.util.SetupItems;
 import org.jetbrains.annotations.Contract;
 
@@ -83,7 +83,7 @@ public class MapSetupInventory extends GlobalInventoryBuilder {
     private ClickHolder handleClick(MapEntry currentMap, Player player, int slot, Click click, ItemStack stack, Consumer<ClickHolder> result) {
         result.accept(ClickHolder.cancelClick());
         boolean lobbyMode = click instanceof Click.Left;
-        EventDispatcher.callCancellable(new MapSetupSelectEvent(player, currentMap, lobbyMode), player::closeInventory);
+        EventDispatcher.callCancellable(new PlayerMapSelectEvent(player, currentMap, lobbyMode), player::closeInventory);
         return ClickHolder.cancelClick();
     }
 

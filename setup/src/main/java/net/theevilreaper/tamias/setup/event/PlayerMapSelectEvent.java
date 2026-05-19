@@ -6,13 +6,13 @@ import net.minestom.server.event.trait.CancellableEvent;
 import net.minestom.server.event.trait.PlayerEvent;
 
 /**
- * The {@link MapSetupSelectEvent} is called when a player selects a map for the setup process.
+ * The {@link PlayerMapSelectEvent} is called when a player selects a map for the setup process.
  *
  * @author theEvilReaper
  * @version 1.0.0
  * @since 1.0.0
  */
-public final class MapSetupSelectEvent implements PlayerEvent, CancellableEvent {
+public final class PlayerMapSelectEvent implements PlayerEvent, CancellableEvent {
 
     private final Player player;
     private final MapEntry mapEntry;
@@ -20,13 +20,13 @@ public final class MapSetupSelectEvent implements PlayerEvent, CancellableEvent 
     private boolean cancelled;
 
     /**
-     * Creates a new instance of the {@link MapSetupSelectEvent}.
+     * Creates a new instance of the {@link PlayerMapSelectEvent}.
      *
      * @param player    the player who selected the map
      * @param mapEntry  the selected map
      * @param lobbyMode if the setup is for the lobby or the game
      */
-    public MapSetupSelectEvent(Player player, MapEntry mapEntry, boolean lobbyMode) {
+    public PlayerMapSelectEvent(Player player, MapEntry mapEntry, boolean lobbyMode) {
         this.player = player;
         this.mapEntry = mapEntry;
         this.lobbyMode = lobbyMode;
