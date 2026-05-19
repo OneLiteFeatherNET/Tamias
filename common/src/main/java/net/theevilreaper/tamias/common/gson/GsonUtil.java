@@ -3,6 +3,8 @@ package net.theevilreaper.tamias.common.gson;
 import com.google.gson.Gson;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
+import net.theevilreaper.aves.file.FileHandler;
+import net.theevilreaper.aves.file.GsonFileHandler;
 import net.theevilreaper.aves.file.gson.PositionGsonAdapter;
 import net.theevilreaper.tamias.common.map.layer.AreaData;
 
@@ -18,6 +20,7 @@ import net.theevilreaper.tamias.common.map.layer.AreaData;
 public final class GsonUtil {
 
     public static final Gson GSON;
+    public static final FileHandler FILE_HANDLER;
 
     static {
         PositionGsonAdapter positionGsonAdapter = new PositionGsonAdapter();
@@ -26,6 +29,7 @@ public final class GsonUtil {
                 .registerTypeAdapter(Vec.class, positionGsonAdapter)
                 .registerTypeAdapter(AreaData.class, new GameAreaAdapter())
                 .create();
+        FILE_HANDLER = new GsonFileHandler(GSON);
     }
 
     /**
