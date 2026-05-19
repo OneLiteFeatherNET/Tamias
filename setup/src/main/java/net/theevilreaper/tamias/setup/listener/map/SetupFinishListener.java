@@ -5,7 +5,6 @@ import net.minestom.server.entity.Player;
 import net.onelitefeather.guira.data.SetupData;
 import net.onelitefeather.guira.event.SetupFinishEvent;
 import net.theevilreaper.aves.util.functional.PlayerConsumer;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
@@ -13,12 +12,12 @@ public class SetupFinishListener implements Consumer<SetupFinishEvent> {
 
     private final PlayerConsumer instanceSwitcher;
 
-    public SetupFinishListener(@NotNull PlayerConsumer instanceSwitcher) {
+    public SetupFinishListener(PlayerConsumer instanceSwitcher) {
         this.instanceSwitcher = instanceSwitcher;
     }
 
     @Override
-    public void accept(@NotNull SetupFinishEvent event) {
+    public void accept(SetupFinishEvent event) {
         SetupData setupData = event.getData();
 
         setupData.save();

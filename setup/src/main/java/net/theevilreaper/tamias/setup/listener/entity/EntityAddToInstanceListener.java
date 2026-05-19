@@ -13,12 +13,12 @@ public class EntityAddToInstanceListener implements Consumer<AddEntityToInstance
 
     private final Supplier<Instance> instanceSupplier;
 
-    public EntityAddToInstanceListener(@NotNull Supplier<Instance> instanceSupplier) {
+    public EntityAddToInstanceListener(Supplier<Instance> instanceSupplier) {
         this.instanceSupplier = instanceSupplier;
     }
 
     @Override
-    public void accept(@NotNull AddEntityToInstanceEvent event) {
+    public void accept(AddEntityToInstanceEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
         Instance mainInstance = this.instanceSupplier.get();
         if (event.getInstance().getUuid().equals(mainInstance.getUuid())) {

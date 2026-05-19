@@ -9,7 +9,6 @@ import net.onelitefeather.guira.data.SetupData;
 import net.theevilreaper.aves.map.BaseMap;
 import net.theevilreaper.tamias.setup.TamiasSetup;
 import net.theevilreaper.tamias.setup.data.InstanceSetupData;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
@@ -21,12 +20,12 @@ public final class PlayerChatListener implements Consumer<PlayerChatEvent> {
 
     private final SetupDataService setupDataService;
 
-    public PlayerChatListener(@NotNull SetupDataService setupDataService) {
+    public PlayerChatListener(SetupDataService setupDataService) {
         this.setupDataService = setupDataService;
     }
 
     @Override
-    public void accept(@NotNull PlayerChatEvent event) {
+    public void accept(PlayerChatEvent event) {
         Player player = event.getPlayer();
         if (!player.hasTag(TamiasSetup.SETUP_TAG)) {
             event.setFormattedMessage(formatGeneral(event));
@@ -35,14 +34,14 @@ public final class PlayerChatListener implements Consumer<PlayerChatEvent> {
         }
     }
 
-    private @NotNull Component formatGeneral(@NotNull PlayerChatEvent event) {
+    private Component formatGeneral(PlayerChatEvent event) {
         Player player = event.getPlayer();
         return Component.text(player.getUsername(), NamedTextColor.GREEN).append(Component.space())
                 .append(CHAT_SEPARATOR).append(Component.space())
                 .append(Component.text(event.getRawMessage(), NamedTextColor.GRAY));
     }
 
-    private @NotNull Component formatSetup(@NotNull PlayerChatEvent event) {
+    private Component formatSetup(PlayerChatEvent event) {
         Player player = event.getPlayer();
         Component general = formatGeneral(event);
         SetupData setupData = setupDataService.get(player.getUuid()).orElse(null);
