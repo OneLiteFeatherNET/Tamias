@@ -1,4 +1,4 @@
-package net.theevilreaper.tamias.common.util;
+package net.theevilreaper.tamias.common.map;
 
 import net.theevilreaper.aves.map.MapEntry;
 import net.theevilreaper.tamias.common.config.GameConfig;
@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /**
- * The class is a utility class which provides a method to filter through a stream of paths and returns a list of maps.
+ * The class is a utility class that provides a method to filter through a stream of paths and returns a list of maps.
  * It is used to filter the available maps for the game and setup.
  *
  * @author theEvilReaper
@@ -25,7 +25,7 @@ public interface MapFilter {
      * Filters through the given stream of paths and returns a list of maps which are available for the game.
      *
      * @param mapStream a stream of paths
-     * @return a list which contains different maps which are available for the game
+     * @return a list that contains different maps which are available for the game
      */
     static @Unmodifiable List<MapEntry> filterMapsForGame(Stream<Path> mapStream) {
         return mapStream
@@ -40,7 +40,7 @@ public interface MapFilter {
      * Filters through the given stream of paths and returns a list of maps which are available for the setup.
      *
      * @param mapStream a stream of paths
-     * @return a list which contains different maps which are available for the setup
+     * @return a list that contains different maps which are available for the setup
      */
     static @Unmodifiable List<MapEntry> filterMapsForSetup(Stream<Path> mapStream) {
         return mapStream

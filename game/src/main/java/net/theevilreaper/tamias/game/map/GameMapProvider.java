@@ -10,7 +10,7 @@ import net.theevilreaper.aves.map.provider.AbstractMapProvider;
 import net.theevilreaper.tamias.common.explosion.ExplosionCreator;
 import net.theevilreaper.tamias.common.gson.GsonUtil;
 import net.theevilreaper.tamias.common.map.GameMap;
-import net.theevilreaper.tamias.common.util.MapFilter;
+import net.theevilreaper.tamias.common.map.MapFilter;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;

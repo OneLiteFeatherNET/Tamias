@@ -9,7 +9,7 @@ import net.theevilreaper.aves.map.MapEntry;
 import net.theevilreaper.aves.map.provider.AbstractMapProvider;
 import net.theevilreaper.tamias.common.map.GameMap;
 import net.theevilreaper.tamias.common.map.functional.LobbyMapPredicate;
-import net.theevilreaper.tamias.common.util.MapFilter;
+import net.theevilreaper.tamias.common.map.MapFilter;
 
 import java.nio.file.Path;
 import java.util.Optional;
