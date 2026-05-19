@@ -15,6 +15,7 @@ import net.theevilreaper.tamias.setup.TamiasSetup;
 import net.theevilreaper.tamias.setup.data.GameData;
 import net.theevilreaper.tamias.setup.data.InstanceSetupData;
 import net.theevilreaper.tamias.setup.data.LobbyData;
+import net.theevilreaper.tamias.setup.data.SetupDataFactory;
 import net.theevilreaper.tamias.setup.event.MapSetupSelectEvent;
 
 import java.time.temporal.ChronoUnit;
@@ -41,13 +42,8 @@ public final class MapSetupSelectListener implements Consumer<MapSetupSelectEven
             player.sendMessage("You already have a map selected");
         }*/
 
-        InstanceSetupData data;
         MapEntry mapEntry = event.getMapEntry();
-        if (event.isLobbyMode()) {
-            data = new LobbyData(player.getUuid(), mapEntry, this.fileHandler);
-        } else {
-            data = new GameData(player.getUuid(), mapEntry, this.fileHandler);
-        }
+        InstanceSetupData data = SetupDataFactory.create(player, mapEntry, event.isLobbyMode());
 
         Component message = Messages.withPrefix(Component.text("You selected the map: ", NamedTextColor.GRAY))
                 .append(Component.text(mapEntry.getDirectoryRoot().getFileName().toString(), NamedTextColor.AQUA));

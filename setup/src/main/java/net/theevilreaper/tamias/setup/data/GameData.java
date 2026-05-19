@@ -4,9 +4,9 @@ import net.kyori.adventure.bossbar.BossBar;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.anvil.AnvilLoader;
-import net.theevilreaper.aves.file.FileHandler;
 import net.theevilreaper.aves.map.BaseMap;
 import net.theevilreaper.aves.map.MapEntry;
+import net.theevilreaper.tamias.common.gson.GsonUtil;
 import net.theevilreaper.tamias.common.map.GameMap;
 import net.theevilreaper.tamias.common.map.builder.GameMapBuilder;
 import net.theevilreaper.tamias.setup.inventory.LobbyViewInventory;
@@ -18,7 +18,6 @@ import java.util.UUID;
 
 public class GameData extends InstanceSetupData {
 
-    private final FileHandler fileHandler;
     private LobbyViewInventory inventory;
     private GameMapBuilder gameMapBuilder;
     private boolean areaMode;
@@ -26,13 +25,11 @@ public class GameData extends InstanceSetupData {
     /**
      * Constructs a new GameData instance.
      *
-     * @param uuid       the UUID of the player
-     * @param mapEntry   the map entry associated with this game data
-     * @param fileHandler the file handler for saving and loading game data
+     * @param uuid     the UUID of the player
+     * @param mapEntry the map entry associated with this game data
      */
-    public GameData(@NotNull UUID uuid, @NotNull MapEntry mapEntry, @NotNull FileHandler fileHandler) {
+    public GameData(@NotNull UUID uuid, @NotNull MapEntry mapEntry) {
         super(uuid, mapEntry, BossBar.Color.RED);
-        this.fileHandler = fileHandler;
         Player player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(uuid);
 
         if (player == null) {
@@ -71,7 +68,7 @@ public class GameData extends InstanceSetupData {
         if (!Files.exists(mapEntry.getMapFile())) {
             this.mapEntry.createFile();
         }
-        this.fileHandler.save(mapEntry.getMapFile(), BaseMap.class);
+        GsonUtil.FILE_HANDLER.save(mapEntry.getMapFile(), BaseMap.class);
     }
 
     /**
@@ -89,7 +86,7 @@ public class GameData extends InstanceSetupData {
     @Override
     public void loadData() {
         if (this.mapEntry != null) return;
-        Optional<GameMap> mapData = fileHandler.load(mapEntry.getMapFile(), GameMap.class);
+        Optional<GameMap> mapData = GsonUtil.FILE_HANDLER.load(mapEntry.getMapFile(), GameMap.class);
         mapData.ifPresentOrElse(gameMap ->
                         this.gameMapBuilder = new GameMapBuilder(gameMap),
                 () -> this.gameMapBuilder = new GameMapBuilder()
