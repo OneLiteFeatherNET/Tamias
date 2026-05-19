@@ -15,12 +15,10 @@ public final class PostPlayingPhase extends TimedPhase {
 
     private final BooleanSupplier lastRoundCheck;
     private final VoidConsumer roundUpdateTrigger;
-    private final VoidConsumer scoreboardReset;
 
     public PostPlayingPhase(
             @NotNull BooleanSupplier lastRoundCheck,
-            @NotNull VoidConsumer roundUpdateTrigger,
-            @NotNull VoidConsumer scoreboardReset
+            @NotNull VoidConsumer roundUpdateTrigger
     ) {
         super("RoundEnd", ChronoUnit.SECONDS, 1);
         this.setPaused(false);
@@ -28,7 +26,6 @@ public final class PostPlayingPhase extends TimedPhase {
         this.setTickDirection(TickDirection.DOWN);
         this.lastRoundCheck = lastRoundCheck;
         this.roundUpdateTrigger = roundUpdateTrigger;
-        this.scoreboardReset = scoreboardReset;
     }
 
     @Override

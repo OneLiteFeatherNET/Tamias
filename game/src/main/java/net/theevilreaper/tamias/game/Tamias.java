@@ -160,9 +160,7 @@ public class Tamias implements ListenerHandling {
         gameSeries.add(
                 new PostPlayingPhase(
                         this.roundProvider::isLastRound,
-                        this.roundProvider::triggerNextRound,
-                        () -> {
-                        }
+                        this.roundProvider::triggerNextRound
                 )
         );
         gameSeries.setMaxIterations(this.gameConfig.maxRounds());
