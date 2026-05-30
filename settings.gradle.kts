@@ -22,7 +22,7 @@ dependencyResolutionManagement {
     }
     versionCatalogs {
         create("libs") {
-            version("shadow", "9.4.1")
+            version("shadow", "9.4.2")
             version("projectiles", "2.1.6")
             version("aonyx", "0.7.1")
             version("cyclonedx", "3.2.4")
