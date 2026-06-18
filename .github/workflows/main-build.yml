@@ -33,7 +33,7 @@ jobs:
         run: ./gradlew cyclonedxBom
       - name: Upload BOM to Dependency-Track
         if: always() && matrix.os == 'ubuntu-latest'
-        uses: DependencyTrack/gh-upload-sbom@v3
+        uses: DependencyTrack/gh-upload-sbom@v4
         with:
           serverhostname: ${{ secrets.DEPENDENCYTRACK_HOSTNAME }}
           apikey: ${{ secrets.DEPENDENCYTRACK_APIKEY }}
