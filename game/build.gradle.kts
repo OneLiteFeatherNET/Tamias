@@ -11,6 +11,7 @@ dependencies {
     implementation(platform(libs.game.bom))
     implementation(libs.atlas.projectiles)
     implementation(libs.adventure)
+    implementation(libs.slf4j.api)
     compileOnly(libs.minestom)
     compileOnly(libs.aves)
     compileOnly(libs.xerus)

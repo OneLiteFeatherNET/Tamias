@@ -11,6 +11,7 @@ dependencies {
     implementation(platform(libs.game.bom))
     implementation(libs.adventure)
     implementation(libs.guira)
+    implementation(libs.slf4j.api)
     compileOnly(libs.minestom)
     compileOnly(libs.aves)
     compileOnly(libs.xerus)
