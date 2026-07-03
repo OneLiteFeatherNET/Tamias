@@ -1,4 +1,5 @@
 plugins {
+    id("tamias.java-conventions")
     alias(libs.plugins.shadow)
     application
 }

@@ -1,3 +1,6 @@
+plugins {
+    id("tamias.java-conventions")
+}
 
 group = "net.theevilreaper.tamias.common"
 version = "1.0-SNAPSHOT"
