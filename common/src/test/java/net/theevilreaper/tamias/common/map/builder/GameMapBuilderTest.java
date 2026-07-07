@@ -43,8 +43,8 @@ class GameMapBuilderTest {
         // Test map creation
         GameMap gameMap = builder.build();
         assertNotNull(gameMap);
-        assertEquals("Test Map", gameMap.getName());
-        assertEquals(new Pos(0, 64, 0), gameMap.getSpawn());
+        assertEquals("Test Map", gameMap.name());
+        assertEquals(new Pos(0, 64, 0), gameMap.spawn());
         assertEquals(new Pos(0, 64, 0), gameMap.getBomberInitialSpawn());
         assertNotNull(gameMap.getGameAreaData());
         assertEquals(Direction.EAST, gameMap.getGameAreaData().facing());
@@ -53,7 +53,7 @@ class GameMapBuilderTest {
         assertNotNull(gameMap.getSpawnData());
         assertEquals(Direction.EAST, gameMap.getSpawnData().direction());
         assertEquals(Pos.ZERO, gameMap.getSpawnData().pos());
-        assertNotNull(gameMap.getBuilders());
+        assertNotNull(gameMap.builders());
         assertEquals(new Pos(0, 64, 0), gameMap.getBomberInitialSpawn());
     }
 }

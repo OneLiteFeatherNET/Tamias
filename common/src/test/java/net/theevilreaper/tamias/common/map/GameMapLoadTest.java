@@ -29,8 +29,8 @@ class GameMapLoadTest {
         GameMap gameMap = mapOptional.get();
 
         assertNotNull(gameMap);
-        assertEquals("Test-Map", gameMap.getName());
-        assertEquals(1, gameMap.getBuilders().length);
-        assertEquals("OLF", gameMap.getBuilders()[0]);
+        assertEquals("Test-Map", gameMap.name());
+        assertEquals(1, gameMap.builders().size());
+        assertEquals("OLF", gameMap.builders().getFirst());
     }
 }

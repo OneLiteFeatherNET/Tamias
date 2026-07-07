@@ -53,7 +53,7 @@ public final class PlayerChatListener implements Consumer<PlayerChatEvent> {
         BaseMap map = null;
 
         if (instanceData.hasMapFile() && map != null) {
-            String mapAsString = map.getName();
+            String mapAsString = map.name();
             mapName = SQUARE_OPEN
                     .append(Component.text(mapAsString, NamedTextColor.LIGHT_PURPLE))
                     .append(SQUARE_CLOSE).append(Component.space());
