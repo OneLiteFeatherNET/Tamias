@@ -30,21 +30,5 @@ jobs:
     uses: OneLiteFeatherNET/workflows/.github/workflows/gradle-publish.yml@v2.3.0
     with:
       java-version: "25"
-      publish-task: "cyclonedxBom publish"
+      publish-task: "publish"
     secrets: inherit
-  bom:
-    name: Upload SBOM to DependencyTrack
-    runs-on: ubuntu-latest
-    needs: publish
-    if: needs.release-please.outputs.release_created == 'true' && needs.publish.outputs.version != ''
-    steps:
-      - uses: DependencyTrack/gh-upload-sbom@v4
-        with:
-          serverhostname: ${{ secrets.DEPENDENCYTRACK_HOSTNAME }}
-          apikey: ${{ secrets.DEPENDENCYTRACK_APIKEY }}
-          projectname: "Cygnus"
-          projectversion: ${{ needs.release-please.outputs.version }}
-          projecttags: 'minestom'
-          bomfilename: "build/reports/cyclonedx/bom.xml"
-          autocreate: true
-          parent: '735737f3-8c00-4123-aa2a-ea6cb62b0b6f'
