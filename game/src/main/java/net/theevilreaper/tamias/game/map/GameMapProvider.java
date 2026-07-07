@@ -33,7 +33,7 @@ public final class GameMapProvider extends AbstractMapProvider implements MapFil
      */
     public GameMapProvider(@NotNull Path path) {
         super(new GsonFileHandler(GsonUtil.GSON), MapFilter::filterMapsForGame);
-        this.mapEntries = this.loadMapEntries(path.resolve("maps"));
+        this.loadMapEntries(path.resolve("maps"));
         this.activeInstance = MinecraftServer.getInstanceManager().createInstanceContainer();
 
         MapEntry map = this.mapEntries.getFirst();
@@ -42,8 +42,8 @@ public final class GameMapProvider extends AbstractMapProvider implements MapFil
         this.activeMap = loadedLobbyMap.get();
         this.activeInstance.setExplosionSupplier(new ExplosionCreator());
         this.registerInstance(this.activeInstance, map);
-        if (this.activeMap.getSpawn() != null) {
-            activeInstance.loadChunk(this.activeMap.getSpawn());
+        if (this.activeMap.spawn() != null) {
+            activeInstance.loadChunk(this.activeMap.spawn());
         }
         MinecraftServer.getInstanceManager().registerInstance(this.activeInstance);
     }
@@ -53,7 +53,7 @@ public final class GameMapProvider extends AbstractMapProvider implements MapFil
      */
     public void loadGameChunks() {
         GameMap givenMap = (GameMap) this.activeMap;
-        this.activeInstance.loadChunk(givenMap.getSpawn()).join();
+        this.activeInstance.loadChunk(givenMap.spawn()).join();
     }
 
     /**
@@ -65,10 +65,10 @@ public final class GameMapProvider extends AbstractMapProvider implements MapFil
     @Override
     public void teleportToSpawn(@NotNull Player player, boolean instanceSet) {
         if (instanceSet) {
-            player.setInstance(this.activeInstance, this.activeMap.getSpawn());
+            player.setInstance(this.activeInstance, this.activeMap.spawn());
             return;
         }
-        player.teleport(this.activeMap.getSpawn());
+        player.teleport(this.activeMap.spawn());
     }
 
     /**

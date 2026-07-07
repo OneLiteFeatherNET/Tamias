@@ -93,7 +93,7 @@ public final class TeamHelper {
         Team survivorTeam = teamService.getTeams().get(GameConfig.SURVIVOR_ID);
 
         teleport(bomberTeam, mapSupplier.getBomberInitialSpawn(), playerConsumer);
-        teleport(survivorTeam, mapSupplier.getSpawn(), playerConsumer);
+        teleport(survivorTeam, mapSupplier.spawn(), playerConsumer);
     }
 
     public static void teleport(Team team, Pos pos) {

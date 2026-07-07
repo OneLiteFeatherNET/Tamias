@@ -4,6 +4,7 @@ import net.kyori.adventure.bossbar.BossBar;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.anvil.AnvilLoader;
+import net.minestom.server.world.DimensionType;
 import net.theevilreaper.aves.map.BaseMap;
 import net.theevilreaper.aves.map.BaseMapBuilder;
 import net.theevilreaper.aves.map.MapEntry;
@@ -68,7 +69,7 @@ public final class LobbyData extends InstanceSetupData {
         this.viewInventory = new LobbyViewInventory(this.mapBuilder);
 
         this.instance = MinecraftServer.getInstanceManager().createInstanceContainer();
-        AnvilLoader anvilLoader = new AnvilLoader(this.mapEntry.getDirectoryRoot());
+        AnvilLoader anvilLoader = new AnvilLoader(this.mapEntry.getDirectoryRoot(), DimensionType.OVERWORLD.key());
         this.instance.setChunkLoader(anvilLoader);
         this.updateTitle();
         MinecraftServer.getInstanceManager().registerInstance(this.instance);

@@ -6,6 +6,8 @@ import net.theevilreaper.tamias.common.map.layer.AreaData;
 import net.theevilreaper.tamias.common.map.layer.SpawnLayer;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 /**
  * The {@link GameMap} class contains all relevant information about the map which is used during the game.
  *
@@ -36,7 +38,7 @@ public final class GameMap extends BaseMap {
             SpawnLayer spawnLayer,
             AreaData areaData
     ) {
-        super(name, spawn, "Team");
+        super(name, spawn, List.of("Team"));
         this.bomberInitialSpawn = bomberInitialSpawn;
         this.spawnLayer = spawnLayer;
         this.areaData = areaData;
