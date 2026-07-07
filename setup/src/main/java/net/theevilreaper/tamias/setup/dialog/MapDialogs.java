@@ -10,6 +10,7 @@ import net.minestom.server.entity.Player;
 import net.onelitefeather.pica.dialog.DialogTemplate;
 import net.onelitefeather.pica.dialog.type.DialogType;
 import net.theevilreaper.tamias.setup.dialog.event.DialogContext;
+import net.theevilreaper.tamias.setup.map.MapDataCategory;
 import net.theevilreaper.tamias.setup.util.DialogBase;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
