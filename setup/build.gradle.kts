@@ -13,6 +13,7 @@ dependencies {
     implementation(libs.adventure)
     implementation(libs.guira)
     implementation(libs.slf4j.api)
+    implementation(libs.pica)
     compileOnly(libs.minestom)
     compileOnly(libs.aves)
     compileOnly(libs.xerus)

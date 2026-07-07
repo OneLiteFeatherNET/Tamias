@@ -27,6 +27,7 @@ dependencyResolutionManagement {
             version("aonyx", "0.8.0")
             version("cyclonedx", "3.2.4")
             version("slf4j", "2.0.18")
+            version("pica", "0.1.0")
 
             library("game.bom", "net.onelitefeather", "aonyx-bom").versionRef("aonyx")
 
@@ -36,6 +37,7 @@ dependencyResolutionManagement {
             library("adventure", "net.kyori", "adventure-text-minimessage").withoutVersion()
             library("cyano", "net.onelitefeather", "cyano").withoutVersion()
             library("guira", "net.onelitefeather", "guira").withoutVersion()
+            library("pica", "net.onelitefeather", "pica").versionRef("pica")
             library("junit.api", "org.junit.jupiter", "junit-jupiter-api").withoutVersion()
             library("junit.engine", "org.junit.jupiter", "junit-jupiter-engine").withoutVersion()
             library("junit.platform.launcher", "org.junit.platform", "junit-platform-launcher").withoutVersion()
