@@ -1,0 +1,18 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "release-type": "simple",
+  "include-component-in-tag": false,
+  "include-v-in-tag": true,
+  "pull-request-header": "",
+  "bootstrap-sha": "4838662c0ce839002d7d9106690e06d0f82a8284",
+  "packages": {
+    ".": {
+      "package-name": "tamias",
+      "release-type": "java",
+      "changelog-path": "CHANGELOG.md",
+      "extra-files": [
+        { "type": "generic", "path": "gradle.properties" }
+      ]
+    }
+  }
+}
