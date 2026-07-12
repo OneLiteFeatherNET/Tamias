@@ -4,9 +4,6 @@ plugins {
     application
 }
 
-group = "net.theevilreaper.tamias.game"
-version = "1.0-SNAPSHOT"
-
 dependencies {
     implementation(project(":common"))
     implementation(platform(libs.game.bom))
