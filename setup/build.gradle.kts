@@ -4,7 +4,6 @@ plugins {
     application
 }
 
-group = "net.theevilreaper.tamias"
 version = "0.1.0"
 
 dependencies {
