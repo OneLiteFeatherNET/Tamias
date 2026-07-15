@@ -20,7 +20,6 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.Tag;
 import net.theevilreaper.tamias.common.ListenerHandling;
 import net.theevilreaper.tamias.common.gson.GsonUtil;
-import net.theevilreaper.tamias.setup.commands.SetupCommand;
 import net.theevilreaper.tamias.setup.event.PlayerMapSelectEvent;
 import net.theevilreaper.tamias.setup.inventory.MapSetupInventory;
 import net.theevilreaper.tamias.setup.listener.PlayerChatListener;
@@ -59,7 +58,6 @@ public final class TamiasSetup implements ListenerHandling {
     public void initialize() {
         this.registerCancelListener(MinecraftServer.getGlobalEventHandler());
         this.registerListener();
-        this.registerCommands();
     }
 
     public void terminate() {
@@ -99,11 +97,4 @@ public final class TamiasSetup implements ListenerHandling {
         this.mapSetupInventory.open(player);
     }
 
-    /**
-     * Register the commands for the setup extension.
-     */
-    private void registerCommands() {
-        CommandManager commandManager = MinecraftServer.getCommandManager();
-        commandManager.register(new SetupCommand(this.setupDataService));
-    }
 }
