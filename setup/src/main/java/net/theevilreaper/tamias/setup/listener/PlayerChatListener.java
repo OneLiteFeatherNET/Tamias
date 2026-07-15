@@ -7,8 +7,8 @@ import net.minestom.server.event.player.PlayerChatEvent;
 import net.onelitefeather.guira.SetupDataService;
 import net.onelitefeather.guira.data.SetupData;
 import net.theevilreaper.aves.map.BaseMap;
-import net.theevilreaper.tamias.setup.TamiasSetup;
 import net.theevilreaper.tamias.setup.data.InstanceSetupData;
+import net.theevilreaper.tamias.setup.util.SetupTags;
 
 import java.util.function.Consumer;
 
@@ -27,7 +27,7 @@ public final class PlayerChatListener implements Consumer<PlayerChatEvent> {
     @Override
     public void accept(PlayerChatEvent event) {
         Player player = event.getPlayer();
-        if (!player.hasTag(TamiasSetup.SETUP_TAG)) {
+        if (!player.hasTag(SetupTags.SETUP_TAG)) {
             event.setFormattedMessage(formatGeneral(event));
         } else {
             event.setFormattedMessage(formatSetup(event));

@@ -10,6 +10,7 @@ import net.minestom.server.item.ItemStack;
 import net.theevilreaper.tamias.common.util.Tags;
 import net.theevilreaper.tamias.setup.TamiasSetup;
 import net.theevilreaper.tamias.setup.data.InstanceSetupData;
+import net.theevilreaper.tamias.setup.util.SetupTags;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -42,7 +43,7 @@ public final class PlayerUseItemListener implements Consumer<PlayerUseItemEvent>
             return;
         }
 
-        if (!player.hasTag(TamiasSetup.SETUP_TAG)) return;
+        if (!player.hasTag(SetupTags.SETUP_TAG)) return;
 
         Optional<SetupData> fetchedData = this.saveFunction.apply(player.getUuid());
         if (fetchedData.isEmpty()) return;
@@ -50,7 +51,7 @@ public final class PlayerUseItemListener implements Consumer<PlayerUseItemEvent>
         SetupData setupData = fetchedData.get();
 
         if (itemId == OVERVIEW_FLAG) {
-            ((InstanceSetupData) setupData).openInventory(player);
+            ((InstanceSetupData) setupData).openInventory(InstanceSetupData.InventoryTarget.GENERAL);
             return;
         }
         EventDispatcher.call(new SetupFinishEvent(setupData));

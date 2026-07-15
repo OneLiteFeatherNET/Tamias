@@ -12,7 +12,7 @@ import net.theevilreaper.tamias.setup.map.MapDataCategory;
  */
 public final class SetupTags {
 
-    public static final Tag<Integer> SETUP_ID_TAG = Tag.Integer("setup_id");
+    public static final Tag<Byte> SETUP_TAG = Tag.Byte("setup_id");
     public static final Tag<MapDataCategory> MAP_DATA_CATEGORY_TAG = Tag.String("category_tag")
             .map(MapDataCategory::valueOf, MapDataCategory::name);
 

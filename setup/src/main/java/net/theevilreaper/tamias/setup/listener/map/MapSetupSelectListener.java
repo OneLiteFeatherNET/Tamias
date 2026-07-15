@@ -11,10 +11,10 @@ import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.timer.Task;
 import net.theevilreaper.tamias.common.util.Messages;
-import net.theevilreaper.tamias.setup.TamiasSetup;
 import net.theevilreaper.tamias.setup.data.InstanceSetupData;
 import net.theevilreaper.tamias.setup.data.SetupDataFactory;
 import net.theevilreaper.tamias.setup.event.PlayerMapSelectEvent;
+import net.theevilreaper.tamias.setup.util.SetupTags;
 
 import java.time.temporal.ChronoUnit;
 import java.util.function.Consumer;
@@ -53,7 +53,7 @@ public final class MapSetupSelectListener implements Consumer<PlayerMapSelectEve
 
         this.setupDataService.add(player.getUuid(), data);
 
-        player.setTag(TamiasSetup.SETUP_TAG, (byte) 1);
+        player.setTag(SetupTags.SETUP_TAG, (byte) 1);
         getTeleportTask(() -> data.teleport(player)).schedule();
     }
 
