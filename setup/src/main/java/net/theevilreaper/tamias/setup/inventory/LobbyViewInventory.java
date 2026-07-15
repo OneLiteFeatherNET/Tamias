@@ -6,8 +6,6 @@ import net.theevilreaper.aves.inventory.slot.ISlot;
 import net.theevilreaper.aves.inventory.util.LayoutCalculator;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.minestom.server.MinecraftServer;
-import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -38,7 +36,6 @@ public class LobbyViewInventory extends GlobalInventoryBuilder {
             .build();
 
     private static final int[] DATA_SLOTS = LayoutCalculator.from(11, 13, 15);
-    private final ConfirmInventory confirmInventory;
     private final BaseMapBuilder mapBuilder;
 
     /**
@@ -49,7 +46,6 @@ public class LobbyViewInventory extends GlobalInventoryBuilder {
     public LobbyViewInventory(BaseMapBuilder mapBuilder) {
         super(Component.text("Lobby data"), InventoryType.CHEST_3_ROW);
         this.mapBuilder = mapBuilder;
-        this.confirmInventory = new ConfirmInventory(this::handleConfirmClick);
         InventoryLayout layout = InventoryLayout.fromType(getType());
         layout.setItems(LayoutCalculator.quad(0, getType().getSize() - 1), SetupItems.DECORATION, CANCEL_CLICK);
         this.setLayout(layout);
@@ -75,29 +71,6 @@ public class LobbyViewInventory extends GlobalInventoryBuilder {
         this.invalidateLayout();
         this.invalidateDataLayout();
         this.register();
-    }
-
-    /**
-     * Opens the confirmation inventory.
-     *
-     * @param player the player to open the inventory
-     */
-    private void openConfirmInventory(Player player) {
-        player.closeInventory();
-        confirmInventory.register();
-        player.openInventory(confirmInventory.getInventory());
-    }
-
-    /**
-     * Handles the confirmation logic.
-     *
-     * @param player the player who clicked
-     */
-    private void handleConfirmClick(Player player) {
-        player.closeInventory();
-        mapBuilder.spawn(null);
-        invalidateDataLayout();
-        MinecraftServer.getSchedulerManager().scheduleNextTick(() -> player.openInventory(this.getInventory()));
     }
 
     /**
