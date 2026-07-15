@@ -11,9 +11,32 @@ import org.jetbrains.annotations.Contract;
 public class SetupMessages extends Messages {
 
     public static final Component SELECT_MAP_FIRST;
+    public static final Component NO_SPACE_SEPARATOR;
+    public static final Component TELEPORT_CLICK;
+    public static final Component DELETE_CLICK;
 
     static {
         SELECT_MAP_FIRST = Messages.withPrefix(Component.text("Please select a map first before executing this function", NamedTextColor.RED));
+        NO_SPACE_SEPARATOR = Component.text("»", NamedTextColor.GRAY);
+
+        TELEPORT_CLICK = NO_SPACE_SEPARATOR
+                .append(Component.space())
+                .append(Component.text("Left", NamedTextColor.GREEN))
+                .append(Component.space())
+                .append(Component.text("click", NamedTextColor.GRAY))
+                .append(Component.space())
+                .append(Component.text("->", NamedTextColor.GRAY))
+                .append(Component.space())
+                .append(Component.text("teleport", NamedTextColor.GREEN));
+        DELETE_CLICK = NO_SPACE_SEPARATOR
+                .append(Component.space())
+                .append(Component.text("Right", NamedTextColor.RED))
+                .append(Component.space())
+                .append(Component.text("click", NamedTextColor.GRAY))
+                .append(Component.space())
+                .append(Component.text("->", NamedTextColor.GRAY))
+                .append(Component.space())
+                .append(Component.text("delete", NamedTextColor.RED));
     }
 
     @Contract(value = "_ -> new", pure = true)

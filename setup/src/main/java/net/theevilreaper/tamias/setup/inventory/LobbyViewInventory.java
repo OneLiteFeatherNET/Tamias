@@ -12,9 +12,10 @@ import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.theevilreaper.aves.map.BaseMapBuilder;
-import net.theevilreaper.tamias.setup.inventory.slot.MultipleStringItemSlot;
-import net.theevilreaper.tamias.setup.inventory.slot.SpawnItemSlot;
-import net.theevilreaper.tamias.setup.inventory.slot.StringItemSlot;
+import net.theevilreaper.tamias.setup.inventory.slot.MultiStringSlot;
+import net.theevilreaper.tamias.setup.inventory.slot.PositionSlot;
+import net.theevilreaper.tamias.setup.inventory.slot.StringSlot;
+import net.theevilreaper.tamias.setup.map.MapDataCategory;
 import net.theevilreaper.tamias.setup.util.SetupItems;
 
 import static net.theevilreaper.aves.inventory.util.InventoryConstants.CANCEL_CLICK;
@@ -62,16 +63,9 @@ public class LobbyViewInventory extends GlobalInventoryBuilder {
                 dataLayout.setItem(DATA_SLOTS[2], SetupItems.DECORATION, CANCEL_CLICK);
                 return dataLayout;
             }
-            ISlot mapNameSlot = new StringItemSlot(Component.text("Map-Name", NamedTextColor.GOLD), mapBuilder.getName());
-            ISlot builderSlot = new MultipleStringItemSlot(Component.text("Builders", NamedTextColor.GOLD), mapBuilder.getBuilders());
-            ISlot spawnSlot;
-
-            if (mapBuilder.getSpawn() != null) {
-                 spawnSlot = SpawnItemSlot.empty();
-            } else {
-                spawnSlot = SpawnItemSlot.asSpawn(mapBuilder.getSpawn(), this::openConfirmInventory);
-            }
-
+            ISlot mapNameSlot = new StringSlot(MapDataCategory.NAME, mapBuilder.getName());
+            ISlot builderSlot = new MultiStringSlot(MapDataCategory.AUTHOR, mapBuilder.getBuilders());
+            ISlot spawnSlot = new PositionSlot(MapDataCategory.SPAWN, mapBuilder.getSpawn());
             dataLayout.setItem(DATA_SLOTS[0], mapNameSlot, CANCEL_CLICK);
             dataLayout.setItem(DATA_SLOTS[1], spawnSlot);
             dataLayout.setItem(DATA_SLOTS[2], builderSlot, CANCEL_CLICK);
