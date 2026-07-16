@@ -1,8 +1,6 @@
 package net.theevilreaper.tamias.setup.map;
 
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.coordinate.Pos;
-import net.minestom.server.entity.Player;
 import net.theevilreaper.aves.map.BaseMap;
 import net.theevilreaper.aves.map.MapEntry;
 import net.theevilreaper.aves.map.provider.AbstractMapProvider;
@@ -22,7 +20,6 @@ import java.util.Optional;
  */
 public final class SetupMapProvider extends AbstractMapProvider {
 
-    private static final Pos FALLBACK_POS = new Pos(0, 100, 0);
     private static final String LOBBY_SUFFIX = "lobby"; // Constant for lobby suffix
 
     /**
@@ -70,15 +67,5 @@ public final class SetupMapProvider extends AbstractMapProvider {
     @Override
     public void saveMap(Path path, BaseMap baseMap) {
         this.fileHandler.save(path, baseMap instanceof GameMap mapToSave ? mapToSave : baseMap);
-    }
-
-    @Override
-    public void teleportToSpawn(Player player, boolean instanceSet) {
-        Pos pos = activeMap.getSpawnOrDefault(FALLBACK_POS);
-        if (!instanceSet) {
-            player.teleport(pos);
-            return;
-        }
-        player.setInstance(this.activeInstance, pos);
     }
 }
