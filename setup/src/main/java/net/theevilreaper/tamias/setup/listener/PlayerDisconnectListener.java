@@ -25,11 +25,11 @@ public final class PlayerDisconnectListener implements Consumer<PlayerDisconnect
     @Override
     public void accept(PlayerDisconnectEvent event) {
         Player player = event.getPlayer();
-        Component joinMessage = Messages.withPrefix(Component.text(player.getUsername(), NamedTextColor.AQUA))
+        Component leftMessage = Messages.withPrefix(Component.text(player.getUsername(), NamedTextColor.AQUA))
                 .append(Component.space())
                 .append(Component.text("left the server", NamedTextColor.GRAY));
         Audience.audience(MinecraftServer.getConnectionManager().getOnlinePlayers())
-                .sendMessage(joinMessage);
+                .sendMessage(leftMessage);
 
         Optional<SetupData> removedData = dataRemover.apply(player.getUuid());
         removedData.ifPresent(SetupData::reset);
