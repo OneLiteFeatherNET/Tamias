@@ -6,7 +6,6 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerChatEvent;
 import net.onelitefeather.guira.SetupDataService;
 import net.onelitefeather.guira.data.SetupData;
-import net.theevilreaper.aves.map.BaseMap;
 import net.theevilreaper.tamias.setup.data.InstanceSetupData;
 import net.theevilreaper.tamias.setup.util.SetupTags;
 
@@ -50,10 +49,8 @@ public final class PlayerChatListener implements Consumer<PlayerChatEvent> {
         }
         Component mapName;
 
-        BaseMap map = null;
-
-        if (instanceData.hasMapFile() && map != null) {
-            String mapAsString = map.name();
+        if (!instanceData.getMapBuilder().getName().equals("Map")) {
+            String mapAsString = instanceData.getMapBuilder().getName();
             mapName = SQUARE_OPEN
                     .append(Component.text(mapAsString, NamedTextColor.LIGHT_PURPLE))
                     .append(SQUARE_CLOSE).append(Component.space());
