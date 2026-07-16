@@ -59,7 +59,7 @@ public class PositionSlot extends AbstractDataSlot {
         lore.add(DELETE_CLICK);
         lore.add(Component.empty());
 
-        return asBuilder(overviewItem).lore(lore).build();
+        return overviewItem.with(builder -> builder.lore(lore));
     }
 
     @Override

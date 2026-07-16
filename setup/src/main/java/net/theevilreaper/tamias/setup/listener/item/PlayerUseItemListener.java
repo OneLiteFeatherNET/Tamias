@@ -10,12 +10,15 @@ import net.minestom.server.item.ItemStack;
 import net.theevilreaper.tamias.common.util.Tags;
 import net.theevilreaper.tamias.setup.TamiasSetup;
 import net.theevilreaper.tamias.setup.data.InstanceSetupData;
+import net.theevilreaper.tamias.setup.util.SetupTags;
 
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static net.theevilreaper.tamias.setup.util.SetupItems.MAPS_FLAG;
+import static net.theevilreaper.tamias.setup.util.SetupItems.SAVE_MAP_FLAG;
 import static net.theevilreaper.tamias.setup.util.SetupItems.OVERVIEW_FLAG;
 
 public final class PlayerUseItemListener implements Consumer<PlayerUseItemEvent> {
@@ -37,12 +40,12 @@ public final class PlayerUseItemListener implements Consumer<PlayerUseItemEvent>
         byte itemId = stack.getTag(Tags.ITEM_TAG);
 
         Player player = event.getPlayer();
-        if (itemId == 0x00) {
+        if (itemId == MAPS_FLAG) {
             this.invOpener.accept(player);
             return;
         }
 
-        if (!player.hasTag(TamiasSetup.SETUP_TAG)) return;
+        if (!player.hasTag(SetupTags.SETUP_TAG)) return;
 
         Optional<SetupData> fetchedData = this.saveFunction.apply(player.getUuid());
         if (fetchedData.isEmpty()) return;
@@ -50,7 +53,7 @@ public final class PlayerUseItemListener implements Consumer<PlayerUseItemEvent>
         SetupData setupData = fetchedData.get();
 
         if (itemId == OVERVIEW_FLAG) {
-            ((InstanceSetupData) setupData).openInventory(player);
+            ((InstanceSetupData) setupData).openInventory(InstanceSetupData.InventoryTarget.GENERAL);
             return;
         }
         EventDispatcher.call(new SetupFinishEvent(setupData));

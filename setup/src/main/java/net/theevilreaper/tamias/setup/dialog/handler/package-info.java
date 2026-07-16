@@ -1,4 +1,4 @@
 @NotNullByDefault
-package net.theevilreaper.tamias.common.map.functional;
+package net.theevilreaper.tamias.setup.dialog.handler;
 
 import org.jetbrains.annotations.NotNullByDefault;

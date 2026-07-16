@@ -30,14 +30,13 @@ public class StringSlot extends AbstractDataSlot {
         ItemStack overviewItem = MapDataCategory.getDefaultItem(type);
 
         if (data.equals("Map")) return overviewItem;
-        return asBuilder(overviewItem).lore(
+        return overviewItem.with(builder -> builder.lore(
                         Component.empty(),
                         NO_SPACE_SEPARATOR.append(Component.space()).append(Component.text(data, type.getColor())),
                         Component.empty(),
                         DELETE_CLICK,
                         Component.empty()
-                )
-                .build();
+                ));
     }
 
     @Override

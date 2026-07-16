@@ -1,14 +1,11 @@
 package net.theevilreaper.tamias.setup.map;
 
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.coordinate.Pos;
-import net.minestom.server.entity.Player;
-import net.theevilreaper.aves.file.FileHandler;
 import net.theevilreaper.aves.map.BaseMap;
 import net.theevilreaper.aves.map.MapEntry;
 import net.theevilreaper.aves.map.provider.AbstractMapProvider;
+import net.theevilreaper.tamias.common.gson.GsonUtil;
 import net.theevilreaper.tamias.common.map.GameMap;
-import net.theevilreaper.tamias.common.map.functional.LobbyMapPredicate;
 import net.theevilreaper.tamias.common.map.MapFilter;
 
 import java.nio.file.Path;
@@ -23,21 +20,18 @@ import java.util.Optional;
  */
 public final class SetupMapProvider extends AbstractMapProvider {
 
-    private static final Pos FALLBACK_POS = new Pos(0, 100, 0);
     private static final String LOBBY_SUFFIX = "lobby"; // Constant for lobby suffix
 
     /**
      * Constructs a SetupMapProvider with the specified FileHandler.
      *
      * @param path        the path where the maps are stored
-     * @param fileHandler the FileHandler used to load and save maps
      */
-    public SetupMapProvider(Path path, FileHandler fileHandler) {
-        super(fileHandler, MapFilter::filterMapsForSetup);
+    public SetupMapProvider(Path path) {
+        super(GsonUtil.FILE_HANDLER, MapFilter::filterMapsForSetup);
         loadMapEntries(path.resolve("maps"));
 
-        LobbyMapPredicate predicate = new LobbyMapPredicate();
-        Optional<MapEntry> lobbyEntry = getEntries().stream().filter(predicate).findFirst();
+        Optional<MapEntry> lobbyEntry = getEntries().stream().filter(this::isLobbyMap).findFirst();
 
         if (lobbyEntry.isEmpty()) {
             throw new IllegalStateException("No lobby map found in the provided map entries.");
@@ -60,7 +54,6 @@ public final class SetupMapProvider extends AbstractMapProvider {
         this.registerInstance(this.activeInstance, lobbyEntry.get());
     }
 
-
     /**
      * Checks if the given map is a lobby map.
      *
@@ -74,15 +67,5 @@ public final class SetupMapProvider extends AbstractMapProvider {
     @Override
     public void saveMap(Path path, BaseMap baseMap) {
         this.fileHandler.save(path, baseMap instanceof GameMap mapToSave ? mapToSave : baseMap);
-    }
-
-    @Override
-    public void teleportToSpawn(Player player, boolean instanceSet) {
-        Pos pos = activeMap.getSpawnOrDefault(FALLBACK_POS);
-        if (!instanceSet) {
-            player.teleport(pos);
-            return;
-        }
-        player.setInstance(this.activeInstance, pos);
     }
 }

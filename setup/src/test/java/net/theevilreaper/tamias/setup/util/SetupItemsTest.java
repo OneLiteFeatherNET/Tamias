@@ -11,6 +11,8 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import static net.theevilreaper.tamias.setup.util.SetupItems.MAPS_FLAG;
+import static net.theevilreaper.tamias.setup.util.SetupItems.SAVE_MAP_FLAG;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -30,7 +32,7 @@ class SetupItemsTest {
         assertNotEquals(Material.AIR, overViewItem.material());
         assertEquals(Material.CHEST, overViewItem.material());
 
-        assertEquals(0x00, overViewItem.getTag(Tags.ITEM_TAG).byteValue());
+        assertEquals(MAPS_FLAG, overViewItem.getTag(Tags.ITEM_TAG).byteValue());
         assertEquals(0x00, player.getHeldSlot());
 
         env.destroyInstance(instance, true);
@@ -48,7 +50,7 @@ class SetupItemsTest {
         assertNotEquals(Material.AIR, saveItem.material());
         assertEquals(Material.BELL, saveItem.material());
 
-        assertEquals(0x01, saveItem.getTag(Tags.ITEM_TAG).byteValue());
+        assertEquals(SAVE_MAP_FLAG, saveItem.getTag(Tags.ITEM_TAG).byteValue());
         assertEquals(0x00, player.getHeldSlot());
 
         env.destroyInstance(instance, true);

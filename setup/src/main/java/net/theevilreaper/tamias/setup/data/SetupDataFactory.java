@@ -2,6 +2,7 @@ package net.theevilreaper.tamias.setup.data;
 
 import net.minestom.server.entity.Player;
 import net.theevilreaper.aves.map.MapEntry;
+import org.jetbrains.annotations.Contract;
 
 import java.util.UUID;
 
@@ -22,6 +23,7 @@ public abstract class SetupDataFactory {
      * @param lobbyMode if the data is for the lobby or the game
      * @return the created instance
      */
+    @Contract(pure = true, value = "_, _, _ -> new")
     public static InstanceSetupData create(Player player, MapEntry mapEntry, boolean lobbyMode) {
         final UUID uuid = player.getUuid();
         return lobbyMode ? new LobbyData(uuid, mapEntry) : new GameData(uuid, mapEntry);

@@ -1,8 +1,6 @@
 package net.theevilreaper.tamias.setup.listener.map;
 
 import net.onelitefeather.guira.SetupDataService;
-import net.onelitefeather.guira.data.SetupData;
-import net.theevilreaper.aves.file.FileHandler;
 import net.theevilreaper.aves.map.MapEntry;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -11,21 +9,19 @@ import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.timer.Task;
 import net.theevilreaper.tamias.common.util.Messages;
-import net.theevilreaper.tamias.setup.TamiasSetup;
 import net.theevilreaper.tamias.setup.data.InstanceSetupData;
 import net.theevilreaper.tamias.setup.data.SetupDataFactory;
 import net.theevilreaper.tamias.setup.event.PlayerMapSelectEvent;
+import net.theevilreaper.tamias.setup.util.SetupTags;
 
 import java.time.temporal.ChronoUnit;
 import java.util.function.Consumer;
 
 public final class MapSetupSelectListener implements Consumer<PlayerMapSelectEvent> {
 
-    private final FileHandler fileHandler;
     private final SetupDataService setupDataService;
 
-    public MapSetupSelectListener(FileHandler fileHandler, SetupDataService setupDataService) {
-        this.fileHandler = fileHandler;
+    public MapSetupSelectListener(SetupDataService setupDataService) {
         this.setupDataService = setupDataService;
     }
 
@@ -33,7 +29,9 @@ public final class MapSetupSelectListener implements Consumer<PlayerMapSelectEve
     public void accept(PlayerMapSelectEvent event) {
         Player player = event.getPlayer();
 
-        SetupData setupData = this.setupDataService.get(player.getUuid()).get();
+        if (player.hasTag(SetupTags.SETUP_TAG)) {
+            return;
+        }
 
         /*if (setupData != null && setupData.hasMap()) {
             // If this condition is reached the setup is fucked up
@@ -53,7 +51,7 @@ public final class MapSetupSelectListener implements Consumer<PlayerMapSelectEve
 
         this.setupDataService.add(player.getUuid(), data);
 
-        player.setTag(TamiasSetup.SETUP_TAG, (byte) 1);
+        player.setTag(SetupTags.SETUP_TAG, (byte) 1);
         getTeleportTask(() -> data.teleport(player)).schedule();
     }
 

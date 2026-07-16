@@ -26,19 +26,4 @@ public abstract class AbstractDataSlot extends Slot {
             ItemStack stack,
             Consumer<ClickHolder> result
     );
-
-    /**
-     * Converts the given ItemStack to a builder, allowing for modifications
-     * without altering the original stack.
-     *
-     * @param stack the ItemStack to convert
-     * @return a new ItemStack.Builder with the same material and custom name
-     */
-    protected ItemStack.Builder asBuilder(ItemStack stack) {
-        ItemStack.Builder builder = ItemStack.builder(stack.material());
-        if (stack.has(DataComponents.CUSTOM_NAME)) {
-            builder.customName(stack.get(DataComponents.CUSTOM_NAME));
-        }
-        return builder;
-    }
 }
