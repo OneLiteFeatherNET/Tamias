@@ -1,7 +1,9 @@
 package net.theevilreaper.tamias.setup.inventory;
 
+import net.minestom.server.entity.Player;
 import net.theevilreaper.aves.inventory.GlobalInventoryBuilder;
 import net.theevilreaper.aves.inventory.InventoryLayout;
+import net.theevilreaper.aves.inventory.PersonalInventoryBuilder;
 import net.theevilreaper.aves.inventory.slot.ISlot;
 import net.theevilreaper.aves.inventory.util.LayoutCalculator;
 import net.kyori.adventure.text.Component;
@@ -29,11 +31,7 @@ import static net.theevilreaper.aves.inventory.util.InventoryConstants.CANCEL_CL
  * @since 1.0.0
  */
 @SuppressWarnings("java:S3252")
-public class LobbyViewInventory extends GlobalInventoryBuilder {
-
-    private static final ItemStack NO_SPAWN = ItemStack.builder(Material.BARRIER)
-            .customName(Component.text("No spawn set", NamedTextColor.RED))
-            .build();
+public class LobbyViewInventory extends PersonalInventoryBuilder {
 
     private static final int[] DATA_SLOTS = LayoutCalculator.from(11, 13, 15);
     private final BaseMapBuilder mapBuilder;
@@ -43,8 +41,8 @@ public class LobbyViewInventory extends GlobalInventoryBuilder {
      *
      * @param mapBuilder the map to display
      */
-    public LobbyViewInventory(BaseMapBuilder mapBuilder) {
-        super(Component.text("Lobby data"), InventoryType.CHEST_3_ROW);
+    public LobbyViewInventory(Player player, BaseMapBuilder mapBuilder) {
+        super(Component.text("Map data"), InventoryType.CHEST_3_ROW, player);
         this.mapBuilder = mapBuilder;
         InventoryLayout layout = InventoryLayout.fromType(getType());
         layout.setItems(LayoutCalculator.quad(0, getType().getSize() - 1), SetupItems.DECORATION, CANCEL_CLICK);
@@ -53,33 +51,17 @@ public class LobbyViewInventory extends GlobalInventoryBuilder {
         this.setDataLayoutFunction(dataLayout -> {
             dataLayout = dataLayout == null ? InventoryLayout.fromType(getType()) : dataLayout;
             dataLayout.blank(DATA_SLOTS);
-            if (hasNoData()) {
-                dataLayout.setItem(DATA_SLOTS[0], SetupItems.DECORATION, CANCEL_CLICK);
-                dataLayout.setItem(DATA_SLOTS[1], NO_SPAWN, CANCEL_CLICK);
-                dataLayout.setItem(DATA_SLOTS[2], SetupItems.DECORATION, CANCEL_CLICK);
-                return dataLayout;
-            }
             ISlot mapNameSlot = new StringSlot(MapDataCategory.NAME, mapBuilder.getName());
             ISlot builderSlot = new MultiStringSlot(MapDataCategory.AUTHOR, mapBuilder.getBuilders());
             ISlot spawnSlot = new PositionSlot(MapDataCategory.SPAWN, mapBuilder.getSpawn());
-            dataLayout.setItem(DATA_SLOTS[0], mapNameSlot, CANCEL_CLICK);
+            dataLayout.setItem(DATA_SLOTS[0], mapNameSlot);
             dataLayout.setItem(DATA_SLOTS[1], spawnSlot);
-            dataLayout.setItem(DATA_SLOTS[2], builderSlot, CANCEL_CLICK);
+            dataLayout.setItem(DATA_SLOTS[2], builderSlot);
             return dataLayout;
         });
 
         this.invalidateLayout();
         this.invalidateDataLayout();
         this.register();
-    }
-
-    /**
-     * Checks if the map has no data.
-     *
-     * @return true if the map has no data otherwise false
-     */
-    private boolean hasNoData() {
-        boolean hasMapName = this.mapBuilder.getName() != null && !this.mapBuilder.getName().isEmpty();
-        return this.mapBuilder.getSpawn() != null && !hasMapName && (this.mapBuilder.getBuilders() == null || this.mapBuilder.getBuilders().isEmpty());
     }
 }
