@@ -1,0 +1,23 @@
+
+package net.theevilreaper.tamias.setup.listener;
+
+import net.onelitefeather.guira.SetupDataService;
+import net.theevilreaper.tamias.setup.data.InstanceSetupData;
+import net.theevilreaper.tamias.setup.event.PositionSetEvent;
+
+import java.util.function.Consumer;
+
+public class PositionSetListener implements Consumer<PositionSetEvent> {
+
+    private final SetupDataService dataService;
+
+    public PositionSetListener(SetupDataService dataService) {
+        this.dataService = dataService;
+    }
+
+    @Override
+    public void accept(PositionSetEvent event) {
+        this.dataService.get(event.getPlayer().getUuid()).ifPresent(data ->
+                ((InstanceSetupData) data).setPosition(event.getCategory(), event.getPlayer()));
+    }
+}
