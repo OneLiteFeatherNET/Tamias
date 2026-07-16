@@ -1,5 +1,6 @@
 package net.theevilreaper.tamias.setup;
 
+import net.minestom.server.event.player.PlayerCustomClickEvent;
 import net.onelitefeather.guira.SetupDataService;
 import net.onelitefeather.guira.event.SetupFinishEvent;
 import net.theevilreaper.aves.file.FileHandler;
@@ -7,7 +8,6 @@ import net.theevilreaper.aves.file.GsonFileHandler;
 import net.theevilreaper.aves.map.provider.MapProvider;
 import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.command.CommandManager;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.instance.AddEntityToInstanceEvent;
@@ -17,15 +17,19 @@ import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.tag.Tag;
 import net.theevilreaper.tamias.common.ListenerHandling;
 import net.theevilreaper.tamias.common.gson.GsonUtil;
+import net.theevilreaper.tamias.setup.dialog.event.DialogRequestEvent;
 import net.theevilreaper.tamias.setup.event.PlayerMapSelectEvent;
+import net.theevilreaper.tamias.setup.event.PositionSetEvent;
 import net.theevilreaper.tamias.setup.inventory.MapSetupInventory;
 import net.theevilreaper.tamias.setup.listener.PlayerChatListener;
 import net.theevilreaper.tamias.setup.listener.PlayerConfigurationListener;
 import net.theevilreaper.tamias.setup.listener.PlayerDisconnectListener;
 import net.theevilreaper.tamias.setup.listener.PlayerSpawnListener;
+import net.theevilreaper.tamias.setup.listener.PositionSetListener;
+import net.theevilreaper.tamias.setup.listener.dialog.DialogPayloadListener;
+import net.theevilreaper.tamias.setup.listener.dialog.DialogRequestListener;
 import net.theevilreaper.tamias.setup.listener.item.PlayerUseItemListener;
 import net.theevilreaper.tamias.setup.listener.entity.EntityAddToInstanceListener;
 import net.theevilreaper.tamias.setup.listener.map.SetupFinishListener;
@@ -38,9 +42,6 @@ import java.nio.file.Paths;
 import java.util.function.Supplier;
 
 public final class TamiasSetup implements ListenerHandling {
-
-    public static final Tag<Byte> SETUP_TAG = Tag.Transient("setup");
-    public static final Tag<Boolean> DELETE_TAG = Tag.Boolean("delete").defaultValue(false);
 
     private final SetupDataService setupDataService;
     private final FileHandler fileHandler;
@@ -86,6 +87,13 @@ public final class TamiasSetup implements ListenerHandling {
 
         // Item listener
         manager.addListener(PlayerUseItemEvent.class, new PlayerUseItemListener(this::updateMapInventory, setupDataService::get));
+
+        // Dialog
+        manager.addListener(PlayerCustomClickEvent.class, new DialogPayloadListener(this.setupDataService));
+        manager.addListener(DialogRequestEvent.class, new DialogRequestListener());
+
+        // Position listener
+        manager.addListener(PositionSetEvent.class, new PositionSetListener(this.setupDataService));
     }
 
     /**
