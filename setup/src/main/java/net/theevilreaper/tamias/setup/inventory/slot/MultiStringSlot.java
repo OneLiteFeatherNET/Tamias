@@ -38,14 +38,13 @@ public class MultiStringSlot extends AbstractDataSlot {
         if (data.isEmpty()) {
             return overviewItem;
         }
-        return asBuilder(overviewItem).lore(
+        return overviewItem.with(builder -> builder.lore(
                         Component.empty(),
                         NO_SPACE_SEPARATOR.append(Component.space()).append(Component.text(String.join(", ", data), type.getColor())),
                         Component.empty(),
                         DELETE_CLICK,
                         Component.empty()
-                )
-                .build();
+                ));
     }
 
     @Override

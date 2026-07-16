@@ -2,10 +2,8 @@ package net.theevilreaper.tamias.setup.dialog.handler;
 
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.nbt.IntBinaryTag;
-import net.minestom.server.coordinate.Point;
 import net.minestom.server.event.player.PlayerCustomClickEvent;
 import net.onelitefeather.guira.SetupDataService;
-import net.theevilreaper.tamias.setup.data.InstanceSetupData;
 import net.theevilreaper.tamias.setup.map.MapDataCategory;
 
 public final class DynamicDataHandler implements DialogHandler {
@@ -27,21 +25,6 @@ public final class DynamicDataHandler implements DialogHandler {
         MapDataCategory category = MapDataCategory.byId(categoryId);
 
         dataService.get(event.getPlayer().getUuid()).ifPresent(data -> {
-            SetupPlayer player = (SetupPlayer) event.getPlayer();
-            Point point = null;
-            if (category == MapDataCategory.SURVIVOR) {
-                point = player.getSurvivorToDelete();
-            }
-            if (category == MapDataCategory.PAGE) {
-                point = player.getPageToDelete();
-            }
-            ((InstanceSetupData)data).handleDataContextDelete(category, point);
-            if (category == MapDataCategory.SURVIVOR) {
-                player.setSurvivorToDelete(null);
-            }
-            if (category == MapDataCategory.PAGE) {
-                player.setPageToDelete(null);
-            }
         });
 
     }
