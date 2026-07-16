@@ -4,31 +4,57 @@ import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.InstanceContainer;
 import net.onelitefeather.guira.data.SetupData;
+import net.theevilreaper.aves.map.BaseMapBuilder;
 import net.theevilreaper.aves.map.MapEntry;
-import org.jetbrains.annotations.NotNull;
+import net.theevilreaper.tamias.setup.map.MapDataCategory;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
+/**
+ * Base implementation for setup data working with a temporary map instance.
+ *
+ * <p>Provides shared functionality for managing setup state, boss bar updates,
+ * instance lifecycle handling and map-related access. Subclasses implement
+ * setup-specific interaction and update logic.</p>
+ *
+ * @author theEvilReaper
+ * @version 2.0.0
+ * @since 2.1.0
+ */
 public abstract class InstanceSetupData implements SetupData {
+
     protected static final Pos SPAWN_POINT = new Pos(0, 100, 0);
 
     protected UUID uuid;
     protected MapEntry mapEntry;
-    protected InstanceContainer instance;
+    protected @Nullable InstanceContainer instance;
     protected BossBar bossBar;
-    protected Component title;
+    protected @Nullable Component title;
 
-    protected InstanceSetupData(@NotNull UUID uuid, @NotNull MapEntry mapEntry, @NotNull BossBar.Color color) {
+    /**
+     * Creates a new setup data container.
+     *
+     * @param uuid     unique identifier of this setup session
+     * @param mapEntry map entry associated with the setup
+     * @param color    boss bar color used for setup feedback
+     */
+    protected InstanceSetupData(UUID uuid, MapEntry mapEntry, BossBar.Color color) {
         this.uuid = uuid;
         this.mapEntry = mapEntry;
         this.bossBar = BossBar.bossBar(Component.empty(), 1, color, BossBar.Overlay.PROGRESS);
     }
 
-
+    /**
+     * Updates the boss bar title.
+     *
+     * <p>If no title is set, a fallback title is used.</p>
+     */
     public void updateTitle() {
         if (this.title == null) {
             this.title = Component.text("Please set a title", NamedTextColor.RED);
@@ -36,28 +62,92 @@ public abstract class InstanceSetupData implements SetupData {
         this.bossBar.name(title);
     }
 
-    public void teleport(@NotNull Player player) {
-        //Pos spawnPoint = map.getSpawnOrDefault(SPAWN_POINT);
-       // player.setInstance(this.instance, spawnPoint);
+    /**
+     * Displays setup-related information to the given player.
+     *
+     * @param player target player
+     */
+    public void teleport(Player player) {
         player.showBossBar(this.bossBar);
     }
 
-    public abstract void openInventory(@NotNull Player player);
+    /**
+     * Opens the setup inventory for the given player.
+     *
+     */
+    public abstract void openInventory(InventoryTarget target);
 
-    public abstract void triggerUpdate();
+    /**
+     * Triggers an update of the setup state and related visual feedback.
+     */
+    public abstract void triggerUpdate(InventoryTarget target);
 
+    /**
+     * Handles the position change of a player during the setup.
+     *
+     * @param category the category of the map data being modified
+     * @param player   who is involved in the position change
+     */
+    public abstract void setPosition(MapDataCategory category, Player player);
+
+    /**
+     * Handles an item interaction by the given player during the setup process.
+     * The default implementation opens the general inventory.
+     * Subclasses may override this to handle additional tag values.
+     *
+     * @param player   the player who interacted with the item
+     * @param tagValue the tag value of the used item
+     * @see GameData#handleItemInteraction(Player, byte)
+     */
+    public void handleItemInteraction(Player player, byte tagValue) {
+        openInventory(InventoryTarget.GENERAL);
+    }
+
+    public abstract void handleDataDelete(MapDataCategory category);
+
+    public void handleDataContextDelete(MapDataCategory category, Point point) {
+        // Nothing to do in the default implementation
+    }
+
+    /**
+     * Checks whether a map file is available for this setup.
+     *
+     * @return true if a map file exists, otherwise false
+     */
     public boolean hasMapFile() {
         return this.mapEntry.hasMapFile();
     }
 
+    /**
+     * Resets this setup and unregisters its instance if present.
+     */
     @Override
     public void reset() {
         if (instance == null) return;
         MinecraftServer.getInstanceManager().unregisterInstance(instance);
     }
 
+    /**
+     * Returns the unique identifier of this setup.
+     *
+     * @return setup id
+     */
     @Override
-    public @NotNull UUID getId() {
+    public UUID getId() {
         return this.uuid;
+    }
+
+    /**
+     * Returns the map builder used by this setup.
+     *
+     * @return associated map builder
+     */
+    public abstract BaseMapBuilder getMapBuilder();
+
+    public enum InventoryTarget {
+
+        GENERAL,
+        GAME,
+
     }
 }

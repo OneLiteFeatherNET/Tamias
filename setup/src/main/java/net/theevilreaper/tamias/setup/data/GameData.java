@@ -1,64 +1,142 @@
 package net.theevilreaper.tamias.setup.data;
 
 import net.kyori.adventure.bossbar.BossBar;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.anvil.AnvilLoader;
 import net.minestom.server.world.DimensionType;
-import net.theevilreaper.aves.map.BaseMap;
+import net.theevilreaper.aves.map.BaseMapBuilder;
 import net.theevilreaper.aves.map.MapEntry;
 import net.theevilreaper.tamias.common.gson.GsonUtil;
 import net.theevilreaper.tamias.common.map.GameMap;
 import net.theevilreaper.tamias.common.map.builder.GameMapBuilder;
 import net.theevilreaper.tamias.setup.inventory.LobbyViewInventory;
-import org.jetbrains.annotations.NotNull;
+import net.theevilreaper.tamias.setup.map.MapDataCategory;
 
-import java.nio.file.Files;
 import java.util.Optional;
 import java.util.UUID;
 
 public class GameData extends InstanceSetupData {
 
-    private LobbyViewInventory inventory;
+    private final LobbyViewInventory inventory;
     private GameMapBuilder gameMapBuilder;
-    private boolean areaMode;
 
     /**
      * Constructs a new GameData instance.
      *
-     * @param uuid     the UUID of the player
-     * @param mapEntry the map entry associated with this game data
+     * @param uuid       the UUID of the player
+     * @param mapEntry   the map entry associated with this game data
      */
-    public GameData(@NotNull UUID uuid, @NotNull MapEntry mapEntry) {
+    public GameData(UUID uuid, MapEntry mapEntry) {
         super(uuid, mapEntry, BossBar.Color.RED);
         Player player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(uuid);
-
+        this.loadData();
         if (player == null) {
             throw new IllegalArgumentException("Player with UUID " + uuid + " is not online.");
+        }
+
+        this.inventory = new LobbyViewInventory(player, this.gameMapBuilder);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void openInventory(InventoryTarget target) {
+        switch (target) {
+            case GENERAL -> this.inventory.open();
+            default -> {
+
+            }
         }
     }
 
     /**
-     * Swaps between area mode and normal mode.
+     * {@inheritDoc}
      */
-    public void swapAreaMode() {
-        this.areaMode = !this.areaMode;
+    @Override
+    public void triggerUpdate(InventoryTarget target) {
+        switch (target) {
+            case GENERAL -> this.inventory.invalidateDataLayout();
+            default -> {
+
+            }
+        }
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void openInventory(@NotNull Player player) {
-        player.openInventory(this.inventory.getInventory());
+    public void updateTitle() {
+        if (getMapBuilder().getName().equalsIgnoreCase("Map")) {
+            this.title = null;
+            super.updateTitle();
+            return;
+        }
+        this.title = Component.text("Map: ").append(Component.text(getMapBuilder().getName(), MapDataCategory.NAME.getColor()));
+        super.updateTitle();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void triggerUpdate() {
-        this.inventory.invalidateDataLayout();
+    public void setPosition(MapDataCategory category, Player player) {
+        Pos pos = player.getPosition();
+        switch (category) {
+            case SPAWN -> {
+                getMapBuilder().spawn(pos);
+                triggerUpdate(InventoryTarget.GENERAL);
+            }
+            case SURVIVOR -> {
+                Pos spawnPos = new Pos(
+                        pos.blockX(),
+                        pos.blockY() + 1,
+                        pos.blockZ(),
+                        player.getPosition().yaw(),
+                        0f
+                );
+            }
+            default -> {}
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void handleItemInteraction(Player player, byte tagValue) {
+        super.handleItemInteraction(player, tagValue);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void handleDataDelete(MapDataCategory category) {
+        switch (category) {
+            case SPAWN -> gameMapBuilder.spawn(null);
+            case NAME -> {
+                gameMapBuilder.name("Map");
+                this.updateTitle();
+            }
+            case AUTHOR -> gameMapBuilder.builders("");
+            default -> throw new IllegalArgumentException("Unknown inventory category: " + category);
+        }
+        this.triggerUpdate(InventoryTarget.GENERAL);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void handleDataContextDelete(MapDataCategory category, Point point) {
+        if (point instanceof Pos pos) {
+        }
     }
 
     /**
@@ -66,10 +144,19 @@ public class GameData extends InstanceSetupData {
      */
     @Override
     public void save() {
-        if (!Files.exists(mapEntry.getMapFile())) {
+        if (!this.mapEntry.hasMapFile()) {
             this.mapEntry.createFile();
         }
-        GsonUtil.FILE_HANDLER.save(mapEntry.getMapFile(), BaseMap.class);
+        GsonUtil.FILE_HANDLER.save(mapEntry.getMapFile(), this.gameMapBuilder.build());
+    }
+
+    @Override
+    public void teleport(Player player) {
+        super.teleport(player);
+        Pos spawnPoint = this.gameMapBuilder.getSpawn() == null
+                ? SPAWN_POINT
+                : this.gameMapBuilder.getSpawn();
+        player.setInstance(this.instance, spawnPoint);
     }
 
     /**
@@ -86,28 +173,22 @@ public class GameData extends InstanceSetupData {
      */
     @Override
     public void loadData() {
-        if (this.mapEntry != null) return;
-        Optional<GameMap> mapData = GsonUtil.FILE_HANDLER.load(mapEntry.getMapFile(), GameMap.class);
-        mapData.ifPresentOrElse(gameMap ->
-                        this.gameMapBuilder = new GameMapBuilder(gameMap),
-                () -> this.gameMapBuilder = new GameMapBuilder()
-        );
-        this.inventory = new LobbyViewInventory(this.gameMapBuilder);
+        Optional<GameMap> mapData =
+                this.mapEntry.hasMapFile()
+                        ? GsonUtil.FILE_HANDLER.load(mapEntry.getMapFile(), GameMap.class)
+                        : Optional.empty();
+
+        this.gameMapBuilder = mapData
+                .map(GameMapBuilder::new)
+                .orElseGet(GameMapBuilder::new);
 
         this.instance = MinecraftServer.getInstanceManager().createInstanceContainer();
+
         AnvilLoader anvilLoader = new AnvilLoader(this.mapEntry.getDirectoryRoot(), DimensionType.OVERWORLD.key());
         this.instance.setChunkLoader(anvilLoader);
+
         this.updateTitle();
         MinecraftServer.getInstanceManager().registerInstance(this.instance);
-    }
-
-    /**
-     * Returns an indication if the area mode is active or not.
-     *
-     * @return true if area mode is active, false otherwise
-     */
-    public boolean hasAreaMode() {
-        return areaMode;
     }
 
     /**
@@ -115,7 +196,8 @@ public class GameData extends InstanceSetupData {
      *
      * @return the builder instance
      */
-    public GameMapBuilder getGameMapBuilder() {
+    @Override
+    public BaseMapBuilder getMapBuilder() {
         return this.gameMapBuilder;
     }
 }
