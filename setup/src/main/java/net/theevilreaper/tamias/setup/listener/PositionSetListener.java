@@ -17,7 +17,10 @@ public class PositionSetListener implements Consumer<PositionSetEvent> {
 
     @Override
     public void accept(PositionSetEvent event) {
-        this.dataService.get(event.getPlayer().getUuid()).ifPresent(data ->
-                ((InstanceSetupData) data).setPosition(event.getCategory(), event.getPlayer()));
+        this.dataService.get(event.getPlayer().getUuid()).ifPresent(data -> {
+            if (data instanceof InstanceSetupData instanceSetupData) {
+                instanceSetupData.setPosition(event.getCategory(), event.getPlayer());
+            }
+        });
     }
 }
