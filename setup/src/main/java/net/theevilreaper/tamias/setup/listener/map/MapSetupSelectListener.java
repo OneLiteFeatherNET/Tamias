@@ -1,8 +1,6 @@
 package net.theevilreaper.tamias.setup.listener.map;
 
 import net.onelitefeather.guira.SetupDataService;
-import net.onelitefeather.guira.data.SetupData;
-import net.theevilreaper.aves.file.FileHandler;
 import net.theevilreaper.aves.map.MapEntry;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -21,11 +19,9 @@ import java.util.function.Consumer;
 
 public final class MapSetupSelectListener implements Consumer<PlayerMapSelectEvent> {
 
-    private final FileHandler fileHandler;
     private final SetupDataService setupDataService;
 
-    public MapSetupSelectListener(FileHandler fileHandler, SetupDataService setupDataService) {
-        this.fileHandler = fileHandler;
+    public MapSetupSelectListener(SetupDataService setupDataService) {
         this.setupDataService = setupDataService;
     }
 
@@ -33,7 +29,9 @@ public final class MapSetupSelectListener implements Consumer<PlayerMapSelectEve
     public void accept(PlayerMapSelectEvent event) {
         Player player = event.getPlayer();
 
-        SetupData setupData = this.setupDataService.get(player.getUuid()).get();
+        if (player.hasTag(SetupTags.SETUP_TAG)) {
+            return;
+        }
 
         /*if (setupData != null && setupData.hasMap()) {
             // If this condition is reached the setup is fucked up

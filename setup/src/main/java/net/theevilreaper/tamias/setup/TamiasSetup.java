@@ -44,13 +44,11 @@ import java.util.function.Supplier;
 public final class TamiasSetup implements ListenerHandling {
 
     private final SetupDataService setupDataService;
-    private final FileHandler fileHandler;
     private final MapProvider mapProvider;
     private final MapSetupInventory mapSetupInventory;
 
     public TamiasSetup() {
-        this.fileHandler = new GsonFileHandler(GsonUtil.GSON);
-        this.mapProvider = new SetupMapProvider(Paths.get(""), this.fileHandler);
+        this.mapProvider = new SetupMapProvider(Paths.get(""));
         this.setupDataService = SetupDataService.create();
         this.mapSetupInventory = new MapSetupInventory(this.mapProvider::getEntries);
         MinecraftServer.getSchedulerManager().buildShutdownTask(this::terminate);
@@ -81,7 +79,7 @@ public final class TamiasSetup implements ListenerHandling {
         manager.addListener(AsyncPlayerConfigurationEvent.class, new PlayerConfigurationListener(instanceSupplier));
         manager.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(initialSpawnSupplier));
         manager.addListener(AddEntityToInstanceEvent.class, new EntityAddToInstanceListener(instanceSupplier));
-        manager.addListener(PlayerMapSelectEvent.class, new MapSetupSelectListener(this.fileHandler, this.setupDataService));
+        manager.addListener(PlayerMapSelectEvent.class, new MapSetupSelectListener(this.setupDataService));
         manager.addListener(SetupFinishEvent.class, new SetupFinishListener(instanceSwitcher));
         manager.addListener(PlayerChatEvent.class, new PlayerChatListener(this.setupDataService));
 
