@@ -1,4 +1,4 @@
 @NotNullByDefault
-package net.theevilreaper.tamias.setup.inventory.slot;
+package net.onelitefeather.cygnus.setup.inventory.slot;
 
 import org.jetbrains.annotations.NotNullByDefault;

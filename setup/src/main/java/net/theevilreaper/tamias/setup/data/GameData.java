@@ -13,7 +13,7 @@ import net.theevilreaper.aves.map.MapEntry;
 import net.theevilreaper.tamias.common.gson.GsonUtil;
 import net.theevilreaper.tamias.common.map.GameMap;
 import net.theevilreaper.tamias.common.map.builder.GameMapBuilder;
-import net.theevilreaper.tamias.setup.inventory.LobbyViewInventory;
+import net.theevilreaper.tamias.setup.inventory.GeneralMapDataInventory;
 import net.theevilreaper.tamias.setup.map.MapDataCategory;
 
 import java.util.Optional;
@@ -21,7 +21,7 @@ import java.util.UUID;
 
 public class GameData extends InstanceSetupData {
 
-    private final LobbyViewInventory inventory;
+    private final GeneralMapDataInventory inventory;
     private GameMapBuilder gameMapBuilder;
 
     /**
@@ -38,7 +38,7 @@ public class GameData extends InstanceSetupData {
             throw new IllegalArgumentException("Player with UUID " + uuid + " is not online.");
         }
 
-        this.inventory = new LobbyViewInventory(player, this.gameMapBuilder);
+        this.inventory = new GeneralMapDataInventory(player, this.gameMapBuilder);
     }
 
     /**
