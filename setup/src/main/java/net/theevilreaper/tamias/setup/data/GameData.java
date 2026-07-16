@@ -109,14 +109,6 @@ public class GameData extends InstanceSetupData {
      * {@inheritDoc}
      */
     @Override
-    public void handleItemInteraction(Player player, byte tagValue) {
-        super.handleItemInteraction(player, tagValue);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public void handleDataDelete(MapDataCategory category) {
         switch (category) {
             case SPAWN -> gameMapBuilder.spawn(null);

@@ -17,6 +17,8 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static net.theevilreaper.tamias.setup.util.SetupItems.MAPS_FLAG;
+import static net.theevilreaper.tamias.setup.util.SetupItems.SAVE_MAP_FLAG;
 import static net.theevilreaper.tamias.setup.util.SetupItems.OVERVIEW_FLAG;
 
 public final class PlayerUseItemListener implements Consumer<PlayerUseItemEvent> {
@@ -38,7 +40,7 @@ public final class PlayerUseItemListener implements Consumer<PlayerUseItemEvent>
         byte itemId = stack.getTag(Tags.ITEM_TAG);
 
         Player player = event.getPlayer();
-        if (itemId == 0x00) {
+        if (itemId == MAPS_FLAG) {
             this.invOpener.accept(player);
             return;
         }
