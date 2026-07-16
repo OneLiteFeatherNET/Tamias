@@ -64,14 +64,8 @@ public final class TamiasSetup implements ListenerHandling {
         GlobalEventHandler manager = MinecraftServer.getGlobalEventHandler();
         Supplier<Instance> instanceSupplier = mapProvider.getActiveInstance();
         SetupMapProvider setupMapProvider = (SetupMapProvider) mapProvider;
-        PlayerConsumer initialSpawnSupplier = player -> {
-            setupMapProvider.teleportToSpawn(player, false);
-            SetupItems.setOverViewItem(player);
-        };
-        PlayerConsumer instanceSwitcher = player -> {
-            setupMapProvider.teleportToSpawn(player, true);
-            SetupItems.setOverViewItem(player);
-        };
+        PlayerConsumer initialSpawnSupplier = player -> setupMapProvider.teleportToSpawn(player, false);
+        PlayerConsumer instanceSwitcher = player -> setupMapProvider.teleportToSpawn(player, true);
         manager.addListener(PlayerDisconnectEvent.class, new PlayerDisconnectListener(setupDataService::remove));
         manager.addListener(AsyncPlayerConfigurationEvent.class, new PlayerConfigurationListener(instanceSupplier));
         manager.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(initialSpawnSupplier));
