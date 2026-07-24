@@ -28,7 +28,7 @@ public record GroundData(Block groundBlock, @Nullable List<Block> additionalBloc
      * @param additionalBlocks the additional blocks
      */
     public GroundData {
-        Check.argCondition(groundBlock.isAir(), "The ground block can't be air");
+        Check.argCondition(groundBlock.air(), "The ground block can't be air");
         if (additionalBlocks != null) {
             Check.argCondition(additionalBlocks.contains(Block.AIR), "The additional blocks can't contain air");
         }
