@@ -2,8 +2,8 @@ package net.theevilreaper.tamias.setup.inventory;
 
 import net.minestom.server.entity.Player;
 import net.theevilreaper.aves.inventory.GlobalInventoryBuilder;
-import net.theevilreaper.aves.inventory.InventoryLayout;
 import net.theevilreaper.aves.inventory.PersonalInventoryBuilder;
+import net.theevilreaper.aves.inventory.layout.InventoryLayout;
 import net.theevilreaper.aves.inventory.slot.ISlot;
 import net.theevilreaper.aves.inventory.util.LayoutCalculator;
 import net.kyori.adventure.text.Component;
