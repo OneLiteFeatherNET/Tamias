@@ -9,7 +9,7 @@ import net.theevilreaper.tamias.common.event.AreaFinishBuildEvent;
 import net.theevilreaper.tamias.common.ground.GroundData;
 import net.theevilreaper.tamias.common.util.Helper;
 
-import java.time.temporal.ChronoUnit;
+import net.minestom.server.timer.TaskSchedule;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -48,7 +48,7 @@ public final class CircleAreaPlacement extends AreaBasePlacement<Vec> {
                 this.placeBlock(pos, groundData);
             }
             sendExpCount(queue.size());
-        }).repeat(5, ChronoUnit.MILLIS).schedule();
+        }).repeat(TaskSchedule.tick(1)).schedule();
     }
 
     @Override
