@@ -8,7 +8,6 @@ import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.item.ItemStack;
 import net.theevilreaper.tamias.common.util.Tags;
-import net.theevilreaper.tamias.setup.TamiasSetup;
 import net.theevilreaper.tamias.setup.data.InstanceSetupData;
 import net.theevilreaper.tamias.setup.util.SetupTags;
 
@@ -18,7 +17,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static net.theevilreaper.tamias.setup.util.SetupItems.MAPS_FLAG;
-import static net.theevilreaper.tamias.setup.util.SetupItems.SAVE_MAP_FLAG;
 import static net.theevilreaper.tamias.setup.util.SetupItems.OVERVIEW_FLAG;
 
 public final class PlayerUseItemListener implements Consumer<PlayerUseItemEvent> {

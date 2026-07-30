@@ -32,7 +32,6 @@ import net.theevilreaper.tamias.setup.listener.entity.EntityAddToInstanceListene
 import net.theevilreaper.tamias.setup.listener.map.SetupFinishListener;
 import net.theevilreaper.tamias.setup.listener.map.MapSetupSelectListener;
 import net.theevilreaper.tamias.setup.map.SetupMapProvider;
-import net.theevilreaper.tamias.setup.util.SetupItems;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Paths;

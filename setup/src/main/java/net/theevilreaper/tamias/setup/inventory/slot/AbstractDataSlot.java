@@ -1,6 +1,5 @@
 package net.theevilreaper.tamias.setup.inventory.slot;
 
-import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.click.Click;
 import net.minestom.server.item.ItemStack;
