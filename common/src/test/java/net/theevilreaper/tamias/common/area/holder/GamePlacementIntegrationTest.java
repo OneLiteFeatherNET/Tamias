@@ -8,6 +8,7 @@ import net.minestom.server.utils.Direction;
 import net.minestom.testing.Env;
 import net.minestom.testing.extension.MicrotusExtension;
 import net.theevilreaper.tamias.common.area.GameArea;
+import net.theevilreaper.tamias.common.area.placement.CircleAreaPlacement;
 import net.theevilreaper.tamias.common.ground.GroundData;
 import net.theevilreaper.tamias.common.ground.GroundDataRegistry;
 import net.theevilreaper.tamias.common.map.layer.AreaData;
@@ -17,9 +18,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -41,12 +44,16 @@ class GamePlacementIntegrationTest {
         );
         assertNotNull(gameArea);
         gameArea.calculatePositions();
-        Placement placement = new GamePlacement(instance, gameArea);
+        CircleAreaPlacement groundPlacement = new CircleAreaPlacement(
+                instance,
+                gameArea.getPositions().stream().map(Vec.class::cast).toList(),
+                new ArrayList<>()
+        );
+        GamePlacement placement = new GamePlacement(instance, gameArea, groundPlacement);
         assertNotNull(placement);
         assertInstanceOf(GamePlacement.class, placement);
 
-        GamePlacement gamePlacement = (GamePlacement) placement;
-        gamePlacement.applyPositions();
+        placement.applyPositions();
 
         Set<Point> testPositions = new HashSet<>();
 
@@ -79,12 +86,31 @@ class GamePlacementIntegrationTest {
 
         placement.triggerPlacement(randomData);
 
-        env.tickWhile(gamePlacement::isRunning, Duration.ofSeconds(60));
+        env.tickWhile(placement::isRunning, Duration.ofSeconds(60));
 
         assertBlock(instance, randomData.groundBlock(), gameArea.getPositions());
 
        // assertBlock(instance, Block.TNT, gameArea.getTntPositions());
 //        assertBlock(instance, Block.TNT, gameArea.getTntPositions().stream().map(tnt -> tnt.add(0, -1,0)).collect(Collectors.toSet()));
+
+        env.destroyInstance(instance);
+    }
+
+    @Test
+    void testPreLoadChunksForAreaPlacementWorks(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        GameArea gameArea = new GameArea(
+                AreaData.builder()
+                        .lowerCorner(Vec.ZERO)
+                        .upperCorner(new Vec(20, 0, 20))
+                        .facing(Direction.NORTH)
+                        .build()
+        );
+        gameArea.calculatePositions();
+        CircleAreaPlacement groundPlacement = new CircleAreaPlacement(instance, new ArrayList<>(), new ArrayList<>());
+        GamePlacement gamePlacement = new GamePlacement(instance, gameArea, groundPlacement);
+
+        assertDoesNotThrow(() -> gamePlacement.preloadChunks().get(10, java.util.concurrent.TimeUnit.SECONDS));
 
         env.destroyInstance(instance);
     }
