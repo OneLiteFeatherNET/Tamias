@@ -1,27 +1,21 @@
 package net.theevilreaper.tamias.game.listener.area;
 
 import net.theevilreaper.tamias.common.area.holder.GamePlacement;
-import net.theevilreaper.tamias.common.area.holder.Placement;
-import net.theevilreaper.tamias.common.event.GameAreaPrepareEvent;
-import org.jetbrains.annotations.NotNull;
+import net.theevilreaper.tamias.common.event.GameAreaChunksReadyEvent;
 
 import java.util.function.Consumer;
 
-public final class GameAreaPrepareListener implements Consumer<GameAreaPrepareEvent> {
+public final class GameAreaPrepareListener implements Consumer<GameAreaChunksReadyEvent> {
 
-    private final Placement placement;
+    private final GamePlacement gamePlacement;
 
-    public GameAreaPrepareListener(@NotNull Placement placement) {
-        if (!(placement instanceof GamePlacement)) {
-            throw new IllegalArgumentException("The placement must be an instance of GamePlacement");
-        }
-        this.placement = placement;
+    public GameAreaPrepareListener(GamePlacement gamePlacement) {
+        this.gamePlacement = gamePlacement;
     }
 
     @Override
-    public void accept(@NotNull GameAreaPrepareEvent event) {
-        GamePlacement gamePlacement = (GamePlacement) placement;
-        gamePlacement.flatten();
-        gamePlacement.applyPositions();
+    public void accept(GameAreaChunksReadyEvent event) {
+        this.gamePlacement.flatten();
+        this.gamePlacement.applyPositions();
     }
 }
