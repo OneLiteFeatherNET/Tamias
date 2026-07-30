@@ -10,6 +10,7 @@ import net.minestom.server.utils.Direction;
 import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.tamias.common.map.layer.SpawnLayer;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -36,7 +37,7 @@ public final class SpawnArea implements Area {
     /**
      * Creates a new object reference from {@link SpawnArea} class with the given values.
      *
-     * @param spawnLayer   the spawn layer which is used to calculate the spawn positions
+     * @param spawnLayer   the spawn layer that is used to calculate the spawn positions
      * @param maxPositions the maximum number of possible positions
      */
     public SpawnArea(SpawnLayer spawnLayer, int maxPositions) {
@@ -50,14 +51,25 @@ public final class SpawnArea implements Area {
     }
 
     /**
-     * Teleports a given amount of players to the positions.
-     * If the player amount is higher than the maximum of position it will throw a {@link IllegalArgumentException}.
+     * Teleports a given number of players to the positions.
+     * If the player amount is higher than the maximum of position, it will throw a {@link IllegalArgumentException}.
+     *
+     * @param instance       the instance where the players should be teleported
+     * @param players        the players to teleport
+     */
+    public void teleport(Instance instance, List<Player> players, BooleanSupplier switchInstance) {
+        this.teleport(instance, players, switchInstance, null);
+    }
+
+    /**
+     * Teleports a given number of players to the positions.
+     * If the player amount is higher than the maximum of position, it will throw a {@link IllegalArgumentException}.
      *
      * @param instance       the instance where the players should be teleported
      * @param players        the players to teleport
      * @param switchInstance if the player should be switched to the instance
      */
-    public void teleport(Instance instance, List<Player> players, BooleanSupplier switchInstance, Consumer<Player> callback) {
+    public void teleport(Instance instance, List<Player> players, BooleanSupplier switchInstance, @Nullable Consumer<Player> callback) {
         Check.argCondition(players.size() > this.positions.length, "The amount of online players is higher then the maximum position count");
         if (!ChunkUtils.isLoaded(instance.getChunkAt(this.spawnLayer.pos()))) {
             instance.loadChunk(this.spawnLayer.pos()).join();
@@ -73,7 +85,9 @@ public final class SpawnArea implements Area {
                 return;
             }
             player.teleport(position);
-            callback.accept(player);
+            if (callback != null) {
+                callback.accept(player);
+            }
         }
     }
 
