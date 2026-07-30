@@ -6,9 +6,7 @@ import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.theevilreaper.tamias.common.area.GameArea;
-import net.theevilreaper.tamias.common.area.PlayingArea;
 import net.theevilreaper.tamias.common.area.placement.AreaPlacement;
-import net.theevilreaper.tamias.common.area.placement.CircleAreaPlacement;
 import net.theevilreaper.tamias.common.ground.GroundData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,17 +23,13 @@ public final class GamePlacement implements Placement {
     private static final Logger LOGGER = LoggerFactory.getLogger(GamePlacement.class);
 
     private final AreaPlacement placement;
-    private final PlayingArea area;
+    private final GameArea area;
     private final Instance instance;
 
-    public GamePlacement(Instance instance, PlayingArea area) {
+    public GamePlacement(Instance instance, GameArea area, AreaPlacement groundPlacement) {
         this.instance = instance;
         this.area = area;
-        this.placement = new CircleAreaPlacement(
-                this.instance,
-                this.area.getPositions().stream().map(it -> (Vec) it).toList(),
-                new ArrayList<>(this.area.getSpecialPositions())
-        );
+        this.placement = groundPlacement;
     }
 
     @Override
@@ -69,11 +63,11 @@ public final class GamePlacement implements Placement {
                 continue;
             }
 
-            if (instance.getBlock(pos.add(0, 1,0)) != Block.AIR) {
+            if (instance.getBlock(pos.add(0, 1, 0)) != Block.AIR) {
                 positions.add(((Vec) pos));
             }
         }
-        ((GameArea) this.area).flattenPositions(positions);
+        this.area.flattenPositions(positions);
         LOGGER.info("Flatten area by {} positions", positions.size());
     }
 
@@ -103,26 +97,23 @@ public final class GamePlacement implements Placement {
 
     /**
      * Preloads chunks in the specified area to improve performance.
-     *
+     * The returned future completes once every chunk in the area's bounding box has loaded;
+     * it does not block the calling thread.
      */
-    public void preloadChunks() {
+    public CompletableFuture<Void> preloadChunks() {
         var start = area.getGameAreaData().lowerCorner();
         var end = area.getGameAreaData().upperCorner();
 
-        // Simplify coordinate handling
         int startBlockX = Math.min(start.blockX(), end.blockX());
         int endBlockX = Math.max(start.blockX(), end.blockX());
         int startBlockZ = Math.min(start.blockZ(), end.blockZ());
         int endBlockZ = Math.max(start.blockZ(), end.blockZ());
 
-
-        // Calculate chunk coordinates
         int startChunkX = startBlockX >> 4;
         int endChunkX = endBlockX >> 4;
         int startChunkZ = startBlockZ >> 4;
         int endChunkZ = endBlockZ >> 4;
 
-        // Create a list of chunk positions to load
         List<CompletableFuture<Chunk>> futures = new ArrayList<>();
         for (int chunkX = startChunkX; chunkX <= endChunkX; chunkX++) {
             for (int chunkZ = startChunkZ; chunkZ <= endChunkZ; chunkZ++) {
@@ -130,8 +121,7 @@ public final class GamePlacement implements Placement {
             }
         }
 
-        // Wait for all chunks to load
-        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
     }
 
     public boolean isRunning() {
