@@ -2,7 +2,6 @@ package net.theevilreaper.tamias.game.listener.round;
 
 import net.theevilreaper.tamias.game.round.event.RoundEndEvent;
 import net.theevilreaper.xerus.api.team.Team;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -17,12 +16,12 @@ public final class RoundEndListener implements Consumer<RoundEndEvent> {
      *
      * @param teamClear a supplier that provides the list of teams to clear
      */
-    public RoundEndListener(@NotNull Supplier<List<Team>> teamClear) {
+    public RoundEndListener(Supplier<List<Team>> teamClear) {
         this.teamClear = teamClear;
     }
 
     @Override
-    public void accept(@NotNull RoundEndEvent event) {
+    public void accept(RoundEndEvent event) {
         List<Team> teams = teamClear.get();
 
         for (Team team : teams) {
