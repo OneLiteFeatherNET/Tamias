@@ -10,11 +10,11 @@ public final class Helper {
         return pitch >= -50 && pitch <= 50;
     }
 
-    public static <T extends Point>  Comparator<T> getComparator() {
-        return Comparator.comparing(pos -> {
+    public static <T extends Point> Comparator<T> getComparator() {
+        return Comparator.comparingDouble(pos -> {
             var x = pos.x();
             var z = pos.z();
-            return Math.sqrt(x * x + z * z);
+            return x * x + z * z;
         });
     }
 
