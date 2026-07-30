@@ -35,6 +35,14 @@ import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.theevilreaper.tamias.common.ListenerHandling;
 import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.common.config.GameConfigReader;
+import net.theevilreaper.tamias.common.event.AreaSpawnTriggerEvent;
+import net.theevilreaper.tamias.common.event.GameAreaChunksReadyEvent;
+import net.theevilreaper.tamias.common.event.SpawnCleanupEvent;
+import net.theevilreaper.tamias.common.event.GameCleanupEvent;
+import net.theevilreaper.tamias.common.ground.GroundData;
+import net.theevilreaper.tamias.common.ground.GroundDataRegistry;
+import net.theevilreaper.tamias.common.map.event.MapPrepareEvent;
+import net.theevilreaper.tamias.game.round.event.RoundPrepareEvent;
 import net.theevilreaper.tamias.game.attribute.AttributeHelper;
 import net.theevilreaper.tamias.game.commands.StartCommand;
 import net.theevilreaper.tamias.game.commands.TestCommand;
@@ -45,6 +53,11 @@ import net.theevilreaper.tamias.game.listener.PlayerChatListener;
 import net.theevilreaper.tamias.game.listener.PlayerJoinListener;
 import net.theevilreaper.tamias.game.listener.PlayerQuitListener;
 import net.theevilreaper.tamias.game.listener.PlayerSpawnListener;
+import net.theevilreaper.tamias.game.listener.area.AreaSpawnListener;
+import net.theevilreaper.tamias.game.listener.area.GameAreaPrepareListener;
+import net.theevilreaper.tamias.game.listener.area.SpawnCleanupListener;
+import net.theevilreaper.tamias.game.listener.area.GameCleanupListener;
+import net.theevilreaper.tamias.game.listener.area.MapPrepareListener;
 import net.theevilreaper.tamias.game.listener.game.BomberExplodeListener;
 import net.theevilreaper.tamias.game.listener.game.BomberReviveListener;
 import net.theevilreaper.tamias.game.listener.game.PlayerInteractItemListener;
@@ -52,6 +65,7 @@ import net.theevilreaper.tamias.game.listener.game.ProjectileBlockListener;
 import net.theevilreaper.tamias.game.listener.game.ProjectileEntityListener;
 import net.theevilreaper.tamias.game.listener.game.RoleToBomberChangeListener;
 import net.theevilreaper.tamias.game.listener.round.RoundEndListener;
+import net.theevilreaper.tamias.game.listener.round.RoundPrepareListener;
 import net.theevilreaper.tamias.game.listener.round.RoundStartListener;
 import net.theevilreaper.tamias.game.listener.team.TeamActionListener;
 import net.theevilreaper.tamias.game.map.GameMapProvider;
@@ -98,7 +112,7 @@ public class Tamias implements ListenerHandling {
         this.gameConfig = new GameConfigReader(path.resolve("config")).getConfig();
         this.phaseSeries = new LinearPhaseSeries<>("game");
         this.teamService = TeamService.of();
-        this.mapProvider = new GameMapProvider(path);
+        this.mapProvider = new GameMapProvider(path, gameConfig.maxPlayers());
         TeamHelper.loadTeams(this.gameConfig.teamSize(), this.teamService);
         this.staminaService = new StaminaService();
         this.scoreboard = new LobbyScoreboard(GameMessages.getTitleTime(this.gameConfig.lobbyTime()));
@@ -128,6 +142,18 @@ public class Tamias implements ListenerHandling {
         closeMapProvider(this.mapProvider);
     }
 
+    /**
+     * Resets the online players' exp bar/level back to their default state.
+     * Called once ground building finishes; {@link net.theevilreaper.tamias.common.area.placement.AreaBasePlacement}
+     * uses the exp bar as a build-progress indicator while placement is running.
+     */
+    private void resetPlayerBuildProgress() {
+        for (Player player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+            player.setLevel(0);
+            player.setExp(0f);
+        }
+    }
+
     private void createPhaseStructure() {
         GameMapProvider gameMapProvider = (GameMapProvider) this.mapProvider;
 
@@ -135,11 +161,11 @@ public class Tamias implements ListenerHandling {
 
         CyclicPhaseSeries<Phase> gameSeries = new CyclicPhaseSeries<>("game");
         this.roundProvider = new RoundProvider(gameSeries);
-        gameSeries.add(new GroundBuildPhase(
-                () -> {
-                    return null;
-                }
-        ));
+        gameSeries.add(new GroundBuildPhase(() -> {
+            GroundData randomData = GroundDataRegistry.instance().getRandomData();
+            gameMapProvider.getGamePlacement().triggerPlacement(randomData);
+            return this::resetPlayerBuildProgress;
+        }));
 
         gameSeries.add(new PrePlayingPhase(this.teamService));
 
@@ -206,6 +232,14 @@ public class Tamias implements ListenerHandling {
         node.addListener(ProjectileCollideWithEntityEvent.class, new ProjectileEntityListener(teamUpdater, this.staminaService::getStaminaBar));
         node.addListener(PlayerChatEvent.class, new PlayerChatListener());
         node.addListener(MultiPlayerTeamEvent.class, new TeamActionListener());
+
+        GameMapProvider gameMapProvider = (GameMapProvider) this.mapProvider;
+        node.addListener(MapPrepareEvent.class, new MapPrepareListener(gameMapProvider.getGamePlacement()));
+        node.addListener(AreaSpawnTriggerEvent.class, new AreaSpawnListener(gameMapProvider.getSpawnPlacement()));
+        node.addListener(GameAreaChunksReadyEvent.class, new GameAreaPrepareListener(gameMapProvider.getGamePlacement()));
+        node.addListener(SpawnCleanupEvent.class, new SpawnCleanupListener(gameMapProvider.getSpawnPlacement()));
+        node.addListener(GameCleanupEvent.class, new GameCleanupListener(gameMapProvider.getGamePlacement()));
+        node.addListener(RoundPrepareEvent.class, new RoundPrepareListener(gameMapProvider.getSpawnArea(), gameMapProvider.getActiveInstance().get()));
 
         // Listener for rounds
         node.addListener(RoundStartEvent.class, new RoundStartListener(this.scoreboard, this.roundProvider));
