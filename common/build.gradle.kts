@@ -10,7 +10,6 @@ dependencies {
     implementation(libs.xerus)
     implementation(libs.slf4j.api)
 
-    testImplementation(platform(libs.game.bom))
     testImplementation(libs.minestom)
     testImplementation(libs.cyano)
     testImplementation(libs.aves)

@@ -14,7 +14,6 @@ dependencies {
     compileOnly(libs.aves)
     compileOnly(libs.xerus)
 
-    testImplementation(platform(libs.game.bom))
     testImplementation(libs.minestom)
     testImplementation(libs.cyano)
     testImplementation(libs.aves)
