@@ -9,5 +9,5 @@ import net.minestom.server.event.Event;
  * @since 0.1.0
  * @author theEvilReaper
  */
-public class MapPrepareEvent implements Event {
+public record MapPrepareEvent() implements Event {
 }

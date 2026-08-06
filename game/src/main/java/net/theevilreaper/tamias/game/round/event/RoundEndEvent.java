@@ -10,5 +10,5 @@ import net.minestom.server.event.Event;
  * @version 1.0.0
  * @since 0.1.0
  */
-public class RoundEndEvent implements Event {
+public record RoundEndEvent() implements Event {
 }

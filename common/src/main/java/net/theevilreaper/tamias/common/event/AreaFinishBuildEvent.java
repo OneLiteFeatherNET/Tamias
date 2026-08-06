@@ -12,4 +12,4 @@ import org.jetbrains.annotations.ApiStatus;
  * @since 1.0.0
  */
 @ApiStatus.NonExtendable
-public class AreaFinishBuildEvent implements Event { }
+public record AreaFinishBuildEvent() implements Event { }

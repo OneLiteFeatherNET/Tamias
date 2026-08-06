@@ -9,5 +9,5 @@ import net.minestom.server.event.Event;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class StaminaCreateEvent implements Event {
+public record StaminaCreateEvent() implements Event {
 }
