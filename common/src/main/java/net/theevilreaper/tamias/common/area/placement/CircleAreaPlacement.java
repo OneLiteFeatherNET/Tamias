@@ -28,6 +28,9 @@ public final class CircleAreaPlacement extends AreaBasePlacement<Vec> {
         this.specialPositions = specialPositions;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void place(GroundData groundData) {
         if (this.buildTask != null) return;
@@ -41,6 +44,7 @@ public final class CircleAreaPlacement extends AreaBasePlacement<Vec> {
                 positions.add(queue.poll());
             }
             if (positions.isEmpty()) {
+                stop();
                 EventDispatcher.call(new AreaFinishBuildEvent());
                 return;
             }
@@ -51,6 +55,9 @@ public final class CircleAreaPlacement extends AreaBasePlacement<Vec> {
         }).repeat(TaskSchedule.tick(1)).schedule();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void placeBlock(Vec position, GroundData groundData) {
         Block groundBlock;

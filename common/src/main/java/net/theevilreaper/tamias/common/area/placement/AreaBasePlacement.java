@@ -37,11 +37,28 @@ public abstract non-sealed class AreaBasePlacement<T extends Point> implements A
      */
     protected abstract void placeBlock(T position, GroundData groundData);
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isRunning() {
         return buildTask != null && buildTask.isAlive();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void stop() {
+        if (this.buildTask != null) {
+            this.buildTask.cancel();
+            this.buildTask = null;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public @Nullable Task getTask() {
         return this.buildTask;

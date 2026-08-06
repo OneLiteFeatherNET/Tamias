@@ -11,6 +11,8 @@ import net.minestom.server.instance.block.Block;
 import net.theevilreaper.tamias.common.ground.GroundData;
 import net.theevilreaper.tamias.common.ground.GroundDataRegistry;
 
+import net.minestom.server.timer.TaskSchedule;
+
 import java.time.Duration;
 import java.util.Iterator;
 import java.util.List;
@@ -34,24 +36,32 @@ public class TNTPlacement extends AreaBasePlacement<Vec> {
         super(instance, blockPositions);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void place(GroundData groundData) {
         if (this.buildTask != null) return;
         Iterator<Vec> iterator = blockPositions.iterator();
         this.buildTask = MinecraftServer.getSchedulerManager().buildTask(() -> {
-            for (int i = 0; i < 10 && iterator.hasNext(); i++) {
-                spawnTnt(iterator.next());
+            if (!iterator.hasNext()) {
+                stop();
+                return;
             }
-        }).delay(Duration.ofMillis(100)).schedule();
+            for (int i = 0; i < 10 && iterator.hasNext(); i++) {
+                spawnTnt(iterator.next(), groundData);
+            }
+        }).repeat(TaskSchedule.tick(1)).schedule();
     }
 
     /**
      * Spawns a TNT entity at the specified position.
      * The TNT will fall and explode when it reaches the ground.
      *
-     * @param pos the position to spawn the TNT
+     * @param pos        the position to spawn the TNT
+     * @param groundData the ground data to use when placing the block
      */
-    private void spawnTnt(Vec pos) {
+    private void spawnTnt(Vec pos, GroundData groundData) {
         Entity tntEntity = new Entity(EntityType.FALLING_BLOCK);
         FallingBlockMeta fallingBlockMeta = (FallingBlockMeta) tntEntity.getEntityMeta();
         fallingBlockMeta.setBlock(Block.TNT);
@@ -59,37 +69,16 @@ public class TNTPlacement extends AreaBasePlacement<Vec> {
         Point entityPos = pos.add(0, 5, 0);
         tntEntity.setInstance(instance, entityPos);
 
-        // Schedule a check to see if the entity is still falling
-        tntEntity.scheduler().buildTask(() -> checkIfStillFalling(tntEntity, pos))
-                .delay(Duration.ofMillis(500))
-                .schedule();
+        MinecraftServer.getSchedulerManager().buildTask(() -> {
+            placeBlock(pos, groundData);
+            tntEntity.remove();
+        }).delay(TaskSchedule.tick(5)).schedule();
     }
 
     /**
-     * Checks if the entity is still falling.
-     *
-     * @param entity      the TNT entity to check
-     * @param originalPos the original position where the TNT was spawned
+     * {@inheritDoc}
      */
-    private void checkIfStillFalling(Entity entity, Vec originalPos) {
-        if (!entity.isOnGround()) {
-            // Schedule with a longer delay to reduce resource usage
-            entity.scheduler().buildTask(() -> checkIfStillFalling(entity, originalPos))
-                    .delay(Duration.ofMillis(100))
-                    .schedule();
-        } else {
-            placeBlock(originalPos, GroundDataRegistry.DEFAULT_SPAWN_DATA);
-            entity.remove();
-        }
-    }
-
-    /**
-     * Places a block at the specified position.
-     * This method is called when the TNT entity reaches the ground.
-     *
-     * @param position   the position to place the block
-     * @param groundData the ground data to use for placing the block
-     */
+    @Override
     protected void placeBlock(Vec position, GroundData groundData) {
         this.instance.setBlock(position, groundData.groundBlock());
     }
