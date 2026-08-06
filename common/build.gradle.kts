@@ -4,10 +4,12 @@ plugins {
 
 dependencies {
     implementation(platform(libs.game.bom))
+    implementation(platform(libs.falco.bom))
     implementation(libs.adventure)
     implementation(libs.minestom)
     implementation(libs.aves)
     implementation(libs.xerus)
+    implementation(libs.falco.anvil)
     implementation(libs.slf4j.api)
 
     testImplementation(libs.minestom)

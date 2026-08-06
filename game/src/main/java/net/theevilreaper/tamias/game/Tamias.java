@@ -125,7 +125,13 @@ public class Tamias implements ListenerHandling {
     }
 
     public void terminate() {
-
+        if (this.mapProvider instanceof AutoCloseable closeable) {
+            try {
+                closeable.close();
+            } catch (Exception exception) {
+                MinecraftServer.getExceptionManager().handleException(exception);
+            }
+        }
     }
 
     private void createPhaseStructure() {

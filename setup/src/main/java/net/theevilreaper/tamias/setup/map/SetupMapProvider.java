@@ -3,10 +3,10 @@ package net.theevilreaper.tamias.setup.map;
 import net.minestom.server.MinecraftServer;
 import net.theevilreaper.aves.map.BaseMap;
 import net.theevilreaper.aves.map.MapEntry;
-import net.theevilreaper.aves.map.provider.AbstractMapProvider;
 import net.theevilreaper.tamias.common.gson.GsonUtil;
 import net.theevilreaper.tamias.common.map.GameMap;
 import net.theevilreaper.tamias.common.map.MapFilter;
+import net.theevilreaper.tamias.common.map.provider.AbstractFalcoMapProvider;
 
 import java.nio.file.Path;
 import java.util.Optional;
@@ -18,7 +18,7 @@ import java.util.Optional;
  * @version 1.0.0
  * @since 1.0.0
  */
-public final class SetupMapProvider extends AbstractMapProvider {
+public final class SetupMapProvider extends AbstractFalcoMapProvider {
 
     private static final String LOBBY_SUFFIX = "lobby"; // Constant for lobby suffix
 
@@ -51,7 +51,7 @@ public final class SetupMapProvider extends AbstractMapProvider {
 
         this.activeMap = baseMap.get();
         this.activeInstance = MinecraftServer.getInstanceManager().createInstanceContainer();
-        this.registerInstance(this.activeInstance, lobbyEntry.get());
+        this.registerFalcoInstance(this.activeInstance, givenMapEntry);
     }
 
     /**
@@ -69,3 +69,5 @@ public final class SetupMapProvider extends AbstractMapProvider {
         this.fileHandler.save(path, baseMap instanceof GameMap mapToSave ? mapToSave : baseMap);
     }
 }
+
+

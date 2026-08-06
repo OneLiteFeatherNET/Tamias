@@ -3,14 +3,13 @@ package net.theevilreaper.tamias.game.map;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.utils.validate.Check;
-import net.theevilreaper.aves.file.GsonFileHandler;
 import net.theevilreaper.aves.map.BaseMap;
 import net.theevilreaper.aves.map.MapEntry;
-import net.theevilreaper.aves.map.provider.AbstractMapProvider;
 import net.theevilreaper.tamias.common.explosion.ExplosionCreator;
 import net.theevilreaper.tamias.common.gson.GsonUtil;
 import net.theevilreaper.tamias.common.map.GameMap;
 import net.theevilreaper.tamias.common.map.MapFilter;
+import net.theevilreaper.tamias.common.map.provider.AbstractFalcoMapProvider;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
@@ -24,7 +23,7 @@ import java.util.Optional;
  * @version 1.0.0
  * @since 0.1.0
  */
-public final class GameMapProvider extends AbstractMapProvider implements MapFilter {
+public final class GameMapProvider extends AbstractFalcoMapProvider implements MapFilter {
 
     /**
      * Creates a new instance from the provider with the given parameters.
@@ -32,7 +31,7 @@ public final class GameMapProvider extends AbstractMapProvider implements MapFil
      * @param path the path to the map files
      */
     public GameMapProvider(@NotNull Path path) {
-        super(new GsonFileHandler(GsonUtil.GSON), MapFilter::filterMapsForGame);
+        super(GsonUtil.FILE_HANDLER, MapFilter::filterMapsForGame);
         this.loadMapEntries(path.resolve("maps"));
         this.activeInstance = MinecraftServer.getInstanceManager().createInstanceContainer();
 
@@ -41,11 +40,10 @@ public final class GameMapProvider extends AbstractMapProvider implements MapFil
         Check.argCondition(loadedLobbyMap.isEmpty(), "The map couldn't be loaded!");
         this.activeMap = loadedLobbyMap.get();
         this.activeInstance.setExplosionSupplier(new ExplosionCreator());
-        this.registerInstance(this.activeInstance, map);
+        this.registerFalcoInstance(this.activeInstance, map);
         if (this.activeMap.spawn() != null) {
             activeInstance.loadChunk(this.activeMap.spawn());
         }
-        MinecraftServer.getInstanceManager().registerInstance(this.activeInstance);
     }
 
     /**
