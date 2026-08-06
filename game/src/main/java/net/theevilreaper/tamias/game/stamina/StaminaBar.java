@@ -30,7 +30,7 @@ public abstract sealed class StaminaBar implements Runnable permits ShootBar, Ex
      *
      * @param player     the player who owns the bar
      * @param chronoUnit the tick interval for the bar
-     * @param period     the tick period for the par
+     * @param period     the tick period for the bar
      */
     StaminaBar(Player player, ChronoUnit chronoUnit, int period) {
         this.player = player;
