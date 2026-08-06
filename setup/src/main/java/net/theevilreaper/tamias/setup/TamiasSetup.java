@@ -56,7 +56,13 @@ public final class TamiasSetup implements ListenerHandling {
     }
 
     public void terminate() {
-        // Nothing to do here
+        if (this.mapProvider instanceof AutoCloseable closeable) {
+            try {
+                closeable.close();
+            } catch (Exception exception) {
+                MinecraftServer.getExceptionManager().handleException(exception);
+            }
+        }
     }
 
     private void registerListener() {
