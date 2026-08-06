@@ -39,6 +39,7 @@ import net.theevilreaper.tamias.game.attribute.AttributeHelper;
 import net.theevilreaper.tamias.game.commands.StartCommand;
 import net.theevilreaper.tamias.game.commands.TestCommand;
 import net.theevilreaper.tamias.game.event.BomberExplodeEvent;
+import net.theevilreaper.tamias.game.event.RoleToBomberChangeEvent;
 import net.theevilreaper.tamias.game.event.BomberRequireSpawnEvent;
 import net.theevilreaper.tamias.game.listener.PlayerChatListener;
 import net.theevilreaper.tamias.game.listener.PlayerJoinListener;
@@ -49,6 +50,7 @@ import net.theevilreaper.tamias.game.listener.game.BomberReviveListener;
 import net.theevilreaper.tamias.game.listener.game.PlayerInteractItemListener;
 import net.theevilreaper.tamias.game.listener.game.ProjectileBlockListener;
 import net.theevilreaper.tamias.game.listener.game.ProjectileEntityListener;
+import net.theevilreaper.tamias.game.listener.game.RoleToBomberChangeListener;
 import net.theevilreaper.tamias.game.listener.round.RoundEndListener;
 import net.theevilreaper.tamias.game.listener.round.RoundStartListener;
 import net.theevilreaper.tamias.game.listener.team.TeamActionListener;
@@ -177,8 +179,9 @@ public class Tamias implements ListenerHandling {
         listenerMap.put(PlayerUseItemEvent.class, new PlayerInteractItemListener(staminaService::getStaminaBar));
         listenerMap.put(BomberRequireSpawnEvent.class, new BomberReviveListener(this.staminaService::getStaminaBar, randomPos));
         listenerMap.put(BomberExplodeEvent.class, new BomberExplodeListener());
+        listenerMap.put(RoleToBomberChangeEvent.class, new RoleToBomberChangeListener(this.staminaService, randomPos));
         listenerMap.put(ProjectileCollideWithBlockEvent.class, new ProjectileBlockListener());
-        PlayerConsumer teamUpdater = player -> TeamHelper.switchToTNTTeam(this.teamService.getTeams()::get, player);
+        PlayerConsumer teamUpdater = player -> TeamHelper.switchToTNTTeam(this.teamService, player);
         listenerMap.put(ProjectileCollideWithEntityEvent.class, new ProjectileEntityListener(teamUpdater, staminaService::getStaminaBar));
         return listenerMap;
     }
@@ -190,17 +193,17 @@ public class Tamias implements ListenerHandling {
         PlayerConsumer teleportConsumer = player -> this.mapProvider.teleportToSpawn(player, false);
         node.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(this.phaseSeries::getCurrentPhase, teleportConsumer, this.scoreboard::addViewer));
         VoidConsumer checkRoundEnd = () -> RoundConditions.checkRoundEnd(this.phaseSeries, this.teamService);
+        PlayerConsumer teamUpdater = player -> TeamHelper.switchToTNTTeam(this.teamService, player);
         node.addListener(PlayerDisconnectEvent.class,
                 new PlayerQuitListener(
                         this.phaseSeries::getCurrentPhase,
-                        this.teamService.getTeams()::get,
+                        key -> this.teamService.getTeam(key).orElse(null),
                         checkRoundEnd,
                         this.scoreboard::removeViewer
                 )
         );
         node.addListener(ProjectileCollideWithBlockEvent.class, new ProjectileBlockListener());
-        node.addListener(ProjectileCollideWithEntityEvent.class, new ProjectileEntityListener(player -> {
-        }, this.staminaService::getStaminaBar));
+        node.addListener(ProjectileCollideWithEntityEvent.class, new ProjectileEntityListener(teamUpdater, this.staminaService::getStaminaBar));
         node.addListener(PlayerChatEvent.class, new PlayerChatListener());
         node.addListener(MultiPlayerTeamEvent.class, new TeamActionListener());
 
