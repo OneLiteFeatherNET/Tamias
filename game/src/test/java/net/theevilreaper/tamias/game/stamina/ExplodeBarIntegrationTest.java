@@ -98,7 +98,7 @@ class ExplodeBarIntegrationTest {
             explodeBar.consume();
             assertBomberTick(level, player);
             tickSoundTracker.assertSingle(this::assertTickSound);
-            --level;
+            level -= 1.0f;
         }
 
         // 11th tick: current reaches 0 -> explosion sound triggered!
