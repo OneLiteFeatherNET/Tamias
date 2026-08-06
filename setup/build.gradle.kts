@@ -9,10 +9,12 @@ version = "0.1.0"
 dependencies {
     implementation(project(":common"))
     implementation(platform(libs.game.bom))
+    implementation(platform(libs.falco.bom))
     implementation(libs.adventure)
     implementation(libs.guira)
     implementation(libs.slf4j.api)
     implementation(libs.pica)
+    implementation(libs.falco.anvil)
     compileOnly(libs.minestom)
     compileOnly(libs.aves)
     compileOnly(libs.xerus)

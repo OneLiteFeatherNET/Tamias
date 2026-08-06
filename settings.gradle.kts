@@ -45,6 +45,10 @@ dependencyResolutionManagement {
             library("aves", "net.theevilreaper", "aves").withoutVersion()
             library("xerus", "net.theevilreaper", "xerus").withoutVersion()
 
+            library("falco.bom", "net.onelitefeather", "falco-bom").version("2.1.0")
+            library("falco.anvil", "net.onelitefeather", "falco-anvil").withoutVersion()
+
+
             plugin("shadow", "com.gradleup.shadow").versionRef("shadow")
             plugin("cyclonedx", "org.cyclonedx.bom").versionRef("cyclonedx")
         }

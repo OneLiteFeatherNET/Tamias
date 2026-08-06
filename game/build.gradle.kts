@@ -7,9 +7,11 @@ plugins {
 dependencies {
     implementation(project(":common"))
     implementation(platform(libs.game.bom))
+    implementation(platform(libs.falco.bom))
     implementation(libs.atlas.projectiles)
     implementation(libs.adventure)
     implementation(libs.slf4j.api)
+    implementation(libs.falco.anvil)
     compileOnly(libs.minestom)
     compileOnly(libs.aves)
     compileOnly(libs.xerus)
