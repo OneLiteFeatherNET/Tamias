@@ -29,19 +29,18 @@ public final class ProjectileEntityListener implements Consumer<ProjectileCollid
         var target = event.getTarget();
 
         if (!(target instanceof Player targetPlayer)) return;
-        if (!target.hasTag(Tags.TEAM_ID)) return;
+        if (!target.hasTag(Tags.TEAM_KEY)) return;
 
-        byte teamValue = target.getTag(Tags.TEAM_ID);
+        String teamKey = target.getTag(Tags.TEAM_KEY);
         var staminaBar = staminaMapper.apply(targetPlayer.getUuid());
 
         if (staminaBar == null) return;
 
-        if (teamValue == GameConfig.TNT_ID) {
+        if (GameConfig.BOMBER_KEY.asString().equals(teamKey)) {
             staminaBar.triggerAction();
             return;
         }
-        // TODO: Fix
-       // this.teamHelper.removeSurvivor(targetPlayer);
-        //this.teamHelper.addTNT(targetPlayer);
+
+        this.teamUpdater.accept(targetPlayer);
     }
 }

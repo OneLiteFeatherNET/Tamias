@@ -3,7 +3,6 @@ package net.theevilreaper.tamias.game.util;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.common.util.Tags;
 
 /**
@@ -45,20 +44,6 @@ public final class Items {
     public static void setBombItem(Player player) {
         player.getInventory().clear();
         player.getInventory().addItemStack(BOMB_ITEM);
-    }
-
-    /**
-     * Sets the item to the player based on the team id.
-     *
-     * @param player who should get the item
-     * @param teamId the team id
-     */
-    public static void setItemToPlayer(Player player, int teamId) {
-        if (teamId == GameConfig.SURVIVOR_ID) {
-            setShootItem(player);
-        } else {
-            setBombItem(player);
-        }
     }
 
     private Items() {

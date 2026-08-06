@@ -1,6 +1,7 @@
 package net.theevilreaper.tamias.game.stamina;
 
-import net.kyori.adventure.key.Key;
+import net.theevilreaper.tamias.common.config.GameConfig;
+import net.theevilreaper.tamias.game.team.TeamHelper;
 import net.theevilreaper.xerus.api.team.Team;
 import net.theevilreaper.xerus.api.team.TeamService;
 import net.minestom.server.entity.Player;
@@ -8,9 +9,8 @@ import net.minestom.server.instance.Instance;
 import net.minestom.testing.Env;
 import net.minestom.testing.extension.MicrotusExtension;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -19,17 +19,14 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(MicrotusExtension.class)
 class StaminaServiceIntegrationTest {
 
-    private static StaminaService staminaService;
-    private static TeamService teamService;
+    private StaminaService staminaService;
+    private TeamService teamService;
 
-    @BeforeAll
-    static void setUp() {
+    @BeforeEach
+    void setUp() {
         staminaService = new StaminaService();
         teamService = TeamService.of();
-        Team testTeam = Team.of(Key.key("tamias", "shoot_team"), 1);
-        Team testTeam2 = Team.of(Key.key("tamias", "explode_team"), 1);
-        teamService.add(testTeam);
-        teamService.add(testTeam2);
+        TeamHelper.loadTeams(1, teamService);
     }
 
     @AfterEach
@@ -41,11 +38,7 @@ class StaminaServiceIntegrationTest {
         }
     }
 
-    @AfterAll
-    static void afterAll() {
-        staminaService.cleanUp();
-        staminaService = null;
-    }
+
 
     @Test
     void testStaminaAdd(@NotNull Env env) {
@@ -53,8 +46,8 @@ class StaminaServiceIntegrationTest {
         Player player = env.createPlayer(instance);
         Player secondPlayer = env.createPlayer(instance);
 
-        teamService.getTeams().getFirst().addPlayer(player);
-        teamService.getTeams().getLast().addPlayer(secondPlayer);
+        teamService.getTeam(GameConfig.SURVIVOR_KEY).ifPresent(t -> TeamHelper.addPlayerToTeam(t, player));
+        teamService.getTeam(GameConfig.BOMBER_KEY).ifPresent(t -> TeamHelper.addPlayerToTeam(t, secondPlayer));
 
         staminaService.createStaminaObjects(teamService);
 
@@ -77,7 +70,7 @@ class StaminaServiceIntegrationTest {
         Player player = env.createPlayer(instance);
         Player secondPlayer = env.createPlayer(instance);
 
-        teamService.getTeams().getFirst().addPlayer(player);
+        teamService.getTeam(GameConfig.SURVIVOR_KEY).ifPresent(t -> TeamHelper.addPlayerToTeam(t, player));
 
         staminaService.createStaminaObjects(teamService);
 
@@ -92,7 +85,7 @@ class StaminaServiceIntegrationTest {
         Instance instance = env.createFlatInstance();
         Player firstPlayer = env.createPlayer(instance);
 
-        teamService.getTeams().getFirst().addPlayer(firstPlayer);
+        teamService.getTeam(GameConfig.SURVIVOR_KEY).ifPresent(t -> TeamHelper.addPlayerToTeam(t, firstPlayer));
 
         staminaService.createStaminaObjects(teamService);
 
