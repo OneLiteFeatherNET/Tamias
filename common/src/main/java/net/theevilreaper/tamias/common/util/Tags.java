@@ -13,7 +13,7 @@ import java.util.UUID;
  **/
 public final class Tags {
 
-    public static final Tag<Byte> TEAM_ID = Tag.Transient("teamId");
+    public static final Tag<String> TEAM_KEY = Tag.String("team_key");
     public static final Tag<Byte> ITEM_TAG = Tag.Byte("itemTag");
     public static final Tag<UUID> SHOOTER_ID = Tag.UUID("shooter");
 
