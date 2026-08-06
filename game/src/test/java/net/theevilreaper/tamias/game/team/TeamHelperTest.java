@@ -28,10 +28,11 @@ class TeamHelperTest {
     }
 
     @Test
-    void testTamiasTeamAssert() {
-        for (int i = 0; i < teamService.getTeams().size(); i++) {
-            Team team = teamService.getTeams().get(i);
-            assertInstanceOf(TamiasTeam.class, team);
+    void testTeamAssert() {
+        TeamHelper.loadTeams(1, teamService);
+        assertEquals(2, teamService.getTeams().size());
+        for (Team team : teamService.getTeams()) {
+            assertNotNull(team.key());
         }
     }
 
