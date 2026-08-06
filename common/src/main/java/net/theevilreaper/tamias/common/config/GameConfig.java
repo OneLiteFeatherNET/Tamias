@@ -32,9 +32,6 @@ public sealed interface GameConfig permits GameConfigImpl, InternalGameConfig {
 
     int FORCE_START_TIME = 11;
 
-    byte SURVIVOR_ID = 0x00;
-    byte TNT_ID = 0x01;
-
     /**
      * Creates a new {@link Builder} which can be used to create a new game configuration.
      *
