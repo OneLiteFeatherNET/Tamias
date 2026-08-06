@@ -107,6 +107,28 @@ class ShootBarIntegrationTest {
         assertEquals(Status.READY, shootBar.status);
     }
 
+    @Test
+    void testEqualsAndHashCode(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player player = env.createPlayer(instance);
+        Player secondPlayer = env.createPlayer(instance);
+
+        StaminaBar shootBar1 = StaminaFactory.createShootBar(player);
+        StaminaBar shootBar2 = StaminaFactory.createShootBar(player);
+        StaminaBar otherPlayerBar = StaminaFactory.createShootBar(secondPlayer);
+
+        assertEquals(shootBar1, shootBar1);
+        assertNotEquals(null, shootBar1);
+        assertEquals(shootBar1, shootBar2);
+        assertEquals(shootBar1.hashCode(), shootBar2.hashCode());
+        assertNotEquals(shootBar1, otherPlayerBar);
+
+        shootBar2.triggerAction();
+        assertNotEquals(shootBar1, shootBar2);
+
+        env.destroyInstance(instance, true);
+    }
+
     /**
      * Asserts the sound packet for the level up sound.
      *

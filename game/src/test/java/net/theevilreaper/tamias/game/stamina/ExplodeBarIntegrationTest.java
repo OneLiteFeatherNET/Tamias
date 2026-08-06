@@ -92,33 +92,29 @@ class ExplodeBarIntegrationTest {
         assertNotEquals(Status.REGENERATING, explodeBar.status);
 
         float level = player.getLevel() - 1;
-
-        Collector<SoundEffectPacket> soundTracker = connection.trackIncoming(SoundEffectPacket.class);
-
-        for (int i = 0; i <= 10; i++) {
+        // 10 draining ticks where TICK_SOUND is played (current goes from 11 down to 1)
+        for (int i = 0; i < 10; i++) {
+            Collector<SoundEffectPacket> tickSoundTracker = connection.trackIncoming(SoundEffectPacket.class);
             explodeBar.consume();
             assertBomberTick(level, player);
-            soundTracker.assertSingle();
-            soundTracker.assertSingle(this::assertTickSound);
+            tickSoundTracker.assertSingle(this::assertTickSound);
             --level;
         }
 
-        // Do last tick
+        // 11th tick: current reaches 0 -> explosion sound triggered!
+        Collector<SoundEffectPacket> explosionSoundTracker = connection.trackIncoming(SoundEffectPacket.class);
         explodeBar.consume();
-
-        // TODO: Check why the sound is wrong here
-        // soundTracker.assertSingle();
-        // soundTracker.assertSingle(this::assertExplodeSound);
+        explosionSoundTracker.assertSingle(this::assertExplodeSound);
         assertEquals(Status.REGENERATING, explodeBar.status);
 
         FlexibleListener<BomberRequireSpawnEvent> eventListener = env.listen(BomberRequireSpawnEvent.class);
         eventListener.followup(event -> {
             assertEquals(player, event.getPlayer());
             assertEquals(explodeBar, event.getExplodeBar());
-            // TODO: Fix me later
-            //assertTrue(player.hasEffect(PotionEffect.BLINDNESS));
             assertEquals(0, player.getAttribute(Attribute.MOVEMENT_SPEED).getBaseValue());
         });
+
+        // Regeneration ticks 1..5 (current goes from 0 to 5)
         for (int i = 0; i < 5; i++) {
             explodeBar.consume();
             assertEquals(Status.REGENERATING, explodeBar.status);
@@ -154,10 +150,9 @@ class ExplodeBarIntegrationTest {
      * @param packet the packet to check
      */
     private void assertExplodeSound(@NotNull SoundEffectPacket packet) {
-        System.out.println("Sound: " + packet.soundEvent());
         assertEquals(SoundEvent.ENTITY_GENERIC_EXPLODE, packet.soundEvent());
         assertEquals(1.0f, packet.volume());
-        assertEquals(0f, packet.pitch());
+        assertEquals(1.0f, packet.pitch());
         assertEquals(Sound.Source.MASTER, packet.source());
     }
 
@@ -171,5 +166,27 @@ class ExplodeBarIntegrationTest {
         assertEquals(1.0f, packet.volume());
         assertEquals(10f, packet.pitch());
         assertEquals(Sound.Source.MASTER, packet.source());
+    }
+
+    @Test
+    void testEqualsAndHashCode(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player player = env.createPlayer(instance);
+        Player secondPlayer = env.createPlayer(instance);
+
+        StaminaBar explodeBar1 = StaminaFactory.createExplodeBar(player);
+        StaminaBar explodeBar2 = StaminaFactory.createExplodeBar(player);
+        StaminaBar otherPlayerBar = StaminaFactory.createExplodeBar(secondPlayer);
+
+        assertEquals(explodeBar1, explodeBar1);
+        assertNotEquals(null, explodeBar1);
+        assertEquals(explodeBar1, explodeBar2);
+        assertEquals(explodeBar1.hashCode(), explodeBar2.hashCode());
+        assertNotEquals(explodeBar1, otherPlayerBar);
+
+        explodeBar2.onStart();
+        assertNotEquals(explodeBar1, explodeBar2);
+
+        env.destroyInstance(instance, true);
     }
 }
