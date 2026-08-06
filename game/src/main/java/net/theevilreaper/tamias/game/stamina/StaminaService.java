@@ -1,112 +1,98 @@
 package net.theevilreaper.tamias.game.stamina;
 
+import net.minestom.server.entity.Player;
 import net.theevilreaper.tamias.game.team.component.StaminaComponent;
 import net.theevilreaper.xerus.api.team.Team;
 import net.theevilreaper.xerus.api.team.TeamService;
-import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * The class has some abilities to manage all {@link StaminaBar} references which are required in the game.
+ * Manages all {@link StaminaBar} references required during game execution in a thread-safe manner.
  *
  * @author theEvilReaper
- * @version 1.0.0
+ * @version 1.1.0
  * @since 1.0.0
  */
 public final class StaminaService {
 
-    private final Lock lock;
     private final Map<UUID, StaminaBar> staminaBars;
 
     /**
-     * Creates a new instance from this class.
+     * Creates a new instance of {@link StaminaService}.
      */
     public StaminaService() {
-        this.lock = new ReentrantLock();
-        this.staminaBars = new HashMap<>();
+        this.staminaBars = new ConcurrentHashMap<>();
     }
 
     /**
-     * Creates all {@link StaminaBar} instances for the given {@link TeamService}.
+     * Creates all {@link StaminaBar} instances for players registered in the given {@link TeamService}.
      *
-     * @param teamService the service to get the teams
+     * @param teamService the team service providing teams and players
      */
     public void createStaminaObjects(TeamService teamService) {
         for (Team team : teamService.getTeams()) {
             StaminaComponent staminaComp = team.get(StaminaComponent.class);
             if (staminaComp == null) continue;
             for (Player player : team.getPlayers()) {
-                staminaBars.put(player.getUuid(), staminaComp.staminaFactory().apply(player));
+                this.staminaBars.put(player.getUuid(), staminaComp.staminaFactory().apply(player));
             }
         }
     }
 
     /**
-     * Starts all {@link net.minestom.server.timer.Task} reference from each {@link StaminaBar}.
+     * Starts all registered {@link StaminaBar} instances.
      */
     public void start() {
-        for (StaminaBar value : this.staminaBars.values()) {
-            value.start();
+        for (StaminaBar staminaBar : this.staminaBars.values()) {
+            staminaBar.start();
         }
     }
 
     /**
-     * Stops all running {@link StaminaBar} instances.
+     * Stops and clears all running {@link StaminaBar} instances.
      */
     public void cleanUp() {
-        if (staminaBars.isEmpty()) return;
-        for (StaminaBar value : staminaBars.values()) {
-            value.stop();
+        if (this.staminaBars.isEmpty()) return;
+        for (StaminaBar staminaBar : this.staminaBars.values()) {
+            staminaBar.stop();
         }
-        staminaBars.clear();
+        this.staminaBars.clear();
     }
 
     /**
-     * Adds a new {@link StaminaBar} for the given {@link UUID}.
+     * Adds a new {@link StaminaBar} for the given player {@link UUID}.
      *
-     * @param uuid       the unique identifier for the player
-     * @param staminaBar the stamina bar to add
+     * @param uuid       the unique identifier of the player
+     * @param staminaBar the stamina bar instance
      */
     public void add(UUID uuid, StaminaBar staminaBar) {
-        lock.lock();
-        try {
-            staminaBars.put(uuid, staminaBar);
-        } finally {
-            lock.unlock();
-        }
+        this.staminaBars.put(uuid, staminaBar);
     }
 
     /**
-     * Removes the {@link StaminaBar} for the given {@link UUID}.
+     * Removes and stops the {@link StaminaBar} associated with the given {@link UUID}.
      *
-     * @param uuid the unique identifier for the player
-     * @return true if the {@link StaminaBar} was removed successfully
+     * @param uuid the unique identifier of the player
+     * @return true if a stamina bar was removed and stopped, false otherwise
      */
     public boolean removeStaminaBar(UUID uuid) {
-        try {
-            lock.lock();
-            StaminaBar staminaBar = staminaBars.get(uuid);
-            if (staminaBar != null) {
-                staminaBar.stop();
-                return true;
-            }
-            return false;
-        } finally {
-            lock.unlock();
+        StaminaBar staminaBar = this.staminaBars.remove(uuid);
+        if (staminaBar != null) {
+            staminaBar.stop();
+            return true;
         }
+        return false;
     }
 
     /**
      * Returns the {@link StaminaBar} for the given {@link Player}.
      *
-     * @param player the player to get the stamina bar
-     * @return the {@link StaminaBar} or null if the player has no stamina bar
+     * @param player the player
+     * @return the {@link StaminaBar} or null if no stamina bar exists for the player
      */
     public @Nullable StaminaBar getStaminaBar(Player player) {
         return this.getStaminaBar(player.getUuid());
@@ -115,15 +101,10 @@ public final class StaminaService {
     /**
      * Returns the {@link StaminaBar} for the given {@link UUID}.
      *
-     * @param uuid the unique identifier for the player
-     * @return the {@link StaminaBar} or null if the player has no stamina bar
+     * @param uuid the unique identifier of the player
+     * @return the {@link StaminaBar} or null if no stamina bar exists for the UUID
      */
     public @Nullable StaminaBar getStaminaBar(UUID uuid) {
-        try {
-            lock.lock();
-            return staminaBars.get(uuid);
-        } finally {
-            lock.unlock();
-        }
+        return this.staminaBars.get(uuid);
     }
 }

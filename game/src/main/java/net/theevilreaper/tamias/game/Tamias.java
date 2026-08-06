@@ -179,7 +179,7 @@ public class Tamias implements ListenerHandling {
         listenerMap.put(PlayerUseItemEvent.class, new PlayerInteractItemListener(staminaService::getStaminaBar));
         listenerMap.put(BomberRequireSpawnEvent.class, new BomberReviveListener(this.staminaService::getStaminaBar, randomPos));
         listenerMap.put(BomberExplodeEvent.class, new BomberExplodeListener());
-        listenerMap.put(RoleToBomberChangeEvent.class, new RoleToBomberChangeListener(this.staminaService, randomPos));
+        listenerMap.put(RoleToBomberChangeEvent.class, new RoleToBomberChangeListener(this.teamService, this.staminaService, randomPos));
         listenerMap.put(ProjectileCollideWithBlockEvent.class, new ProjectileBlockListener());
         PlayerConsumer teamUpdater = player -> TeamHelper.switchToTNTTeam(this.teamService, player);
         listenerMap.put(ProjectileCollideWithEntityEvent.class, new ProjectileEntityListener(teamUpdater, staminaService::getStaminaBar));
