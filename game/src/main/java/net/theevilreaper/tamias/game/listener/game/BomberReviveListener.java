@@ -42,11 +42,11 @@ public final class BomberReviveListener implements Consumer<BomberRequireSpawnEv
     public void accept(@NotNull BomberRequireSpawnEvent event) {
         Player player = event.getPlayer();
 
-        if (!player.hasTag(Tags.TEAM_ID)) return;
+        if (!player.hasTag(Tags.TEAM_KEY)) return;
 
-        byte teamId = player.getTag(Tags.TEAM_ID);
+        String teamKey = player.getTag(Tags.TEAM_KEY);
 
-        if (teamId != GameConfig.TNT_ID) return;
+        if (!GameConfig.BOMBER_KEY.asString().equals(teamKey)) return;
 
         if (this.spawnPos.get() == null) {
             event.setCancelled(true);

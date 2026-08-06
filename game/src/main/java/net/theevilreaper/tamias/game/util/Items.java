@@ -48,13 +48,13 @@ public final class Items {
     }
 
     /**
-     * Sets the item to the player based on the team id.
+     * Sets the item to the player based on the team key.
      *
-     * @param player who should get the item
-     * @param teamId the team id
+     * @param player  who should get the item
+     * @param teamKey the team key
      */
-    public static void setItemToPlayer(Player player, int teamId) {
-        if (teamId == GameConfig.SURVIVOR_ID) {
+    public static void setItemToPlayer(Player player, String teamKey) {
+        if (GameConfig.SURVIVOR_KEY.asString().equals(teamKey)) {
             setShootItem(player);
         } else {
             setBombItem(player);

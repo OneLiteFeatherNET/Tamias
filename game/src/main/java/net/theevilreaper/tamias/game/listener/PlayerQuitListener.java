@@ -1,5 +1,6 @@
 package net.theevilreaper.tamias.game.listener;
 
+import net.kyori.adventure.key.Key;
 import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.theevilreaper.aves.util.functional.VoidConsumer;
 import net.theevilreaper.xerus.api.phase.Phase;
@@ -14,7 +15,7 @@ import net.theevilreaper.tamias.game.util.GameMessages;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
-import java.util.function.IntFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static net.minestom.server.MinecraftServer.getConnectionManager;
@@ -31,13 +32,13 @@ import static net.minestom.server.MinecraftServer.getConnectionManager;
 public final class PlayerQuitListener implements Consumer<PlayerDisconnectEvent> {
 
     private final Supplier<Phase> phaseSupplier;
-    private final IntFunction<Team> teamFunction;
+    private final Function<Key, Team> teamFunction;
     private final VoidConsumer roundEndCheck;
     private final PlayerConsumer scoreboardConsumer;
 
     public PlayerQuitListener(
             @NotNull Supplier<Phase> phaseSupplier,
-            @NotNull IntFunction<Team> teamFunction,
+            @NotNull Function<Key, Team> teamFunction,
             @NotNull VoidConsumer roundEndCheck,
             @NotNull PlayerConsumer scoreboardConsumer
     ) {
@@ -69,10 +70,10 @@ public final class PlayerQuitListener implements Consumer<PlayerDisconnectEvent>
      * @param player       the involved player
      */
     private void handleGameQuit(@NotNull PlayingPhase playingPhase, @NotNull Player player) {
-        if (!player.hasTag(Tags.TEAM_ID)) return;
+        if (!player.hasTag(Tags.TEAM_KEY)) return;
 
-        int teamId = player.getTag(Tags.TEAM_ID);
-        Team team = this.teamFunction.apply(teamId);
+        String teamKeyStr = player.getTag(Tags.TEAM_KEY);
+        Team team = this.teamFunction.apply(Key.key(teamKeyStr));
 
         if (team == null) return;
         team.removePlayer(player);

@@ -10,7 +10,7 @@ import net.minestom.server.entity.metadata.other.PrimedTntMeta;
  * It provides methods to switch the player to a TNT entity and update the meta.
  *
  * @author theEvilReaper
- * @version 1.0.0
+ * @version 1.1.0
  * @since 1.0.0
  */
 @SuppressWarnings("java:S3252")
@@ -25,6 +25,7 @@ public final class EntityHelper {
      */
     public static void switchToTNT(Player player) {
         player.switchEntityType(EntityType.TNT);
+        updateTNTMeta(player);
     }
 
     /**
