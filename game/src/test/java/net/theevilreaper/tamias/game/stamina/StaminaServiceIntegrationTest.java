@@ -41,7 +41,7 @@ class StaminaServiceIntegrationTest {
 
 
     @Test
-    void testStaminaAdd(@NotNull Env env) {
+    void testCreateStaminaObjects(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
         Player player = env.createPlayer(instance);
         Player secondPlayer = env.createPlayer(instance);
@@ -54,8 +54,6 @@ class StaminaServiceIntegrationTest {
         StaminaBar staminaBar = staminaService.getStaminaBar(player.getUuid());
         assertNotNull(staminaBar);
         assertInstanceOf(ShootBar.class, staminaBar);
-
-        assertNotNull(staminaService.getStaminaBar(player.getUuid()));
 
         StaminaBar secondBar = staminaService.getStaminaBar(secondPlayer.getUuid());
         assertNotNull(secondBar);
@@ -93,6 +91,55 @@ class StaminaServiceIntegrationTest {
 
         assertNotNull(staminaService.getStaminaBar(firstPlayer));
         assertNull(staminaService.getStaminaBar(secondPlayer));
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testStartAndCleanUpFlow(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player player = env.createPlayer(instance);
+
+        teamService.getTeam(GameConfig.SURVIVOR_KEY).ifPresent(t -> TeamHelper.addPlayerToTeam(t, player));
+        staminaService.createStaminaObjects(teamService);
+
+        StaminaBar bar = staminaService.getStaminaBar(player);
+        assertNotNull(bar);
+        assertNull(bar.status);
+
+        staminaService.start();
+        assertEquals(StaminaBar.Status.READY, bar.status);
+
+        staminaService.cleanUp();
+        assertNull(staminaService.getStaminaBar(player));
+        assertNull(bar.status);
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testAddManualStaminaBar(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player player = env.createPlayer(instance);
+        StaminaBar shootBar = StaminaFactory.createShootBar(player);
+
+        staminaService.add(player.getUuid(), shootBar);
+        assertEquals(shootBar, staminaService.getStaminaBar(player.getUuid()));
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testTeamWithoutStaminaComponent(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player player = env.createPlayer(instance);
+
+        Team customTeam = Team.of(net.kyori.adventure.key.Key.key("tamias", "spec_team"), 10);
+        customTeam.addPlayer(player);
+        teamService.add(customTeam);
+
+        staminaService.createStaminaObjects(teamService);
+        assertNull(staminaService.getStaminaBar(player));
 
         env.destroyInstance(instance, true);
     }

@@ -9,6 +9,7 @@ import net.theevilreaper.tamias.game.event.BomberExplodeEvent;
 import net.theevilreaper.tamias.game.event.BomberRequireSpawnEvent;
 
 import java.time.temporal.ChronoUnit;
+import java.util.Objects;
 
 /**
  * The {@link ExplodeBar} is a implementation of the {@link StaminaBar} which is used from the bomber team to explode the player.
@@ -26,6 +27,7 @@ public final class ExplodeBar extends StaminaBar {
     private static final float MAX = 10;
 
     private float current;
+    private boolean regeneratedEventFired;
 
     /**
      * Creates a new reference from an {@link StaminaBar}.
@@ -36,11 +38,17 @@ public final class ExplodeBar extends StaminaBar {
         super(player, ChronoUnit.MILLIS, 250);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void onStart() {
         this.resetToDefaults();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void onRegenerated() {
         EventDispatcher.call(new BomberRequireSpawnEvent(player, this));
@@ -51,13 +59,21 @@ public final class ExplodeBar extends StaminaBar {
         this.player.setLevel((int) MAX);
         this.player.setExp(normalize(current - 1));
         this.status = Status.READY;
+        this.regeneratedEventFired = false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void triggerAction() {
         status = Status.DRAINING;
+        this.regeneratedEventFired = false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void consume() {
         if (status == null || status == Status.READY) return;
@@ -74,7 +90,7 @@ public final class ExplodeBar extends StaminaBar {
      * Handles the logic when a bomber wants to explode.
      */
     private void handleBomberTick() {
-        --current;
+        current -= 1.0f;
         this.player.setExp(normalize(current));
         this.player.setLevel(player.getLevel() - 1);
         if (current > 0) {
@@ -93,10 +109,15 @@ public final class ExplodeBar extends StaminaBar {
      * Handles the regeneration of the bomber.
      */
     private void handleBomberRegeneration() {
-        ++current;
+        current += 1.0f;
 
-        if (current > MAX / 2) {
+        if (current > MAX / 2 && !regeneratedEventFired) {
+            this.regeneratedEventFired = true;
             this.onRegenerated();
+        }
+
+        if (current >= MAX + 1) {
+            this.resetToDefaults();
         }
     }
 
@@ -108,5 +129,19 @@ public final class ExplodeBar extends StaminaBar {
      */
     private float normalize(float current) {
         return current < 0 ? 0 : current / MAX;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        ExplodeBar that = (ExplodeBar) o;
+        return Float.compare(that.current, current) == 0 && regeneratedEventFired == that.regeneratedEventFired;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), current, regeneratedEventFired);
     }
 }
