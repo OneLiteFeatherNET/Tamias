@@ -34,7 +34,7 @@ public final class ShootBar extends StaminaBar {
     }
 
     /**
-     * Called when the {@link StaminaBar} is started in general.
+     * {@inheritDoc}
      */
     @Override
     protected void onStart() {
@@ -42,7 +42,7 @@ public final class ShootBar extends StaminaBar {
     }
 
     /**
-     * The method can be called when the regeneration of the {@link StaminaBar} is finished.
+     * {@inheritDoc}
      */
     @Override
     protected void onRegenerated() {
@@ -50,6 +50,9 @@ public final class ShootBar extends StaminaBar {
         status = Status.READY;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void triggerAction() {
         this.currentTime = 0;
@@ -57,6 +60,9 @@ public final class ShootBar extends StaminaBar {
         ProjectileHelper.spawnProjectile(player, ProjectileHelper::createProjectile);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void consume() {
         if (status != Status.REGENERATING) return;
@@ -65,5 +71,19 @@ public final class ShootBar extends StaminaBar {
             return;
         }
         this.currentTime += 1;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        ShootBar shootBar = (ShootBar) o;
+        return currentTime == shootBar.currentTime;
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(super.hashCode(), currentTime);
     }
 }
