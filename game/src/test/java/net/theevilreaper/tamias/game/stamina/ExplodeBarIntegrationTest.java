@@ -124,6 +124,16 @@ class ExplodeBarIntegrationTest {
             assertEquals(Status.REGENERATING, explodeBar.status);
         }
 
+        // On tick 6 of regeneration, current becomes 6 (> MAX / 2), triggering BomberRequireSpawnEvent exactly once
+        explodeBar.consume();
+        assertEquals(Status.REGENERATING, explodeBar.status);
+
+        // Continue consuming until regeneration finishes (current reaches MAX + 1 = 11)
+        for (int i = 7; i <= 11; i++) {
+            explodeBar.consume();
+        }
+        assertEquals(Status.READY, explodeBar.status);
+
         env.destroyInstance(instance, true);
     }
 
