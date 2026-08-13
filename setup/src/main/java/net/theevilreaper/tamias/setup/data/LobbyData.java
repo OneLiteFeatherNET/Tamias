@@ -5,8 +5,8 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
-import net.minestom.server.instance.anvil.AnvilLoader;
 import net.minestom.server.world.DimensionType;
+import net.onelitefeather.falco.anvil.FalcoAnvilLoader;
 import net.theevilreaper.aves.inventory.PersonalInventoryBuilder;
 import net.theevilreaper.aves.map.BaseMap;
 import net.theevilreaper.aves.map.BaseMapBuilder;
@@ -141,8 +141,8 @@ public final class LobbyData extends InstanceSetupData {
 
         this.instance = MinecraftServer.getInstanceManager().createInstanceContainer();
 
-        AnvilLoader anvilLoader = new AnvilLoader(this.mapEntry.getDirectoryRoot(), DimensionType.OVERWORLD.key());
-        this.instance.setChunkLoader(anvilLoader);
+        this.chunkLoader = new FalcoAnvilLoader(this.mapEntry.getDirectoryRoot(), DimensionType.OVERWORLD.key());
+        this.instance.setChunkLoader(this.chunkLoader);
 
         this.updateTitle();
         MinecraftServer.getInstanceManager().registerInstance(this.instance);

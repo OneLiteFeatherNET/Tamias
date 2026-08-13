@@ -8,12 +8,16 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.InstanceContainer;
+import net.onelitefeather.falco.anvil.FalcoAnvilLoader;
 import net.onelitefeather.guira.data.SetupData;
 import net.theevilreaper.aves.map.BaseMapBuilder;
 import net.theevilreaper.aves.map.MapEntry;
 import net.theevilreaper.tamias.setup.map.MapDataCategory;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.UUID;
 
 /**
@@ -29,11 +33,13 @@ import java.util.UUID;
  */
 public abstract class InstanceSetupData implements SetupData {
 
+    protected static final Logger LOGGER = LoggerFactory.getLogger(InstanceSetupData.class);
     protected static final Pos SPAWN_POINT = new Pos(0, 100, 0);
 
     protected UUID uuid;
     protected MapEntry mapEntry;
     protected @Nullable InstanceContainer instance;
+    protected @Nullable FalcoAnvilLoader chunkLoader;
     protected BossBar bossBar;
     protected @Nullable Component title;
 
@@ -119,12 +125,20 @@ public abstract class InstanceSetupData implements SetupData {
     }
 
     /**
-     * Resets this setup and unregisters its instance if present.
+     * Resets this setup, unregisters its instance and closes its chunk loader if present.
      */
     @Override
     public void reset() {
         if (instance == null) return;
         MinecraftServer.getInstanceManager().unregisterInstance(instance);
+
+        if (this.chunkLoader == null) return;
+        try {
+            this.chunkLoader.close();
+        } catch (IOException exception) {
+            LOGGER.error("Failed to close FalcoAnvilLoader", exception);
+        }
+        this.chunkLoader = null;
     }
 
     /**
