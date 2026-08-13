@@ -14,10 +14,10 @@ dependencies {
     implementation(libs.guira)
     implementation(libs.slf4j.api)
     implementation(libs.pica)
-    implementation(libs.falco.anvil)
     compileOnly(libs.minestom)
     compileOnly(libs.aves)
     compileOnly(libs.xerus)
+    compileOnly(libs.falco.anvil)
 
     testImplementation(libs.minestom)
     testImplementation(libs.aves)

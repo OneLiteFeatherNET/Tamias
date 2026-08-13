@@ -1,5 +1,6 @@
 package net.theevilreaper.tamias.common;
 
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.item.ItemDropEvent;
@@ -8,6 +9,7 @@ import net.minestom.server.event.player.PlayerBlockInteractEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.event.player.PlayerSwapItemEvent;
 import net.minestom.server.event.trait.CancellableEvent;
+import net.theevilreaper.aves.map.provider.MapProvider;
 
 import java.util.function.Consumer;
 
@@ -33,5 +35,20 @@ public interface ListenerHandling {
         eventNode.addListener(ItemDropEvent.class, CANCELLABLE_EVENT::accept);
         eventNode.addListener(PlayerSwapItemEvent.class, CANCELLABLE_EVENT::accept);
         eventNode.addListener(PlayerBlockInteractEvent.class, CANCELLABLE_EVENT::accept);
+    }
+
+    /**
+     * Closes the given {@link MapProvider} if it implements {@link AutoCloseable}.
+     *
+     * @param mapProvider the map provider to close
+     */
+    default void closeMapProvider(MapProvider mapProvider) {
+        if (mapProvider instanceof AutoCloseable closeable) {
+            try {
+                closeable.close();
+            } catch (Exception exception) {
+                MinecraftServer.getExceptionManager().handleException(exception);
+            }
+        }
     }
 }
