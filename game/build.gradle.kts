@@ -15,6 +15,9 @@ dependencies {
     compileOnly(libs.aves)
     compileOnly(libs.xerus)
     compileOnly(libs.falco.anvil)
+    // SLF4J needs a binding at runtime; without one it falls back to NOP and the
+    // server logs nothing at all.
+    runtimeOnly(libs.slf4j.simple)
 
     testImplementation(libs.minestom)
     testImplementation(libs.cyano)

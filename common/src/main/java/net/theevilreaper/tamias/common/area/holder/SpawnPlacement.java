@@ -3,7 +3,6 @@ package net.theevilreaper.tamias.common.area.holder;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
-import net.theevilreaper.tamias.common.area.Area;
 import net.theevilreaper.tamias.common.area.SpawnArea;
 import net.theevilreaper.tamias.common.ground.GroundData;
 
@@ -16,12 +15,9 @@ import static net.theevilreaper.tamias.common.area.SpawnArea.SPAWN_BLOCK;
 public final class SpawnPlacement implements Placement {
 
     private final Instance instance;
-    private final Area area;
+    private final SpawnArea area;
 
-    public SpawnPlacement(Instance instance, Area area) {
-        if (!(area instanceof SpawnArea)) {
-            throw new IllegalArgumentException("The instance must be an instance");
-        }
+    public SpawnPlacement(Instance instance, SpawnArea area) {
         this.instance = instance;
         this.area = area;
     }

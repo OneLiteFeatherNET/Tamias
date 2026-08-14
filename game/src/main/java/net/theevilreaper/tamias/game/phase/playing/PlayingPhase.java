@@ -6,7 +6,7 @@ import net.theevilreaper.xerus.api.phase.TickDirection;
 import net.theevilreaper.xerus.api.phase.TimedPhase;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventDispatcher;
-import net.theevilreaper.tamias.common.event.AreaCleanupEvent;
+import net.theevilreaper.tamias.common.event.SpawnCleanupEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.temporal.ChronoUnit;
@@ -51,7 +51,7 @@ public final class PlayingPhase extends TimedPhase {
     @Override
     public void onStart() {
         super.onStart();
-        EventDispatcher.call(new AreaCleanupEvent(true));
+        EventDispatcher.call(new SpawnCleanupEvent());
         this.startGameLogic.apply();
     }
 

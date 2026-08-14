@@ -32,6 +32,8 @@ dependencyResolutionManagement {
             library("game.bom", "net.onelitefeather", "aonyx-bom").versionRef("aonyx")
 
             library("slf4j.api", "org.slf4j", "slf4j-api").versionRef("slf4j")
+            library("slf4j.simple", "org.slf4j", "slf4j-simple").versionRef("slf4j")
+
             library("atlas.projectiles", "ca.atlasengine", "atlas-projectiles").versionRef("projectiles")
             library("minestom","net.minestom", "minestom").withoutVersion()
             library("adventure", "net.kyori", "adventure-text-minimessage").withoutVersion()

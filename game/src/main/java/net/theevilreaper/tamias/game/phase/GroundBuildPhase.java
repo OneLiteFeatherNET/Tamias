@@ -1,6 +1,8 @@
 package net.theevilreaper.tamias.game.phase;
 
 import net.theevilreaper.aves.util.functional.VoidConsumer;
+import net.theevilreaper.tamias.common.area.GameAreaHelper;
+import net.theevilreaper.tamias.common.area.holder.GamePlacement;
 import net.theevilreaper.xerus.api.phase.GamePhase;
 import net.kyori.adventure.audience.Audience;
 import net.minestom.server.MinecraftServer;
@@ -10,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.temporal.ChronoUnit;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
 
 import static net.theevilreaper.tamias.game.util.GameMessages.MAP_BUILDING;
@@ -28,10 +31,12 @@ public final class GroundBuildPhase extends GamePhase {
     private static final Logger LOGGER = LoggerFactory.getLogger(GroundBuildPhase.class);
 
     private final Supplier<VoidConsumer> mapPlacementTaskTrigger;
+    private final GamePlacement gamePlacement;
     private VoidConsumer taskReset;
 
     public GroundBuildPhase(
-            @NotNull Supplier<VoidConsumer> mapPlacementTaskTrigger
+            @NotNull Supplier<VoidConsumer> mapPlacementTaskTrigger,
+            @NotNull GamePlacement gamePlacement
     ) {
         super("MapBuild");
         addListener(AreaFinishBuildEvent.class, areaFinishBuildEvent -> {
@@ -40,6 +45,7 @@ public final class GroundBuildPhase extends GamePhase {
             finish();
         });
         this.mapPlacementTaskTrigger = mapPlacementTaskTrigger;
+        this.gamePlacement = gamePlacement;
     }
 
     @Override
@@ -50,6 +56,10 @@ public final class GroundBuildPhase extends GamePhase {
             LOGGER.info("Map is building up...");
             this.taskReset = this.mapPlacementTaskTrigger.get();
             LOGGER.info("Map placement task started");
+
+            MinecraftServer.getSchedulerManager().buildTask(() ->
+                    this.gamePlacement.dropTnt(() -> ThreadLocalRandom.current().nextInt(GameAreaHelper.MIN_TNT_AMOUNT, GameAreaHelper.MAX_TNT_AMOUNT + 1))
+            ).delay(2, ChronoUnit.SECONDS).schedule();
         }).delay(10, ChronoUnit.SECONDS).schedule();
     }
 

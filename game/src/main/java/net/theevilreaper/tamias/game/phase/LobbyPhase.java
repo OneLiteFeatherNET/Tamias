@@ -1,6 +1,7 @@
 package net.theevilreaper.tamias.game.phase;
 
 import net.minestom.server.event.EventDispatcher;
+import net.theevilreaper.tamias.common.event.AreaSpawnTriggerEvent;
 import net.theevilreaper.tamias.common.map.event.MapPrepareEvent;
 import net.theevilreaper.tamias.game.round.event.RoundPrepareEvent;
 import net.theevilreaper.tamias.game.util.phase.LobbyPhaseData;
@@ -67,7 +68,7 @@ public final class LobbyPhase extends TimedPhase {
             }
             case 5 -> {
                 this.broadcastTime();
-                //TODO: Add placement back
+                EventDispatcher.call(AreaSpawnTriggerEvent.empty());
             }
             default -> {
                 // Nothing to do here

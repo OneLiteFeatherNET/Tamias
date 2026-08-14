@@ -5,12 +5,15 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.aves.map.BaseMap;
 import net.theevilreaper.aves.map.MapEntry;
+import net.theevilreaper.tamias.common.area.GameArea;
+import net.theevilreaper.tamias.common.area.SpawnArea;
+import net.theevilreaper.tamias.common.area.holder.GamePlacement;
+import net.theevilreaper.tamias.common.area.holder.SpawnPlacement;
 import net.theevilreaper.tamias.common.explosion.ExplosionCreator;
 import net.theevilreaper.tamias.common.gson.GsonUtil;
 import net.theevilreaper.tamias.common.map.GameMap;
 import net.theevilreaper.tamias.common.map.MapFilter;
 import net.theevilreaper.tamias.common.map.provider.AbstractFalcoMapProvider;
-import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 import java.util.Optional;
@@ -25,25 +28,38 @@ import java.util.Optional;
  */
 public final class GameMapProvider extends AbstractFalcoMapProvider implements MapFilter {
 
+    private final SpawnArea spawnArea;
+    private final SpawnPlacement spawnPlacement;
+    private final GamePlacement gamePlacement;
+
     /**
      * Creates a new instance from the provider with the given parameters.
      *
-     * @param path the path to the map files
+     * @param path       the path to the map files
+     * @param maxPlayers the maximum number of players, used to size the spawn area
      */
-    public GameMapProvider(@NotNull Path path) {
+    public GameMapProvider(Path path,int maxPlayers) {
         super(GsonUtil.FILE_HANDLER, MapFilter::filterMapsForGame);
-        this.loadMapEntries(path.resolve("maps"));
+        this.loadMapEntries(path.resolve("game").resolve("maps"));
         this.activeInstance = MinecraftServer.getInstanceManager().createInstanceContainer();
-
         MapEntry map = this.mapEntries.getFirst();
         Optional<GameMap> loadedLobbyMap = fileHandler.load(map.getMapFile(), GameMap.class);
         Check.argCondition(loadedLobbyMap.isEmpty(), "The map couldn't be loaded!");
-        this.activeMap = loadedLobbyMap.get();
+        GameMap gameMap = loadedLobbyMap.get();
+        this.activeMap = gameMap;
         this.activeInstance.setExplosionSupplier(new ExplosionCreator());
         this.registerFalcoInstance(this.activeInstance, map);
         if (this.activeMap.spawn() != null) {
             activeInstance.loadChunk(this.activeMap.spawn());
         }
+        MinecraftServer.getInstanceManager().registerInstance(this.activeInstance);
+
+        this.spawnArea = new SpawnArea(gameMap.getSpawnData(), maxPlayers);
+        this.spawnPlacement = new SpawnPlacement(this.activeInstance, this.spawnArea);
+
+        GameArea gameArea = new GameArea(gameMap.getGameAreaData());
+        gameArea.calculatePositions();
+        this.gamePlacement = new GamePlacement(this.activeInstance, gameArea);
     }
 
     /**
@@ -61,7 +77,7 @@ public final class GameMapProvider extends AbstractFalcoMapProvider implements M
      * @param instanceSet if the instance should be set for the player
      */
     @Override
-    public void teleportToSpawn(@NotNull Player player, boolean instanceSet) {
+    public void teleportToSpawn(Player player, boolean instanceSet) {
         if (instanceSet) {
             player.setInstance(this.activeInstance, this.activeMap.spawn());
             return;
@@ -78,7 +94,7 @@ public final class GameMapProvider extends AbstractFalcoMapProvider implements M
      * @throws UnsupportedOperationException if called
      */
     @Override
-    public void saveMap(@NotNull Path path, @NotNull BaseMap baseMap) {
+    public void saveMap(Path path, BaseMap baseMap) {
         throw new UnsupportedOperationException("A game can't save a map");
     }
 
@@ -87,7 +103,34 @@ public final class GameMapProvider extends AbstractFalcoMapProvider implements M
      *
      * @return the active map
      */
-    public @NotNull BaseMap getActiveMap() {
+    public BaseMap getActiveMap() {
         return this.activeMap;
+    }
+
+    /**
+     * Returns the area used to spawn players during the lobby/build phase.
+     *
+     * @return the spawn area
+     */
+    public SpawnArea getSpawnArea() {
+        return this.spawnArea;
+    }
+
+    /**
+     * Returns the placement responsible for building/clearing the spawn area.
+     *
+     * @return the spawn placement
+     */
+    public SpawnPlacement getSpawnPlacement() {
+        return this.spawnPlacement;
+    }
+
+    /**
+     * Returns the placement responsible for building/clearing the game area.
+     *
+     * @return the game placement
+     */
+    public GamePlacement getGamePlacement() {
+        return this.gamePlacement;
     }
 }

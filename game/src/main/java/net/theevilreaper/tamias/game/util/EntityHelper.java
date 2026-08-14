@@ -1,8 +1,12 @@
 package net.theevilreaper.tamias.game.util;
 
 import net.minestom.server.entity.EntityType;
+import net.minestom.server.entity.Metadata;
+import net.minestom.server.entity.MetadataDef;
 import net.minestom.server.entity.Player;
-import net.minestom.server.entity.metadata.other.PrimedTntMeta;
+import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
+
+import java.util.Map;
 
 /**
  * The {@link EntityHelper} provides some utility methods to handle entities.
@@ -39,13 +43,20 @@ public final class EntityHelper {
 
     /**
      * Updates the TNT meta for the player.
+     * <p>
+     * Sent to viewers only, bypassing {@link Player#editEntityMeta}. A player is never its own
+     * viewer, so {@code editEntityMeta} would also push the TNT metadata schema to the switching
+     * player's own client - which still expects the previous entity type's schema and crashes
+     * on the resulting type mismatch (see field index collision between {@code LIVING_ENTITY_FLAGS}
+     * and {@code PrimedTnt.FUSE_TIME}).
      *
      * @param player the player to update the meta
      */
     public static void updateTNTMeta(Player player) {
         if (player.getEntityType() != EntityType.TNT) return;
 
-        player.editEntityMeta(PrimedTntMeta.class, meta -> meta.setFuseTime(TNT_FUSE_TIME));
+        int index = MetadataDef.PrimedTnt.FUSE_TIME.index();
+        player.sendPacketToViewers(new EntityMetaDataPacket(player.getEntityId(), Map.of(index, Metadata.VarInt(TNT_FUSE_TIME))));
     }
 
     private EntityHelper() {
