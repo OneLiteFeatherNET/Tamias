@@ -5,7 +5,9 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
+import net.minestom.server.utils.Direction;
 import net.minestom.server.world.DimensionType;
 import net.onelitefeather.falco.anvil.FalcoAnvilLoader;
 import net.theevilreaper.aves.map.BaseMapBuilder;
@@ -13,6 +15,8 @@ import net.theevilreaper.aves.map.MapEntry;
 import net.theevilreaper.tamias.common.gson.GsonUtil;
 import net.theevilreaper.tamias.common.map.GameMap;
 import net.theevilreaper.tamias.common.map.builder.GameMapBuilder;
+import net.theevilreaper.tamias.setup.inventory.GameAreaDataInventory;
+import net.theevilreaper.tamias.setup.inventory.GameMapDataInventory;
 import net.theevilreaper.tamias.setup.inventory.GeneralMapDataInventory;
 import net.theevilreaper.tamias.setup.map.MapDataCategory;
 
@@ -22,6 +26,8 @@ import java.util.UUID;
 public class GameData extends InstanceSetupData {
 
     private final GeneralMapDataInventory inventory;
+    private final GameMapDataInventory gameMapDataInventory;
+    private final GameAreaDataInventory gameAreaDataInventory;
     private GameMapBuilder gameMapBuilder;
 
     /**
@@ -39,6 +45,8 @@ public class GameData extends InstanceSetupData {
         }
 
         this.inventory = new GeneralMapDataInventory(player, this.gameMapBuilder);
+        this.gameMapDataInventory = new GameMapDataInventory(player, this.gameMapBuilder);
+        this.gameAreaDataInventory = new GameAreaDataInventory(player, this.gameMapBuilder);
     }
 
     /**
@@ -48,9 +56,8 @@ public class GameData extends InstanceSetupData {
     public void openInventory(InventoryTarget target) {
         switch (target) {
             case GENERAL -> this.inventory.open();
-            default -> {
-
-            }
+            case GAME -> this.gameMapDataInventory.open();
+            case AREA -> this.gameAreaDataInventory.open();
         }
     }
 
@@ -61,9 +68,8 @@ public class GameData extends InstanceSetupData {
     public void triggerUpdate(InventoryTarget target) {
         switch (target) {
             case GENERAL -> this.inventory.invalidateDataLayout();
-            default -> {
-
-            }
+            case GAME -> this.gameMapDataInventory.invalidateDataLayout();
+            case AREA -> this.gameAreaDataInventory.invalidateDataLayout();
         }
     }
 
@@ -93,13 +99,20 @@ public class GameData extends InstanceSetupData {
                 triggerUpdate(InventoryTarget.GENERAL);
             }
             case SURVIVOR -> {
-                Pos spawnPos = new Pos(
-                        pos.blockX(),
-                        pos.blockY() + 1,
-                        pos.blockZ(),
-                        player.getPosition().yaw(),
-                        0f
-                );
+                this.gameMapBuilder.spawnLayerPos(pos);
+                triggerUpdate(InventoryTarget.GAME);
+            }
+            case BOMBER_SPAWN -> {
+                this.gameMapBuilder.bomberSpawn(pos);
+                triggerUpdate(InventoryTarget.GAME);
+            }
+            case AREA_LOWER_CORNER -> {
+                this.gameMapBuilder.areaLowerCorner(new Vec(pos.blockX(), pos.blockY(), pos.blockZ()));
+                triggerUpdate(InventoryTarget.AREA);
+            }
+            case AREA_UPPER_CORNER -> {
+                this.gameMapBuilder.areaUpperCorner(new Vec(pos.blockX(), pos.blockY(), pos.blockZ()));
+                triggerUpdate(InventoryTarget.AREA);
             }
             default -> {}
         }
@@ -109,17 +122,50 @@ public class GameData extends InstanceSetupData {
      * {@inheritDoc}
      */
     @Override
+    public void setDirection(MapDataCategory category, Player player, Direction direction) {
+        if (category == MapDataCategory.SURVIVOR_DIRECTION) {
+            this.gameMapBuilder.spawnLayerDirection(direction);
+            triggerUpdate(InventoryTarget.GAME);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void handleDataDelete(MapDataCategory category) {
         switch (category) {
-            case SPAWN -> gameMapBuilder.spawn(null);
+            case SPAWN -> {
+                gameMapBuilder.spawn(null);
+                this.triggerUpdate(InventoryTarget.GENERAL);
+            }
             case NAME -> {
                 gameMapBuilder.name("Map");
                 this.updateTitle();
+                this.triggerUpdate(InventoryTarget.GENERAL);
             }
-            case AUTHOR -> gameMapBuilder.builders("");
+            case AUTHOR -> {
+                gameMapBuilder.builders("");
+                this.triggerUpdate(InventoryTarget.GENERAL);
+            }
+            case SURVIVOR -> {
+                gameMapBuilder.spawnLayerPos(null);
+                this.triggerUpdate(InventoryTarget.GAME);
+            }
+            case BOMBER_SPAWN -> {
+                gameMapBuilder.bomberSpawn(null);
+                this.triggerUpdate(InventoryTarget.GAME);
+            }
+            case AREA_LOWER_CORNER -> {
+                gameMapBuilder.areaLowerCorner(null);
+                this.triggerUpdate(InventoryTarget.AREA);
+            }
+            case AREA_UPPER_CORNER -> {
+                gameMapBuilder.areaUpperCorner(null);
+                this.triggerUpdate(InventoryTarget.AREA);
+            }
             default -> throw new IllegalArgumentException("Unknown inventory category: " + category);
         }
-        this.triggerUpdate(InventoryTarget.GENERAL);
     }
 
     /**
@@ -127,7 +173,38 @@ public class GameData extends InstanceSetupData {
      */
     @Override
     public void handleDataContextDelete(MapDataCategory category, Point point) {
-        if (point instanceof Pos pos) {
+        switch (category) {
+            case SPAWN -> {
+                if (samePosition(point, gameMapBuilder.getSpawn())) {
+                    gameMapBuilder.spawn(null);
+                    triggerUpdate(InventoryTarget.GENERAL);
+                }
+            }
+            case SURVIVOR -> {
+                if (samePosition(point, gameMapBuilder.getSpawnLayerBuilder().getPos())) {
+                    gameMapBuilder.spawnLayerPos(null);
+                    triggerUpdate(InventoryTarget.GAME);
+                }
+            }
+            case BOMBER_SPAWN -> {
+                if (samePosition(point, gameMapBuilder.getBomberInitialSpawn())) {
+                    gameMapBuilder.bomberSpawn(null);
+                    triggerUpdate(InventoryTarget.GAME);
+                }
+            }
+            case AREA_LOWER_CORNER -> {
+                if (samePosition(point, gameMapBuilder.getAreaDataBuilder().lowerCorner())) {
+                    gameMapBuilder.areaLowerCorner(null);
+                    triggerUpdate(InventoryTarget.AREA);
+                }
+            }
+            case AREA_UPPER_CORNER -> {
+                if (samePosition(point, gameMapBuilder.getAreaDataBuilder().upperCorner())) {
+                    gameMapBuilder.areaUpperCorner(null);
+                    triggerUpdate(InventoryTarget.AREA);
+                }
+            }
+            default -> {}
         }
     }
 
@@ -158,6 +235,8 @@ public class GameData extends InstanceSetupData {
     public void reset() {
         super.reset();
         this.inventory.unregister();
+        this.gameMapDataInventory.unregister();
+        this.gameAreaDataInventory.unregister();
     }
 
     /**
