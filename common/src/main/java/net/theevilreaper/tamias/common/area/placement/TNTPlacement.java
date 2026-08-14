@@ -8,8 +8,9 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.other.FallingBlockMeta;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.network.packet.server.play.ParticlePacket;
+import net.minestom.server.particle.Particle;
 import net.theevilreaper.tamias.common.ground.GroundData;
-import net.theevilreaper.tamias.common.ground.GroundDataRegistry;
 
 import net.minestom.server.timer.TaskSchedule;
 
@@ -41,16 +42,14 @@ public class TNTPlacement extends AreaBasePlacement<Vec> {
      */
     @Override
     public void place(GroundData groundData) {
-        if (this.buildTask != null) return;
+        if (!tryStart()) return;
         Iterator<Vec> iterator = blockPositions.iterator();
         this.buildTask = MinecraftServer.getSchedulerManager().buildTask(() -> {
             if (!iterator.hasNext()) {
                 stop();
                 return;
             }
-            for (int i = 0; i < 10 && iterator.hasNext(); i++) {
-                spawnTnt(iterator.next(), groundData);
-            }
+            spawnTnt(iterator.next(), groundData);
         }).repeat(TaskSchedule.tick(1)).schedule();
     }
 
@@ -68,9 +67,10 @@ public class TNTPlacement extends AreaBasePlacement<Vec> {
 
         Point entityPos = pos.add(0, 5, 0);
         tntEntity.setInstance(instance, entityPos);
+        instance.sendGroupedPacket(new ParticlePacket(Particle.CLOUD, entityPos, Vec.ZERO, 0f, 5));
 
         MinecraftServer.getSchedulerManager().buildTask(() -> {
-            placeBlock(pos, groundData);
+            doPlaceBlock(pos, groundData);
             tntEntity.remove();
         }).delay(TaskSchedule.tick(5)).schedule();
     }

@@ -8,7 +8,7 @@ import net.minestom.server.utils.Direction;
 import net.minestom.testing.Env;
 import net.minestom.testing.extension.MicrotusExtension;
 import net.theevilreaper.tamias.common.area.GameArea;
-import net.theevilreaper.tamias.common.area.placement.CircleAreaPlacement;
+import net.theevilreaper.tamias.common.area.GameAreaHelper;
 import net.theevilreaper.tamias.common.ground.GroundData;
 import net.theevilreaper.tamias.common.ground.GroundDataRegistry;
 import net.theevilreaper.tamias.common.map.layer.AreaData;
@@ -18,7 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -44,12 +43,7 @@ class GamePlacementIntegrationTest {
         );
         assertNotNull(gameArea);
         gameArea.calculatePositions();
-        CircleAreaPlacement groundPlacement = new CircleAreaPlacement(
-                instance,
-                gameArea.getPositions().stream().map(Vec.class::cast).toList(),
-                new ArrayList<>()
-        );
-        GamePlacement placement = new GamePlacement(instance, gameArea, groundPlacement);
+        GamePlacement placement = new GamePlacement(instance, gameArea);
         assertNotNull(placement);
         assertInstanceOf(GamePlacement.class, placement);
 
@@ -107,10 +101,130 @@ class GamePlacementIntegrationTest {
                         .build()
         );
         gameArea.calculatePositions();
-        CircleAreaPlacement groundPlacement = new CircleAreaPlacement(instance, new ArrayList<>(), new ArrayList<>());
-        GamePlacement gamePlacement = new GamePlacement(instance, gameArea, groundPlacement);
+        GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
 
         assertDoesNotThrow(() -> gamePlacement.preloadChunks().get(10, java.util.concurrent.TimeUnit.SECONDS));
+
+        env.destroyInstance(instance);
+    }
+
+    @Test
+    void testFlattenOnlyKeepsGroundMarkerPositions(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        GameArea gameArea = new GameArea(
+                AreaData.builder()
+                        .lowerCorner(Vec.ZERO)
+                        .upperCorner(new Vec(2, 0, 2))
+                        .facing(Direction.NORTH)
+                        .build()
+        );
+        gameArea.calculatePositions();
+
+        Vec markerPosition = new Vec(1, 0, 1);
+        instance.setBlock(markerPosition, GameAreaHelper.GROUND_MARKER_BLOCK);
+        instance.setBlock(markerPosition.add(0, 1, 0), Block.AIR);
+
+        GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
+
+        gamePlacement.flatten();
+
+        assertEquals(Set.of(markerPosition), gameArea.getPositions());
+
+        GroundData randomData = GroundDataRegistry.instance().getRandomData();
+        gamePlacement.triggerPlacement(randomData);
+        env.tickWhile(gamePlacement::isRunning, Duration.ofSeconds(10));
+
+        assertEquals(randomData.groundBlock(), instance.getBlock(markerPosition));
+        assertEquals(Block.AIR, instance.getBlock(new Vec(0, 0, 0)));
+
+        env.destroyInstance(instance);
+    }
+
+    @Test
+    void testDropTntSkipsObstructedPositions(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        GameArea gameArea = new GameArea(
+                AreaData.builder()
+                        .lowerCorner(Vec.ZERO)
+                        .upperCorner(new Vec(2, 0, 2))
+                        .facing(Direction.NORTH)
+                        .build()
+        );
+        gameArea.calculatePositions();
+
+        Vec clearPosition = new Vec(1, 0, 0);
+        Vec obstructedPosition = new Vec(1, 0, 1);
+        instance.setBlock(clearPosition, GameAreaHelper.GROUND_MARKER_BLOCK);
+        instance.setBlock(clearPosition.add(0, 1, 0), Block.AIR);
+        instance.setBlock(obstructedPosition, GameAreaHelper.GROUND_MARKER_BLOCK);
+        instance.setBlock(obstructedPosition.add(0, 1, 0), Block.STONE);
+
+        GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
+        gamePlacement.flatten();
+
+        gamePlacement.triggerPlacement(GroundDataRegistry.instance().getRandomData());
+        env.tickWhile(gamePlacement::isRunning, Duration.ofSeconds(10));
+
+        gamePlacement.dropTnt(() -> 5);
+        for (int i = 0; i < 20; i++) {
+            env.tick();
+        }
+
+        assertEquals(Block.TNT, instance.getBlock(clearPosition.add(0, 1, 0)));
+        assertEquals(Block.STONE, instance.getBlock(obstructedPosition.add(0, 1, 0)));
+
+        gamePlacement.clear();
+        assertEquals(Block.AIR, instance.getBlock(clearPosition.add(0, 1, 0)));
+
+        env.destroyInstance(instance);
+    }
+
+    @Test
+    void testDropTntSpreadsPositionsOut(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        GameArea gameArea = new GameArea(
+                AreaData.builder()
+                        .lowerCorner(Vec.ZERO)
+                        .upperCorner(new Vec(9, 0, 9))
+                        .facing(Direction.NORTH)
+                        .build()
+        );
+        gameArea.calculatePositions();
+
+        for (Point pos : gameArea.getPositions()) {
+            instance.setBlock(pos, GameAreaHelper.GROUND_MARKER_BLOCK);
+            instance.setBlock(pos.add(0, 1, 0), Block.AIR);
+        }
+
+        GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
+        gamePlacement.flatten();
+
+        gamePlacement.triggerPlacement(GroundDataRegistry.instance().getRandomData());
+        env.tickWhile(gamePlacement::isRunning, Duration.ofSeconds(10));
+
+        gamePlacement.dropTnt(() -> 9);
+        for (int i = 0; i < 60; i++) {
+            env.tick();
+        }
+
+        Set<Point> tntPositions = new HashSet<>();
+        for (Point pos : gameArea.getPositions()) {
+            Point above = pos.add(0, 1, 0);
+            if (instance.getBlock(above) == Block.TNT) {
+                tntPositions.add(above);
+            }
+        }
+
+        assertEquals(9, tntPositions.size());
+
+        double minDistance = Double.MAX_VALUE;
+        for (Point a : tntPositions) {
+            for (Point b : tntPositions) {
+                if (a == b) continue;
+                minDistance = Math.min(minDistance, a.distance(b));
+            }
+        }
+        assertTrue(minDistance >= 2.0, "TNT positions should be spread apart, closest pair was " + minDistance + " blocks apart");
 
         env.destroyInstance(instance);
     }
