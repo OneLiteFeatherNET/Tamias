@@ -21,7 +21,11 @@ public enum MapDataCategory {
     NAME("Name", Material.ACACIA_SIGN, NamedTextColor.YELLOW),
     AUTHOR("Builder", Material.DARK_OAK_DOOR, NamedTextColor.AQUA),
     SPAWN("Spawn", Material.COMPASS, NamedTextColor.RED),
-    SURVIVOR("Survivor", Material.CLOCK, NamedTextColor.GREEN);
+    SURVIVOR("Survivor", Material.CLOCK, NamedTextColor.GREEN),
+    SURVIVOR_DIRECTION("Survivor Direction", Material.RECOVERY_COMPASS, NamedTextColor.GREEN),
+    BOMBER_SPAWN("Bomber Spawn", Material.TNT, NamedTextColor.GOLD),
+    AREA_LOWER_CORNER("Area Lower Corner", Material.RED_CONCRETE, NamedTextColor.LIGHT_PURPLE),
+    AREA_UPPER_CORNER("Area Upper Corner", Material.BLUE_CONCRETE, NamedTextColor.LIGHT_PURPLE);
 
     private static final MapDataCategory[] VALUES = values();
     private static final Map<MapDataCategory, ItemStack> DEFAULT_CACHE = new EnumMap<>(MapDataCategory.class);

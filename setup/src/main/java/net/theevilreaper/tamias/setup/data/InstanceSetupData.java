@@ -8,6 +8,7 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.InstanceContainer;
+import net.minestom.server.utils.Direction;
 import net.onelitefeather.falco.anvil.FalcoAnvilLoader;
 import net.onelitefeather.guira.data.SetupData;
 import net.theevilreaper.aves.map.BaseMapBuilder;
@@ -97,6 +98,18 @@ public abstract class InstanceSetupData implements SetupData {
     public abstract void setPosition(MapDataCategory category, Player player);
 
     /**
+     * Handles a direction change for the given category.
+     * The default implementation does nothing. Subclasses may override this to handle direction-based categories.
+     *
+     * @param category  the category the direction belongs to
+     * @param player    the player who triggered the change
+     * @param direction the new direction
+     */
+    public void setDirection(MapDataCategory category, Player player, Direction direction) {
+        // Nothing to do in the default implementation
+    }
+
+    /**
      * Handles an item interaction by the given player during the setup process.
      * The default implementation opens the general inventory.
      * Subclasses may override this to handle additional tag values.
@@ -158,10 +171,23 @@ public abstract class InstanceSetupData implements SetupData {
      */
     public abstract BaseMapBuilder getMapBuilder();
 
+    /**
+     * Compares the coordinates of two points, ignoring type, yaw and pitch.
+     *
+     * @param a first point, may be null
+     * @param b second point, may be null
+     * @return true if both points are non-null and share the same x, y and z coordinates
+     */
+    protected static boolean samePosition(@Nullable Point a, @Nullable Point b) {
+        if (a == null || b == null) return false;
+        return a.x() == b.x() && a.y() == b.y() && a.z() == b.z();
+    }
+
     public enum InventoryTarget {
 
         GENERAL,
         GAME,
+        AREA,
 
     }
 }

@@ -16,6 +16,8 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import static net.theevilreaper.tamias.setup.util.SetupItems.AREA_DATA_FLAG;
+import static net.theevilreaper.tamias.setup.util.SetupItems.GAME_DATA_FLAG;
 import static net.theevilreaper.tamias.setup.util.SetupItems.MAPS_FLAG;
 import static net.theevilreaper.tamias.setup.util.SetupItems.OVERVIEW_FLAG;
 
@@ -52,6 +54,16 @@ public final class PlayerUseItemListener implements Consumer<PlayerUseItemEvent>
 
         if (itemId == OVERVIEW_FLAG) {
             ((InstanceSetupData) setupData).openInventory(InstanceSetupData.InventoryTarget.GENERAL);
+            return;
+        }
+
+        if (itemId == GAME_DATA_FLAG) {
+            ((InstanceSetupData) setupData).openInventory(InstanceSetupData.InventoryTarget.GAME);
+            return;
+        }
+
+        if (itemId == AREA_DATA_FLAG) {
+            ((InstanceSetupData) setupData).openInventory(InstanceSetupData.InventoryTarget.AREA);
             return;
         }
         EventDispatcher.call(new SetupFinishEvent(setupData));

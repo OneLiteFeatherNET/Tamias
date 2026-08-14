@@ -3,6 +3,7 @@ package net.theevilreaper.tamias.setup.data;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.world.DimensionType;
@@ -91,6 +92,17 @@ public final class LobbyData extends InstanceSetupData {
             default -> throw new IllegalArgumentException("Unknown inventory category: " + category);
         }
         this.triggerUpdate(InventoryTarget.GENERAL);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void handleDataContextDelete(MapDataCategory category, Point point) {
+        if (category == MapDataCategory.SPAWN && samePosition(point, mapBuilder.getSpawn())) {
+            mapBuilder.spawn(null);
+            triggerUpdate(InventoryTarget.GENERAL);
+        }
     }
 
     /**

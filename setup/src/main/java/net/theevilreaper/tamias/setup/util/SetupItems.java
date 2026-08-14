@@ -24,6 +24,8 @@ public final class SetupItems {
     public static final byte MAPS_FLAG = 0x00;
     public static final byte SAVE_MAP_FLAG = 0x01;
     public static final byte OVERVIEW_FLAG = 0x02;
+    public static final byte GAME_DATA_FLAG = 0x03;
+    public static final byte AREA_DATA_FLAG = 0x04;
 
     public static final ItemStack DECORATION = ItemStack.builder(Material.GRAY_STAINED_GLASS_PANE)
             .customName(Component.empty())
@@ -40,12 +42,22 @@ public final class SetupItems {
                 .build()
         );
         mapLayout = new HotBarLayout();
-        mapLayout.set(0x02, ItemStack.builder(Material.COMPASS)
+        mapLayout.set(0x01, ItemStack.builder(Material.COMPASS)
                 .customName(Component.text("View data", NamedTextColor.AQUA))
                 .set(Tags.ITEM_TAG, OVERVIEW_FLAG)
                 .build()
         );
-        mapLayout.set(0x06, ItemStack.builder(Material.BELL)
+        mapLayout.set(0x03, ItemStack.builder(Material.FILLED_MAP)
+                .customName(Component.text("Game data", NamedTextColor.GOLD))
+                .set(Tags.ITEM_TAG, GAME_DATA_FLAG)
+                .build()
+        );
+        mapLayout.set(0x05, ItemStack.builder(Material.BARRIER)
+                .customName(Component.text("Area data", NamedTextColor.LIGHT_PURPLE))
+                .set(Tags.ITEM_TAG, AREA_DATA_FLAG)
+                .build()
+        );
+        mapLayout.set(0x07, ItemStack.builder(Material.BELL)
                 .customName(Component.text("Save map", NamedTextColor.RED))
                 .set(Tags.ITEM_TAG, SAVE_MAP_FLAG)
                 .build()
