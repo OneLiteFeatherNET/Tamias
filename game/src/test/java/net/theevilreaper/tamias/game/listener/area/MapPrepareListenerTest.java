@@ -8,7 +8,6 @@ import net.minestom.testing.Env;
 import net.minestom.testing.extension.MicrotusExtension;
 import net.theevilreaper.tamias.common.area.GameArea;
 import net.theevilreaper.tamias.common.area.holder.GamePlacement;
-import net.theevilreaper.tamias.common.area.placement.CircleAreaPlacement;
 import net.theevilreaper.tamias.common.event.GameAreaChunksReadyEvent;
 import net.theevilreaper.tamias.common.map.event.MapPrepareEvent;
 import net.theevilreaper.tamias.common.map.layer.AreaData;
@@ -17,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -36,8 +34,7 @@ class MapPrepareListenerTest {
                         .build()
         );
         gameArea.calculatePositions();
-        CircleAreaPlacement groundPlacement = new CircleAreaPlacement(instance, new ArrayList<>(), new ArrayList<>());
-        GamePlacement gamePlacement = new GamePlacement(instance, gameArea, groundPlacement);
+        GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
 
         AtomicInteger firedCount = new AtomicInteger();
         env.process().eventHandler()
