@@ -5,7 +5,9 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.tag.PreProcess;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import net.minestom.server.utils.Direction;
 import net.theevilreaper.tamias.common.util.Messages;
+import net.theevilreaper.tamias.setup.map.MapDataCategory;
 import org.jetbrains.annotations.Contract;
 
 public class SetupMessages extends Messages {
@@ -54,5 +56,28 @@ public class SetupMessages extends Messages {
         PreProcess facePreProcess = Tag.preProcessParsed(face);
         TagResolver faceTag = TagResolver.builder().tag("face", (argumentQueue, context) -> facePreProcess).build();
         return Messages.withMini("<red>You are looking in an invalid direction! <gray>(<gold><face><gray>)", faceTag);
+    }
+
+    /**
+     * Returns the confirmation message shown after a position was captured for a category.
+     *
+     * @param category the category the position was captured for
+     * @return the confirmation message
+     */
+    @Contract(value = "_ -> new", pure = true)
+    public static Component getPositionSet(MapDataCategory category) {
+        return Messages.withPrefix(Component.text(category.getName() + " position set.", NamedTextColor.GREEN));
+    }
+
+    /**
+     * Returns the confirmation message shown after a direction was set for a category.
+     *
+     * @param category  the category the direction was set for
+     * @param direction the direction that was set
+     * @return the confirmation message
+     */
+    @Contract(value = "_, _ -> new", pure = true)
+    public static Component getDirectionSet(MapDataCategory category, Direction direction) {
+        return Messages.withPrefix(Component.text(category.getName() + " direction set to " + direction.name() + ".", NamedTextColor.GREEN));
     }
 }
