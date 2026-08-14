@@ -1,7 +1,6 @@
 package net.theevilreaper.tamias.game.map;
 
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.aves.map.BaseMap;
@@ -10,7 +9,6 @@ import net.theevilreaper.tamias.common.area.GameArea;
 import net.theevilreaper.tamias.common.area.SpawnArea;
 import net.theevilreaper.tamias.common.area.holder.GamePlacement;
 import net.theevilreaper.tamias.common.area.holder.SpawnPlacement;
-import net.theevilreaper.tamias.common.area.placement.CircleAreaPlacement;
 import net.theevilreaper.tamias.common.explosion.ExplosionCreator;
 import net.theevilreaper.tamias.common.gson.GsonUtil;
 import net.theevilreaper.tamias.common.map.GameMap;
@@ -18,7 +16,6 @@ import net.theevilreaper.tamias.common.map.MapFilter;
 import net.theevilreaper.tamias.common.map.provider.AbstractFalcoMapProvider;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Optional;
 
 /**
@@ -43,9 +40,8 @@ public final class GameMapProvider extends AbstractFalcoMapProvider implements M
      */
     public GameMapProvider(Path path,int maxPlayers) {
         super(GsonUtil.FILE_HANDLER, MapFilter::filterMapsForGame);
-        this.loadMapEntries(path.resolve("maps"));
+        this.loadMapEntries(path.resolve("game").resolve("maps"));
         this.activeInstance = MinecraftServer.getInstanceManager().createInstanceContainer();
-
         MapEntry map = this.mapEntries.getFirst();
         Optional<GameMap> loadedLobbyMap = fileHandler.load(map.getMapFile(), GameMap.class);
         Check.argCondition(loadedLobbyMap.isEmpty(), "The map couldn't be loaded!");
@@ -63,12 +59,7 @@ public final class GameMapProvider extends AbstractFalcoMapProvider implements M
 
         GameArea gameArea = new GameArea(gameMap.getGameAreaData());
         gameArea.calculatePositions();
-        CircleAreaPlacement groundPlacement = new CircleAreaPlacement(
-                this.activeInstance,
-                gameArea.getPositions().stream().map(Vec.class::cast).toList(),
-                new ArrayList<>(gameArea.getSpecialPositions())
-        );
-        this.gamePlacement = new GamePlacement(this.activeInstance, gameArea, groundPlacement);
+        this.gamePlacement = new GamePlacement(this.activeInstance, gameArea);
     }
 
     /**
