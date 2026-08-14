@@ -16,6 +16,7 @@ import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.instance.Instance;
 import net.theevilreaper.tamias.common.ListenerHandling;
+import net.theevilreaper.tamias.common.bootstrap.ServiceBootstrap;
 import net.theevilreaper.tamias.setup.dialog.event.DialogRequestEvent;
 import net.theevilreaper.tamias.setup.event.DirectionSetEvent;
 import net.theevilreaper.tamias.setup.event.PlayerMapSelectEvent;
@@ -38,7 +39,6 @@ import net.theevilreaper.tamias.setup.listener.map.MapSetupSelectListener;
 import net.theevilreaper.tamias.setup.map.SetupMapProvider;
 import org.jetbrains.annotations.NotNull;
 
-import java.nio.file.Paths;
 import java.util.function.Supplier;
 
 public final class TamiasSetup implements ListenerHandling {
@@ -48,7 +48,7 @@ public final class TamiasSetup implements ListenerHandling {
     private final MapSetupInventory mapSetupInventory;
 
     public TamiasSetup() {
-        this.mapProvider = new SetupMapProvider(Paths.get(""));
+        this.mapProvider = new SetupMapProvider(ServiceBootstrap.resolveWorkingDirectory());
         this.setupDataService = SetupDataService.create();
         this.mapSetupInventory = new MapSetupInventory(this.mapProvider::getEntries);
         MinecraftServer.getSchedulerManager().buildShutdownTask(this::terminate);
