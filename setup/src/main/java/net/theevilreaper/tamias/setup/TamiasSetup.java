@@ -17,12 +17,16 @@ import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.instance.Instance;
 import net.theevilreaper.tamias.common.ListenerHandling;
 import net.theevilreaper.tamias.setup.dialog.event.DialogRequestEvent;
+import net.theevilreaper.tamias.setup.event.DirectionSetEvent;
 import net.theevilreaper.tamias.setup.event.PlayerMapSelectEvent;
+import net.theevilreaper.tamias.setup.event.PlayerRemoveDataEvent;
 import net.theevilreaper.tamias.setup.event.PositionSetEvent;
 import net.theevilreaper.tamias.setup.inventory.MapSetupInventory;
+import net.theevilreaper.tamias.setup.listener.DirectionSetListener;
 import net.theevilreaper.tamias.setup.listener.PlayerChatListener;
 import net.theevilreaper.tamias.setup.listener.PlayerConfigurationListener;
 import net.theevilreaper.tamias.setup.listener.PlayerDisconnectListener;
+import net.theevilreaper.tamias.setup.listener.PlayerRemoveDataListener;
 import net.theevilreaper.tamias.setup.listener.PlayerSpawnListener;
 import net.theevilreaper.tamias.setup.listener.PositionSetListener;
 import net.theevilreaper.tamias.setup.listener.dialog.DialogPayloadListener;
@@ -82,6 +86,12 @@ public final class TamiasSetup implements ListenerHandling {
 
         // Position listener
         manager.addListener(PositionSetEvent.class, new PositionSetListener(this.setupDataService));
+
+        // Direction listener
+        manager.addListener(DirectionSetEvent.class, new DirectionSetListener(this.setupDataService));
+
+        // Data removal listener
+        manager.addListener(PlayerRemoveDataEvent.class, new PlayerRemoveDataListener(this.setupDataService));
     }
 
     /**
