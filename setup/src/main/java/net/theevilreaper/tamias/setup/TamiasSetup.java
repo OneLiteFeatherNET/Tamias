@@ -74,7 +74,7 @@ public final class TamiasSetup implements ListenerHandling {
         manager.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(initialSpawnSupplier));
         manager.addListener(AddEntityToInstanceEvent.class, new EntityAddToInstanceListener(instanceSupplier));
         manager.addListener(PlayerMapSelectEvent.class, new MapSetupSelectListener(this.setupDataService));
-        manager.addListener(SetupFinishEvent.class, new SetupFinishListener(instanceSwitcher));
+        manager.addListener(SetupFinishEvent.class, new SetupFinishListener(instanceSwitcher, setupDataService::remove));
         manager.addListener(PlayerChatEvent.class, new PlayerChatListener(this.setupDataService));
 
         // Item listener

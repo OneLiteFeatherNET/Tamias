@@ -4,6 +4,7 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.dialog.DialogAction;
 import net.minestom.server.dialog.DialogAfterAction;
 import net.minestom.server.entity.Player;
@@ -120,7 +121,7 @@ public final class MapDialogs extends DialogBase {
                     });
                 })
                 .yesButton(button -> button.width(101).label(Component.text("Save"))
-                        .action(new DialogAction.DynamicCustom(DYNAMIC_DELETE_KEY, getCategoryPayload(mapDataCategory.ordinal())))
+                        .action(new DialogAction.DynamicCustom(DYNAMIC_DELETE_KEY, getCategoryPayload(mapDataCategory.ordinal(), positionContent.point())))
                 )
                 .noButton(button -> button.width(101).label(NO_COMPONENT))
                 .build();
@@ -139,5 +140,24 @@ public final class MapDialogs extends DialogBase {
     @Contract(pure = true)
     private static CompoundBinaryTag getCategoryPayload(int id) {
         return CompoundBinaryTag.builder().putInt("category_id", id).build();
+    }
+
+    /**
+     * Returns a payload that contains the id of the frame to update alongside the point it currently holds.
+     * The point is round-tripped through the dialog so the server can verify it still matches the stored
+     * value once the deletion is confirmed.
+     *
+     * @param id    the id of the frame
+     * @param point the point currently associated with the category
+     * @return a payload
+     */
+    @Contract(pure = true)
+    private static CompoundBinaryTag getCategoryPayload(int id, Point point) {
+        return CompoundBinaryTag.builder()
+                .putInt("category_id", id)
+                .putDouble("x", point.x())
+                .putDouble("y", point.y())
+                .putDouble("z", point.z())
+                .build();
     }
 }
