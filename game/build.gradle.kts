@@ -11,6 +11,22 @@ dependencies {
     implementation(libs.atlas.projectiles)
     implementation(libs.adventure)
     implementation(libs.slf4j.api)
+
+    // CloudNet is provided by the CloudNet wrapper at runtime and its bridge is loaded as a
+    // Minestom extension (separate classloader, see the :bridge module), so :setup neither
+    // references nor bundles any CloudNet artifact.
+    implementation(platform(libs.minestom.extensions.bom))
+    implementation(libs.minestom.extensions)
+
+    // LuckPerms
+    implementation(libs.guava)
+    compileOnly(libs.luckperms.api) {
+        exclude(group = "net.kyori.adventure")
+    }
+    runtimeOnly(libs.luckperms.minestom.loader) {
+        exclude(group = "net.kyori.adventure")
+    }
+
     compileOnly(libs.minestom)
     compileOnly(libs.aves)
     compileOnly(libs.xerus)

@@ -30,7 +30,6 @@ public interface MapFilter {
     static @Unmodifiable List<MapEntry> filterMapsForGame(Stream<Path> mapStream) {
         return mapStream
                 .filter(Files::isDirectory)
-                .filter(path -> Files.exists(path.resolve(REGION_FOLDER)))
                 .filter(path -> Files.exists(path.resolve(GameConfig.MAP_FILE_NAME)))
                 .map(MapEntry::of)
                 .toList();
@@ -45,7 +44,7 @@ public interface MapFilter {
     static @Unmodifiable List<MapEntry> filterMapsForSetup(Stream<Path> mapStream) {
         return mapStream
                 .filter(Files::isDirectory)
-                .filter(path -> Files.exists(path.resolve(REGION_FOLDER)))
+                .filter(path -> Files.exists(path.resolve(REGION_FOLDER)) || Files.exists(path.resolve("dimensions")))
                 .map(MapEntry::of)
                 .toList();
     }

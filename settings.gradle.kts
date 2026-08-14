@@ -28,9 +28,16 @@ dependencyResolutionManagement {
             version("cyclonedx", "3.4.1")
             version("slf4j", "2.0.18")
             version("pica", "0.1.2")
+            version("cloudnet", "4.0.0-RC16")
+            version("luckperms", "5.5")
+            version("luckperms-minestom-loader", "5.6-SNAPSHOT")
+            version("minestom-extensions", "2.1.1")
+            library("luckperms.api", "net.luckperms", "api").versionRef("luckperms")
+            library("luckperms.minestom.loader", "net.luckperms", "minestom-loader").versionRef("luckperms-minestom-loader")
+            version("guava", "33.6.0-jre")
 
             library("game.bom", "net.onelitefeather", "aonyx-bom").versionRef("aonyx")
-
+            library("guava", "com.google.guava", "guava").versionRef("guava")
             library("slf4j.api", "org.slf4j", "slf4j-api").versionRef("slf4j")
             library("slf4j.simple", "org.slf4j", "slf4j-simple").versionRef("slf4j")
 
@@ -49,6 +56,27 @@ dependencyResolutionManagement {
 
             library("falco.bom", "net.onelitefeather", "falco-bom").version("2.1.0")
             library("falco.anvil", "net.onelitefeather", "falco-anvil").withoutVersion()
+
+            // OneLiteFeather fork of the archived hollow-cube/minestom-ce-extensions. Same
+            // packages (net.hollowcube.minestom.extensions, net.minestom.server.extensions), but
+            // extension dependencies resolve through Maven Resolver instead of the Kotlin-based
+            // DependencyGetter, so no Kotlin stdlib is needed on the class path anymore.
+            library("minestom-extensions-bom", "net.onelitefeather", "minestom-extensions-bom").versionRef("minestom-extensions")
+            library("minestom-extensions", "net.onelitefeather", "minestom-extensions").withoutVersion()
+            // Generates extension.json from @ExtensionInfo at compile time; source retention, so
+            // the annotation itself never reaches the extension jar.
+            library("minestom-extensions-processor", "net.onelitefeather", "minestom-extensions-processor").withoutVersion()
+
+
+            // CloudNet is never bundled: the wrapper provides the driver at runtime and the bridge
+            // arrives as a Minestom extension. Only the :bridge extension module compiles against it.
+            library("cloudnet-bom", "eu.cloudnetservice.cloudnet", "bom").versionRef("cloudnet")
+            library("cloudnet-bridge", "eu.cloudnetservice.cloudnet", "bridge-api").withoutVersion()
+            library("cloudnet-bridge-impl", "eu.cloudnetservice.cloudnet", "bridge-impl").withoutVersion()
+            library("cloudnet-driver-api", "eu.cloudnetservice.cloudnet", "driver-api").withoutVersion()
+            library("cloudnet-driver-impl", "eu.cloudnetservice.cloudnet", "driver-impl").withoutVersion()
+            library("cloudnet-platform-inject", "eu.cloudnetservice.cloudnet", "platform-inject-api").withoutVersion()
+            library("cloudnet-jvm-wrapper", "eu.cloudnetservice.cloudnet", "wrapper-jvm-api").withoutVersion()
 
 
             plugin("shadow", "com.gradleup.shadow").versionRef("shadow")

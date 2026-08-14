@@ -29,7 +29,7 @@ public final class SetupMapProvider extends AbstractFalcoMapProvider {
      */
     public SetupMapProvider(Path path) {
         super(GsonUtil.FILE_HANDLER, MapFilter::filterMapsForSetup);
-        loadMapEntries(path.resolve("maps"));
+        loadMapEntries(path.resolve("setup").resolve("maps"));
 
         Optional<MapEntry> lobbyEntry = getEntries().stream().filter(this::isLobbyMap).findFirst();
 

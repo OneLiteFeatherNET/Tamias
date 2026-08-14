@@ -7,6 +7,7 @@ import net.theevilreaper.aves.util.Strings;
 import net.theevilreaper.aves.util.TimeFormat;
 import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.theevilreaper.aves.util.functional.VoidConsumer;
+import net.theevilreaper.tamias.common.bootstrap.ServiceBootstrap;
 import net.theevilreaper.tamias.game.scoreboard.LobbyScoreboard;
 import net.theevilreaper.tamias.game.scoreboard.ScoreType;
 import net.theevilreaper.tamias.game.scoreboard.Scoreboard;
@@ -108,7 +109,7 @@ public class Tamias implements ListenerHandling {
     private RoundProvider roundProvider;
 
     public Tamias() {
-        Path path = Paths.get("");
+        Path path = ServiceBootstrap.resolveWorkingDirectory();
         this.gameConfig = new GameConfigReader(path.resolve("config")).getConfig();
         this.phaseSeries = new LinearPhaseSeries<>("game");
         this.teamService = TeamService.of();
