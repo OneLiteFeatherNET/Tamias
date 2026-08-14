@@ -30,6 +30,7 @@ public final class GameMapBuilder extends BaseMapBuilder {
     public GameMapBuilder() {
         this.spawnLayerBuilder = SpawnLayer.builder();
         this.areaDataBuilder = AreaData.builder();
+        this.areaDataBuilder.facing(Direction.NORTH);
     }
 
     /**

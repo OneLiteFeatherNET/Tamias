@@ -14,6 +14,7 @@ public class SetupMessages extends Messages {
     public static final Component NO_SPACE_SEPARATOR;
     public static final Component TELEPORT_CLICK;
     public static final Component DELETE_CLICK;
+    public static final Component CYCLE_CLICK;
 
     static {
         SELECT_MAP_FIRST = Messages.withPrefix(Component.text("Please select a map first before executing this function", NamedTextColor.RED));
@@ -37,6 +38,15 @@ public class SetupMessages extends Messages {
                 .append(Component.text("->", NamedTextColor.GRAY))
                 .append(Component.space())
                 .append(Component.text("delete", NamedTextColor.RED));
+        CYCLE_CLICK = NO_SPACE_SEPARATOR
+                .append(Component.space())
+                .append(Component.text("Left", NamedTextColor.GREEN))
+                .append(Component.space())
+                .append(Component.text("click", NamedTextColor.GRAY))
+                .append(Component.space())
+                .append(Component.text("->", NamedTextColor.GRAY))
+                .append(Component.space())
+                .append(Component.text("next direction", NamedTextColor.GREEN));
     }
 
     @Contract(value = "_ -> new", pure = true)
