@@ -1,8 +1,10 @@
 package net.theevilreaper.tamias.common.permissions;
 
+import net.theevilreaper.tamias.common.permission.LuckPermsSupport;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
  * Pins the assumption every other test relies on: the LuckPerms loader is kept off the test class

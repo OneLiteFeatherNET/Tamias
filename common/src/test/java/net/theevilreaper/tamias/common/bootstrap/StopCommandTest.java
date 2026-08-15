@@ -7,7 +7,7 @@ import net.minestom.server.network.player.GameProfile;
 import net.minestom.server.network.player.PlayerConnection;
 import net.minestom.testing.Env;
 import net.minestom.testing.extension.MicrotusExtension;
-import net.onelitefeather.cygnus.common.player.PermissionAwarePlayer;
+import net.theevilreaper.tamias.common.player.PermissionAwarePlayer;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
