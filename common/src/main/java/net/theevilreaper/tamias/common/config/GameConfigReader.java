@@ -21,6 +21,8 @@ import java.util.Properties;
  *     <li>gameTime</li>
  *     <li>teamSize</li>
  *     <li>maxRounds</li>
+ *     <li>ticketMultiplier</li>
+ *     <li>conversionRadius</li>
  * </ul>
  * <p>
  * If a property cannot be found in the file, the default value will be used.
@@ -110,12 +112,26 @@ public final class GameConfigReader {
             maxRounds = Integer.parseInt(properties.getProperty("maxRounds"));
         }
 
+        int ticketMultiplier = internal.ticketMultiplier();
+
+        if (properties.containsKey("ticketMultiplier")) {
+            ticketMultiplier = Integer.parseInt(properties.getProperty("ticketMultiplier"));
+        }
+
+        double conversionRadius = internal.conversionRadius();
+
+        if (properties.containsKey("conversionRadius")) {
+            conversionRadius = Double.parseDouble(properties.getProperty("conversionRadius"));
+        }
+
         configBuilder.minPlayers(minPlayers)
                 .maxPlayers(maxPlayers)
                 .lobbyTime(lobbyTime)
                 .gameTime(maxGameTime)
                 .teamSize(teamSize)
-                .maxRounds(maxRounds);
+                .maxRounds(maxRounds)
+                .ticketMultiplier(ticketMultiplier)
+                .conversionRadius(conversionRadius);
         return configBuilder.build();
     }
 }

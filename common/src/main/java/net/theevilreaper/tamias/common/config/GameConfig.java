@@ -85,6 +85,23 @@ public sealed interface GameConfig permits GameConfigImpl, InternalGameConfig {
     int maxRounds();
 
     /**
+     * Returns the number of tickets awarded per online player at round start.
+     * The online player count is multiplied by this value to size the shared
+     * bomber-respawn ticket pool for the round.
+     *
+     * @return the ticket multiplier
+     */
+    int ticketMultiplier();
+
+    /**
+     * Returns the radius, in blocks, scanned around a self-detonation blast for
+     * Survivors to convert to Bomber.
+     *
+     * @return the conversion radius
+     */
+    double conversionRadius();
+
+    /**
      * The {@link Builder} interface is used to create a new game configuration.
      * It provides methods to set the values for the configuration.
      *
@@ -142,6 +159,23 @@ public sealed interface GameConfig permits GameConfigImpl, InternalGameConfig {
          * @return the builder instance
          */
         Builder maxRounds(int maxRounds);
+
+        /**
+         * Sets the number of tickets awarded per online player at round start.
+         *
+         * @param ticketMultiplier the ticket multiplier
+         * @return the builder instance
+         */
+        Builder ticketMultiplier(int ticketMultiplier);
+
+        /**
+         * Sets the radius, in blocks, scanned around a self-detonation blast for
+         * Survivor-to-Bomber conversion.
+         *
+         * @param conversionRadius the conversion radius
+         * @return the builder instance
+         */
+        Builder conversionRadius(double conversionRadius);
 
         /**
          * Builds the game configuration.
