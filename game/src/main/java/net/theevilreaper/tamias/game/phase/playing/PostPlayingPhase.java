@@ -1,6 +1,7 @@
 package net.theevilreaper.tamias.game.phase.playing;
 
 import net.theevilreaper.aves.util.functional.VoidConsumer;
+import net.theevilreaper.tamias.game.round.event.RoundPrepareEvent;
 import net.theevilreaper.xerus.api.phase.TickDirection;
 import net.theevilreaper.xerus.api.phase.TimedPhase;
 import net.minestom.server.event.EventDispatcher;
@@ -37,7 +38,6 @@ public final class PostPlayingPhase extends TimedPhase {
     @Override
     protected void onFinish() {
         if (this.lastRoundCheck.getAsBoolean()) return;
-        //TODO: Yeet the players out of the current round
         System.out.println("Round finished");
         EventDispatcher.call(new GameCleanupEvent());
     }
@@ -49,7 +49,7 @@ public final class PostPlayingPhase extends TimedPhase {
             EventDispatcher.call(AreaSpawnTriggerEvent.empty());
         }
         if (this.getCurrentTicks() == 1) {
-            //TODO: Teleport
+            EventDispatcher.call(new RoundPrepareEvent());
         }
     }
 }
