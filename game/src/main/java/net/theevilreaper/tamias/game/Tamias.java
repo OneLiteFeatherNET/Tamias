@@ -31,6 +31,7 @@ import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEv
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.PlayerChatEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
+import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.theevilreaper.tamias.common.ListenerHandling;
@@ -42,6 +43,7 @@ import net.theevilreaper.tamias.common.event.SpawnCleanupEvent;
 import net.theevilreaper.tamias.common.event.GameCleanupEvent;
 import net.theevilreaper.tamias.common.ground.GroundData;
 import net.theevilreaper.tamias.common.ground.GroundDataRegistry;
+import net.theevilreaper.tamias.common.util.Tags;
 import net.theevilreaper.tamias.common.map.event.MapPrepareEvent;
 import net.theevilreaper.tamias.game.round.event.RoundPrepareEvent;
 import net.theevilreaper.tamias.game.attribute.AttributeHelper;
@@ -52,6 +54,7 @@ import net.theevilreaper.tamias.game.event.bomber.BomberExplodeEvent;
 import net.theevilreaper.tamias.game.event.RoleToBomberChangeEvent;
 import net.theevilreaper.tamias.game.event.bomber.BomberRequireSpawnEvent;
 import net.theevilreaper.tamias.game.listener.PlayerChatListener;
+import net.theevilreaper.tamias.game.listener.PlayerFreezeListener;
 import net.theevilreaper.tamias.game.listener.PlayerJoinListener;
 import net.theevilreaper.tamias.game.listener.PlayerQuitListener;
 import net.theevilreaper.tamias.game.listener.PlayerSpawnListener;
@@ -182,6 +185,7 @@ public class Tamias implements ListenerHandling {
         VoidConsumer startLogic = () -> {
             for (Player player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
                 AttributeHelper.enableMovement(player);
+                player.removeTag(Tags.FROZEN);
                 this.scoreboard.addViewer(player);
             }
             TeamHelper.grantRoleItems(this.teamService);
@@ -239,6 +243,7 @@ public class Tamias implements ListenerHandling {
                 )
         );
         node.addListener(PlayerChatEvent.class, new PlayerChatListener());
+        node.addListener(PlayerMoveEvent.class, new PlayerFreezeListener());
         node.addListener(MultiPlayerTeamEvent.class, new TeamActionListener());
 
         GameMapProvider gameMapProvider = (GameMapProvider) this.mapProvider;
