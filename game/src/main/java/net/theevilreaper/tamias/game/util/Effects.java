@@ -1,9 +1,12 @@
 package net.theevilreaper.tamias.game.util;
 
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.potion.Potion;
 import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.potion.TimedPotion;
+import net.theevilreaper.tamias.game.attribute.AttributeHelper;
 
 /**
  * The class contains some effects that are used during the game.
@@ -45,6 +48,20 @@ public final class Effects {
         clearEffects(player);
         player.addEffect(SLOWNESS.potion());
         player.addEffect(BLINDNESS.potion());
+    }
+
+    /**
+     * Blows up the player's position, applies the blindness effect and locks their movement.
+     * Used for both self-detonation and elimination by a Survivor's gun projectile.
+     *
+     * @param player   the player caught in the blast
+     * @param blastPos the position to explode at
+     */
+    public static void applyBlastEffects(Player player, Pos blastPos) {
+        Instance instance = player.getInstance();
+        instance.explode((float) blastPos.x(), (float) blastPos.y(), (float) blastPos.z(), 1);
+        player.addEffect(BLINDNESS.potion());
+        AttributeHelper.disableMovement(player);
     }
 
     /**

@@ -148,6 +148,10 @@ public class Tamias implements ListenerHandling {
         closeMapProvider(this.mapProvider);
     }
 
+    private void checkRoundEnd() {
+        RoundConditions.checkRoundEnd(this.phaseSeries, this.teamService, this.ticketService);
+    }
+
     /**
      * Resets the online players' exp bar/level back to their default state.
      * Called once ground building finishes; {@link net.theevilreaper.tamias.common.area.placement.AreaBasePlacement}
@@ -209,10 +213,9 @@ public class Tamias implements ListenerHandling {
         GameMapProvider gameMapProvider = (GameMapProvider) this.mapProvider;
 
         Supplier<Pos> randomPos = () -> Pos.ZERO;//gameMapProvider.getGameArea()::getRandomPosition;
-        VoidConsumer checkRoundEnd = () -> RoundConditions.checkRoundEnd(this.phaseSeries, this.teamService, this.ticketService);
         listenerMap.put(PlayerUseItemEvent.class, new PlayerInteractItemListener(staminaService::getStaminaBar));
-        listenerMap.put(BomberRequireSpawnEvent.class, new BomberReviveListener(this.staminaService::getStaminaBar, randomPos, this.ticketService, checkRoundEnd));
-        listenerMap.put(BomberExplodeEvent.class, new BomberExplodeListener(this.teamService, this.ticketService, this.gameConfig.conversionRadius(), checkRoundEnd));
+        listenerMap.put(BomberRequireSpawnEvent.class, new BomberReviveListener(this.staminaService::getStaminaBar, randomPos, this.ticketService, this::checkRoundEnd));
+        listenerMap.put(BomberExplodeEvent.class, new BomberExplodeListener(this.teamService, this.ticketService, this.gameConfig.conversionRadius(), this::checkRoundEnd));
         listenerMap.put(BomberEliminatedEvent.class, new BomberEliminatedListener(this.staminaService::getStaminaBar));
         listenerMap.put(RoleToBomberChangeEvent.class, new RoleToBomberChangeListener(this.teamService, this.staminaService, randomPos));
         listenerMap.put(ProjectileCollideWithBlockEvent.class, new ProjectileBlockListener());
@@ -226,12 +229,11 @@ public class Tamias implements ListenerHandling {
         );
         PlayerConsumer teleportConsumer = player -> this.mapProvider.teleportToSpawn(player, false);
         node.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(this.phaseSeries::getCurrentPhase, teleportConsumer, this.scoreboard::addViewer));
-        VoidConsumer checkRoundEnd = () -> RoundConditions.checkRoundEnd(this.phaseSeries, this.teamService, this.ticketService);
         node.addListener(PlayerDisconnectEvent.class,
                 new PlayerQuitListener(
                         this.phaseSeries::getCurrentPhase,
                         key -> this.teamService.getTeam(key).orElse(null),
-                        checkRoundEnd,
+                        this::checkRoundEnd,
                         this.scoreboard::removeViewer
                 )
         );
