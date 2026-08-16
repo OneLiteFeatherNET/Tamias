@@ -13,9 +13,14 @@ import java.util.Optional;
 @ApiStatus.Internal
 public final class RoundConditions {
 
-    public static void checkRoundEnd(LinearPhaseSeries<Phase> phaseSeries, TeamService teamService) {
+    public static void checkRoundEnd(LinearPhaseSeries<Phase> phaseSeries, TeamService teamService, BomberTicketService ticketService) {
         Phase currentPhase = phaseSeries.getCurrentPhase();
         if (!(currentPhase instanceof PlayingPhase)) return;
+
+        if (ticketService.isEmpty()) {
+            currentPhase.finish();
+            return;
+        }
 
         Optional<Team> survivorTeamOpt = teamService.getTeam(GameConfig.SURVIVOR_KEY);
         Optional<Team> bomberTeamOpt = teamService.getTeam(GameConfig.BOMBER_KEY);
