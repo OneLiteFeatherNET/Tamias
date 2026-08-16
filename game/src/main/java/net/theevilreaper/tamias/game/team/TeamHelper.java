@@ -66,6 +66,20 @@ public final class TeamHelper {
      * @param player the player to add
      */
     public static void addPlayerToTeam(Team team, Player player) {
+        addPlayerToTeam(team, player, true);
+    }
+
+    /**
+     * Adds a player to the target team and applies all attached team components
+     * (e.g. team key tag, TNT entity transformation), optionally deferring the team's
+     * item grant. Used by {@link #allocateTeams(TeamService)} to assign roles without
+     * handing out weapon items before the round has actually started.
+     *
+     * @param team       the team to receive the player
+     * @param player     the player to add
+     * @param grantItems whether the team's configured items should be applied immediately
+     */
+    private static void addPlayerToTeam(Team team, Player player, boolean grantItems) {
         team.addPlayer(player);
         player.setTag(Tags.TEAM_KEY, team.key().asString());
 
@@ -74,9 +88,29 @@ public final class TeamHelper {
             EntityHelper.switchToTNT(player);
         }
 
+        if (!grantItems) return;
+
         ItemComponent itemComp = team.get(ItemComponent.class);
         if (itemComp != null) {
             itemComp.itemApplier().accept(player);
+        }
+    }
+
+    /**
+     * Grants every team's configured items to its current players.
+     * Called once the round actually starts, matching the moment movement is unlocked
+     * so players can't act before the round begins even though their role is already set.
+     *
+     * @param teamService the team service providing teams
+     */
+    public static void grantRoleItems(TeamService teamService) {
+        for (Team team : teamService.getTeams()) {
+            ItemComponent itemComp = team.get(ItemComponent.class);
+            if (itemComp == null) continue;
+
+            for (Player player : team.getPlayers()) {
+                itemComp.itemApplier().accept(player);
+            }
         }
     }
 
@@ -116,26 +150,35 @@ public final class TeamHelper {
     }
 
     /**
-     * Allocates all online players into teams at game start.
-     * Exactly one random player is chosen as the initial Bomber, while all other online players join the Survivor team.
+     * Allocates all online players into teams at the start of a round.
+     * Exactly one random player is chosen as the Bomber, while all other online players join the Survivor team.
+     * Item grants are deferred - see {@link #grantRoleItems(TeamService)} - since this runs before the round
+     * actually starts.
+     * <p>
+     * Since the surrounding game loop is cyclic, this also runs again for every later round; any leftover
+     * membership/entity state from the previous round's allocation is cleared first so a player who was Bomber
+     * last round doesn't keep the TNT entity type or a stale team tag after being reassigned as Survivor.
      *
      * @param teamService the team service providing teams
      */
     public static void allocateTeams(TeamService teamService) {
         Check.argCondition(!teamService.hasTeams(), "The team service must contain teams");
 
-        Set<Player> onlinePlayers = new HashSet<>(MinecraftServer.getConnectionManager().getOnlinePlayers());
-        Player bomber = Players.getRandomPlayer()
-                .orElseThrow(() -> new IllegalStateException("No online player found for bomber allocation"));
-        onlinePlayers.remove(bomber);
-
         Team bomberTeam = teamService.getTeam(GameConfig.BOMBER_KEY)
                 .orElseThrow(() -> new IllegalStateException("Bomber team not found"));
         Team survivorTeam = teamService.getTeam(GameConfig.SURVIVOR_KEY)
                 .orElseThrow(() -> new IllegalStateException("Survivor team not found"));
 
-        addPlayerToTeam(bomberTeam, bomber);
-        onlinePlayers.forEach(survivor -> addPlayerToTeam(survivorTeam, survivor));
+        new HashSet<>(bomberTeam.getPlayers()).forEach(player -> removePlayerFromTeam(bomberTeam, player));
+        new HashSet<>(survivorTeam.getPlayers()).forEach(player -> removePlayerFromTeam(survivorTeam, player));
+
+        Set<Player> onlinePlayers = new HashSet<>(MinecraftServer.getConnectionManager().getOnlinePlayers());
+        Player bomber = Players.getRandomPlayer()
+                .orElseThrow(() -> new IllegalStateException("No online player found for bomber allocation"));
+        onlinePlayers.remove(bomber);
+
+        addPlayerToTeam(bomberTeam, bomber, false);
+        onlinePlayers.forEach(survivor -> addPlayerToTeam(survivorTeam, survivor, false));
     }
 
     private TeamHelper() {
