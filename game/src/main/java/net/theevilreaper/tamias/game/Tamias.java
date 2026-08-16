@@ -184,6 +184,7 @@ public class Tamias implements ListenerHandling {
                 AttributeHelper.enableMovement(player);
                 this.scoreboard.addViewer(player);
             }
+            TeamHelper.grantRoleItems(this.teamService);
             this.staminaService.start();
             this.ticketService.start(MinecraftServer.getConnectionManager().getOnlinePlayers().size(), this.gameConfig.ticketMultiplier());
         };
@@ -212,7 +213,7 @@ public class Tamias implements ListenerHandling {
         listenerMap.put(RoundEndEvent.class, new RoundEndListener(this.teamService::getTeams));
         GameMapProvider gameMapProvider = (GameMapProvider) this.mapProvider;
 
-        Supplier<Pos> randomPos = () -> Pos.ZERO;//gameMapProvider.getGameArea()::getRandomPosition;
+        Supplier<Pos> randomPos = gameMapProvider.getGamePlacement().getGameArea()::getRandomPosition;
         listenerMap.put(PlayerUseItemEvent.class, new PlayerInteractItemListener(staminaService::getStaminaBar));
         listenerMap.put(BomberRequireSpawnEvent.class, new BomberReviveListener(this.staminaService::getStaminaBar, randomPos, this.ticketService, this::checkRoundEnd));
         listenerMap.put(BomberExplodeEvent.class, new BomberExplodeListener(this.teamService, this.ticketService, this.gameConfig.conversionRadius(), this::checkRoundEnd));
