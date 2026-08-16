@@ -5,15 +5,15 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.sound.SoundEvent;
 import net.theevilreaper.tamias.game.attribute.AttributeHelper;
-import net.theevilreaper.tamias.game.event.BomberExplodeEvent;
-import net.theevilreaper.tamias.game.event.BomberRequireSpawnEvent;
+import net.theevilreaper.tamias.game.event.bomber.BomberExplodeEvent;
+import net.theevilreaper.tamias.game.event.bomber.BomberRequireSpawnEvent;
 
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 /**
- * The {@link ExplodeBar} is a implementation of the {@link StaminaBar} which is used from the bomber team to explode the player.
- * If the bar is empty, the player will explode and the after a certain time the player receives a new spawn position and the bar resets
+ * The {@link ExplodeBar} is an implementation of the {@link StaminaBar} which is used from the bomber team to explode the player.
+ * If the bar is empty, the player will explode and after a certain time the player receives a new spawn position and the bar resets
  *
  * @author theEvilReaper
  * @version 1.0.0
