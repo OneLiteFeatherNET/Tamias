@@ -10,6 +10,8 @@ public final class GameConfigBuilder implements GameConfig.Builder {
     private int maxGameTime;
     private int teamSize;
     private int maxRounds;
+    private int ticketMultiplier;
+    private double conversionRadius;
 
     @Override
     public GameConfig.Builder minPlayers(int minPlayers) {
@@ -53,7 +55,19 @@ public final class GameConfigBuilder implements GameConfig.Builder {
     }
 
     @Override
+    public GameConfig.Builder ticketMultiplier(int ticketMultiplier) {
+        this.ticketMultiplier = ticketMultiplier;
+        return this;
+    }
+
+    @Override
+    public GameConfig.Builder conversionRadius(double conversionRadius) {
+        this.conversionRadius = conversionRadius;
+        return this;
+    }
+
+    @Override
     public GameConfig build() {
-        return new GameConfigImpl(minPlayers, maxPlayers, lobbyTime, maxGameTime, teamSize, maxRounds);
+        return new GameConfigImpl(minPlayers, maxPlayers, lobbyTime, maxGameTime, teamSize, maxRounds, ticketMultiplier, conversionRadius);
     }
 }

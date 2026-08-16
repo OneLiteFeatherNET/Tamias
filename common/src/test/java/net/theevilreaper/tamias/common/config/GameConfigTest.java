@@ -32,4 +32,18 @@ class GameConfigTest {
         assertEquals(12, config.teamSize());
     }
 
+    @Test
+    void testTicketAndRadiusBuilderUsage() {
+        GameConfig.Builder builder = GameConfig.builder();
+        assertNotNull(builder);
+
+        builder.gameTime(500).lobbyTime(12).minPlayers(1).maxPlayers(12).teamSize(12)
+                .ticketMultiplier(5).conversionRadius(4.0);
+
+        GameConfig config = builder.build();
+
+        assertEquals(5, config.ticketMultiplier());
+        assertEquals(4.0, config.conversionRadius());
+    }
+
 }
