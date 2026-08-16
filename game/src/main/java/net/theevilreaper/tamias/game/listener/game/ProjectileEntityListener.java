@@ -1,26 +1,24 @@
 package net.theevilreaper.tamias.game.listener.game;
 
-import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEvent;
 import net.theevilreaper.tamias.common.config.GameConfig;
-import net.theevilreaper.tamias.game.stamina.StaminaBar;
 import net.theevilreaper.tamias.common.util.Tags;
-import org.jetbrains.annotations.Nullable;
+import net.theevilreaper.tamias.game.event.bomber.BomberEliminatedEvent;
 
-import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
+/**
+ * Removes the projectile on collision and, if the target is a tagged Bomber,
+ * dispatches {@link BomberEliminatedEvent}. Hits on Survivors are ignored —
+ * only self-detonation (see {@link BomberExplodeListener}) can convert a Survivor to Bomber.
+ *
+ * @author theEvilReaper
+ * @version 2.0.0
+ * @since 1.0.0
+ **/
 public final class ProjectileEntityListener implements Consumer<ProjectileCollideWithEntityEvent> {
-
-    private final PlayerConsumer teamUpdater;
-    private final Function<UUID, @Nullable StaminaBar> staminaMapper;
-
-    public ProjectileEntityListener(PlayerConsumer teamUpdater, Function<UUID, @Nullable StaminaBar> staminaMapper) {
-        this.teamUpdater = teamUpdater;
-        this.staminaMapper = staminaMapper;
-    }
 
     @Override
     public void accept(ProjectileCollideWithEntityEvent event) {
@@ -31,15 +29,8 @@ public final class ProjectileEntityListener implements Consumer<ProjectileCollid
         if (!target.hasTag(Tags.TEAM_KEY)) return;
 
         String teamKey = target.getTag(Tags.TEAM_KEY);
-        var staminaBar = staminaMapper.apply(targetPlayer.getUuid());
+        if (!GameConfig.BOMBER_KEY.asString().equals(teamKey)) return;
 
-        if (staminaBar == null) return;
-
-        if (GameConfig.BOMBER_KEY.asString().equals(teamKey)) {
-            staminaBar.triggerAction();
-            return;
-        }
-
-        this.teamUpdater.accept(targetPlayer);
+        EventDispatcher.call(new BomberEliminatedEvent(targetPlayer, targetPlayer.getPosition().asVec()));
     }
 }
