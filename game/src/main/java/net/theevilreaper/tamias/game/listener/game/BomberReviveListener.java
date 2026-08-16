@@ -55,8 +55,7 @@ public final class BomberReviveListener implements Consumer<BomberRequireSpawnEv
 
         if (!GameConfig.BOMBER_KEY.asString().equals(teamKey)) return;
 
-        boolean ticketAvailable = this.ticketService.tryConsume();
-        this.roundEndCheck.apply();
+        boolean ticketAvailable = this.ticketService.tryConsume(this.roundEndCheck);
 
         if (!ticketAvailable) {
             event.setCancelled(true);
@@ -64,12 +63,13 @@ public final class BomberReviveListener implements Consumer<BomberRequireSpawnEv
             return;
         }
 
-        if (this.spawnPos.get() == null) {
+        Pos spawnPos = this.spawnPos.get();
+        if (spawnPos == null) {
             event.setCancelled(true);
             //TODO: Light spectator mode is here required
             return;
         }
-        Pos newSpawnPos = this.spawnPos.get().add(0, 1,0);
+        Pos newSpawnPos = spawnPos.add(0, 1, 0);
 
         ExplodeBar staminaBar = (ExplodeBar) this.barGetter.apply(player);
         staminaBar.resetToDefaults();

@@ -5,15 +5,13 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
-import net.minestom.server.potion.Potion;
-import net.minestom.server.potion.PotionEffect;
 import net.theevilreaper.aves.util.functional.VoidConsumer;
 import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.common.util.Tags;
-import net.theevilreaper.tamias.game.attribute.AttributeHelper;
 import net.theevilreaper.tamias.game.event.bomber.BomberExplodeEvent;
 import net.theevilreaper.tamias.game.round.BomberTicketService;
 import net.theevilreaper.tamias.game.team.TeamHelper;
+import net.theevilreaper.tamias.game.util.Effects;
 import net.theevilreaper.xerus.api.team.TeamService;
 
 import java.util.function.Consumer;
@@ -30,7 +28,7 @@ import java.util.function.Consumer;
 @SuppressWarnings("java:S3252")
 public final class BomberExplodeListener implements Consumer<BomberExplodeEvent> {
 
-    private static final Potion BLINDNESS = new Potion(PotionEffect.BLINDNESS, (byte) 1, Integer.MAX_VALUE);
+    private static final String SURVIVOR_KEY = GameConfig.SURVIVOR_KEY.asString();
 
     private final TeamService teamService;
     private final BomberTicketService ticketService;
@@ -54,11 +52,10 @@ public final class BomberExplodeListener implements Consumer<BomberExplodeEvent>
         Player player = event.getPlayer();
         Instance instance = player.getInstance();
         Pos pos = player.getPosition().asPos();
-        instance.explode((float) pos.x(), (float) pos.y(), (float) pos.z(), 1);
-        player.addEffect(BLINDNESS);
-        AttributeHelper.disableMovement(player);
+        Effects.applyBlastEffects(player, pos);
 
         this.convertNearbySurvivors(instance, event.getPosition());
+        this.roundEndCheck.apply();
     }
 
     /**
@@ -72,11 +69,9 @@ public final class BomberExplodeListener implements Consumer<BomberExplodeEvent>
         for (Entity nearby : instance.getNearbyEntities(blastPos, this.conversionRadius)) {
             if (!(nearby instanceof Player survivor)) continue;
             if (!survivor.hasTag(Tags.TEAM_KEY)) continue;
-            if (!GameConfig.SURVIVOR_KEY.asString().equals(survivor.getTag(Tags.TEAM_KEY))) continue;
+            if (!SURVIVOR_KEY.equals(survivor.getTag(Tags.TEAM_KEY))) continue;
 
-            boolean ticketAvailable = this.ticketService.tryConsume();
-            this.roundEndCheck.apply();
-            if (!ticketAvailable) return;
+            if (!this.ticketService.tryConsume()) return;
 
             TeamHelper.switchToTNTTeam(this.teamService, survivor);
         }
