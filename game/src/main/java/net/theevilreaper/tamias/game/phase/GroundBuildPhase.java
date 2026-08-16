@@ -3,9 +3,11 @@ package net.theevilreaper.tamias.game.phase;
 import net.theevilreaper.aves.util.functional.VoidConsumer;
 import net.theevilreaper.tamias.common.area.GameAreaHelper;
 import net.theevilreaper.tamias.common.area.holder.GamePlacement;
+import net.theevilreaper.tamias.game.attribute.AttributeHelper;
 import net.theevilreaper.xerus.api.phase.GamePhase;
 import net.kyori.adventure.audience.Audience;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.Player;
 import net.theevilreaper.tamias.common.event.AreaFinishBuildEvent;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -50,6 +52,10 @@ public final class GroundBuildPhase extends GamePhase {
 
     @Override
     protected void onStart() {
+        for (Player player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+            AttributeHelper.disableMovement(player);
+        }
+
         MinecraftServer.getSchedulerManager().buildTask(() -> {
             Audience.audience(MinecraftServer.getConnectionManager().getOnlinePlayers())
                     .sendMessage(MAP_BUILDING);
