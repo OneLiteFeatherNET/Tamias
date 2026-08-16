@@ -1,4 +1,4 @@
-package net.theevilreaper.tamias.game.event;
+package net.theevilreaper.tamias.game.event.bomber;
 
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
