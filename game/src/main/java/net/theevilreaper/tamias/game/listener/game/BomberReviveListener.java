@@ -7,10 +7,12 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.potion.TimedPotion;
 import net.minestom.server.sound.SoundEvent;
+import net.theevilreaper.aves.util.functional.VoidConsumer;
 import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.common.util.Tags;
 import net.theevilreaper.tamias.game.attribute.AttributeHelper;
-import net.theevilreaper.tamias.game.event.BomberRequireSpawnEvent;
+import net.theevilreaper.tamias.game.event.bomber.BomberRequireSpawnEvent;
+import net.theevilreaper.tamias.game.round.BomberTicketService;
 import net.theevilreaper.tamias.game.stamina.ExplodeBar;
 import net.theevilreaper.tamias.game.stamina.StaminaBar;
 import net.theevilreaper.tamias.game.util.Items;
@@ -28,10 +30,19 @@ public final class BomberReviveListener implements Consumer<BomberRequireSpawnEv
 
     private final Function<Player, StaminaBar> barGetter;
     private final Supplier<Pos> spawnPos;
+    private final BomberTicketService ticketService;
+    private final VoidConsumer roundEndCheck;
 
-    public BomberReviveListener(Function<Player, StaminaBar> barGetter, Supplier<Pos>  spawnPos) {
+    public BomberReviveListener(
+            Function<Player, StaminaBar> barGetter,
+            Supplier<Pos> spawnPos,
+            BomberTicketService ticketService,
+            VoidConsumer roundEndCheck
+    ) {
         this.barGetter = barGetter;
         this.spawnPos = spawnPos;
+        this.ticketService = ticketService;
+        this.roundEndCheck = roundEndCheck;
     }
 
     @Override
@@ -43,6 +54,15 @@ public final class BomberReviveListener implements Consumer<BomberRequireSpawnEv
         String teamKey = player.getTag(Tags.TEAM_KEY);
 
         if (!GameConfig.BOMBER_KEY.asString().equals(teamKey)) return;
+
+        boolean ticketAvailable = this.ticketService.tryConsume();
+        this.roundEndCheck.apply();
+
+        if (!ticketAvailable) {
+            event.setCancelled(true);
+            //TODO: Light spectator mode is here required
+            return;
+        }
 
         if (this.spawnPos.get() == null) {
             event.setCancelled(true);
