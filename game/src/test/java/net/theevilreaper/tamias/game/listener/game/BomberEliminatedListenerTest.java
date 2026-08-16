@@ -3,8 +3,10 @@ package net.theevilreaper.tamias.game.listener.game;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.event.EventListener;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.potion.PotionEffect;
 import net.minestom.testing.Env;
 import net.minestom.testing.FlexibleListener;
 import net.minestom.testing.extension.MicrotusExtension;
@@ -45,6 +47,17 @@ class BomberEliminatedListenerTest {
 
         listener.accept(new BomberEliminatedEvent(player, player.getPosition().asVec()));
 
+        // Respawn is delayed (mirrors self-detonation's regen window) so the blast/blindness
+        // treatment applied on elimination is actually visible before the respawn fires.
+        assertFalse(fired.get());
+        assertEquals(0.0, player.getAttribute(Attribute.MOVEMENT_SPEED).getBaseValue());
+        assertTrue(player.getActiveEffects().stream()
+                .anyMatch(effect -> effect.potion().effect() == PotionEffect.BLINDNESS));
+
+        for (int i = 0; i < 30 && !fired.get(); i++) {
+            env.tick();
+        }
+
         assertTrue(fired.get());
 
         env.destroyInstance(instance, true);
@@ -65,7 +78,15 @@ class BomberEliminatedListenerTest {
 
         listener.accept(new BomberEliminatedEvent(player, player.getPosition().asVec()));
 
+        for (int i = 0; i < 30; i++) {
+            env.tick();
+        }
+
         assertFalse(fired.get());
+        // The bar guard must run before any blast/blindness/movement-lock is applied,
+        // otherwise a player with no ExplodeBar gets soft-locked with no way to respawn.
+        assertTrue(player.getActiveEffects().isEmpty());
+        assertEquals(0.1, player.getAttribute(Attribute.MOVEMENT_SPEED).getBaseValue(), 0.0001);
 
         MinecraftServer.getGlobalEventHandler().removeListener(rawListener);
         env.destroyInstance(instance, true);

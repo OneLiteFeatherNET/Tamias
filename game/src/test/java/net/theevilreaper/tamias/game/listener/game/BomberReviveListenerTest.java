@@ -81,6 +81,32 @@ class BomberReviveListenerTest {
     }
 
     @Test
+    void testTicketPreservedWhenSpawnPosMissing(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player player = env.createPlayer(instance, Pos.ZERO);
+        player.setTag(Tags.TEAM_KEY, GameConfig.BOMBER_KEY.asString());
+
+        StaminaBar staminaBar = StaminaFactory.createExplodeBar(player);
+        ExplodeBar explodeBar = (ExplodeBar) staminaBar;
+
+        BomberTicketService ticketService = new BomberTicketService();
+        ticketService.start(1, 1);
+        AtomicInteger roundEndChecks = new AtomicInteger(0);
+
+        BomberReviveListener listener = new BomberReviveListener(p -> explodeBar, () -> null, ticketService, roundEndChecks::incrementAndGet);
+
+        BomberRequireSpawnEvent event = new BomberRequireSpawnEvent(player, explodeBar);
+        listener.accept(event);
+
+        assertTrue(event.isCancelled());
+        assertFalse(ticketService.isEmpty());
+        assertEquals(1, ticketService.getRemaining());
+        assertEquals(0, roundEndChecks.get());
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
     void testNonBomberIsIgnored(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
         Player player = env.createPlayer(instance, Pos.ZERO);
