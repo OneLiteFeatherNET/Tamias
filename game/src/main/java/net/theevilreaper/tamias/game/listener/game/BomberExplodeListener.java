@@ -1,6 +1,5 @@
 package net.theevilreaper.tamias.game.listener.game;
 
-import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
@@ -51,10 +50,10 @@ public final class BomberExplodeListener implements Consumer<BomberExplodeEvent>
     public void accept(BomberExplodeEvent event) {
         Player player = event.getPlayer();
         Instance instance = player.getInstance();
-        Pos pos = player.getPosition().asPos();
-        Effects.applyBlastEffects(player, pos);
+        Vec blastPos = event.getPosition();
+        Effects.applyBlastEffects(player, blastPos.asPos());
 
-        this.convertNearbySurvivors(instance, event.getPosition());
+        this.convertNearbySurvivors(instance, blastPos);
         this.roundEndCheck.apply();
     }
 

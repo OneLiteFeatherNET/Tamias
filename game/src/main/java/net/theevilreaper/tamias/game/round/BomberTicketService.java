@@ -1,7 +1,5 @@
 package net.theevilreaper.tamias.game.round;
 
-import net.theevilreaper.aves.util.functional.VoidConsumer;
-
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -40,19 +38,6 @@ public final class BomberTicketService {
      */
     public boolean tryConsume() {
         return this.tickets.getAndUpdate(current -> current > 0 ? current - 1 : current) > 0;
-    }
-
-    /**
-     * Attempts to consume one ticket from the pool and always runs the round-end check
-     * afterward, since exhausting the pool here is itself a round-end condition.
-     *
-     * @param roundEndCheck invoked unconditionally after the consume attempt
-     * @return {@code true} if a ticket was available and consumed, {@code false} if the pool was already empty
-     */
-    public boolean tryConsume(VoidConsumer roundEndCheck) {
-        boolean ticketAvailable = tryConsume();
-        roundEndCheck.apply();
-        return ticketAvailable;
     }
 
     /**
