@@ -157,6 +157,15 @@ public final class GamePlacement implements Placement {
     }
 
     /**
+     * Returns the game area backing this placement.
+     *
+     * @return the game area
+     */
+    public GameArea getGameArea() {
+        return this.area;
+    }
+
+    /**
      * Drops a random amount of TNT onto the ground area.
      * Candidates are picked from the whole known area (not just what the ground placement has
      * placed so far) so the spread covers the entire map even while ground placement - which fills
