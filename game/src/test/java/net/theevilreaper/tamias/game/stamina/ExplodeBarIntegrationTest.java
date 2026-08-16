@@ -13,7 +13,7 @@ import net.minestom.testing.FlexibleListener;
 import net.minestom.testing.TestConnection;
 import net.minestom.testing.extension.MicrotusExtension;
 import net.theevilreaper.tamias.common.explosion.ExplosionCreator;
-import net.theevilreaper.tamias.game.event.BomberRequireSpawnEvent;
+import net.theevilreaper.tamias.game.event.bomber.BomberRequireSpawnEvent;
 import net.theevilreaper.tamias.game.stamina.StaminaBar.Status;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
