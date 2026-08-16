@@ -8,7 +8,6 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.theevilreaper.tamias.game.phase.LobbyPhase;
 import net.theevilreaper.tamias.game.util.GameMessages;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -34,9 +33,9 @@ public final class PlayerSpawnListener implements Consumer<PlayerSpawnEvent> {
      * @param scoreboardConsumer a consumer that handles scoreboard updates for the player
      */
     public PlayerSpawnListener(
-            @NotNull Supplier<Phase> phaseSupplier,
-            @NotNull PlayerConsumer spawnConsumer,
-            @NotNull PlayerConsumer scoreboardConsumer
+            Supplier<Phase> phaseSupplier,
+            PlayerConsumer spawnConsumer,
+            PlayerConsumer scoreboardConsumer
     ) {
         this.phaseSupplier = phaseSupplier;
         this.spawnConsumer = spawnConsumer;
@@ -44,7 +43,7 @@ public final class PlayerSpawnListener implements Consumer<PlayerSpawnEvent> {
     }
 
     @Override
-    public void accept(@NotNull PlayerSpawnEvent event) {
+    public void accept(PlayerSpawnEvent event) {
         Player player = event.getPlayer();
         player.setDisplayName(Component.text(player.getUsername()));
 

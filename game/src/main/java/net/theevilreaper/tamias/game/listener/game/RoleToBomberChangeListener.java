@@ -9,7 +9,6 @@ import net.theevilreaper.tamias.game.stamina.StaminaService;
 import net.theevilreaper.tamias.game.team.component.StaminaComponent;
 import net.theevilreaper.xerus.api.team.Team;
 import net.theevilreaper.xerus.api.team.TeamService;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -20,14 +19,14 @@ public final class RoleToBomberChangeListener implements Consumer<RoleToBomberCh
     private final StaminaService staminaService;
     private final Supplier<Pos> spawnSupplier;
 
-    public RoleToBomberChangeListener(@NotNull TeamService teamService, @NotNull StaminaService staminaService, @NotNull Supplier<Pos> spawnSupplier) {
+    public RoleToBomberChangeListener(TeamService teamService, StaminaService staminaService, Supplier<Pos> spawnSupplier) {
         this.teamService = teamService;
         this.staminaService = staminaService;
         this.spawnSupplier = spawnSupplier;
     }
 
     @Override
-    public void accept(@NotNull RoleToBomberChangeEvent event) {
+    public void accept(RoleToBomberChangeEvent event) {
         Player player = event.getPlayer();
 
         Pos spawnPos = this.spawnSupplier.get();

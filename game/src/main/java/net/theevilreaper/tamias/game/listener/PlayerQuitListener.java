@@ -12,7 +12,6 @@ import net.theevilreaper.tamias.common.util.Tags;
 import net.theevilreaper.tamias.game.phase.LobbyPhase;
 import net.theevilreaper.tamias.game.phase.playing.PlayingPhase;
 import net.theevilreaper.tamias.game.util.GameMessages;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -37,10 +36,10 @@ public final class PlayerQuitListener implements Consumer<PlayerDisconnectEvent>
     private final PlayerConsumer scoreboardConsumer;
 
     public PlayerQuitListener(
-            @NotNull Supplier<Phase> phaseSupplier,
-            @NotNull Function<Key, Team> teamFunction,
-            @NotNull VoidConsumer roundEndCheck,
-            @NotNull PlayerConsumer scoreboardConsumer
+            Supplier<Phase> phaseSupplier,
+            Function<Key, Team> teamFunction,
+            VoidConsumer roundEndCheck,
+            PlayerConsumer scoreboardConsumer
     ) {
         this.phaseSupplier = phaseSupplier;
         this.teamFunction = teamFunction;
@@ -49,7 +48,7 @@ public final class PlayerQuitListener implements Consumer<PlayerDisconnectEvent>
     }
 
     @Override
-    public void accept(@NotNull PlayerDisconnectEvent event) {
+    public void accept(PlayerDisconnectEvent event) {
         Phase phase = phaseSupplier.get();
 
         if (phase == null) return;
@@ -69,7 +68,7 @@ public final class PlayerQuitListener implements Consumer<PlayerDisconnectEvent>
      * @param playingPhase the phase reference
      * @param player       the involved player
      */
-    private void handleGameQuit(@NotNull PlayingPhase playingPhase, @NotNull Player player) {
+    private void handleGameQuit(PlayingPhase playingPhase, Player player) {
         if (!player.hasTag(Tags.TEAM_KEY)) return;
 
         String teamKeyStr = player.getTag(Tags.TEAM_KEY);
@@ -86,7 +85,7 @@ public final class PlayerQuitListener implements Consumer<PlayerDisconnectEvent>
      * @param lobbyPhase the reference from the phase
      * @param player     the player which is involved
      */
-    private void handleLobbyQuit(@NotNull LobbyPhase lobbyPhase, @NotNull Player player) {
+    private void handleLobbyQuit(LobbyPhase lobbyPhase, Player player) {
         lobbyPhase.checkStopCondition();
         Audience.audience(getConnectionManager().getOnlinePlayers()).sendMessage(GameMessages.getLeaveMessage(player));
         this.scoreboardConsumer.accept(player);
@@ -95,7 +94,7 @@ public final class PlayerQuitListener implements Consumer<PlayerDisconnectEvent>
     /**
      * @param player
      */
-    private void handleGeneralQuit(@NotNull Player player) {
+    private void handleGeneralQuit(Player player) {
 
     }
 }

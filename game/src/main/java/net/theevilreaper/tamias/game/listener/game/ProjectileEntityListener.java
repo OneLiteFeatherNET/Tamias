@@ -6,7 +6,6 @@ import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEv
 import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.game.stamina.StaminaBar;
 import net.theevilreaper.tamias.common.util.Tags;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
@@ -16,9 +15,9 @@ import java.util.function.Function;
 public final class ProjectileEntityListener implements Consumer<ProjectileCollideWithEntityEvent> {
 
     private final PlayerConsumer teamUpdater;
-    private final Function<@NotNull UUID, @Nullable StaminaBar> staminaMapper;
+    private final Function<UUID, @Nullable StaminaBar> staminaMapper;
 
-    public ProjectileEntityListener(@NotNull PlayerConsumer teamUpdater, Function<@NotNull UUID, @Nullable StaminaBar> staminaMapper) {
+    public ProjectileEntityListener(PlayerConsumer teamUpdater, Function<UUID, @Nullable StaminaBar> staminaMapper) {
         this.teamUpdater = teamUpdater;
         this.staminaMapper = staminaMapper;
     }
