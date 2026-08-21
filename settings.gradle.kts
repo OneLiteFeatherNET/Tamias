@@ -28,7 +28,7 @@ dependencyResolutionManagement {
             version("cyclonedx", "3.4.1")
             version("slf4j", "2.0.18")
             version("pica", "0.1.2")
-            version("cloudnet", "4.0.0-RC16")
+            version("cloudnet", "4.0.0-RC17")
             version("luckperms", "5.5")
             version("luckperms-minestom-loader", "5.6-SNAPSHOT")
             version("minestom-extensions", "2.1.1")
