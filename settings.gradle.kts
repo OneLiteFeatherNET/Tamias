@@ -34,7 +34,7 @@ dependencyResolutionManagement {
             version("minestom-extensions", "2.2.0")
             library("luckperms.api", "net.luckperms", "api").versionRef("luckperms")
             library("luckperms.minestom.loader", "net.luckperms", "minestom-loader").versionRef("luckperms-minestom-loader")
-            version("guava", "33.6.0-jre")
+            version("guava", "33.7.1-jre")
 
             library("game.bom", "net.onelitefeather", "aonyx-bom").versionRef("aonyx")
             library("guava", "com.google.guava", "guava").versionRef("guava")
