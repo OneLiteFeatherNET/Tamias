@@ -31,7 +31,7 @@ dependencyResolutionManagement {
             version("cloudnet", "4.0.0-RC17")
             version("luckperms", "5.5")
             version("luckperms-minestom-loader", "5.6-SNAPSHOT")
-            version("minestom-extensions", "2.1.1")
+            version("minestom-extensions", "2.2.0")
             library("luckperms.api", "net.luckperms", "api").versionRef("luckperms")
             library("luckperms.minestom.loader", "net.luckperms", "minestom-loader").versionRef("luckperms-minestom-loader")
             version("guava", "33.6.0-jre")
