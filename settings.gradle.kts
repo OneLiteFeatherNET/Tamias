@@ -26,7 +26,7 @@ dependencyResolutionManagement {
             version("projectiles", "2.1.6")
             version("aonyx", "0.8.7")
             version("cyclonedx", "3.4.1")
-            version("slf4j", "2.0.18")
+            version("slf4j", "2.0.19")
             version("pica", "0.1.3")
             version("cloudnet", "4.0.0-RC17")
             version("luckperms", "5.5")
