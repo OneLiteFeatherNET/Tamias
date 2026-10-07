@@ -54,7 +54,7 @@ dependencyResolutionManagement {
             library("aves", "net.theevilreaper", "aves").withoutVersion()
             library("xerus", "net.theevilreaper", "xerus").withoutVersion()
 
-            library("falco.bom", "net.onelitefeather", "falco-bom").version("2.1.0")
+            library("falco.bom", "net.onelitefeather", "falco-bom").version("3.0.0")
             library("falco.anvil", "net.onelitefeather", "falco-anvil").withoutVersion()
 
             // OneLiteFeather fork of the archived hollow-cube/minestom-ce-extensions. Same
