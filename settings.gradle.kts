@@ -24,7 +24,7 @@ dependencyResolutionManagement {
         create("libs") {
             version("shadow", "9.6.1")
             version("projectiles", "3.0.0")
-            version("aonyx", "0.8.7")
+            version("aonyx", "0.8.8")
             version("cyclonedx", "3.5.1")
             version("slf4j", "2.0.20")
             version("pica", "0.1.3")
