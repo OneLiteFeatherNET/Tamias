@@ -13,6 +13,7 @@ import net.theevilreaper.tamias.game.attribute.AttributeHelper;
 import net.theevilreaper.tamias.game.event.BomberRequireSpawnEvent;
 import net.theevilreaper.tamias.game.stamina.ExplodeBar;
 import net.theevilreaper.tamias.game.stamina.StaminaBar;
+import net.theevilreaper.tamias.game.util.EntityHelper;
 import net.theevilreaper.tamias.game.util.Items;
 
 import java.util.ArrayList;
@@ -62,7 +63,8 @@ public final class BomberReviveListener implements Consumer<BomberRequireSpawnEv
         Instance instance = player.getInstance();
         instance.setBlock(newSpawnPos, Block.AIR);
 
-        player.teleport(newSpawnPos.add(0.5, 1, 0.5));
+        // Stand exactly where the removed TNT block was, so the disguise replaces it seamlessly
+        player.teleport(newSpawnPos.add(0.5, 0, 0.5)).thenRun(() -> EntityHelper.switchToTNT(player));
         player.playSound(RESPAWN);
         AttributeHelper.enableMovement(player);
         Items.setBombItem(player);
