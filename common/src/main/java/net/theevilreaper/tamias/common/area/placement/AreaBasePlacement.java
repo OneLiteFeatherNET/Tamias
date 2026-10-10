@@ -103,7 +103,7 @@ public abstract non-sealed class AreaBasePlacement<T extends Point> implements A
     @SuppressWarnings("unchecked")
     public void updatePositions(List<Vec> positions) {
         this.blockPositions.clear();
-        this.blockPositions.addAll((List<T>) (List<?>) positions);
+        this.blockPositions.addAll((List<T>) positions);
     }
 
     /**

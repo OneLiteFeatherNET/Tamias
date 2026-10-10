@@ -7,7 +7,6 @@ import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.common.map.GameMap;
 import net.theevilreaper.xerus.api.team.Team;
 import net.theevilreaper.xerus.api.team.TeamService;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;

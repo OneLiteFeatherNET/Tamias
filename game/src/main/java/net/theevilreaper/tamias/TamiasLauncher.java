@@ -1,7 +1,6 @@
 package net.theevilreaper.tamias;
 
 import net.hollowcube.minestom.extensions.ExtensionBootstrap;
-import net.minestom.server.MinecraftServer;
 import net.theevilreaper.tamias.common.bootstrap.ServiceBootstrap;
 import net.theevilreaper.tamias.common.permission.LuckPermsSupport;
 import net.theevilreaper.tamias.game.Tamias;
