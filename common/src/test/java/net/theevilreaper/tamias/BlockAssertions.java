@@ -37,11 +37,15 @@ public class BlockAssertions {
      * @param given    the given positions
      * @param <T>      the type of the position
      */
-    public static <T extends Point> void assertPostions(@NotNull Set<T> expected, @NotNull Set<T> given) {
+    public static <T extends Point> void assertPositions(@NotNull Set<T> expected, @NotNull Set<T> given) {
         assertEquals(expected.size(), given.size());
 
         for (T point : expected) {
             assertTrue(given.contains(point), "The position " + point + " should be in the area");
         }
+    }
+
+    private BlockAssertions() {
+        // Nothing to do here
     }
 }
