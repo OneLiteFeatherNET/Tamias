@@ -3,11 +3,9 @@ package net.theevilreaper.tamias.game.phase;
 import net.theevilreaper.aves.util.functional.VoidConsumer;
 import net.theevilreaper.tamias.common.area.GameAreaHelper;
 import net.theevilreaper.tamias.common.area.holder.GamePlacement;
-import net.theevilreaper.tamias.common.util.Tags;
 import net.theevilreaper.xerus.api.phase.GamePhase;
 import net.kyori.adventure.audience.Audience;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.entity.Player;
 import net.theevilreaper.tamias.common.event.AreaFinishBuildEvent;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -52,10 +50,8 @@ public final class GroundBuildPhase extends GamePhase {
 
     @Override
     protected void onStart() {
-        for (Player player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
-            player.setTag(Tags.FROZEN, true);
-        }
-
+        // Players are already frozen by RoundPrepareListener, which always runs right before this
+        // phase starts (LobbyPhase for round 1, PostPlayingPhase for every later round).
         MinecraftServer.getSchedulerManager().buildTask(() -> {
             Audience.audience(MinecraftServer.getConnectionManager().getOnlinePlayers())
                     .sendMessage(MAP_BUILDING);
