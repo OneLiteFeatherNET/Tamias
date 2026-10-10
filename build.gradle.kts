@@ -3,5 +3,5 @@ plugins {
 }
 
 allprojects {
-    version = (version as String).substringBefore('#').trim()
+    version = "0.0.1" // x-release-please-version
 }
