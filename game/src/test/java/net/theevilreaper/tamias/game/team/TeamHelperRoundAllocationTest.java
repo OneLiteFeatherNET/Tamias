@@ -1,5 +1,6 @@
 package net.theevilreaper.tamias.game.team;
 
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
@@ -39,7 +40,8 @@ class TeamHelperRoundAllocationTest {
         TeamHelper.addPlayerToTeam(bomberTeam, playerA);
         TeamHelper.addPlayerToTeam(survivorTeam, playerB);
 
-        TeamHelper.allocateTeams(teamService);
+        Pos bomberSpawn = new Pos(5, 0, 5);
+        TeamHelper.allocateTeams(teamService, () -> bomberSpawn);
 
         // Exactly one player per team - nobody is left double-booked from the previous round.
         assertEquals(1, bomberTeam.getPlayers().size());
@@ -47,6 +49,8 @@ class TeamHelperRoundAllocationTest {
 
         Player newBomber = bomberTeam.getPlayers().iterator().next();
         Player newSurvivor = survivorTeam.getPlayers().iterator().next();
+
+        assertTrue(bomberSpawn.samePoint(newBomber.getPosition()));
 
         // Whoever ends up Survivor must not still be rendered as TNT from a past round.
         assertEquals(EntityType.TNT, newBomber.getEntityType());

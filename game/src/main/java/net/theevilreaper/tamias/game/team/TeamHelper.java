@@ -1,6 +1,7 @@
 package net.theevilreaper.tamias.game.team;
 
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
@@ -22,6 +23,7 @@ import net.theevilreaper.xerus.api.team.TeamService;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * Utility class providing helper methods to load, find, assign, and manage teams.
@@ -158,10 +160,18 @@ public final class TeamHelper {
      * Since the surrounding game loop is cyclic, this also runs again for every later round; any leftover
      * membership/entity state from the previous round's allocation is cleared first so a player who was Bomber
      * last round doesn't keep the TNT entity type or a stale team tag after being reassigned as Survivor.
+     * <p>
+     * The chosen Bomber is teleported to {@code bomberSpawnSupplier}'s position (a spot inside the built arena)
+     * instead of staying wherever {@link #removePlayerFromTeam} + {@link #addPlayerToTeam} left them - the same
+     * spawn a mid-round conversion gets via {@link RoleToBomberChangeEvent}. The stamina-bar swap that event also
+     * does is intentionally skipped here: {@link net.theevilreaper.tamias.game.stamina.event.StaminaCreateEvent}
+     * fires a few ticks later and would otherwise recreate (and leak) the bar this method just started.
      *
-     * @param teamService the team service providing teams
+     * @param teamService        the team service providing teams
+     * @param bomberSpawnSupplier supplies the Bomber's spawn position; a {@code null} result leaves them at their
+     *                            current position
      */
-    public static void allocateTeams(TeamService teamService) {
+    public static void allocateTeams(TeamService teamService, Supplier<Pos> bomberSpawnSupplier) {
         Check.argCondition(!teamService.hasTeams(), "The team service must contain teams");
 
         Team bomberTeam = teamService.getTeam(GameConfig.BOMBER_KEY)
@@ -179,6 +189,11 @@ public final class TeamHelper {
 
         addPlayerToTeam(bomberTeam, bomber, false);
         onlinePlayers.forEach(survivor -> addPlayerToTeam(survivorTeam, survivor, false));
+
+        Pos spawnPos = bomberSpawnSupplier.get();
+        if (spawnPos != null) {
+            bomber.teleport(spawnPos);
+        }
     }
 
     private TeamHelper() {

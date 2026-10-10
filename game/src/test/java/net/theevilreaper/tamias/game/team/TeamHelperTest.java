@@ -48,7 +48,7 @@ class TeamHelperTest {
         TeamService emptyService = TeamService.of();
         assertThrowsExactly(
                 IllegalArgumentException.class,
-                () -> TeamHelper.allocateTeams(emptyService),
+                () -> TeamHelper.allocateTeams(emptyService, () -> null),
                 "The team service must contain teams"
         );
     }

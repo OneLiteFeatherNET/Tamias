@@ -1,6 +1,7 @@
 package net.theevilreaper.tamias.common.area.holder;
 
 import net.minestom.server.coordinate.Point;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
@@ -12,6 +13,7 @@ import net.theevilreaper.tamias.common.area.placement.SweepAreaPlacement;
 import net.theevilreaper.tamias.common.area.placement.TNTPlacement;
 import net.theevilreaper.tamias.common.ground.GroundData;
 import net.theevilreaper.tamias.common.ground.GroundDataRegistry;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -157,12 +159,17 @@ public final class GamePlacement implements Placement {
     }
 
     /**
-     * Returns the game area backing this placement.
+     * Returns a random position among the TNT blocks currently placed in the world by {@link #dropTnt}.
+     * Used to give a Bomber a spawn point that's actually inside the built arena.
      *
-     * @return the game area
+     * @return a random TNT position, or {@code null} if none are currently placed
      */
-    public GameArea getGameArea() {
-        return this.area;
+    public @Nullable Pos getRandomTntPosition() {
+        Set<Vec> placed = this.tntPlacement.getPlacedPositions();
+        if (placed.isEmpty()) return null;
+
+        List<Vec> positions = new ArrayList<>(placed);
+        return positions.get(ThreadLocalRandom.current().nextInt(positions.size())).asPos();
     }
 
     /**

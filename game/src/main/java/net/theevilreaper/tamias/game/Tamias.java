@@ -169,6 +169,7 @@ public class Tamias implements ListenerHandling {
 
     private void createPhaseStructure() {
         GameMapProvider gameMapProvider = (GameMapProvider) this.mapProvider;
+        Supplier<Pos> randomPos = gameMapProvider.getGamePlacement()::getRandomTntPosition;
 
         this.phaseSeries.add(new LobbyPhase(new LobbyPhaseData(this.timeUpdater, this.gameConfig)));
 
@@ -180,7 +181,7 @@ public class Tamias implements ListenerHandling {
             return this::resetPlayerBuildProgress;
         }, gameMapProvider.getGamePlacement()));
 
-        gameSeries.add(new PrePlayingPhase(this.teamService));
+        gameSeries.add(new PrePlayingPhase(this.teamService, randomPos));
 
         VoidConsumer startLogic = () -> {
             for (Player player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
@@ -217,7 +218,7 @@ public class Tamias implements ListenerHandling {
         listenerMap.put(RoundEndEvent.class, new RoundEndListener(this.teamService::getTeams));
         GameMapProvider gameMapProvider = (GameMapProvider) this.mapProvider;
 
-        Supplier<Pos> randomPos = gameMapProvider.getGamePlacement().getGameArea()::getRandomPosition;
+        Supplier<Pos> randomPos = gameMapProvider.getGamePlacement()::getRandomTntPosition;
         listenerMap.put(PlayerUseItemEvent.class, new PlayerInteractItemListener(staminaService::getStaminaBar));
         listenerMap.put(BomberRequireSpawnEvent.class, new BomberReviveListener(this.staminaService::getStaminaBar, randomPos, this.ticketService, this::checkRoundEnd));
         listenerMap.put(BomberExplodeEvent.class, new BomberExplodeListener(this.teamService, this.ticketService, this.gameConfig.conversionRadius(), this::checkRoundEnd));

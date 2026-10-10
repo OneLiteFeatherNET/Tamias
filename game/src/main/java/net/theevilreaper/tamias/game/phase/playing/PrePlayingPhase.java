@@ -1,6 +1,7 @@
 package net.theevilreaper.tamias.game.phase.playing;
 
 import net.kyori.adventure.text.Component;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.theevilreaper.tamias.game.stamina.event.StaminaCreateEvent;
@@ -12,6 +13,7 @@ import net.theevilreaper.xerus.api.team.TeamService;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.temporal.ChronoUnit;
+import java.util.function.Supplier;
 
 /**
  * The {@link PrePlayingPhase} deals each code logic that should be executed before the {@link PlayingPhase} begins.
@@ -24,23 +26,26 @@ import java.time.temporal.ChronoUnit;
 public final class PrePlayingPhase extends TimedPhase {
 
     private final TeamService teamService;
+    private final Supplier<Pos> bomberSpawnSupplier;
 
     /**
      * Creates a new instance from the phase
      *
-     * @param teamService the service that provides access to the teams
+     * @param teamService         the service that provides access to the teams
+     * @param bomberSpawnSupplier supplies the position the round's Bomber is teleported to
      */
-    public PrePlayingPhase(@NotNull TeamService teamService) {
+    public PrePlayingPhase(@NotNull TeamService teamService, @NotNull Supplier<Pos> bomberSpawnSupplier) {
         super("Pre-Playing", ChronoUnit.SECONDS, 1);
         this.setCurrentTicks(5);
         this.setTickDirection(TickDirection.DOWN);
         this.teamService = teamService;
+        this.bomberSpawnSupplier = bomberSpawnSupplier;
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        TeamHelper.allocateTeams(this.teamService);
+        TeamHelper.allocateTeams(this.teamService, this.bomberSpawnSupplier);
     }
 
     @Override
