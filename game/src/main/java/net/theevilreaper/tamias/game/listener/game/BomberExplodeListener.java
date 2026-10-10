@@ -7,6 +7,7 @@ import net.minestom.server.potion.Potion;
 import net.minestom.server.potion.PotionEffect;
 import net.theevilreaper.tamias.game.attribute.AttributeHelper;
 import net.theevilreaper.tamias.game.event.BomberExplodeEvent;
+import net.theevilreaper.tamias.game.util.EntityHelper;
 
 import java.util.function.Consumer;
 
@@ -21,6 +22,7 @@ public class BomberExplodeListener implements Consumer<BomberExplodeEvent> {
         Instance instance = player.getInstance();
         Pos pos = player.getPosition().asPos();
         instance.explode((float) pos.x(), (float) pos.y(), (float) pos.z(), 1);
+        EntityHelper.hide(player);
         player.addEffect(BLINDNESS);
         AttributeHelper.disableMovement(player);
     }
