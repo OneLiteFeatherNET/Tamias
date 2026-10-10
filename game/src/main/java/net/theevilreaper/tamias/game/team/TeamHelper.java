@@ -81,7 +81,7 @@ public final class TeamHelper {
     }
 
     /**
-     * Removes a player from a team, clearing their team tag, inventory, and resetting entity type to player.
+     * Removes a player from a team, clearing their team tag and inventory, and showing them as a normal player again.
      *
      * @param team   the team from which the player is removed
      * @param player the player to remove
@@ -90,9 +90,7 @@ public final class TeamHelper {
         team.removePlayer(player);
         player.removeTag(Tags.TEAM_KEY);
         player.getInventory().clear();
-        if (player.getEntityType() != EntityType.PLAYER) {
-            player.switchEntityType(EntityType.PLAYER);
-        }
+        EntityHelper.switchToPlayer(player);
     }
 
     /**

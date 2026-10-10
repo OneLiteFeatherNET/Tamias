@@ -1,24 +1,23 @@
 package net.theevilreaper.tamias.game.team;
 
-import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.testing.Env;
-import net.minestom.testing.extension.MicrotusExtension;
 import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.common.util.Tags;
 import net.theevilreaper.xerus.api.team.Team;
 import net.theevilreaper.xerus.api.team.TeamService;
+import net.theevilreaper.tamias.game.player.DisguiseState;
+import net.theevilreaper.tamias.game.player.TamiasPlayer;
+import net.theevilreaper.tamias.game.player.TamiasPlayerTestBase;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(MicrotusExtension.class)
-class TeamHelperTest {
+class TeamHelperTest extends TamiasPlayerTestBase {
 
     private TeamService teamService;
 
@@ -82,10 +81,10 @@ class TeamHelperTest {
         TeamHelper.addPlayerToTeam(bomberTeam, player);
 
         assertTrue(bomberTeam.getPlayers().contains(player));
-        assertEquals(EntityType.TNT, player.getEntityType());
+        assertEquals(DisguiseState.TNT_BLOCK, ((TamiasPlayer) player).getDisguiseState());
 
         TeamHelper.removePlayerFromTeam(bomberTeam, player);
-        assertEquals(EntityType.PLAYER, player.getEntityType());
+        assertEquals(DisguiseState.NONE, ((TamiasPlayer) player).getDisguiseState());
 
         env.destroyInstance(instance, true);
     }
@@ -106,7 +105,7 @@ class TeamHelperTest {
         assertFalse(survivorTeam.getPlayers().contains(player));
         assertTrue(bomberTeam.getPlayers().contains(player));
         assertEquals(GameConfig.BOMBER_KEY.asString(), player.getTag(Tags.TEAM_KEY));
-        assertEquals(EntityType.TNT, player.getEntityType());
+        assertEquals(DisguiseState.TNT_BLOCK, ((TamiasPlayer) player).getDisguiseState());
 
         env.destroyInstance(instance, true);
     }

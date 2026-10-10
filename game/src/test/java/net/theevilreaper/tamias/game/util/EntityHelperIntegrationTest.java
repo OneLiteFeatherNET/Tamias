@@ -5,29 +5,52 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.testing.Env;
-import net.minestom.testing.extension.MicrotusExtension;
+import net.theevilreaper.tamias.game.player.DisguiseState;
+import net.theevilreaper.tamias.game.player.TamiasPlayer;
+import net.theevilreaper.tamias.game.player.TamiasPlayerTestBase;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-@ExtendWith(MicrotusExtension.class)
 @SuppressWarnings("java:S3252")
-class EntityHelperIntegrationTest {
+class EntityHelperIntegrationTest extends TamiasPlayerTestBase {
 
     @Test
     void testSwitchToTNT(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
-
         Player player = env.createPlayer(instance, Pos.ZERO);
-
-        assertEquals(EntityType.PLAYER.id(), player.getEntityType().id());
 
         EntityHelper.switchToTNT(player);
 
-        assertEquals(EntityType.TNT.id(), player.getEntityType().id());
+        assertEquals(DisguiseState.TNT_BLOCK, ((TamiasPlayer) player).getDisguiseState());
+        assertEquals(EntityType.PLAYER, player.getEntityType());
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testPrime(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player player = env.createPlayer(instance, Pos.ZERO);
+
+        EntityHelper.switchToTNT(player);
+        EntityHelper.prime(player);
+
+        assertEquals(DisguiseState.PRIMED_TNT, ((TamiasPlayer) player).getDisguiseState());
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testHide(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player player = env.createPlayer(instance, Pos.ZERO);
+
+        EntityHelper.prime(player);
+        EntityHelper.hide(player);
+
+        assertEquals(DisguiseState.HIDDEN, ((TamiasPlayer) player).getDisguiseState());
 
         env.destroyInstance(instance, true);
     }
@@ -35,16 +58,14 @@ class EntityHelperIntegrationTest {
     @Test
     void testSwitchToPlayer(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
-
         Player player = env.createPlayer(instance, Pos.ZERO);
 
         EntityHelper.switchToTNT(player);
-
-        assertNotEquals(EntityType.PLAYER.id(), player.getEntityType().id());
-
         EntityHelper.switchToPlayer(player);
 
-        assertEquals(EntityType.PLAYER.id(), player.getEntityType().id());
+        assertEquals(DisguiseState.NONE, ((TamiasPlayer) player).getDisguiseState());
+        assertEquals(EntityType.PLAYER, player.getEntityType());
+
         env.destroyInstance(instance, true);
     }
 }

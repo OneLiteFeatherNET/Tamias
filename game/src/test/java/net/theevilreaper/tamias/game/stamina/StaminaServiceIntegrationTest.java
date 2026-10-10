@@ -7,17 +7,15 @@ import net.theevilreaper.xerus.api.team.TeamService;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.testing.Env;
-import net.minestom.testing.extension.MicrotusExtension;
+import net.theevilreaper.tamias.game.player.TamiasPlayerTestBase;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(MicrotusExtension.class)
-class StaminaServiceIntegrationTest {
+class StaminaServiceIntegrationTest extends TamiasPlayerTestBase {
 
     private StaminaService staminaService;
     private TeamService teamService;
