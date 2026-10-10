@@ -7,6 +7,7 @@ import net.minestom.server.sound.SoundEvent;
 import net.theevilreaper.tamias.game.attribute.AttributeHelper;
 import net.theevilreaper.tamias.game.event.BomberExplodeEvent;
 import net.theevilreaper.tamias.game.event.BomberRequireSpawnEvent;
+import net.theevilreaper.tamias.game.util.EntityHelper;
 
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
@@ -64,11 +65,16 @@ public final class ExplodeBar extends StaminaBar {
 
     /**
      * {@inheritDoc}
+     * <p>
+     * Ignored while the bomber is already counting down or regenerating — e.g. an egg hitting a hidden bomber
+     * must neither restart the countdown nor make them visible again.
      */
     @Override
     public void triggerAction() {
+        if (status == Status.DRAINING || status == Status.REGENERATING) return;
         status = Status.DRAINING;
         this.regeneratedEventFired = false;
+        EntityHelper.prime(this.player);
     }
 
     /**

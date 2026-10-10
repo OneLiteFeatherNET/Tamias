@@ -11,18 +11,18 @@ import net.minestom.testing.Collector;
 import net.minestom.testing.Env;
 import net.minestom.testing.FlexibleListener;
 import net.minestom.testing.TestConnection;
-import net.minestom.testing.extension.MicrotusExtension;
 import net.theevilreaper.tamias.common.explosion.ExplosionCreator;
 import net.theevilreaper.tamias.game.event.BomberRequireSpawnEvent;
+import net.theevilreaper.tamias.game.player.DisguiseState;
+import net.theevilreaper.tamias.game.player.TamiasPlayer;
+import net.theevilreaper.tamias.game.player.TamiasPlayerTestBase;
 import net.theevilreaper.tamias.game.stamina.StaminaBar.Status;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(MicrotusExtension.class)
-class ExplodeBarIntegrationTest {
+class ExplodeBarIntegrationTest extends TamiasPlayerTestBase {
 
     @Test
     void testExplodeBarStartFlow(@NotNull Env env) {
@@ -186,6 +186,63 @@ class ExplodeBarIntegrationTest {
 
         explodeBar2.onStart();
         assertNotEquals(explodeBar1, explodeBar2);
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testTriggerActionPrimesPlayer(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player player = env.createPlayer(instance);
+        StaminaBar explodeBar = StaminaFactory.createExplodeBar(player);
+        explodeBar.onStart();
+
+        explodeBar.triggerAction();
+
+        assertEquals(DisguiseState.PRIMED_TNT, ((TamiasPlayer) player).getDisguiseState());
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testTriggerActionIgnoredWhileRegenerating(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        instance.setExplosionSupplier(new ExplosionCreator());
+        Player player = env.createPlayer(instance);
+        StaminaBar explodeBar = StaminaFactory.createExplodeBar(player);
+        explodeBar.onStart();
+        explodeBar.triggerAction();
+
+        // 10 draining ticks + the exploding tick
+        for (int i = 0; i < 11; i++) {
+            explodeBar.consume();
+        }
+        assertEquals(Status.REGENERATING, explodeBar.status);
+        ((TamiasPlayer) player).setDisguise(DisguiseState.HIDDEN);
+
+        explodeBar.triggerAction();
+
+        assertEquals(Status.REGENERATING, explodeBar.status);
+        assertEquals(DisguiseState.HIDDEN, ((TamiasPlayer) player).getDisguiseState());
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testTriggerActionIgnoredWhileDraining(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player player = env.createPlayer(instance);
+        StaminaBar explodeBar = StaminaFactory.createExplodeBar(player);
+        explodeBar.onStart();
+        explodeBar.triggerAction();
+        explodeBar.consume();
+        int levelAfterFirstTick = player.getLevel();
+
+        explodeBar.triggerAction();
+        explodeBar.consume();
+
+        assertEquals(Status.DRAINING, explodeBar.status);
+        assertEquals(levelAfterFirstTick - 1, player.getLevel());
 
         env.destroyInstance(instance, true);
     }
