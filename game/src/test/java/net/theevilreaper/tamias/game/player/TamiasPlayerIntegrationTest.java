@@ -27,6 +27,16 @@ class TamiasPlayerIntegrationTest extends TamiasPlayerTestBase {
     private static final Pos VIEWER_POS = new Pos(2, 40, 0);
 
     @Test
+    void testPrimedFuseOutlastsExplodeCountdown() {
+        // The client discards a primed TNT by itself once its fuse runs out. The ExplodeBar needs 11 consume calls
+        // every 250 ms (plus up to one period until the first call) before the server hides the bomber, so the
+        // fuse must outlast 11 * 250 ms or viewers see the bomber vanish before the explosion.
+        long fuseMillis = TamiasPlayer.PRIMED_FUSE_TIME * 50L;
+        long countdownMillis = 11 * 250L;
+        assertTrue(fuseMillis > countdownMillis, "fuse " + fuseMillis + "ms must outlast countdown " + countdownMillis + "ms");
+    }
+
+    @Test
     void testDefaultStateIsNone(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
         Player player = env.createPlayer(instance, BOMBER_POS);
@@ -264,6 +274,7 @@ class TamiasPlayerIntegrationTest extends TamiasPlayerTestBase {
 
         bomber.setSneaking(true);
 
+        metas.assertAnyMatch(packet -> packet.entityId() == bomber.getEntityId());
         metas.assertAllMatch(packet -> packet.entityId() != bomber.getEntityId()
                 || packet.entries().keySet().equals(java.util.Set.of(MetadataDef.HAS_NO_GRAVITY.index())));
 

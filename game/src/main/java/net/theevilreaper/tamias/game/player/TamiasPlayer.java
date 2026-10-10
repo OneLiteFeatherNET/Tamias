@@ -36,7 +36,9 @@ import java.util.Map;
  */
 public final class TamiasPlayer extends PermissionAwarePlayer {
 
-    static final int PRIMED_FUSE_TIME = 50;
+    // Longer than the ExplodeBar countdown (2.5-2.75 s): the client discards a primed TNT on its own once the fuse
+    // runs out, the server hides the bomber at the explosion anyway
+    static final int PRIMED_FUSE_TIME = 60;
     static final BoundingBox DISGUISE_BOUNDING_BOX = new BoundingBox(0.98, 0.98, 0.98);
 
     private final BoundingBox playerBoundingBox;
