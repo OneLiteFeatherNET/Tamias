@@ -2,11 +2,15 @@ package net.theevilreaper.tamias.game.player;
 
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.EntityType;
+import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.entity.MetadataDef;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.DestroyEntitiesPacket;
+import net.minestom.server.network.packet.server.play.EntityEquipmentPacket;
 import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
 import net.minestom.server.network.packet.server.play.SpawnEntityPacket;
 import net.minestom.testing.Collector;
@@ -205,6 +209,109 @@ class TamiasPlayerIntegrationTest extends TamiasPlayerTestBase {
 
         bomber.setDisguise(DisguiseState.NONE);
         assertEquals(playerHeight, bomber.getBoundingBox().height());
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testEquipmentNotSentWhileDisguised(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        TamiasPlayer bomber = (TamiasPlayer) env.createPlayer(instance, BOMBER_POS);
+        TestConnection viewerConnection = env.createConnection();
+        Player viewer = viewerConnection.connect(instance, VIEWER_POS);
+        env.tick();
+        assertTrue(bomber.getViewers().contains(viewer), "precondition: viewer must see the bomber");
+        bomber.setDisguise(DisguiseState.TNT_BLOCK);
+
+        Collector<EntityEquipmentPacket> equipment = viewerConnection.trackIncoming(EntityEquipmentPacket.class);
+
+        bomber.setEquipment(EquipmentSlot.MAIN_HAND, ItemStack.of(Material.TNT));
+
+        equipment.assertNoneMatch(packet -> packet.entityId() == bomber.getEntityId());
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testEquipmentSentWithoutDisguise(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        TamiasPlayer bomber = (TamiasPlayer) env.createPlayer(instance, BOMBER_POS);
+        TestConnection viewerConnection = env.createConnection();
+        Player viewer = viewerConnection.connect(instance, VIEWER_POS);
+        env.tick();
+        assertTrue(bomber.getViewers().contains(viewer), "precondition: viewer must see the bomber");
+
+        Collector<EntityEquipmentPacket> equipment = viewerConnection.trackIncoming(EntityEquipmentPacket.class);
+
+        bomber.setEquipment(EquipmentSlot.MAIN_HAND, ItemStack.of(Material.TNT));
+
+        equipment.assertAnyMatch(packet -> packet.entityId() == bomber.getEntityId());
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testMetadataReplacedWhileDisguised(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        TamiasPlayer bomber = (TamiasPlayer) env.createPlayer(instance, BOMBER_POS);
+        TestConnection viewerConnection = env.createConnection();
+        Player viewer = viewerConnection.connect(instance, VIEWER_POS);
+        env.tick();
+        assertTrue(bomber.getViewers().contains(viewer), "precondition: viewer must see the bomber");
+        bomber.setDisguise(DisguiseState.TNT_BLOCK);
+
+        Collector<EntityMetaDataPacket> metas = viewerConnection.trackIncoming(EntityMetaDataPacket.class);
+
+        bomber.setSneaking(true);
+
+        metas.assertAllMatch(packet -> packet.entityId() != bomber.getEntityId()
+                || packet.entries().keySet().equals(java.util.Set.of(MetadataDef.HAS_NO_GRAVITY.index())));
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testHiddenSendsNoViewerPackets(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        TamiasPlayer bomber = (TamiasPlayer) env.createPlayer(instance, BOMBER_POS);
+        TestConnection viewerConnection = env.createConnection();
+        Player viewer = viewerConnection.connect(instance, VIEWER_POS);
+        env.tick();
+        assertTrue(bomber.getViewers().contains(viewer), "precondition: viewer must see the bomber");
+        bomber.setDisguise(DisguiseState.HIDDEN);
+
+        Collector<EntityMetaDataPacket> metas = viewerConnection.trackIncoming(EntityMetaDataPacket.class);
+        Collector<EntityEquipmentPacket> equipment = viewerConnection.trackIncoming(EntityEquipmentPacket.class);
+
+        bomber.setSneaking(true);
+        bomber.setEquipment(EquipmentSlot.MAIN_HAND, ItemStack.of(Material.TNT));
+
+        metas.assertNoneMatch(packet -> packet.entityId() == bomber.getEntityId());
+        equipment.assertNoneMatch(packet -> packet.entityId() == bomber.getEntityId());
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testTeleportKeepsDisguise(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        TamiasPlayer bomber = (TamiasPlayer) env.createPlayer(instance, BOMBER_POS);
+        TestConnection viewerConnection = env.createConnection();
+        Player viewer = viewerConnection.connect(instance, VIEWER_POS);
+        env.tick();
+        assertTrue(bomber.getViewers().contains(viewer), "precondition: viewer must see the bomber");
+        bomber.setDisguise(DisguiseState.TNT_BLOCK);
+
+        Collector<SpawnEntityPacket> spawns = viewerConnection.trackIncoming(SpawnEntityPacket.class);
+        Collector<EntityMetaDataPacket> metas = viewerConnection.trackIncoming(EntityMetaDataPacket.class);
+
+        bomber.teleport(new Pos(4, 40, 4)).join();
+        env.tick();
+
+        spawns.assertNoneMatch(packet -> packet.entityId() == bomber.getEntityId()
+                && packet.type() == EntityType.PLAYER);
+        metas.assertAllMatch(packet -> packet.entityId() != bomber.getEntityId()
+                || packet.entries().keySet().equals(java.util.Set.of(MetadataDef.HAS_NO_GRAVITY.index())));
 
         env.destroyInstance(instance, true);
     }

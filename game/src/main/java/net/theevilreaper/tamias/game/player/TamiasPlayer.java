@@ -8,8 +8,13 @@ import net.minestom.server.entity.Metadata;
 import net.minestom.server.entity.MetadataDef;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.network.packet.server.SendablePacket;
 import net.minestom.server.network.packet.server.play.DestroyEntitiesPacket;
+import net.minestom.server.network.packet.server.play.EntityAnimationPacket;
+import net.minestom.server.network.packet.server.play.EntityAttributesPacket;
+import net.minestom.server.network.packet.server.play.EntityEquipmentPacket;
 import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
+import net.minestom.server.network.packet.server.play.EntityStatusPacket;
 import net.minestom.server.network.packet.server.play.SpawnEntityPacket;
 import net.minestom.server.network.player.GameProfile;
 import net.minestom.server.network.player.PlayerConnection;
@@ -94,6 +99,55 @@ public final class TamiasPlayer extends PermissionAwarePlayer {
             case PRIMED_TNT -> createDisguiseSpawnPacket(EntityType.TNT, 0);
             case NONE, HIDDEN -> super.getSpawnPacket();
         };
+    }
+
+    /**
+     * Every viewer-bound packet of this player passes through here (movement packets excepted, which Minestom
+     * sends separately and which the disguise is meant to receive).
+     * While disguised, player-only packets would not match the disguise entity's schema on the client,
+     * so they are dropped and player metadata is replaced by the disguise metadata.
+     */
+    @Override
+    public void sendPacketToViewers(SendablePacket packet) {
+        switch (this.disguiseState) {
+            case NONE -> super.sendPacketToViewers(packet);
+            case HIDDEN -> {
+                // Viewers must not receive anything about this player
+            }
+            case TNT_BLOCK, PRIMED_TNT -> {
+                if (packet instanceof EntityMetaDataPacket) {
+                    super.sendPacketToViewers(createDisguiseMetadataPacket());
+                    return;
+                }
+                if (isPlayerOnlyPacket(packet)) return;
+                super.sendPacketToViewers(packet);
+            }
+        }
+    }
+
+    /**
+     * Minestom uses this on respawn to re-show the player directly on each viewer's connection,
+     * bypassing {@link #sendPacketToViewers(SendablePacket)}.
+     */
+    @Override
+    protected void showPlayer(PlayerConnection connection) {
+        switch (this.disguiseState) {
+            case NONE -> super.showPlayer(connection);
+            case HIDDEN -> {
+                // Viewers must not see anything
+            }
+            case TNT_BLOCK, PRIMED_TNT -> {
+                connection.sendPacket(getSpawnPacket());
+                connection.sendPacket(createDisguiseMetadataPacket());
+            }
+        }
+    }
+
+    private static boolean isPlayerOnlyPacket(SendablePacket packet) {
+        return packet instanceof EntityEquipmentPacket
+                || packet instanceof EntityAttributesPacket
+                || packet instanceof EntityAnimationPacket
+                || packet instanceof EntityStatusPacket;
     }
 
     private SpawnEntityPacket createDisguiseSpawnPacket(EntityType type, int data) {
