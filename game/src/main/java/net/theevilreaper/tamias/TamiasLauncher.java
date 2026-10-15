@@ -1,9 +1,11 @@
 package net.theevilreaper.tamias;
 
 import net.hollowcube.minestom.extensions.ExtensionBootstrap;
+import net.minestom.server.MinecraftServer;
 import net.theevilreaper.tamias.common.bootstrap.ServiceBootstrap;
 import net.theevilreaper.tamias.common.permission.LuckPermsSupport;
 import net.theevilreaper.tamias.game.Tamias;
+import net.theevilreaper.tamias.game.player.TamiasPlayer;
 
 public class TamiasLauncher {
 
@@ -12,6 +14,8 @@ public class TamiasLauncher {
         // :bridge permission extension among them - from the extensions/ folder. Running
         // standalone simply loads none. This also performs MinecraftServer.init().
         ExtensionBootstrap bootstrap = ExtensionBootstrap.init();
+        // Every player must be a TamiasPlayer - EntityHelper relies on it for the bomber disguise
+        MinecraftServer.getConnectionManager().setPlayerProvider(TamiasPlayer::new);
         LuckPermsSupport.bootstrap();
         Tamias tamias = new Tamias();
         tamias.initialize();

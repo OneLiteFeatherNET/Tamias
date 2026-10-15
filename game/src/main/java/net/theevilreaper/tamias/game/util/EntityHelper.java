@@ -1,62 +1,62 @@
 package net.theevilreaper.tamias.game.util;
 
-import net.minestom.server.entity.EntityType;
-import net.minestom.server.entity.Metadata;
-import net.minestom.server.entity.MetadataDef;
 import net.minestom.server.entity.Player;
-import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
-
-import java.util.Map;
+import net.theevilreaper.tamias.game.player.DisguiseState;
+import net.theevilreaper.tamias.game.player.TamiasPlayer;
 
 /**
  * The {@link EntityHelper} provides some utility methods to handle entities.
  * This class is not intended to be instantiated.
- * It provides methods to switch the player to a TNT entity and update the meta.
+ * It changes how a player is shown to other players, see {@link DisguiseState}.
+ * The server-side entity type of the player is never changed.
  *
  * @author theEvilReaper
- * @version 1.1.0
+ * @version 2.0.0
  * @since 1.0.0
  */
-@SuppressWarnings("java:S3252")
 public final class EntityHelper {
 
-    private static final int TNT_FUSE_TIME = 50;
-
     /**
-     * Switches the player to a TNT entity.
+     * Shows the player as a placed TNT block to other players.
      *
      * @param player the player to switch
      */
     public static void switchToTNT(Player player) {
-        player.switchEntityType(EntityType.TNT);
-        updateTNTMeta(player);
+        disguise(player, DisguiseState.TNT_BLOCK);
     }
 
     /**
-     * Switches the player to a player entity.
+     * Shows the player as a blinking primed TNT to other players.
+     *
+     * @param player the player to prime
+     */
+    public static void prime(Player player) {
+        disguise(player, DisguiseState.PRIMED_TNT);
+    }
+
+    /**
+     * Hides the player from other players.
+     *
+     * @param player the player to hide
+     */
+    public static void hide(Player player) {
+        disguise(player, DisguiseState.HIDDEN);
+    }
+
+    /**
+     * Shows the player as a normal player to other players again.
      *
      * @param player the player to switch
      */
     public static void switchToPlayer(Player player) {
-        player.switchEntityType(EntityType.PLAYER);
+        disguise(player, DisguiseState.NONE);
     }
 
     /**
-     * Updates the TNT meta for the player.
-     * <p>
-     * Sent to viewers only, bypassing {@link Player#editEntityMeta}. A player is never its own
-     * viewer, so {@code editEntityMeta} would also push the TNT metadata schema to the switching
-     * player's own client - which still expects the previous entity type's schema and crashes
-     * on the resulting type mismatch (see field index collision between {@code LIVING_ENTITY_FLAGS}
-     * and {@code PrimedTnt.FUSE_TIME}).
-     *
-     * @param player the player to update the meta
+     * Every online player is a {@link TamiasPlayer}, see {@code TamiasLauncher}.
      */
-    public static void updateTNTMeta(Player player) {
-        if (player.getEntityType() != EntityType.TNT) return;
-
-        int index = MetadataDef.PrimedTnt.FUSE_TIME.index();
-        player.sendPacketToViewers(new EntityMetaDataPacket(player.getEntityId(), Map.of(index, Metadata.VarInt(TNT_FUSE_TIME))));
+    private static void disguise(Player player, DisguiseState state) {
+        ((TamiasPlayer) player).setDisguise(state);
     }
 
     private EntityHelper() {

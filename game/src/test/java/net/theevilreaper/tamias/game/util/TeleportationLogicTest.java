@@ -4,23 +4,21 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.testing.Env;
-import net.minestom.testing.extension.MicrotusExtension;
 import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.game.team.TeamHelper;
 import net.theevilreaper.xerus.api.team.Team;
 import net.theevilreaper.xerus.api.team.TeamService;
+import net.theevilreaper.tamias.game.player.TamiasPlayerTestBase;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(MicrotusExtension.class)
-class TeleportationLogicTest {
+class TeleportationLogicTest extends TamiasPlayerTestBase {
 
     private TeamService teamService;
 
