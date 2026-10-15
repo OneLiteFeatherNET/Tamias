@@ -1,5 +1,6 @@
 package net.theevilreaper.tamias.game.phase;
 
+import net.theevilreaper.tamias.common.bootstrap.ServiceShutdown;
 import net.theevilreaper.xerus.api.phase.TimedPhase;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
@@ -35,7 +36,7 @@ public final class RestartPhase extends TimedPhase {
      */
     @Override
     protected void onFinish() {
-        MinecraftServer.stopCleanly();
+        ServiceShutdown.request();
     }
 
     /**
