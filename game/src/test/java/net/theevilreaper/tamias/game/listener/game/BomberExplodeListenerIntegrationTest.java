@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -28,7 +29,7 @@ class BomberExplodeListenerIntegrationTest extends TamiasPlayerTestBase {
         Player player = env.createPlayer(instance, new Pos(0, 40, 0));
         ((TamiasPlayer) player).setDisguise(DisguiseState.PRIMED_TNT);
 
-        new BomberExplodeListener(_ -> {}).accept(new BomberExplodeEvent(player, player.getPosition().asVec()));
+        new BomberExplodeListener(_ -> {}, () -> {}).accept(new BomberExplodeEvent(player, player.getPosition().asVec()));
 
         assertEquals(DisguiseState.HIDDEN, ((TamiasPlayer) player).getDisguiseState());
 
@@ -45,11 +46,32 @@ class BomberExplodeListenerIntegrationTest extends TamiasPlayerTestBase {
         createPlayer(env, instance, new Pos(0, 40, 1), GameConfig.BOMBER_KEY.asString());
 
         List<Player> converted = new ArrayList<>();
-        BomberExplodeListener listener = new BomberExplodeListener(converted::add);
+        AtomicInteger roundEndChecks = new AtomicInteger();
+        BomberExplodeListener listener = new BomberExplodeListener(converted::add, roundEndChecks::incrementAndGet);
 
         listener.accept(new BomberExplodeEvent(bomber, bomber.getPosition().asVec()));
 
         assertEquals(List.of(nearSurvivor), converted);
+        assertEquals(1, roundEndChecks.get());
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testExplosionWithoutSurvivorsSkipsRoundEndCheck(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        instance.setExplosionSupplier(new ExplosionCreator());
+        Player bomber = createPlayer(env, instance, new Pos(0, 40, 0), GameConfig.BOMBER_KEY.asString());
+        createPlayer(env, instance, new Pos(10, 40, 0), GameConfig.SURVIVOR_KEY.asString());
+
+        List<Player> converted = new ArrayList<>();
+        AtomicInteger roundEndChecks = new AtomicInteger();
+        BomberExplodeListener listener = new BomberExplodeListener(converted::add, roundEndChecks::incrementAndGet);
+
+        listener.accept(new BomberExplodeEvent(bomber, bomber.getPosition().asVec()));
+
+        assertEquals(List.of(), converted);
+        assertEquals(0, roundEndChecks.get());
 
         env.destroyInstance(instance, true);
     }

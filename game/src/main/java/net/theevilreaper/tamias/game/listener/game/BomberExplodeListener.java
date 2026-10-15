@@ -6,6 +6,7 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.potion.Potion;
 import net.minestom.server.potion.PotionEffect;
 import net.theevilreaper.aves.util.functional.PlayerConsumer;
+import net.theevilreaper.aves.util.functional.VoidConsumer;
 import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.common.util.Tags;
 import net.theevilreaper.tamias.game.attribute.AttributeHelper;
@@ -25,14 +26,17 @@ public class BomberExplodeListener implements Consumer<BomberExplodeEvent> {
     static final double INFECTION_RADIUS = 3.0;
 
     private final PlayerConsumer survivorConverter;
+    private final VoidConsumer roundEndCheck;
 
     /**
      * Creates a new listener.
      *
      * @param survivorConverter switches a survivor in the explosion radius to the bomber team
+     * @param roundEndCheck     checks if the round can end after survivors were converted
      */
-    public BomberExplodeListener(PlayerConsumer survivorConverter) {
+    public BomberExplodeListener(PlayerConsumer survivorConverter, VoidConsumer roundEndCheck) {
         this.survivorConverter = survivorConverter;
+        this.roundEndCheck = roundEndCheck;
     }
 
     @Override
@@ -52,6 +56,9 @@ public class BomberExplodeListener implements Consumer<BomberExplodeEvent> {
                 .map(Player.class::cast)
                 .filter(target -> GameConfig.SURVIVOR_KEY.asString().equals(target.getTag(Tags.TEAM_KEY)))
                 .toList();
+        if (survivors.isEmpty()) return;
+
         survivors.forEach(this.survivorConverter::accept);
+        this.roundEndCheck.apply();
     }
 }
