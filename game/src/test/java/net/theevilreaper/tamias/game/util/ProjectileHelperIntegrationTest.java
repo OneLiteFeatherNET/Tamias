@@ -1,12 +1,14 @@
 package net.theevilreaper.tamias.game.util;
 
-import net.minestom.server.entity.EntityProjectile;
+import ca.atlasengine.projectiles.AbstractProjectile;
+import ca.atlasengine.projectiles.entities.ThrownItemProjectile;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.item.ThrownEggMeta;
 import net.minestom.server.instance.Instance;
 import net.minestom.testing.Env;
 import net.minestom.testing.extension.MicrotusExtension;
+import net.theevilreaper.tamias.common.util.Tags;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,13 +38,29 @@ class ProjectileHelperIntegrationTest {
         Instance instance = env.createFlatInstance();
         Player player = env.createPlayer(instance);
 
-        EntityProjectile projectile = ProjectileHelper.createProjectile(player);
+        AbstractProjectile projectile = ProjectileHelper.createProjectile(player);
         assertNotNull(projectile);
+        assertInstanceOf(ThrownItemProjectile.class, projectile);
         assertEquals(EntityType.EGG, projectile.getEntityType());
+        assertSame(player, projectile.getShooter());
 
         assertInstanceOf(ThrownEggMeta.class, projectile.getEntityMeta());
         assertTrue(projectile.getEntityMeta().isOnFire());
 
+        // The projectile is only spawned when it gets shot
         assertEquals(1, instance.getEntities().size());
+    }
+
+    @Test
+    void testProjectileSpawn(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player player = env.createPlayer(instance);
+
+        AbstractProjectile projectile = ProjectileHelper.createProjectile(player);
+        ProjectileHelper.spawnProjectile(player, ignored -> projectile);
+
+        assertEquals(player.getUuid(), projectile.getTag(Tags.SHOOTER_ID));
+        assertSame(instance, projectile.getInstance());
+        assertEquals(2, instance.getEntities().size());
     }
 }

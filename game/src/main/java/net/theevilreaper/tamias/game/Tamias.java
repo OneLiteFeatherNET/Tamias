@@ -208,8 +208,7 @@ public class Tamias implements ListenerHandling {
         listenerMap.put(BomberExplodeEvent.class, new BomberExplodeListener());
         listenerMap.put(RoleToBomberChangeEvent.class, new RoleToBomberChangeListener(this.teamService, this.staminaService, randomPos));
         listenerMap.put(ProjectileCollideWithBlockEvent.class, new ProjectileBlockListener());
-        PlayerConsumer teamUpdater = player -> TeamHelper.switchToTNTTeam(this.teamService, player);
-        listenerMap.put(ProjectileCollideWithEntityEvent.class, new ProjectileEntityListener(teamUpdater, staminaService::getStaminaBar));
+        listenerMap.put(ProjectileCollideWithEntityEvent.class, new ProjectileEntityListener(staminaService::getStaminaBar));
         return listenerMap;
     }
 
@@ -220,7 +219,6 @@ public class Tamias implements ListenerHandling {
         PlayerConsumer teleportConsumer = player -> this.mapProvider.teleportToSpawn(player, false);
         node.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(this.phaseSeries::getCurrentPhase, teleportConsumer, this.scoreboard::addViewer));
         VoidConsumer checkRoundEnd = () -> RoundConditions.checkRoundEnd(this.phaseSeries, this.teamService);
-        PlayerConsumer teamUpdater = player -> TeamHelper.switchToTNTTeam(this.teamService, player);
         node.addListener(PlayerDisconnectEvent.class,
                 new PlayerQuitListener(
                         this.phaseSeries::getCurrentPhase,
@@ -229,8 +227,6 @@ public class Tamias implements ListenerHandling {
                         this.scoreboard::removeViewer
                 )
         );
-        node.addListener(ProjectileCollideWithBlockEvent.class, new ProjectileBlockListener());
-        node.addListener(ProjectileCollideWithEntityEvent.class, new ProjectileEntityListener(teamUpdater, this.staminaService::getStaminaBar));
         node.addListener(PlayerChatEvent.class, new PlayerChatListener());
         node.addListener(MultiPlayerTeamEvent.class, new TeamActionListener());
 
