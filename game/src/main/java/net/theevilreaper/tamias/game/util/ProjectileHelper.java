@@ -1,12 +1,10 @@
 package net.theevilreaper.tamias.game.util;
 
+import ca.atlasengine.projectiles.AbstractProjectile;
+import ca.atlasengine.projectiles.entities.ThrownItemProjectile;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.coordinate.Vec;
-import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.EntityProjectile;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
-import net.minestom.server.entity.metadata.item.ThrownEggMeta;
 import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.tamias.common.util.Tags;
 
@@ -19,42 +17,31 @@ import java.util.function.Function;
  **/
 public final class ProjectileHelper {
 
-    private static final double PROJECTILE_SPEED = 1.0;
+    private static final double PROJECTILE_POWER = 3.0;
+    private static final double PROJECTILE_UNCERTAINTY = 1.0;
 
     private ProjectileHelper() { }
 
-    public static void spawnProjectile(Player player, Function<Player, EntityProjectile> projectTileMapper) {
+    public static void spawnProjectile(Player player, Function<Player, AbstractProjectile> projectTileMapper) {
         Check.argCondition(player.getInstance() == null, "Can't shoot without a instance from a player");
         var projectile = projectTileMapper.apply(player);
-
-        final Pos position = player.getPosition().add(0, player.getEyeHeight(), 0);
-
-        projectile.setInstance(player.getInstance(), position);
         projectile.setTag(Tags.SHOOTER_ID, player.getUuid());
-        Vec direction = projectile.getPosition().direction();
-        projectile.shoot(position.add(direction).sub(0, 0.2, 0), PROJECTILE_SPEED * 3, 1.0);
 
+        final Pos origin = player.getPosition().add(0, player.getEyeHeight() - 0.1, 0);
+        // The projectile spawns itself into the shooter's instance
+        projectile.shoot(origin, PROJECTILE_POWER, PROJECTILE_UNCERTAINTY);
     }
 
     /**
-     * Creates a new {@link EntityProjectile} for the given player.
+     * Creates a new burning egg projectile for the given player.
+     * The projectile is not spawned until it gets shot.
      *
      * @param player the player who should shoot
-     * @return a new instance of the {@link EntityProjectile}
+     * @return a new instance of the {@link AbstractProjectile}
      */
-    public static EntityProjectile createProjectile(Player player) {
-        EntityProjectile projectile = new EntityProjectile(player, EntityType.EGG);
-        ThrownEggMeta eggMeta = (ThrownEggMeta) projectile.getEntityMeta();
-        eggMeta.setOnFire(true);
-        checkIfStillFalling(projectile);
+    public static AbstractProjectile createProjectile(Player player) {
+        ThrownItemProjectile projectile = new ThrownItemProjectile(EntityType.EGG, player);
+        projectile.getEntityMeta().setOnFire(true);
         return projectile;
-    }
-
-    private static void checkIfStillFalling(Entity entity) {
-        if (!entity.isOnGround()) {
-            entity.scheduleNextTick(ProjectileHelper::checkIfStillFalling);
-            return;
-        }
-        entity.remove();
     }
 }
