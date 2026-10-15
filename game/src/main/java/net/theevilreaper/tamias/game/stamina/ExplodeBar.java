@@ -103,6 +103,25 @@ public final class ExplodeBar extends StaminaBar {
             player.playSound(TICK_SOUND);
             return;
         }
+        this.handleExplosion();
+    }
+
+    /**
+     * Lets the bomber explode immediately and skips the countdown, e.g. when an egg hits the bomber.
+     * Ignored while the bar is not started or the bomber is already regenerating.
+     */
+    public void explode() {
+        if (status == null || status == Status.REGENERATING) return;
+        this.current = 0;
+        this.player.setExp(0);
+        this.player.setLevel(0);
+        this.handleExplosion();
+    }
+
+    /**
+     * Handles the explosion of the bomber.
+     */
+    private void handleExplosion() {
         EventDispatcher.call(new BomberExplodeEvent(player, player.getPosition().asVec()));
         this.player.playSound(EXPLODE_SOUND);
         this.status = Status.REGENERATING;

@@ -12,6 +12,7 @@ import net.minestom.testing.Env;
 import net.minestom.testing.FlexibleListener;
 import net.minestom.testing.TestConnection;
 import net.theevilreaper.tamias.common.explosion.ExplosionCreator;
+import net.theevilreaper.tamias.game.event.BomberExplodeEvent;
 import net.theevilreaper.tamias.game.event.BomberRequireSpawnEvent;
 import net.theevilreaper.tamias.game.player.DisguiseState;
 import net.theevilreaper.tamias.game.player.TamiasPlayer;
@@ -19,6 +20,8 @@ import net.theevilreaper.tamias.game.player.TamiasPlayerTestBase;
 import net.theevilreaper.tamias.game.stamina.StaminaBar.Status;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -243,6 +246,80 @@ class ExplodeBarIntegrationTest extends TamiasPlayerTestBase {
 
         assertEquals(Status.DRAINING, explodeBar.status);
         assertEquals(levelAfterFirstTick - 1, player.getLevel());
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testExplodeSkipsCountdown(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        instance.setExplosionSupplier(new ExplosionCreator());
+        TestConnection connection = env.createConnection();
+        Player player = connection.connect(instance, Pos.ZERO);
+        ExplodeBar explodeBar = (ExplodeBar) StaminaFactory.createExplodeBar(player);
+        explodeBar.onStart();
+
+        Collector<SoundEffectPacket> explosionSoundTracker = connection.trackIncoming(SoundEffectPacket.class);
+        explodeBar.explode();
+
+        explosionSoundTracker.assertSingle(this::assertExplodeSound);
+        assertEquals(Status.REGENERATING, explodeBar.status);
+        assertEquals(0, player.getLevel());
+        assertEquals(0f, player.getExp());
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testExplodeWhileDraining(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        instance.setExplosionSupplier(new ExplosionCreator());
+        Player player = env.createPlayer(instance);
+        ExplodeBar explodeBar = (ExplodeBar) StaminaFactory.createExplodeBar(player);
+        explodeBar.onStart();
+        explodeBar.triggerAction();
+        explodeBar.consume();
+
+        explodeBar.explode();
+
+        assertEquals(Status.REGENERATING, explodeBar.status);
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testExplodeIgnoredWhileRegenerating(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        instance.setExplosionSupplier(new ExplosionCreator());
+        Player player = env.createPlayer(instance);
+        ExplodeBar explodeBar = (ExplodeBar) StaminaFactory.createExplodeBar(player);
+        explodeBar.onStart();
+        explodeBar.explode();
+        explodeBar.consume();
+        explodeBar.consume();
+
+        AtomicBoolean exploded = new AtomicBoolean();
+        env.process().eventHandler().addListener(BomberExplodeEvent.class, _ -> exploded.set(true));
+        explodeBar.explode();
+
+        assertFalse(exploded.get());
+        assertEquals(Status.REGENERATING, explodeBar.status);
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testExplodeIgnoredBeforeStart(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player player = env.createPlayer(instance);
+        ExplodeBar explodeBar = (ExplodeBar) StaminaFactory.createExplodeBar(player);
+
+        AtomicBoolean exploded = new AtomicBoolean();
+        env.process().eventHandler().addListener(BomberExplodeEvent.class, _ -> exploded.set(true));
+        explodeBar.explode();
+
+        assertFalse(exploded.get());
+        assertNull(explodeBar.status);
 
         env.destroyInstance(instance, true);
     }
