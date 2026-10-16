@@ -7,7 +7,6 @@ import net.theevilreaper.xerus.api.phase.TimedPhase;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventDispatcher;
 import net.theevilreaper.tamias.common.event.SpawnCleanupEvent;
-import org.jetbrains.annotations.NotNull;
 
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
@@ -22,6 +21,8 @@ import java.util.function.Supplier;
  **/
 public final class PlayingPhase extends TimedPhase {
 
+    private static final int PLAYING_TIME = 300;
+
     private final IntConsumer timeUpdater;
     private final VoidConsumer startGameLogic;
 
@@ -33,14 +34,13 @@ public final class PlayingPhase extends TimedPhase {
      * @param gameListener   a map of listeners which are required for the game
      */
     public PlayingPhase(
-            @NotNull IntConsumer timeUpdater,
-            @NotNull VoidConsumer startGameLogic,
-            @NotNull Supplier<Map<Class<? extends Event>, Consumer<? extends Event>>> gameListener
+            IntConsumer timeUpdater,
+            VoidConsumer startGameLogic,
+            Supplier<Map<Class<? extends Event>, Consumer<? extends Event>>> gameListener
     ) {
         super("GamePhase", ChronoUnit.SECONDS, 1);
         this.timeUpdater = timeUpdater;
         this.startGameLogic = startGameLogic;
-        this.setCurrentTicks(30);
         this.setTickDirection(TickDirection.DOWN);
 
         for (Map.Entry<Class<? extends Event>, Consumer<? extends Event>> entrySet : gameListener.get().entrySet()) {
@@ -50,6 +50,7 @@ public final class PlayingPhase extends TimedPhase {
 
     @Override
     public void onStart() {
+        this.setCurrentTicks(PLAYING_TIME);
         super.onStart();
         EventDispatcher.call(new SpawnCleanupEvent());
         this.startGameLogic.apply();
