@@ -1,0 +1,11 @@
+"area: common":
+  - changed-files:
+      - any-glob-to-any-file: "common/**"
+
+"area: game":
+  - changed-files:
+      - any-glob-to-any-file: "game/**"
+
+"area: setup":
+  - changed-files:
+      - any-glob-to-any-file: "setup/**"
