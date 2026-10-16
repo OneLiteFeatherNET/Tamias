@@ -184,12 +184,7 @@ public class Tamias implements ListenerHandling {
                 )
         );
 
-        gameSeries.add(
-                new PostPlayingPhase(
-                        this.roundProvider::isLastRound,
-                        this.roundProvider::triggerNextRound
-                )
-        );
+        gameSeries.add(new PostPlayingPhase());
         gameSeries.setMaxIterations(this.gameConfig.maxRounds());
         this.phaseSeries.add(gameSeries);
         this.phaseSeries.add(new RestartPhase());

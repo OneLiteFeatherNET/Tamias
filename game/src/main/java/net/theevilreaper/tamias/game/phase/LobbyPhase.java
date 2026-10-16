@@ -1,9 +1,7 @@
 package net.theevilreaper.tamias.game.phase;
 
 import net.minestom.server.event.EventDispatcher;
-import net.theevilreaper.tamias.common.event.AreaSpawnTriggerEvent;
 import net.theevilreaper.tamias.common.map.event.MapPrepareEvent;
-import net.theevilreaper.tamias.game.round.event.RoundPrepareEvent;
 import net.theevilreaper.tamias.game.util.phase.LobbyPhaseData;
 import net.theevilreaper.xerus.api.phase.TickDirection;
 import net.theevilreaper.xerus.api.phase.TimedPhase;
@@ -52,7 +50,7 @@ public final class LobbyPhase extends TimedPhase {
 
     @Override
     protected void onFinish() {
-        EventDispatcher.call(new RoundPrepareEvent());
+        // The round preparation happens at the start of the round cycle
     }
 
     @Override
@@ -60,14 +58,10 @@ public final class LobbyPhase extends TimedPhase {
         setLevel();
         this.phaseData.timeUpdater().accept(getCurrentTicks());
         switch (getCurrentTicks()) {
-            case 30, 20, 3, 1 -> broadcastTime();
+            case 30, 20, 5, 3, 1 -> broadcastTime();
             case 10 -> {
                 this.broadcastTime();
                 EventDispatcher.call(new MapPrepareEvent());
-            }
-            case 5 -> {
-                this.broadcastTime();
-                EventDispatcher.call(AreaSpawnTriggerEvent.empty());
             }
             default -> {
                 // Nothing to do here

@@ -6,7 +6,11 @@ import net.theevilreaper.tamias.common.area.holder.GamePlacement;
 import net.theevilreaper.xerus.api.phase.GamePhase;
 import net.kyori.adventure.audience.Audience;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.event.EventDispatcher;
 import net.theevilreaper.tamias.common.event.AreaFinishBuildEvent;
+import net.theevilreaper.tamias.common.event.AreaSpawnTriggerEvent;
+import net.theevilreaper.tamias.game.round.event.RoundPrepareEvent;
+import net.theevilreaper.tamias.game.round.event.RoundStartEvent;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +51,7 @@ public final class GroundBuildPhase extends GamePhase {
 
     @Override
     protected void onStart() {
+        prepareRound();
         MinecraftServer.getSchedulerManager().buildTask(() -> {
             Audience.audience(MinecraftServer.getConnectionManager().getOnlinePlayers())
                     .sendMessage(MAP_BUILDING);
@@ -58,6 +63,16 @@ public final class GroundBuildPhase extends GamePhase {
                     this.gamePlacement.dropTnt(() -> ThreadLocalRandom.current().nextInt(GameAreaHelper.MIN_TNT_AMOUNT, GameAreaHelper.MAX_TNT_AMOUNT + 1))
             ).delay(2, ChronoUnit.SECONDS).schedule();
         }).delay(10, ChronoUnit.SECONDS).schedule();
+    }
+
+    /**
+     * Prepares a new round. As this phase is the first one of the round cycle, it runs for every round,
+     * so no check for the first or last round is required.
+     */
+    private void prepareRound() {
+        EventDispatcher.call(AreaSpawnTriggerEvent.empty());
+        EventDispatcher.call(new RoundPrepareEvent());
+        EventDispatcher.call(new RoundStartEvent());
     }
 
     @Override

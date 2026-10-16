@@ -16,30 +16,26 @@ import net.theevilreaper.xerus.api.phase.Phase;
 public final class RoundProvider {
 
     private final CyclicPhaseSeries<Phase> phaseSeries;
-    private final Component maxRoundComponent;
-
-    private Component roundComponent;
 
     /**
      * Creates a new {@link RoundProvider} with the given phase series.
      *
-     * @param phaseSeries the phase series to get the max rounds from
-     * @throws IllegalArgumentException if the phase series is null or has no iterations
+     * @param phaseSeries the phase series to get the round information from
      */
     public RoundProvider(CyclicPhaseSeries<Phase> phaseSeries) {
         this.phaseSeries = phaseSeries;
-        int maxRounds = phaseSeries.getMaxIterations();
-        this.maxRoundComponent = Component.text(" / ", NamedTextColor.GRAY).append(Component.text(maxRounds, NamedTextColor.AQUA));
     }
 
     /**
-     * Triggers the next round if the current round is not the last round.
+     * Returns the current round, starting at {@code 1}.
+     * The iterations of the {@link CyclicPhaseSeries} start at {@code 0} and are only increased after the last
+     * phase of a cycle has finished, so the running round is always one ahead of the iteration count.
+     *
+     * @return the current round
      */
-    public void triggerNextRound() {
-        int currentRound = phaseSeries.getIterations();
-        roundComponent = Component.text(currentRound).append(maxRoundComponent);
+    public int getCurrentRound() {
+        return phaseSeries.getIterations() + 1;
     }
-
 
     /**
      * Checks if the current round is the first round.
@@ -47,7 +43,7 @@ public final class RoundProvider {
      * @return {@code true} if the current round is the first round
      */
     public boolean isFirstRound() {
-        return phaseSeries.getIterations() == 1;
+        return getCurrentRound() == 1;
     }
 
     /**
@@ -56,7 +52,7 @@ public final class RoundProvider {
      * @return {@code true} if the current round is the last round
      */
     public boolean isLastRound() {
-        return phaseSeries.getIterations() == phaseSeries.getMaxIterations();
+        return getCurrentRound() == phaseSeries.getMaxIterations();
     }
 
     /**
@@ -65,6 +61,8 @@ public final class RoundProvider {
      * @return the current round component
      */
     public Component getCurrentRoundComponent() {
-        return this.roundComponent;
+        return Component.text(getCurrentRound())
+                .append(Component.text(" / ", NamedTextColor.GRAY))
+                .append(Component.text(phaseSeries.getMaxIterations(), NamedTextColor.AQUA));
     }
 }

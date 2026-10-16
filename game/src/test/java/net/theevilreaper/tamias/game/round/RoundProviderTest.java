@@ -3,26 +3,23 @@ package net.theevilreaper.tamias.game.round;
 import net.theevilreaper.xerus.api.phase.CyclicPhaseSeries;
 import net.theevilreaper.xerus.api.phase.GamePhase;
 import net.theevilreaper.xerus.api.phase.Phase;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.RepeatedTest;
-import org.junit.jupiter.api.RepetitionInfo;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RoundProviderTest {
 
     private static final int MAX_ROUNDS = 5;
-    private static CyclicPhaseSeries<Phase> cyclicPhaseSeries;
-    private static RoundProvider roundProvider;
 
-    @BeforeAll
-    static void setUp() {
+    private CyclicPhaseSeries<Phase> cyclicPhaseSeries;
+    private RoundProvider roundProvider;
+
+    @BeforeEach
+    void setUp() {
         cyclicPhaseSeries = new CyclicPhaseSeries<>("TestPhaseSeries");
         cyclicPhaseSeries.add(new GamePhase("TestPhase1") {
             @Override
@@ -30,26 +27,30 @@ class RoundProviderTest {
                 // Nothing to do on start
             }
         });
-        cyclicPhaseSeries.setMaxIterations(MAX_ROUNDS);
+        // The provider is created before the max iterations are set, like in the game setup
         roundProvider = new RoundProvider(cyclicPhaseSeries);
+        cyclicPhaseSeries.setMaxIterations(MAX_ROUNDS);
     }
 
-    @AfterAll
-    static void tearDown() {
-        assertTrue(cyclicPhaseSeries.isLastPhase());
+    @Test
+    void testFirstRoundBeforeAnyIteration() {
+        assertEquals(1, roundProvider.getCurrentRound());
+        assertTrue(roundProvider.isFirstRound());
+        assertFalse(roundProvider.isLastRound());
+        assertEquals("1 / " + MAX_ROUNDS, plainText().serialize(roundProvider.getCurrentRoundComponent()));
+    }
+
+    @Test
+    void testRoundsFollowTheCycle() {
+        for (int round = 1; round <= MAX_ROUNDS; round++) {
+            assertEquals(round, roundProvider.getCurrentRound());
+            assertEquals(round == 1, roundProvider.isFirstRound());
+            assertEquals(round == MAX_ROUNDS, roundProvider.isLastRound());
+            assertEquals(round + " / " + MAX_ROUNDS, plainText().serialize(roundProvider.getCurrentRoundComponent()));
+            assertFalse(cyclicPhaseSeries.isFinished());
+            cyclicPhaseSeries.advance();
+        }
+
         assertTrue(cyclicPhaseSeries.isFinished());
-        assertTrue(roundProvider.isLastRound());
-        roundProvider = null;
-    }
-
-    @RepeatedTest(value = 5, name = "Round trigger {currentRepetition} / 5")
-    void testNextRound(@NotNull RepetitionInfo repetitionInfo) {
-        cyclicPhaseSeries.advance();
-        roundProvider.triggerNextRound();
-        String roundComponentString = plainText().serialize(roundProvider.getCurrentRoundComponent());
-        assertNotNull(roundComponentString);
-        assertFalse(roundComponentString.isEmpty());
-        String currentRound = repetitionInfo.getCurrentRepetition() + " / " + MAX_ROUNDS;
-        assertEquals(currentRound, roundComponentString);
     }
 }
