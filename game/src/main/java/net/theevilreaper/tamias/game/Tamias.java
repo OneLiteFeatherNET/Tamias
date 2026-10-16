@@ -2,7 +2,6 @@ package net.theevilreaper.tamias.game;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.theevilreaper.aves.map.provider.MapProvider;
 import net.theevilreaper.aves.util.Strings;
 import net.theevilreaper.aves.util.TimeFormat;
 import net.theevilreaper.aves.util.functional.PlayerConsumer;
@@ -109,7 +108,7 @@ public class Tamias implements ListenerHandling {
     private final IntConsumer timeUpdater;
     private final LobbyScoreboard lobbyScoreboard;
     private final GameScoreboard gameScoreboard;
-    private final MapProvider mapProvider;
+    private final GameMapProvider mapProvider;
 
     private volatile Scoreboard activeScoreboard;
     private RoundProvider roundProvider;
@@ -141,7 +140,6 @@ public class Tamias implements ListenerHandling {
         MinecraftServer.getCommandManager().register(new StartCommand(this.phaseSeries::getCurrentPhase));
 
         this.lobbyScoreboard.initDefaults();
-        this.gameScoreboard.initDefaults();
         this.createPhaseStructure();
         registerListener(MinecraftServer.getGlobalEventHandler());
         this.phaseSeries.start();
@@ -166,7 +164,6 @@ public class Tamias implements ListenerHandling {
     }
 
     private void createPhaseStructure() {
-        GameMapProvider gameMapProvider = (GameMapProvider) this.mapProvider;
 
         this.phaseSeries.add(new LobbyPhase(new LobbyPhaseData(this.timeUpdater, this.gameConfig)));
 
@@ -175,9 +172,9 @@ public class Tamias implements ListenerHandling {
         this.roundProvider = new RoundProvider(gameSeries);
         gameSeries.add(new GroundBuildPhase(() -> {
             GroundData randomData = GroundDataRegistry.instance().getRandomData();
-            gameMapProvider.getGamePlacement().triggerPlacement(randomData);
+            this.mapProvider.getGamePlacement().triggerPlacement(randomData);
             return this::resetPlayerBuildProgress;
-        }, gameMapProvider.getGamePlacement()));
+        }, this.mapProvider.getGamePlacement()));
 
         gameSeries.add(new PrePlayingPhase(this.teamService));
 
@@ -218,11 +215,10 @@ public class Tamias implements ListenerHandling {
             this.playedRounds++;
             this.refreshWins();
         }));
-        GameMapProvider gameMapProvider = (GameMapProvider) this.mapProvider;
 
         // Every dropped TNT is a respawn ticket for the bomber team, null means no TNT is left
         Supplier<Pos> randomPos = () -> {
-            Pos position = gameMapProvider.getGameArea().getRandomPosition();
+            Pos position = this.mapProvider.getGameArea().getRandomPosition();
             this.refreshSharedScores();
             return position;
         };
@@ -265,8 +261,7 @@ public class Tamias implements ListenerHandling {
      * Updates the remaining TNT tickets and survivors on the game scoreboard.
      */
     private void refreshSharedScores() {
-        GameMapProvider gameMapProvider = (GameMapProvider) this.mapProvider;
-        int tntTickets = gameMapProvider.getGameArea().getTntPositions().size();
+        int tntTickets = this.mapProvider.getGameArea().getTntPositions().size();
         int survivors = this.teamService.getTeam(GameConfig.SURVIVOR_KEY).map(team -> team.getPlayers().size()).orElse(0);
         this.gameScoreboard.updateScore(ScoreType.TNT, Component.text(tntTickets));
         this.gameScoreboard.updateScore(ScoreType.PLAYER, Component.text(survivors, NamedTextColor.GRAY));
@@ -309,13 +304,12 @@ public class Tamias implements ListenerHandling {
         node.addListener(PlayerChatEvent.class, new PlayerChatListener());
         node.addListener(MultiPlayerTeamEvent.class, new TeamActionListener());
 
-        GameMapProvider gameMapProvider = (GameMapProvider) this.mapProvider;
-        node.addListener(MapPrepareEvent.class, new MapPrepareListener(gameMapProvider.getGamePlacement()));
-        node.addListener(AreaSpawnTriggerEvent.class, new AreaSpawnListener(gameMapProvider.getSpawnPlacement()));
-        node.addListener(GameAreaChunksReadyEvent.class, new GameAreaPrepareListener(gameMapProvider.getGamePlacement()));
-        node.addListener(SpawnCleanupEvent.class, new SpawnCleanupListener(gameMapProvider.getSpawnPlacement()));
-        node.addListener(GameCleanupEvent.class, new GameCleanupListener(gameMapProvider.getGamePlacement()));
-        node.addListener(RoundPrepareEvent.class, new RoundPrepareListener(gameMapProvider.getSpawnArea(), gameMapProvider.getActiveInstance().get()));
+        node.addListener(MapPrepareEvent.class, new MapPrepareListener(this.mapProvider.getGamePlacement()));
+        node.addListener(AreaSpawnTriggerEvent.class, new AreaSpawnListener(this.mapProvider.getSpawnPlacement()));
+        node.addListener(GameAreaChunksReadyEvent.class, new GameAreaPrepareListener(this.mapProvider.getGamePlacement()));
+        node.addListener(SpawnCleanupEvent.class, new SpawnCleanupListener(this.mapProvider.getSpawnPlacement()));
+        node.addListener(GameCleanupEvent.class, new GameCleanupListener(this.mapProvider.getGamePlacement()));
+        node.addListener(RoundPrepareEvent.class, new RoundPrepareListener(this.mapProvider.getSpawnArea(), this.mapProvider.getActiveInstance().get()));
 
         // Listener for rounds
         node.addListener(RoundStartEvent.class, _ -> this.hideScoreboards());
