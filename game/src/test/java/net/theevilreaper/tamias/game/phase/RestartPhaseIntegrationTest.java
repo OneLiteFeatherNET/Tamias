@@ -28,7 +28,7 @@ class RestartPhaseIntegrationTest {
         TestConnection testConnection = env.createConnection();
         testConnection.connect(instance);
 
-        RestartPhase restartPhase = new RestartPhase();
+        RestartPhase restartPhase = new RestartPhase(() -> {});
         assertNotNull(restartPhase);
 
         // Set the duration to 3 ticks for testing

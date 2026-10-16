@@ -25,13 +25,6 @@ public final class RestartPhase extends TimedPhase {
 
     /**
      * Constructs a new {@link RestartPhase} with a duration of 15 seconds.
-     */
-    public RestartPhase() {
-        this(() -> {});
-    }
-
-    /**
-     * Constructs a new {@link RestartPhase} with a duration of 15 seconds.
      *
      * @param onGameEnd called once when the phase starts, e.g. to show the players their results
      */
