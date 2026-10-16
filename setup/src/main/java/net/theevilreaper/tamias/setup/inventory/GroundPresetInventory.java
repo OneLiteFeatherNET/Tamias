@@ -17,7 +17,6 @@ import net.theevilreaper.tamias.setup.util.GroundBlocks;
 import net.theevilreaper.tamias.setup.util.SetupItems;
 import net.theevilreaper.tamias.setup.util.SetupMessages;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.IntConsumer;
 
@@ -25,6 +24,7 @@ import static net.theevilreaper.aves.inventory.util.InventoryConstants.CANCEL_CL
 import static net.theevilreaper.tamias.setup.util.SetupMessages.DELETE_CLICK;
 import static net.theevilreaper.tamias.setup.util.SetupMessages.EDIT_CLICK;
 import static net.theevilreaper.tamias.setup.util.SetupMessages.NO_SPACE_SEPARATOR;
+import static net.theevilreaper.tamias.setup.util.SetupMessages.loreValue;
 
 /**
  * The {@link GroundPresetInventory} lists the ground presets of a game map.
@@ -54,18 +54,16 @@ public class GroundPresetInventory extends PersonalInventoryBuilder {
     public static final int MAX_PRESETS = PRESET_SLOTS.length;
 
     private static final ItemStack EMPTY_ITEM = ItemStack.builder(Material.PAPER)
-            .customName(Component.text("No presets", NamedTextColor.YELLOW))
+            .customName(Component.text("No presets yet", NamedTextColor.YELLOW))
             .lore(
                     Component.empty(),
                     NO_SPACE_SEPARATOR.append(Component.space()).append(Component.text("The global default presets are used", NamedTextColor.GRAY)),
+                    NO_SPACE_SEPARATOR.append(Component.space()).append(Component.text("Add a preset to match the map theme", NamedTextColor.GRAY)),
                     Component.empty()
             )
             .build();
     private static final ItemStack BACK_ITEM = ItemStack.builder(Material.ARROW)
             .customName(Component.text("Back", NamedTextColor.RED))
-            .build();
-    private static final ItemStack ADD_ITEM = ItemStack.builder(Material.LIME_DYE)
-            .customName(Component.text("Add preset", NamedTextColor.GREEN))
             .build();
 
     /**
@@ -84,7 +82,7 @@ public class GroundPresetInventory extends PersonalInventoryBuilder {
             Runnable openParent,
             Runnable onChange
     ) {
-        super(Component.text("Ground presets"), InventoryType.CHEST_5_ROW, player);
+        super(Component.text("Ground Presets"), InventoryType.CHEST_5_ROW, player);
         this.setCancelEmptySlotClicks(true);
         InventoryLayout layout = InventoryLayout.fromType(getType());
         layout.setItems(LayoutCalculator.quad(0, getType().getSize() - 1), SetupItems.DECORATION, CANCEL_CLICK);
@@ -93,14 +91,6 @@ public class GroundPresetInventory extends PersonalInventoryBuilder {
             result.accept(ClickHolder.cancelClick());
             openParent.run();
         });
-        layout.setItem(ADD_SLOT, ADD_ITEM, (clicker, slot, click, stack, result) -> {
-            result.accept(ClickHolder.cancelClick());
-            if (mapBuilder.getGroundPresets().size() >= MAX_PRESETS) {
-                clicker.sendMessage(SetupMessages.GROUND_PRESET_LIMIT);
-                return;
-            }
-            openEditor.accept(NEW_PRESET);
-        });
         this.setLayout(layout);
 
         this.setDataLayoutFunction(dataLayout -> {
@@ -108,6 +98,14 @@ public class GroundPresetInventory extends PersonalInventoryBuilder {
             dataLayout.setItems(PRESET_SLOTS, SetupItems.DECORATION, CANCEL_CLICK);
 
             List<GroundData> presets = mapBuilder.getGroundPresets();
+            dataLayout.setItem(ADD_SLOT, getAddItem(presets.size()), (clicker, slot, click, stack, result) -> {
+                result.accept(ClickHolder.cancelClick());
+                if (mapBuilder.getGroundPresets().size() >= MAX_PRESETS) {
+                    clicker.sendMessage(SetupMessages.GROUND_PRESET_LIMIT);
+                    return;
+                }
+                openEditor.accept(NEW_PRESET);
+            });
             if (presets.isEmpty()) {
                 dataLayout.setItem(PRESET_SLOTS[PRESET_SLOTS.length / 2], EMPTY_ITEM, CANCEL_CLICK);
                 return dataLayout;
@@ -134,6 +132,17 @@ public class GroundPresetInventory extends PersonalInventoryBuilder {
         this.register();
     }
 
+    private static ItemStack getAddItem(int presetCount) {
+        return ItemStack.builder(Material.LIME_DYE)
+                .customName(Component.text("Add preset", NamedTextColor.GREEN))
+                .lore(
+                        Component.empty(),
+                        loreValue("Presets", presetCount + "/" + MAX_PRESETS, NamedTextColor.WHITE),
+                        Component.empty()
+                )
+                .build();
+    }
+
     /**
      * Creates the item which represents a preset in the overview.
      *
@@ -142,25 +151,20 @@ public class GroundPresetInventory extends PersonalInventoryBuilder {
      * @return the created item
      */
     private static ItemStack getPresetItem(int index, GroundData groundData) {
-        List<Component> lore = new ArrayList<>();
-        lore.add(Component.empty());
-        lore.add(NO_SPACE_SEPARATOR.append(Component.space())
-                .append(Component.text("Ground: ", NamedTextColor.GRAY))
-                .append(Component.text(GroundBlocks.displayName(groundData.groundBlock()), NamedTextColor.GREEN)));
-        if (groundData.hasAdditionalBlocks()) {
-            List<String> names = groundData.additionalBlocks().stream().map(GroundBlocks::displayName).toList();
-            lore.add(NO_SPACE_SEPARATOR.append(Component.space())
-                    .append(Component.text("Additional: ", NamedTextColor.GRAY))
-                    .append(Component.text(String.join(", ", names), NamedTextColor.AQUA)));
-        }
-        lore.add(Component.empty());
-        lore.add(EDIT_CLICK);
-        lore.add(DELETE_CLICK);
-        lore.add(Component.empty());
-
+        String decoration = groundData.hasAdditionalBlocks()
+                ? String.join(", ", groundData.additionalBlocks().stream().map(GroundBlocks::displayName).toList())
+                : "none";
         return ItemStack.builder(GroundBlocks.displayMaterial(groundData.groundBlock()))
-                .customName(Component.text("Preset #" + (index + 1), NamedTextColor.DARK_GREEN))
-                .lore(lore)
+                .customName(Component.text("Preset #" + (index + 1), NamedTextColor.YELLOW))
+                .lore(
+                        Component.empty(),
+                        loreValue("Ground", GroundBlocks.displayName(groundData.groundBlock()), NamedTextColor.GREEN),
+                        loreValue("Decoration", decoration, groundData.hasAdditionalBlocks() ? NamedTextColor.AQUA : NamedTextColor.DARK_GRAY),
+                        Component.empty(),
+                        EDIT_CLICK,
+                        DELETE_CLICK,
+                        Component.empty()
+                )
                 .build();
     }
 }

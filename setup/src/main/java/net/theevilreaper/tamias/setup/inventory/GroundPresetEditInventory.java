@@ -3,16 +3,16 @@ package net.theevilreaper.tamias.setup.inventory;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.entity.Player;
-import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.inventory.click.Click;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.theevilreaper.aves.inventory.PersonalInventoryBuilder;
 import net.theevilreaper.aves.inventory.click.ClickHolder;
-import net.theevilreaper.aves.inventory.function.InventoryClick;
 import net.theevilreaper.aves.inventory.layout.InventoryLayout;
 import net.theevilreaper.aves.inventory.util.LayoutCalculator;
+import net.theevilreaper.tamias.common.ground.GroundCategory;
 import net.theevilreaper.tamias.common.ground.GroundData;
 import net.theevilreaper.tamias.common.map.builder.GameMapBuilder;
 import net.theevilreaper.tamias.setup.util.GroundBlocks;
@@ -21,18 +21,20 @@ import net.theevilreaper.tamias.setup.util.SetupMessages;
 import net.theevilreaper.tamias.setup.util.SetupSounds;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Objects;
-import java.util.function.Consumer;
+import java.util.SequencedSet;
 
 import static net.theevilreaper.aves.inventory.util.InventoryConstants.CANCEL_CLICK;
-import static net.theevilreaper.tamias.setup.util.SetupMessages.DELETE_CLICK;
-import static net.theevilreaper.tamias.setup.util.SetupMessages.SET_BLOCK_CLICK;
+import static net.theevilreaper.tamias.setup.util.SetupMessages.CHOOSE_CLICK;
+import static net.theevilreaper.tamias.setup.util.SetupMessages.CLEAR_CLICK;
+import static net.theevilreaper.tamias.setup.util.SetupMessages.NO_SPACE_SEPARATOR;
+import static net.theevilreaper.tamias.setup.util.SetupMessages.loreValue;
 
 /**
  * The {@link GroundPresetEditInventory} edits a single ground preset of a game map.
- * A block is set by clicking a slot while the block item is on the cursor, a right click clears the slot.
+ * The ground block and the decoration blocks are picked from the {@link GroundCategory} entries.
  * Changes are only applied to the map builder when the preset is saved.
  *
  * @author theEvilReaper
@@ -42,21 +44,30 @@ import static net.theevilreaper.tamias.setup.util.SetupMessages.SET_BLOCK_CLICK;
 @SuppressWarnings("java:S3252")
 public class GroundPresetEditInventory extends PersonalInventoryBuilder {
 
-    private static final int GROUND_SLOT = 10;
-    private static final int[] ADDITIONAL_SLOTS = LayoutCalculator.from(12, 13, 14, 15, 16);
-    private static final int[] FILL_SLOTS = LayoutCalculator.from(11, 19, 20, 22, 24, 25);
-    private static final int BACK_SLOT = 21;
-    private static final int SAVE_SLOT = 23;
+    /**
+     * The maximum amount of decoration blocks a preset can have.
+     */
+    public static final int MAX_DECORATION_BLOCKS = 5;
+
+    static final int GROUND_SLOT = 11;
+    static final int DECORATION_SLOT = 15;
+    static final int BACK_SLOT = 21;
+    static final int SAVE_SLOT = 23;
+    private static final int[] FILL_SLOTS = LayoutCalculator.from(10, 12, 13, 14, 16, 19, 20, 22, 24, 25);
 
     private static final ItemStack BACK_ITEM = ItemStack.builder(Material.ARROW)
             .customName(Component.text("Back", NamedTextColor.RED))
+            .lore(Component.empty(), NO_SPACE_SEPARATOR.append(Component.space()).append(Component.text("Discards unsaved changes", NamedTextColor.GRAY)), Component.empty())
             .build();
     private static final ItemStack SAVE_ITEM = ItemStack.builder(Material.LIME_DYE)
             .customName(Component.text("Save preset", NamedTextColor.GREEN))
+            .lore(Component.empty(), NO_SPACE_SEPARATOR.append(Component.space()).append(Component.text("Applies the preset to the map", NamedTextColor.GRAY)), Component.empty())
             .build();
 
     private final GameMapBuilder mapBuilder;
-    private final Block[] additionalBlocks;
+    private final SequencedSet<Block> decorationBlocks;
+    private final BlockPickerInventory groundPicker;
+    private final BlockPickerInventory decorationPicker;
     private int index;
     private @Nullable Block groundBlock;
 
@@ -69,10 +80,26 @@ public class GroundPresetEditInventory extends PersonalInventoryBuilder {
      * @param onChange     called after a preset was saved
      */
     public GroundPresetEditInventory(Player player, GameMapBuilder mapBuilder, Runnable openOverview, Runnable onChange) {
-        super(Component.text("Edit ground preset"), InventoryType.CHEST_4_ROW, player);
+        super(Component.text("Preset Editor"), InventoryType.CHEST_4_ROW, player);
         this.mapBuilder = mapBuilder;
-        this.additionalBlocks = new Block[ADDITIONAL_SLOTS.length];
+        this.decorationBlocks = new LinkedHashSet<>();
         this.index = GroundPresetInventory.NEW_PRESET;
+        this.groundPicker = new BlockPickerInventory(
+                Component.text("Choose Ground Block"),
+                player,
+                false,
+                block -> block.equals(this.groundBlock),
+                this::pickGround,
+                this::open
+        );
+        this.decorationPicker = new BlockPickerInventory(
+                Component.text("Choose Decoration Blocks"),
+                player,
+                true,
+                this.decorationBlocks::contains,
+                block -> this.toggleDecoration(player, block),
+                this::open
+        );
         this.setCancelEmptySlotClicks(true);
 
         InventoryLayout layout = InventoryLayout.fromType(getType());
@@ -93,15 +120,23 @@ public class GroundPresetEditInventory extends PersonalInventoryBuilder {
 
         this.setDataLayoutFunction(dataLayout -> {
             dataLayout = dataLayout == null ? InventoryLayout.fromType(getType()) : dataLayout;
-            dataLayout.setItem(GROUND_SLOT, getBlockItem("Ground block", this.groundBlock), blockClick(block -> this.groundBlock = block));
-            for (int i = 0; i < ADDITIONAL_SLOTS.length; i++) {
-                int additionalIndex = i;
-                dataLayout.setItem(
-                        ADDITIONAL_SLOTS[i],
-                        getBlockItem("Additional block", this.additionalBlocks[i]),
-                        blockClick(block -> this.additionalBlocks[additionalIndex] = block)
-                );
-            }
+            dataLayout.setItem(GROUND_SLOT, getGroundItem(), (clicker, slot, click, stack, result) -> {
+                result.accept(ClickHolder.cancelClick());
+                if (click instanceof Click.Left) {
+                    this.groundPicker.openCategories();
+                }
+            });
+            dataLayout.setItem(DECORATION_SLOT, getDecorationItem(), (clicker, slot, click, stack, result) -> {
+                result.accept(ClickHolder.cancelClick());
+                if (click instanceof Click.Left) {
+                    this.decorationPicker.openCategories();
+                    return;
+                }
+                if (click instanceof Click.Right) {
+                    this.decorationBlocks.clear();
+                    this.refresh();
+                }
+            });
             return dataLayout;
         });
 
@@ -117,20 +152,17 @@ public class GroundPresetEditInventory extends PersonalInventoryBuilder {
     public void edit(int index) {
         List<GroundData> presets = this.mapBuilder.getGroundPresets();
         this.index = index >= 0 && index < presets.size() ? index : GroundPresetInventory.NEW_PRESET;
-        Arrays.fill(this.additionalBlocks, null);
         this.groundBlock = null;
+        this.decorationBlocks.clear();
 
         if (this.index != GroundPresetInventory.NEW_PRESET) {
             GroundData groundData = presets.get(this.index);
             this.groundBlock = groundData.groundBlock();
             if (groundData.hasAdditionalBlocks()) {
-                List<Block> blocks = groundData.additionalBlocks();
-                for (int i = 0; i < blocks.size() && i < this.additionalBlocks.length; i++) {
-                    this.additionalBlocks[i] = blocks.get(i);
-                }
+                this.decorationBlocks.addAll(groundData.additionalBlocks());
             }
         }
-        this.invalidateDataLayout();
+        this.refresh();
         this.open();
     }
 
@@ -145,8 +177,8 @@ public class GroundPresetEditInventory extends PersonalInventoryBuilder {
             player.sendMessage(SetupMessages.GROUND_BLOCK_REQUIRED);
             return false;
         }
-        List<Block> additional = Arrays.stream(this.additionalBlocks).filter(Objects::nonNull).toList();
-        GroundData groundData = new GroundData(this.groundBlock, additional.isEmpty() ? null : additional);
+        List<Block> additional = this.decorationBlocks.isEmpty() ? null : List.copyOf(this.decorationBlocks);
+        GroundData groundData = new GroundData(this.groundBlock, additional);
 
         if (this.index == GroundPresetInventory.NEW_PRESET || this.index >= this.mapBuilder.getGroundPresets().size()) {
             if (this.mapBuilder.getGroundPresets().size() >= GroundPresetInventory.MAX_PRESETS) {
@@ -162,73 +194,95 @@ public class GroundPresetEditInventory extends PersonalInventoryBuilder {
         return true;
     }
 
-    /**
-     * Creates the click handling for a block slot.
-     * A click with an item on the cursor sets the block, a right click without an item clears the slot.
-     *
-     * @param setter receives the new block or {@code null} if the slot was cleared
-     * @return the created click
-     */
-    private InventoryClick blockClick(Consumer<@Nullable Block> setter) {
-        return (clicker, slot, click, stack, result) -> {
-            result.accept(ClickHolder.cancelClick());
-            ItemStack cursor = clicker.getInventory().getCursorItem();
+    private void pickGround(Block block) {
+        this.groundBlock = block;
+        this.refresh();
+        this.open();
+    }
 
-            if (cursor.isAir()) {
-                if (click instanceof Click.Right) {
-                    setter.accept(null);
-                    this.invalidateDataLayout();
-                }
+    private void toggleDecoration(Player player, Block block) {
+        if (!this.decorationBlocks.remove(block)) {
+            if (this.decorationBlocks.size() >= MAX_DECORATION_BLOCKS) {
+                player.sendMessage(SetupMessages.getDecorationLimit(MAX_DECORATION_BLOCKS));
                 return;
             }
-
-            Block block = GroundBlocks.fromItem(cursor);
-            if (block == null) {
-                clicker.sendMessage(SetupMessages.getInvalidGroundBlock(cursor.material()));
-                return;
-            }
-            setter.accept(block);
-            clicker.playSound(SetupSounds.DATA_SET);
-            this.invalidateDataLayout();
-        };
+            this.decorationBlocks.add(block);
+        }
+        this.refresh();
     }
 
     /**
-     * Creates the item for a block slot.
-     *
-     * @param name  the name of the slot
-     * @param block the block in the slot or {@code null} if the slot is empty
-     * @return the created item
+     * Updates the editor and both pickers after the edited preset changed.
      */
-    private static ItemStack getBlockItem(String name, @Nullable Block block) {
-        if (block == null) {
-            return ItemStack.builder(Material.LIGHT_GRAY_STAINED_GLASS_PANE)
-                    .customName(Component.text(name, NamedTextColor.GRAY))
-                    .lore(Component.empty(), SET_BLOCK_CLICK, Component.empty())
-                    .build();
+    private void refresh() {
+        this.invalidateDataLayout();
+        this.groundPicker.invalidateDataLayout();
+        this.decorationPicker.invalidateDataLayout();
+    }
+
+    private ItemStack getGroundItem() {
+        Material material = this.groundBlock == null
+                ? Material.LIGHT_GRAY_STAINED_GLASS_PANE
+                : GroundBlocks.displayMaterial(this.groundBlock);
+        Component current = this.groundBlock == null
+                ? loreValue("Current", "not chosen", NamedTextColor.RED)
+                : loreValue("Current", GroundBlocks.displayName(this.groundBlock), NamedTextColor.GREEN);
+        return ItemStack.builder(material)
+                .customName(Component.text("Ground block", NamedTextColor.YELLOW))
+                .lore(Component.empty(), current, Component.empty(), CHOOSE_CLICK, Component.empty())
+                .build();
+    }
+
+    private ItemStack getDecorationItem() {
+        Material material = this.decorationBlocks.isEmpty()
+                ? Material.LIGHT_GRAY_STAINED_GLASS_PANE
+                : GroundBlocks.displayMaterial(this.decorationBlocks.getFirst());
+        List<Component> lore = new ArrayList<>();
+        lore.add(Component.empty());
+        lore.add(loreValue("Selected", this.decorationBlocks.size() + "/" + MAX_DECORATION_BLOCKS, NamedTextColor.AQUA));
+        for (Block block : this.decorationBlocks) {
+            lore.add(Component.text("   - ", NamedTextColor.DARK_GRAY).append(Component.text(GroundBlocks.displayName(block), NamedTextColor.WHITE)));
         }
-        return ItemStack.builder(GroundBlocks.displayMaterial(block))
-                .customName(Component.text(name + ": ", NamedTextColor.GRAY)
-                        .append(Component.text(GroundBlocks.displayName(block), NamedTextColor.GREEN)))
-                .lore(Component.empty(), SET_BLOCK_CLICK, DELETE_CLICK, Component.empty())
+        lore.add(Component.empty());
+        lore.add(CHOOSE_CLICK);
+        if (!this.decorationBlocks.isEmpty()) {
+            lore.add(CLEAR_CLICK);
+        }
+        lore.add(Component.empty());
+
+        return ItemStack.builder(material)
+                .customName(Component.text("Decoration blocks", NamedTextColor.YELLOW))
+                .lore(lore)
                 .build();
     }
 
     /**
-     * Returns the index of the preset which is edited.
-     *
-     * @return the preset index or {@link GroundPresetInventory#NEW_PRESET}
+     * {@inheritDoc}
      */
+    @Override
+    public void unregister() {
+        this.groundPicker.unregister();
+        this.decorationPicker.unregister();
+        super.unregister();
+    }
+
     int getIndex() {
         return index;
     }
 
-    /**
-     * Returns the ground block of the edited preset.
-     *
-     * @return the ground block or {@code null} if none is set
-     */
     @Nullable Block getGroundBlock() {
         return groundBlock;
+    }
+
+    List<Block> getDecorationBlocks() {
+        return List.copyOf(decorationBlocks);
+    }
+
+    BlockPickerInventory getGroundPicker() {
+        return groundPicker;
+    }
+
+    BlockPickerInventory getDecorationPicker() {
+        return decorationPicker;
     }
 }

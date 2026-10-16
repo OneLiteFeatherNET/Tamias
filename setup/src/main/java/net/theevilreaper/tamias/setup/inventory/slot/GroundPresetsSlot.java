@@ -10,8 +10,8 @@ import net.theevilreaper.tamias.setup.map.MapDataCategory;
 
 import java.util.function.Consumer;
 
-import static net.theevilreaper.tamias.setup.util.SetupMessages.NO_SPACE_SEPARATOR;
 import static net.theevilreaper.tamias.setup.util.SetupMessages.OPEN_CLICK;
+import static net.theevilreaper.tamias.setup.util.SetupMessages.loreValue;
 
 /**
  * Displays how many ground presets a map has and opens the preset overview on a left click.
@@ -34,11 +34,11 @@ public class GroundPresetsSlot extends AbstractDataSlot {
     @Override
     public ItemStack getItem() {
         Component state = presetCount == 0
-                ? Component.text("Global defaults", NamedTextColor.GRAY)
-                : Component.text(presetCount + (presetCount == 1 ? " preset" : " presets"), type.getColor());
+                ? loreValue("Presets", "none, global defaults are used", NamedTextColor.GRAY)
+                : loreValue("Presets", String.valueOf(presetCount), type.getColor());
         return MapDataCategory.getDefaultItem(type).with(builder -> builder.lore(
                 Component.empty(),
-                NO_SPACE_SEPARATOR.append(Component.space()).append(state),
+                state,
                 Component.empty(),
                 OPEN_CLICK,
                 Component.empty()
