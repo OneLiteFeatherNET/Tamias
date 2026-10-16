@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 class PlayerQuitListenerIntegrationTest extends TamiasPlayerTestBase {
 
     private final AtomicInteger roundEndChecks = new AtomicInteger();
-    private final AtomicInteger gameAborts = new AtomicInteger();
+    private final AtomicInteger earlyGameFinishes = new AtomicInteger();
 
     @Test
     void testGameQuitRemovesPlayerFromTeamAndStaminaBar(@NotNull Env env) {
@@ -51,7 +51,7 @@ class PlayerQuitListenerIntegrationTest extends TamiasPlayerTestBase {
         assertFalse(bomber.hasTag(Tags.TEAM_KEY));
         assertNull(staminaService.getStaminaBar(bomber));
         assertEquals(1, roundEndChecks.get());
-        assertEquals(0, gameAborts.get());
+        assertEquals(0, earlyGameFinishes.get());
 
         staminaService.cleanUp();
         env.destroyInstance(instance, true);
@@ -72,13 +72,13 @@ class PlayerQuitListenerIntegrationTest extends TamiasPlayerTestBase {
 
         assertFalse(survivorTeam.hasPlayer(survivor));
         assertFalse(survivor.hasTag(Tags.TEAM_KEY));
-        assertEquals(0, gameAborts.get());
+        assertEquals(0, earlyGameFinishes.get());
 
         env.destroyInstance(instance, true);
     }
 
     @Test
-    void testGameIsAbortedWhenTooFewPlayersAreLeft(@NotNull Env env) {
+    void testGameFinishesEarlyWhenTooFewPlayersAreLeft(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
         Player leavingPlayer = env.createPlayer(instance);
         env.createPlayer(instance);
@@ -87,7 +87,7 @@ class PlayerQuitListenerIntegrationTest extends TamiasPlayerTestBase {
         createListener(new PlayingPhase(_ -> {}, () -> {}, HashMap::new), teamService, new StaminaService())
                 .accept(new PlayerDisconnectEvent(leavingPlayer));
 
-        assertEquals(1, gameAborts.get());
+        assertEquals(1, earlyGameFinishes.get());
         assertEquals(0, roundEndChecks.get());
 
         env.destroyInstance(instance, true);
@@ -110,7 +110,7 @@ class PlayerQuitListenerIntegrationTest extends TamiasPlayerTestBase {
                 player -> staminaService.removeStaminaBar(player.getUuid()),
                 roundEndChecks::incrementAndGet,
                 _ -> {},
-                gameAborts::incrementAndGet
+                earlyGameFinishes::incrementAndGet
         );
     }
 }

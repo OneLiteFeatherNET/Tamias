@@ -41,7 +41,7 @@ public final class PlayerQuitListener implements Consumer<PlayerDisconnectEvent>
     private final PlayerConsumer staminaRemover;
     private final VoidConsumer roundEndCheck;
     private final PlayerConsumer scoreboardConsumer;
-    private final VoidConsumer gameAbort;
+    private final VoidConsumer earlyGameFinish;
 
     /**
      * Creates a new {@link PlayerQuitListener}.
@@ -51,7 +51,7 @@ public final class PlayerQuitListener implements Consumer<PlayerDisconnectEvent>
      * @param staminaRemover     stops and removes the stamina bar of a player
      * @param roundEndCheck      checks if the round is over
      * @param scoreboardConsumer removes the player from the scoreboard
-     * @param gameAbort          ends the game when too few players are left
+     * @param earlyGameFinish    ends the game when too few players are left
      */
     public PlayerQuitListener(
             Supplier<Phase> phaseSupplier,
@@ -59,14 +59,14 @@ public final class PlayerQuitListener implements Consumer<PlayerDisconnectEvent>
             PlayerConsumer staminaRemover,
             VoidConsumer roundEndCheck,
             PlayerConsumer scoreboardConsumer,
-            VoidConsumer gameAbort
+            VoidConsumer earlyGameFinish
     ) {
         this.phaseSupplier = phaseSupplier;
         this.teamFunction = teamFunction;
         this.staminaRemover = staminaRemover;
         this.roundEndCheck = roundEndCheck;
         this.scoreboardConsumer = scoreboardConsumer;
-        this.gameAbort = gameAbort;
+        this.earlyGameFinish = earlyGameFinish;
     }
 
     @Override
@@ -101,7 +101,7 @@ public final class PlayerQuitListener implements Consumer<PlayerDisconnectEvent>
         this.staminaRemover.accept(player);
 
         if (getRemainingPlayers(player) < MIN_GAME_PLAYERS) {
-            this.gameAbort.apply();
+            this.earlyGameFinish.apply();
             return;
         }
 
