@@ -15,6 +15,7 @@ import net.theevilreaper.tamias.game.stamina.StaminaBar;
 import net.theevilreaper.tamias.game.stamina.StaminaFactory;
 import net.theevilreaper.tamias.game.player.TamiasPlayerTestBase;
 import net.theevilreaper.tamias.game.util.ProjectileHelper;
+import net.theevilreaper.tamias.game.util.SpectatorHelper;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
@@ -65,6 +66,29 @@ class ProjectileEntityListenerIntegrationTest extends TamiasPlayerTestBase {
 
         assertFalse(exploded.get());
         assertEquals(GameConfig.SURVIVOR_KEY.asString(), survivor.getTag(Tags.TEAM_KEY));
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testEggFliesThroughSpectator(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player shooter = env.createPlayer(instance);
+        Player spectator = env.createPlayer(instance);
+        spectator.setTag(Tags.TEAM_KEY, GameConfig.BOMBER_KEY.asString());
+        SpectatorHelper.enable(spectator);
+
+        AtomicBoolean exploded = new AtomicBoolean();
+        env.process().eventHandler().addListener(BomberExplodeEvent.class, _ -> exploded.set(true));
+        ProjectileEntityListener listener = new ProjectileEntityListener(_ -> null);
+
+        ProjectileCollideWithEntityEvent hit = createHit(shooter, spectator);
+        hit.getEntity().setInstance(instance, shooter.getPosition()).join();
+        listener.accept(hit);
+
+        assertTrue(hit.isCancelled());
+        assertFalse(hit.getEntity().isRemoved());
+        assertFalse(exploded.get());
 
         env.destroyInstance(instance, true);
     }

@@ -7,6 +7,9 @@ import net.theevilreaper.tamias.common.map.layer.AreaData;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class GameAreaTest {
@@ -53,6 +56,29 @@ class GameAreaTest {
         assertNotEquals(new Pos(-1, -1, -1), randomPosition);
         int updatedPositionValue = POSITION_VALUE + 1;
         assertNotEquals(new Pos(updatedPositionValue, updatedPositionValue, updatedPositionValue), randomPosition);
+    }
+
+    @Test
+    void testTntPositionsAreConsumedOnce() {
+        GameArea gameArea = new GameArea(areaData);
+        gameArea.setTntPositions(List.of(new Vec(1, 1, 1), new Vec(2, 1, 2)));
+
+        Pos first = gameArea.getRandomPosition();
+        Pos second = gameArea.getRandomPosition();
+
+        assertNotNull(first);
+        assertNotNull(second);
+        assertNotEquals(first, second);
+        assertNull(gameArea.getRandomPosition());
+    }
+
+    @Test
+    void testSetTntPositionsReplacesOldPositions() {
+        GameArea gameArea = new GameArea(areaData);
+        gameArea.setTntPositions(List.of(new Vec(1, 1, 1)));
+        gameArea.setTntPositions(List.of(new Vec(2, 1, 2)));
+
+        assertEquals(Set.of(new Vec(2, 1, 2)), gameArea.getTntPositions());
     }
 
     @Test

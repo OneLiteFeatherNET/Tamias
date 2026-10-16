@@ -180,6 +180,7 @@ public final class GamePlacement implements Placement {
         int count = Math.min(countSupplier.getAsInt(), candidates.size());
         List<Vec> selected = selectSpreadOut(candidates, count);
 
+        this.area.setTntPositions(selected);
         this.tntPlacement.updatePositions(selected);
         this.tntPlacement.place(GroundDataRegistry.DEFAULT_SPAWN_DATA);
         LOGGER.info("Dropping {} TNT blocks onto the game area", selected.size());

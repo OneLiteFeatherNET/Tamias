@@ -225,6 +225,7 @@ class GamePlacementIntegrationTest {
             }
         }
         assertTrue(minDistance >= 2.0, "TNT positions should be spread apart, closest pair was " + minDistance + " blocks apart");
+        assertEquals(tntPositions, new HashSet<Point>(gameArea.getTntPositions()), "The dropped TNT blocks are the respawn tickets");
 
         env.destroyInstance(instance);
     }

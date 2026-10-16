@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -126,6 +127,19 @@ public final class GameArea implements PlayingArea {
         }
 
         LOGGER.info("Calculated {} TNT positions", this.tntPositions.size());
+    }
+
+    /**
+     * Replaces the tnt positions with the given ones.
+     * Each position is the position of a placed TNT block and acts as a respawn ticket for a bomber.
+     *
+     * @param positions the positions of the placed TNT blocks
+     */
+    public void setTntPositions(Collection<Vec> positions) {
+        synchronized (this.tntPositions) {
+            this.tntPositions.clear();
+            this.tntPositions.addAll(positions);
+        }
     }
 
     /**

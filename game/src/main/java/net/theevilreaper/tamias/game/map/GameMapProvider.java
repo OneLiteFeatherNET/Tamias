@@ -30,6 +30,7 @@ public final class GameMapProvider extends AbstractFalcoMapProvider implements M
 
     private final SpawnArea spawnArea;
     private final SpawnPlacement spawnPlacement;
+    private final GameArea gameArea;
     private final GamePlacement gamePlacement;
 
     /**
@@ -57,9 +58,9 @@ public final class GameMapProvider extends AbstractFalcoMapProvider implements M
         this.spawnArea = new SpawnArea(gameMap.getSpawnData(), maxPlayers);
         this.spawnPlacement = new SpawnPlacement(this.activeInstance, this.spawnArea);
 
-        GameArea gameArea = new GameArea(gameMap.getGameAreaData());
-        gameArea.calculatePositions();
-        this.gamePlacement = new GamePlacement(this.activeInstance, gameArea);
+        this.gameArea = new GameArea(gameMap.getGameAreaData());
+        this.gameArea.calculatePositions();
+        this.gamePlacement = new GamePlacement(this.activeInstance, this.gameArea);
     }
 
     /**
@@ -123,6 +124,15 @@ public final class GameMapProvider extends AbstractFalcoMapProvider implements M
      */
     public SpawnPlacement getSpawnPlacement() {
         return this.spawnPlacement;
+    }
+
+    /**
+     * Returns the game area which holds the positions of the dropped TNT blocks.
+     *
+     * @return the game area
+     */
+    public GameArea getGameArea() {
+        return this.gameArea;
     }
 
     /**
