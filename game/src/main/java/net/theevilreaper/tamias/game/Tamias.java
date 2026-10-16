@@ -46,7 +46,6 @@ import net.theevilreaper.tamias.common.map.event.MapPrepareEvent;
 import net.theevilreaper.tamias.game.round.event.RoundPrepareEvent;
 import net.theevilreaper.tamias.game.attribute.AttributeHelper;
 import net.theevilreaper.tamias.game.commands.StartCommand;
-import net.theevilreaper.tamias.game.commands.TestCommand;
 import net.theevilreaper.tamias.game.event.BomberExplodeEvent;
 import net.theevilreaper.tamias.game.event.RoleToBomberChangeEvent;
 import net.theevilreaper.tamias.game.event.BomberRequireSpawnEvent;
@@ -133,7 +132,6 @@ public class Tamias implements ListenerHandling {
         this.scoreboard.initDefaults();
         this.createPhaseStructure();
         registerListener(MinecraftServer.getGlobalEventHandler());
-        MinecraftServer.getCommandManager().register(new TestCommand());
         this.phaseSeries.start();
         this.scoreboard.updateScore(ScoreType.MAP_TYPE, Component.text("Test"));
         MinecraftServer.getSchedulerManager().buildShutdownTask(this::terminate);
