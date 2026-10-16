@@ -74,8 +74,9 @@ public final class LobbyScoreboard implements Scoreboard, DefaultScoreLayout {
      */
     @Override
     public void updateScore(ScoreType scoreType, Component component) {
-        if (scoreType instanceof ScoreType.TNTCount || scoreType instanceof ScoreType.RoundType) {
-            throw new UnsupportedOperationException("Cannot update TNT or ROUND scores in LobbyScoreboard");
+        if (scoreType instanceof ScoreType.TNTCount || scoreType instanceof ScoreType.RoundType
+                || scoreType instanceof ScoreType.WinsType) {
+            throw new UnsupportedOperationException("Cannot update TNT, ROUND or WINS scores in LobbyScoreboard");
         }
         this.sidebar.updateLineContent(scoreType.key().asString(), component);
     }

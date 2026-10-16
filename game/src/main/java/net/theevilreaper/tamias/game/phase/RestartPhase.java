@@ -1,5 +1,6 @@
 package net.theevilreaper.tamias.game.phase;
 
+import net.theevilreaper.aves.util.functional.VoidConsumer;
 import net.theevilreaper.tamias.common.bootstrap.ServiceShutdown;
 import net.theevilreaper.xerus.api.phase.TimedPhase;
 import net.kyori.adventure.audience.Audience;
@@ -20,13 +21,27 @@ import static net.minestom.server.MinecraftServer.getConnectionManager;
  **/
 public final class RestartPhase extends TimedPhase {
 
+    private final VoidConsumer onGameEnd;
+
     /**
      * Constructs a new {@link RestartPhase} with a duration of 15 seconds.
+     *
+     * @param onGameEnd called once when the phase starts, e.g. to show the players their results
      */
-    public RestartPhase() {
+    public RestartPhase(VoidConsumer onGameEnd) {
         super("Restart", ChronoUnit.SECONDS, 1);
+        this.onGameEnd = onGameEnd;
         this.setCurrentTicks(15);
         this.setEndTicks(-1);
+    }
+
+    /**
+     * Runs the game end callback and starts the countdown.
+     */
+    @Override
+    public void onStart() {
+        this.onGameEnd.apply();
+        super.onStart();
     }
 
     /**

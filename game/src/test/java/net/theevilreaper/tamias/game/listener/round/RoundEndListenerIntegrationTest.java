@@ -28,6 +28,8 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -36,6 +38,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RoundEndListenerIntegrationTest extends TamiasPlayerTestBase {
+
+    private static final BiConsumer<Team, Team> NO_CREDIT = (survivors, bombers) -> {};
 
     @Test
     void testRoundEndShowsBomberAsPlayer(@NotNull Env env) {
@@ -47,7 +51,7 @@ class RoundEndListenerIntegrationTest extends TamiasPlayerTestBase {
         TeamHelper.addPlayerToTeam(bomberTeam, player);
         assertEquals(DisguiseState.TNT_BLOCK, ((TamiasPlayer) player).getDisguiseState());
 
-        new RoundEndListener(teamService::getTeams, () -> {}).accept(new RoundEndEvent());
+        new RoundEndListener(teamService::getTeams, () -> {}, NO_CREDIT).accept(new RoundEndEvent());
 
         assertEquals(DisguiseState.NONE, ((TamiasPlayer) player).getDisguiseState());
         assertTrue(bomberTeam.getPlayers().isEmpty());
@@ -64,7 +68,7 @@ class RoundEndListenerIntegrationTest extends TamiasPlayerTestBase {
         TeamHelper.addPlayerToTeam(teamService.getTeam(GameConfig.BOMBER_KEY).orElseThrow(), player);
         SpectatorHelper.enable(player);
 
-        new RoundEndListener(teamService::getTeams, () -> {}).accept(new RoundEndEvent());
+        new RoundEndListener(teamService::getTeams, () -> {}, NO_CREDIT).accept(new RoundEndEvent());
 
         assertFalse(SpectatorHelper.isSpectator(player));
         assertFalse(player.isAllowFlying());
@@ -88,10 +92,37 @@ class RoundEndListenerIntegrationTest extends TamiasPlayerTestBase {
         assertNotNull(staminaService.getStaminaBar(survivor));
         assertNotNull(staminaService.getStaminaBar(bomber));
 
-        new RoundEndListener(teamService::getTeams, staminaService::cleanUp).accept(new RoundEndEvent());
+        new RoundEndListener(teamService::getTeams, staminaService::cleanUp, NO_CREDIT).accept(new RoundEndEvent());
 
         assertNull(staminaService.getStaminaBar(survivor));
         assertNull(staminaService.getStaminaBar(bomber));
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testRoundEndCreditsBeforeTeamsAreCleared(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player survivor = env.createPlayer(instance);
+        Player bomber = env.createPlayer(instance);
+        TeamService teamService = TeamService.of();
+        TeamHelper.loadTeams(2, teamService);
+        Team survivorTeam = teamService.getTeam(GameConfig.SURVIVOR_KEY).orElseThrow();
+        Team bomberTeam = teamService.getTeam(GameConfig.BOMBER_KEY).orElseThrow();
+        TeamHelper.addPlayerToTeam(survivorTeam, survivor);
+        TeamHelper.addPlayerToTeam(bomberTeam, bomber);
+        AtomicInteger survivorsAtCredit = new AtomicInteger(-1);
+        AtomicInteger bombersAtCredit = new AtomicInteger(-1);
+
+        new RoundEndListener(teamService::getTeams, () -> {}, (survivors, bombers) -> {
+            survivorsAtCredit.set(survivors.getPlayers().size());
+            bombersAtCredit.set(bombers.getPlayers().size());
+        }).accept(new RoundEndEvent());
+
+        assertEquals(1, survivorsAtCredit.get());
+        assertEquals(1, bombersAtCredit.get());
+        assertTrue(survivorTeam.getPlayers().isEmpty());
+        assertTrue(bomberTeam.getPlayers().isEmpty());
 
         env.destroyInstance(instance, true);
     }
@@ -106,7 +137,7 @@ class RoundEndListenerIntegrationTest extends TamiasPlayerTestBase {
         TeamHelper.addPlayerToTeam(teamService.getTeam(GameConfig.SURVIVOR_KEY).orElseThrow(), survivor);
         Collector<SystemChatPacket> messages = connection.trackIncoming(SystemChatPacket.class);
 
-        new RoundEndListener(teamService::getTeams, () -> {}).accept(new RoundEndEvent());
+        new RoundEndListener(teamService::getTeams, () -> {}, NO_CREDIT).accept(new RoundEndEvent());
 
         messages.assertSingle();
         String message = PlainTextComponentSerializer.plainText().serialize(messages.collect().getFirst().message());
@@ -125,7 +156,7 @@ class RoundEndListenerIntegrationTest extends TamiasPlayerTestBase {
         TeamHelper.addPlayerToTeam(teamService.getTeam(GameConfig.SURVIVOR_KEY).orElseThrow(), survivor);
         TeamHelper.addPlayerToTeam(teamService.getTeam(GameConfig.BOMBER_KEY).orElseThrow(), bomber);
 
-        new RoundEndListener(teamService::getTeams, () -> {}).accept(new RoundEndEvent());
+        new RoundEndListener(teamService::getTeams, () -> {}, NO_CREDIT).accept(new RoundEndEvent());
 
         List<Entity> fireworks = getFireworks(instance);
         assertEquals(2, fireworks.size());
@@ -146,7 +177,7 @@ class RoundEndListenerIntegrationTest extends TamiasPlayerTestBase {
         TeamHelper.loadTeams(2, teamService);
         TeamHelper.addPlayerToTeam(teamService.getTeam(GameConfig.BOMBER_KEY).orElseThrow(), bomber);
 
-        new RoundEndListener(teamService::getTeams, () -> {}).accept(new RoundEndEvent());
+        new RoundEndListener(teamService::getTeams, () -> {}, NO_CREDIT).accept(new RoundEndEvent());
         Entity firework = getFireworks(instance).getFirst();
 
         env.tickWhile(() -> !firework.isRemoved(), Duration.ofSeconds(5));

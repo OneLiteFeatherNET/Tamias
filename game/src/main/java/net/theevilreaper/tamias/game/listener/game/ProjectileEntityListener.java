@@ -1,8 +1,10 @@
 package net.theevilreaper.tamias.game.listener.game;
 
+import ca.atlasengine.projectiles.AbstractProjectile;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEvent;
 import net.theevilreaper.tamias.common.config.GameConfig;
+import net.theevilreaper.tamias.game.player.TamiasPlayer;
 import net.theevilreaper.tamias.game.stamina.ExplodeBar;
 import net.theevilreaper.tamias.game.stamina.StaminaBar;
 import net.theevilreaper.tamias.common.util.Tags;
@@ -39,6 +41,9 @@ public final class ProjectileEntityListener implements Consumer<ProjectileCollid
         if (!GameConfig.BOMBER_KEY.asString().equals(target.getTag(Tags.TEAM_KEY))) return;
         if (!(staminaMapper.apply(target.getUuid()) instanceof ExplodeBar explodeBar)) return;
 
-        explodeBar.explode();
+        if (!explodeBar.explode()) return;
+        if (event.getEntity() instanceof AbstractProjectile projectile && projectile.getShooter() instanceof TamiasPlayer shooter) {
+            shooter.addHit();
+        }
     }
 }

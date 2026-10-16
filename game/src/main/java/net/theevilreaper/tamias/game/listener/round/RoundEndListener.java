@@ -18,6 +18,7 @@ import net.theevilreaper.xerus.api.team.Team;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -25,6 +26,7 @@ public final class RoundEndListener implements Consumer<RoundEndEvent> {
 
     private final Supplier<List<Team>> teamClear;
     private final VoidConsumer staminaCleanup;
+    private final BiConsumer<Team, Team> roundCredit;
 
     /**
      * Creates a new {@link RoundEndListener} that stops the stamina bars, announces the winner of the round, resets
@@ -32,10 +34,12 @@ public final class RoundEndListener implements Consumer<RoundEndEvent> {
      *
      * @param teamClear      a supplier that provides the list of teams to clear
      * @param staminaCleanup stops and removes the stamina bars of the round, so they don't keep running in the next one
+     * @param roundCredit    credits the round to the players, receives the survivor and the bomber team before they are cleared
      */
-    public RoundEndListener(Supplier<List<Team>> teamClear, VoidConsumer staminaCleanup) {
+    public RoundEndListener(Supplier<List<Team>> teamClear, VoidConsumer staminaCleanup, BiConsumer<Team, Team> roundCredit) {
         this.teamClear = teamClear;
         this.staminaCleanup = staminaCleanup;
+        this.roundCredit = roundCredit;
     }
 
     @Override
@@ -48,6 +52,7 @@ public final class RoundEndListener implements Consumer<RoundEndEvent> {
         // The winner must be determined before the teams are cleared
         if (survivorTeam.isPresent() && bomberTeam.isPresent()) {
             celebrate(RoundConditions.getWinner(survivorTeam.get(), bomberTeam.get()), teams);
+            this.roundCredit.accept(survivorTeam.get(), bomberTeam.get());
         }
 
         for (Team team : teams) {

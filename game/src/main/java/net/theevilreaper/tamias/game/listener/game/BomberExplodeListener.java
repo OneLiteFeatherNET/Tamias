@@ -9,6 +9,7 @@ import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.theevilreaper.aves.util.functional.VoidConsumer;
 import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.common.util.Tags;
+import net.theevilreaper.tamias.game.player.TamiasPlayer;
 import net.theevilreaper.tamias.game.attribute.AttributeHelper;
 import net.theevilreaper.tamias.game.event.BomberExplodeEvent;
 import net.theevilreaper.tamias.game.util.EntityHelper;
@@ -58,6 +59,9 @@ public class BomberExplodeListener implements Consumer<BomberExplodeEvent> {
                 .toList();
         if (survivors.isEmpty()) return;
 
+        if (player instanceof TamiasPlayer bomber) {
+            survivors.forEach(_ -> bomber.addKill());
+        }
         survivors.forEach(this.survivorConverter::accept);
         this.roundEndCheck.apply();
     }

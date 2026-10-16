@@ -88,6 +88,9 @@ class LobbyScoreboardIntegrationTest {
                 ),
                 () -> assertThrows(UnsupportedOperationException.class, () ->
                         lobbyScoreboard.updateScore(ScoreType.ROUND_TYPE, Component.text("Round Type"))
+                ),
+                () -> assertThrows(UnsupportedOperationException.class, () ->
+                        lobbyScoreboard.updateScore(ScoreType.WINS, Component.text("Wins"))
                 )
         );
     }

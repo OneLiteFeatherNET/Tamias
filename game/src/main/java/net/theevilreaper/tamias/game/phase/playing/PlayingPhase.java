@@ -54,6 +54,7 @@ public final class PlayingPhase extends TimedPhase {
         this.setCurrentTicks(PLAYING_TIME);
         super.onStart();
         EventDispatcher.call(new SpawnCleanupEvent());
+        this.timeUpdater.accept(PLAYING_TIME);
         this.startGameLogic.apply();
     }
 

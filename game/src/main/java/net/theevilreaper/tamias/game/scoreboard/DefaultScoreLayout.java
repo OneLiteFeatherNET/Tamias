@@ -36,13 +36,16 @@ sealed interface DefaultScoreLayout permits LobbyScoreboard, GameScoreboard {
      * @param gameScoreboard the scoreboard to initialize
      */
     default void initGameScoreboard(Sidebar gameScoreboard) {
-        gameScoreboard.createLine(new Sidebar.ScoreboardLine("empty-line-1", Component.empty(), 8));
-        gameScoreboard.createLine(new Sidebar.ScoreboardLine("tnt-header", Component.text("TNT:", NamedTextColor.RED), 7));
-        gameScoreboard.createLine(new Sidebar.ScoreboardLine(ScoreType.TNT.key().asString(), SPACER.append(Component.text("0")), 6));
-        gameScoreboard.createLine(new Sidebar.ScoreboardLine("empty-line-2", Component.empty(), 5));
-        gameScoreboard.createLine(new Sidebar.ScoreboardLine("player-header", Component.text("Players:", NamedTextColor.GREEN), 4));
-        gameScoreboard.createLine(new Sidebar.ScoreboardLine(ScoreType.PLAYER.key().asString(), SPACER.append(Component.text("0", NamedTextColor.GRAY)), 3));
-        gameScoreboard.createLine(new Sidebar.ScoreboardLine("empty-line-3", Component.empty(), 2));
+        gameScoreboard.createLine(new Sidebar.ScoreboardLine("empty-line-1", Component.empty(), 11));
+        gameScoreboard.createLine(new Sidebar.ScoreboardLine("tnt-header", Component.text("TNT:", NamedTextColor.RED), 10));
+        gameScoreboard.createLine(new Sidebar.ScoreboardLine(ScoreType.TNT.key().asString(), SPACER.append(Component.text("0")), 9));
+        gameScoreboard.createLine(new Sidebar.ScoreboardLine("empty-line-2", Component.empty(), 8));
+        gameScoreboard.createLine(new Sidebar.ScoreboardLine("player-header", Component.text("Survivors:", NamedTextColor.GREEN), 7));
+        gameScoreboard.createLine(new Sidebar.ScoreboardLine(ScoreType.PLAYER.key().asString(), SPACER.append(Component.text("0", NamedTextColor.GRAY)), 6));
+        gameScoreboard.createLine(new Sidebar.ScoreboardLine("empty-line-3", Component.empty(), 5));
+        gameScoreboard.createLine(new Sidebar.ScoreboardLine("wins-header", Component.text("Wins:", NamedTextColor.GOLD), 4));
+        gameScoreboard.createLine(new Sidebar.ScoreboardLine(ScoreType.WINS.key().asString(), SPACER.append(Component.text("0")), 3));
+        gameScoreboard.createLine(new Sidebar.ScoreboardLine("empty-line-4", Component.empty(), 2));
         gameScoreboard.createLine(new Sidebar.ScoreboardLine("round-header", Component.text("Round:", NamedTextColor.AQUA), 1));
         gameScoreboard.createLine(new Sidebar.ScoreboardLine(ScoreType.ROUND_TYPE.key().asString(), SPACER.append(Component.text("0")), 0));
     }
