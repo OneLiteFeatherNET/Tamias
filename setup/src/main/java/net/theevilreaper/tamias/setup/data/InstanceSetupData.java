@@ -15,7 +15,6 @@ import net.theevilreaper.aves.map.BaseMapBuilder;
 import net.theevilreaper.aves.map.MapEntry;
 import net.theevilreaper.tamias.setup.map.MapDataCategory;
 import net.theevilreaper.tamias.setup.util.SetupTags;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

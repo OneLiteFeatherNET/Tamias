@@ -4,8 +4,6 @@ import net.minestom.server.entity.Player;
 import net.theevilreaper.aves.map.MapEntry;
 import org.jetbrains.annotations.Contract;
 
-import java.util.UUID;
-
 /**
  * The {@link SetupDataFactory} is used to create new instances of {@link InstanceSetupData}.
  *
@@ -25,7 +23,6 @@ public abstract class SetupDataFactory {
      */
     @Contract(pure = true, value = "_, _, _ -> new")
     public static InstanceSetupData create(Player player, MapEntry mapEntry, boolean lobbyMode) {
-        final UUID uuid = player.getUuid();
         return lobbyMode ? new LobbyData(player, mapEntry) : new GameData(player, mapEntry);
     }
 

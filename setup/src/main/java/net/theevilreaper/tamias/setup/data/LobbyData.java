@@ -17,7 +17,6 @@ import net.theevilreaper.tamias.setup.inventory.GeneralMapDataInventory;
 import net.theevilreaper.tamias.setup.map.MapDataCategory;
 
 import java.util.Optional;
-import java.util.UUID;
 
 public final class LobbyData extends InstanceSetupData {
 
