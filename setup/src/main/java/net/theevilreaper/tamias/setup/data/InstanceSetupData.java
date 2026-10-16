@@ -204,6 +204,7 @@ public abstract class InstanceSetupData implements SetupData {
         GENERAL,
         GAME,
         AREA,
+        GROUND_PRESETS,
 
     }
 }

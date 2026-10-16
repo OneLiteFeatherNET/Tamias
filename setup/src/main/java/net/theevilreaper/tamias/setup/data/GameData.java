@@ -18,6 +18,8 @@ import net.theevilreaper.tamias.common.map.builder.GameMapBuilder;
 import net.theevilreaper.tamias.setup.inventory.GameAreaDataInventory;
 import net.theevilreaper.tamias.setup.inventory.GameMapDataInventory;
 import net.theevilreaper.tamias.setup.inventory.GeneralMapDataInventory;
+import net.theevilreaper.tamias.setup.inventory.GroundPresetEditInventory;
+import net.theevilreaper.tamias.setup.inventory.GroundPresetInventory;
 import net.theevilreaper.tamias.setup.map.MapDataCategory;
 
 import java.util.Optional;
@@ -27,6 +29,8 @@ public class GameData extends InstanceSetupData {
     private final GeneralMapDataInventory inventory;
     private final GameMapDataInventory gameMapDataInventory;
     private final GameAreaDataInventory gameAreaDataInventory;
+    private final GroundPresetInventory groundPresetInventory;
+    private final GroundPresetEditInventory groundPresetEditInventory;
     private GameMapBuilder gameMapBuilder;
 
     /**
@@ -39,8 +43,42 @@ public class GameData extends InstanceSetupData {
         super(player, mapEntry, BossBar.Color.RED);
         this.loadData();
         this.inventory = new GeneralMapDataInventory(player, this.gameMapBuilder);
-        this.gameMapDataInventory = new GameMapDataInventory(player, this.gameMapBuilder);
+        this.gameMapDataInventory = new GameMapDataInventory(
+                player,
+                this.gameMapBuilder,
+                () -> this.openInventory(InventoryTarget.GROUND_PRESETS)
+        );
         this.gameAreaDataInventory = new GameAreaDataInventory(player, this.gameMapBuilder);
+        this.groundPresetInventory = new GroundPresetInventory(
+                player,
+                this.gameMapBuilder,
+                this::editGroundPreset,
+                () -> this.openInventory(InventoryTarget.GAME),
+                this::onGroundPresetChange
+        );
+        this.groundPresetEditInventory = new GroundPresetEditInventory(
+                player,
+                this.gameMapBuilder,
+                () -> this.openInventory(InventoryTarget.GROUND_PRESETS),
+                this::onGroundPresetChange
+        );
+    }
+
+    /**
+     * Opens the editor for the ground preset with the given index.
+     *
+     * @param index the index of the preset or {@link GroundPresetInventory#NEW_PRESET} for a new one
+     */
+    private void editGroundPreset(int index) {
+        this.groundPresetEditInventory.edit(index);
+    }
+
+    /**
+     * Updates every inventory which displays ground preset data.
+     */
+    private void onGroundPresetChange() {
+        triggerUpdate(InventoryTarget.GAME);
+        triggerUpdate(InventoryTarget.GROUND_PRESETS);
     }
 
     /**
@@ -52,6 +90,7 @@ public class GameData extends InstanceSetupData {
             case GENERAL -> this.inventory.open();
             case GAME -> this.gameMapDataInventory.open();
             case AREA -> this.gameAreaDataInventory.open();
+            case GROUND_PRESETS -> this.groundPresetInventory.open();
         }
     }
 
@@ -64,6 +103,7 @@ public class GameData extends InstanceSetupData {
             case GENERAL -> this.inventory.invalidateDataLayout();
             case GAME -> this.gameMapDataInventory.invalidateDataLayout();
             case AREA -> this.gameAreaDataInventory.invalidateDataLayout();
+            case GROUND_PRESETS -> this.groundPresetInventory.invalidateDataLayout();
         }
     }
 
@@ -233,6 +273,8 @@ public class GameData extends InstanceSetupData {
         this.inventory.unregister();
         this.gameMapDataInventory.unregister();
         this.gameAreaDataInventory.unregister();
+        this.groundPresetInventory.unregister();
+        this.groundPresetEditInventory.unregister();
     }
 
     /**

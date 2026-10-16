@@ -25,7 +25,8 @@ public enum MapDataCategory {
     SURVIVOR_DIRECTION("Survivor Direction", Material.RECOVERY_COMPASS, NamedTextColor.GREEN),
     BOMBER_SPAWN("Bomber Spawn", Material.TNT, NamedTextColor.GOLD),
     AREA_LOWER_CORNER("Area Lower Corner", Material.RED_CONCRETE, NamedTextColor.LIGHT_PURPLE),
-    AREA_UPPER_CORNER("Area Upper Corner", Material.BLUE_CONCRETE, NamedTextColor.LIGHT_PURPLE);
+    AREA_UPPER_CORNER("Area Upper Corner", Material.BLUE_CONCRETE, NamedTextColor.LIGHT_PURPLE),
+    GROUND_PRESETS("Ground Presets", Material.BRUSH, NamedTextColor.DARK_GREEN);
 
     private static final MapDataCategory[] VALUES = values();
     private static final Map<MapDataCategory, ItemStack> DEFAULT_CACHE = new EnumMap<>(MapDataCategory.class);
