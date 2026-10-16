@@ -14,6 +14,8 @@ class GroundBlocksTest {
         assertEquals("Sand", GroundBlocks.displayName(Block.SAND));
         assertEquals("Red Sand", GroundBlocks.displayName(Block.RED_SAND));
         assertEquals("Deepslate Diamond Ore", GroundBlocks.displayName(Block.DEEPSLATE_DIAMOND_ORE));
+        assertEquals("Redstone Lamp", GroundBlocks.displayName(Block.REDSTONE_LAMP));
+        assertEquals("Redstone Lamp (On)", GroundBlocks.displayName(Block.REDSTONE_LAMP.withProperty("lit", "true")));
     }
 
     @Test

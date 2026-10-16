@@ -47,6 +47,28 @@ class GroundDataAdapterTest {
     }
 
     @Test
+    void testBlockStateRoundTrip() {
+        Block litLamp = Block.REDSTONE_LAMP.withProperty("lit", "true");
+        GroundData groundData = new GroundData(Block.STONE, List.of(litLamp));
+
+        JsonObject object = GsonUtil.GSON.toJsonTree(groundData).getAsJsonObject();
+        assertEquals("minecraft:stone", object.get("ground").getAsString(), "Default states must be stored as plain key");
+        assertEquals("minecraft:redstone_lamp[lit=true]", object.getAsJsonArray("additional").get(0).getAsString());
+
+        GroundData parsed = GsonUtil.GSON.fromJson(object, GroundData.class);
+        assertEquals("true", parsed.additionalBlocks().getFirst().getProperty("lit"));
+        assertEquals(groundData, parsed);
+    }
+
+    @Test
+    void testInvalidBlockStateFails() {
+        assertThrows(
+                JsonParseException.class,
+                () -> GsonUtil.GSON.fromJson("{ \"ground\": \"minecraft:redstone_lamp[unknown=true]\" }", GroundData.class)
+        );
+    }
+
+    @Test
     void testUnknownBlockFails() {
         assertThrows(
                 JsonParseException.class,
