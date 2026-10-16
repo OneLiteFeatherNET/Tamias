@@ -14,6 +14,7 @@ import net.onelitefeather.guira.data.SetupData;
 import net.theevilreaper.aves.map.BaseMapBuilder;
 import net.theevilreaper.aves.map.MapEntry;
 import net.theevilreaper.tamias.setup.map.MapDataCategory;
+import net.theevilreaper.tamias.setup.util.SetupTags;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -138,11 +139,13 @@ public abstract class InstanceSetupData implements SetupData {
     }
 
     /**
-     * Resets this setup, unregisters its instance and closes its chunk loader if present.
+     * Resets this setup, removes the setup tag from the player so a new setup can be started,
+     * unregisters its instance and closes its chunk loader if present.
      */
     @Override
     public void reset() {
         this.bossBar.removeViewer(player);
+        player.removeTag(SetupTags.SETUP_TAG);
         if (instance == null) return;
         MinecraftServer.getInstanceManager().unregisterInstance(instance);
 

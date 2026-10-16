@@ -5,7 +5,6 @@ import net.minestom.server.entity.Player;
 import net.onelitefeather.guira.data.SetupData;
 import net.onelitefeather.guira.event.SetupFinishEvent;
 import net.theevilreaper.aves.util.functional.PlayerConsumer;
-import net.theevilreaper.tamias.setup.util.SetupTags;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -32,8 +31,5 @@ public class SetupFinishListener implements Consumer<SetupFinishEvent> {
         setupData.reset();
 
         this.dataRemover.apply(setupData.getId());
-        if (player != null) {
-            player.removeTag(SetupTags.SETUP_TAG);
-        }
     }
 }
