@@ -5,6 +5,9 @@ import net.minestom.server.entity.Player;
 import net.onelitefeather.guira.data.SetupData;
 import net.onelitefeather.guira.event.SetupFinishEvent;
 import net.theevilreaper.aves.util.functional.PlayerConsumer;
+import net.theevilreaper.tamias.setup.data.InstanceSetupData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -12,6 +15,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class SetupFinishListener implements Consumer<SetupFinishEvent> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SetupFinishListener.class);
 
     private final PlayerConsumer instanceSwitcher;
     private final Function<UUID, Optional<SetupData>> dataRemover;
@@ -23,13 +28,11 @@ public class SetupFinishListener implements Consumer<SetupFinishEvent> {
 
     @Override
     public void accept(SetupFinishEvent event) {
-        SetupData setupData = event.getData();
-
-        setupData.save();
-        Player player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(setupData.getId());
+        if (!(event.getData() instanceof InstanceSetupData instanceSetupData)) return;
+        instanceSetupData.save();
+        Player player = instanceSetupData.getPlayer();
         this.instanceSwitcher.accept(player);
-        setupData.reset();
-
-        this.dataRemover.apply(setupData.getId());
+        instanceSetupData.reset();
+        this.dataRemover.apply(instanceSetupData.getId());
     }
 }

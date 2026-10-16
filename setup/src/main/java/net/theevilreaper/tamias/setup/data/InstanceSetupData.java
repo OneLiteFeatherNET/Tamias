@@ -15,6 +15,7 @@ import net.theevilreaper.aves.map.BaseMapBuilder;
 import net.theevilreaper.aves.map.MapEntry;
 import net.theevilreaper.tamias.setup.map.MapDataCategory;
 import net.theevilreaper.tamias.setup.util.SetupTags;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -187,6 +188,18 @@ public abstract class InstanceSetupData implements SetupData {
         return a.x() == b.x() && a.y() == b.y() && a.z() == b.z();
     }
 
+    /**
+     * Returns the player reference that owns the instance data
+     *
+     * @return the owing reference
+     */
+    public Player getPlayer() {
+        return player;
+    }
+
+    /**
+     * Small enumeration of which inventory targets could be updated durign the setup
+     */
     public enum InventoryTarget {
 
         GENERAL,
