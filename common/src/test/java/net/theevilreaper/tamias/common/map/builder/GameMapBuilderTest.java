@@ -2,9 +2,13 @@ package net.theevilreaper.tamias.common.map.builder;
 
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.Direction;
+import net.theevilreaper.tamias.common.ground.GroundData;
 import net.theevilreaper.tamias.common.map.GameMap;
 import org.junit.jupiter.api.Test;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -55,5 +59,45 @@ class GameMapBuilderTest {
         assertEquals(Pos.ZERO, gameMap.getSpawnData().pos());
         assertNotNull(gameMap.builders());
         assertEquals(new Pos(0, 64, 0), gameMap.getBomberInitialSpawn());
+    }
+
+    @Test
+    void testGroundPresetHandling() {
+        GroundData sand = new GroundData(Block.SAND, List.of(Block.RED_SAND));
+        GroundData ice = new GroundData(Block.ICE, null);
+        GroundData snow = new GroundData(Block.SNOW_BLOCK, null);
+
+        GameMapBuilder builder = completeBuilder().addGroundPreset(sand).addGroundPreset(ice);
+        assertEquals(List.of(sand, ice), builder.getGroundPresets());
+
+        builder.setGroundPreset(1, snow);
+        assertEquals(List.of(sand, snow), builder.getGroundPresets());
+
+        builder.removeGroundPreset(0);
+        assertEquals(List.of(snow), builder.getGroundPresets());
+        assertThrows(UnsupportedOperationException.class, () -> builder.getGroundPresets().add(ice));
+
+        GameMap gameMap = builder.build();
+        assertTrue(gameMap.hasGroundPresets());
+        assertEquals(List.of(snow), gameMap.getGroundPresets());
+
+        GameMapBuilder copy = new GameMapBuilder(gameMap);
+        assertEquals(List.of(snow), copy.getGroundPresets());
+    }
+
+    @Test
+    void testMapWithoutGroundPresets() {
+        GameMap gameMap = completeBuilder().build();
+        assertFalse(gameMap.hasGroundPresets());
+        assertTrue(gameMap.getGroundPresets().isEmpty());
+    }
+
+    private static GameMapBuilder completeBuilder() {
+        return new GameMapBuilder()
+                .bomberSpawn(Pos.ZERO)
+                .spawnLayerPos(Pos.ZERO)
+                .spawnLayerDirection(Direction.EAST)
+                .areaLowerCorner(Vec.ZERO)
+                .areaUpperCorner(Vec.ONE);
     }
 }
