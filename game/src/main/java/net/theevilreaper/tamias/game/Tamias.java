@@ -52,6 +52,7 @@ import net.theevilreaper.tamias.game.event.BomberRequireSpawnEvent;
 import net.theevilreaper.tamias.game.listener.PlayerChatListener;
 import net.theevilreaper.tamias.game.listener.PlayerJoinListener;
 import net.theevilreaper.tamias.game.listener.PlayerQuitListener;
+import net.theevilreaper.tamias.game.util.phase.PhaseSeriesHelper;
 import net.theevilreaper.tamias.game.listener.PlayerSpawnListener;
 import net.theevilreaper.tamias.game.listener.area.AreaSpawnListener;
 import net.theevilreaper.tamias.game.listener.area.GameAreaPrepareListener;
@@ -106,6 +107,7 @@ public class Tamias implements ListenerHandling {
     private final MapProvider mapProvider;
 
     private RoundProvider roundProvider;
+    private CyclicPhaseSeries<Phase> gameSeries;
 
     public Tamias() {
         Path path = ServiceBootstrap.resolveWorkingDirectory();
@@ -159,6 +161,7 @@ public class Tamias implements ListenerHandling {
         this.phaseSeries.add(new LobbyPhase(new LobbyPhaseData(this.timeUpdater, this.gameConfig)));
 
         CyclicPhaseSeries<Phase> gameSeries = new CyclicPhaseSeries<>("game");
+        this.gameSeries = gameSeries;
         this.roundProvider = new RoundProvider(gameSeries);
         gameSeries.add(new GroundBuildPhase(() -> {
             GroundData randomData = GroundDataRegistry.instance().getRandomData();
@@ -230,8 +233,10 @@ public class Tamias implements ListenerHandling {
                 new PlayerQuitListener(
                         this.phaseSeries::getCurrentPhase,
                         key -> this.teamService.getTeam(key).orElse(null),
+                        player -> this.staminaService.removeStaminaBar(player.getUuid()),
                         checkRoundEnd,
-                        this.scoreboard::removeViewer
+                        this.scoreboard::removeViewer,
+                        () -> PhaseSeriesHelper.finishEarly(this.gameSeries)
                 )
         );
         node.addListener(PlayerChatEvent.class, new PlayerChatListener());

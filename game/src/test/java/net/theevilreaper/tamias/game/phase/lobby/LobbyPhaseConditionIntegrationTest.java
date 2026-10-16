@@ -4,6 +4,8 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.testing.Env;
 import net.minestom.testing.extension.MicrotusExtension;
+import net.theevilreaper.tamias.game.phase.LobbyPhase;
+import net.theevilreaper.tamias.game.util.phase.LobbyPhaseData;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,29 +51,44 @@ class LobbyPhaseConditionIntegrationTest extends LobbyPhaseTestBase {
     @Test
     void testPhaseStopCondition(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
-        assertTrue(lobbyPhase.isPaused());
+        LobbyPhase phase = new LobbyPhase(new LobbyPhaseData(_ -> {}, 3, 2, LOBBY_PHASE_TIME));
+        assertTrue(phase.isPaused());
 
         List<Player> players = new ArrayList<>();
         for (int i = 0; i < 2; i++) {
             players.add(env.createPlayer(instance));
         }
-        assertEquals(2, players.size());
 
-        lobbyPhase.checkStartCondition();
-        assertFalse(lobbyPhase.isPaused());
+        phase.checkStartCondition();
+        assertFalse(phase.isPaused());
+        phase.setCurrentTicks(LOBBY_PHASE_TIME - 10);
 
         int randomIndex = ThreadLocalRandom.current().nextInt(0, players.size());
         Player player = players.remove(randomIndex);
-        assertNotNull(player);
-        assertEquals(1, players.size());
-        player.remove(true);
-        lobbyPhase.checkStopCondition();
-        assertTrue(lobbyPhase.isPaused());
+        phase.checkStopCondition(player);
+        assertTrue(phase.isPaused());
 
         Player lastPlayer = players.getFirst();
-        assertNotNull(lastPlayer);
-        assertEquals(LOBBY_PHASE_TIME, lobbyPhase.getCurrentTicks());
+        assertEquals(LOBBY_PHASE_TIME, phase.getCurrentTicks());
         assertEquals(LOBBY_PHASE_TIME, lastPlayer.getLevel());
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testPhaseKeepsRunningWithEnoughPlayers(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        LobbyPhase phase = new LobbyPhase(new LobbyPhaseData(value -> {}, 3, 2, LOBBY_PHASE_TIME));
+        Player leavingPlayer = env.createPlayer(instance);
+        env.createPlayer(instance);
+        env.createPlayer(instance);
+
+        phase.checkStartCondition();
+        phase.setCurrentTicks(LOBBY_PHASE_TIME - 10);
+        phase.checkStopCondition(leavingPlayer);
+
+        assertFalse(phase.isPaused());
+        assertEquals(LOBBY_PHASE_TIME - 10, phase.getCurrentTicks());
 
         env.destroyInstance(instance, true);
     }

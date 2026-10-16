@@ -135,11 +135,17 @@ public final class LobbyPhase extends TimedPhase {
     }
 
     /**
-     * Checks if the stop condition is met, which is when the number of online players
-     * minus one (the host) is less than or equal to the maximum number of players.
+     * Checks if the stop condition is met, which is when fewer players than the minimum are left
+     * after the given player leaves. On a regular disconnect Minestom removes the player from the online players
+     * before the disconnect event is called. The filter only applies when a player is removed directly.
+     *
+     * @param leavingPlayer the player who leaves the game
      */
-    public void checkStopCondition() {
-        if (getConnectionManager().getOnlinePlayers().size() - 1 <= this.phaseData.maxPlayers()) {
+    public void checkStopCondition(Player leavingPlayer) {
+        long remainingPlayers = getConnectionManager().getOnlinePlayers().stream()
+                .filter(player -> player != leavingPlayer)
+                .count();
+        if (remainingPlayers < this.phaseData.minPlayers()) {
             this.setPaused(true);
             this.setCurrentTicks(this.phaseData.lobbyTime());
             setLevel();
