@@ -76,6 +76,35 @@ class BomberExplodeListenerIntegrationTest extends TamiasPlayerTestBase {
         env.destroyInstance(instance, true);
     }
 
+    @Test
+    void testExplosionCountsKillPerConvertedSurvivor(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        instance.setExplosionSupplier(new ExplosionCreator());
+        Player bomber = createPlayer(env, instance, new Pos(0, 40, 0), GameConfig.BOMBER_KEY.asString());
+        createPlayer(env, instance, new Pos(2, 40, 0), GameConfig.SURVIVOR_KEY.asString());
+        createPlayer(env, instance, new Pos(0, 40, 2), GameConfig.SURVIVOR_KEY.asString());
+
+        new BomberExplodeListener(_ -> {}, () -> {}).accept(new BomberExplodeEvent(bomber, bomber.getPosition().asVec()));
+
+        assertEquals(2, ((TamiasPlayer) bomber).getKills());
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testExplosionWithoutSurvivorsCountsNoKill(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        instance.setExplosionSupplier(new ExplosionCreator());
+        Player bomber = createPlayer(env, instance, new Pos(0, 40, 0), GameConfig.BOMBER_KEY.asString());
+        createPlayer(env, instance, new Pos(10, 40, 0), GameConfig.SURVIVOR_KEY.asString());
+
+        new BomberExplodeListener(_ -> {}, () -> {}).accept(new BomberExplodeEvent(bomber, bomber.getPosition().asVec()));
+
+        assertEquals(0, ((TamiasPlayer) bomber).getKills());
+
+        env.destroyInstance(instance, true);
+    }
+
     private Player createPlayer(Env env, Instance instance, Pos pos, String teamKey) {
         Player player = env.createPlayer(instance, pos);
         player.setTag(Tags.TEAM_KEY, teamKey);
