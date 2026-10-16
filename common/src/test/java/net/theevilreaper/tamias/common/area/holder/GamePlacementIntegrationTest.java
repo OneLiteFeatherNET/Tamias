@@ -13,7 +13,6 @@ import net.theevilreaper.tamias.common.ground.GroundData;
 import net.theevilreaper.tamias.common.ground.GroundDataRegistry;
 import net.theevilreaper.tamias.common.map.layer.AreaData;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -30,7 +29,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ExtendWith(MicrotusExtension.class)
 class GamePlacementIntegrationTest {
 
-    @Disabled("Should be revisited in the near future")
     @Test
     void testGamePlacement(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
@@ -71,11 +69,6 @@ class GamePlacementIntegrationTest {
         assertPostions(gameArea.getPositions(), testPositions);
         assertBlock(instance, Block.BARRIER, gameArea.getPositions());
 
-        gameArea.calculateTntPositions(() -> 1);
-       // gameArea.calculateTntPositions(() -> (int) (((double) testPositions.size() / 2) * 0.5));
-
-        assertNotNull(gameArea.getTntPositions(), "The TNT positions should not be null");
-
         GroundData randomData = GroundDataRegistry.instance().getRandomData();
 
         placement.triggerPlacement(randomData);
@@ -83,9 +76,6 @@ class GamePlacementIntegrationTest {
         env.tickWhile(placement::isRunning, Duration.ofSeconds(60));
 
         assertBlock(instance, randomData.groundBlock(), gameArea.getPositions());
-
-       // assertBlock(instance, Block.TNT, gameArea.getTntPositions());
-//        assertBlock(instance, Block.TNT, gameArea.getTntPositions().stream().map(tnt -> tnt.add(0, -1,0)).collect(Collectors.toSet()));
 
         env.destroyInstance(instance);
     }

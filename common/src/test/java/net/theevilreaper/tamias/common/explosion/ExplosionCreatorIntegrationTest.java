@@ -3,6 +3,7 @@ package net.theevilreaper.tamias.common.explosion;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.packet.server.play.ExplosionPacket;
 import net.minestom.testing.Collector;
 import net.minestom.testing.Env;
@@ -34,14 +35,14 @@ class ExplosionCreatorIntegrationTest {
         assertEquals(pos, player.getPosition());
         Collector<ExplosionPacket> explosionTracker = testConnection.trackIncoming(ExplosionPacket.class);
 
+        Pos blockPos = pos.sub(0, 1, 0);
+        instance.setBlock(blockPos, Block.STONE);
+
         instance.explode((float) pos.x(), (float) pos.y(), (float) pos.z(), 1F);
 
         explosionTracker.assertCount(1);
-        explosionTracker.assertSingle(packet -> {
-            // TODO: FIX ME
-            /*assertEquals(1, packet.radius());
-            assertEquals(ExplosionPacket.BlockInteraction.DESTROY, packet.blockInteraction());*/
-        });
+        explosionTracker.assertSingle(packet -> assertEquals(pos.asVec(), packet.center()));
+        assertEquals(Block.STONE, instance.getBlock(blockPos), "The explosion should not destroy any blocks");
 
         env.destroyInstance(instance, true);
     }
