@@ -43,10 +43,9 @@ public final class GamePlacement implements Placement {
         this.tntPlacement = new TNTPlacement(instance, new ArrayList<>());
 
         List<Vec> initialPositions = area.getPositions().stream().map(Vec.class::cast).toList();
-        List<Vec> specialPositions = new ArrayList<>(area.getSpecialPositions());
         this.groundPatterns = new EnumMap<>(GroundFillPattern.class);
         for (GroundFillPattern pattern : GroundFillPattern.values()) {
-            this.groundPatterns.put(pattern, new SweepAreaPlacement(instance, initialPositions, specialPositions, pattern.comparator()));
+            this.groundPatterns.put(pattern, new SweepAreaPlacement(instance, initialPositions, List.of(), pattern.comparator()));
         }
         this.activePattern = this.groundPatterns.get(GroundFillPattern.values()[0]);
     }
@@ -78,7 +77,25 @@ public final class GamePlacement implements Placement {
         GroundFillPattern chosen = patterns[ThreadLocalRandom.current().nextInt(patterns.length)];
         this.activePattern = this.groundPatterns.get(chosen);
         LOGGER.info("Using ground fill pattern {}", chosen);
+        this.updateSpecialPositions(groundData);
         this.activePattern.place(groundData);
+    }
+
+    /**
+     * Picks new special positions for the given ground data, they get an additional block instead of the ground
+     * block. Nothing is picked if the ground data has no additional blocks.
+     *
+     * @param groundData the ground data which is placed next
+     */
+    private void updateSpecialPositions(GroundData groundData) {
+        if (groundData.hasAdditionalBlocks()) {
+            int positions = this.area.getPositions().size();
+            int specialBlocks = Math.ceilDiv(positions, GameAreaHelper.POSITIONS_PER_SPECIAL_BLOCK);
+            this.area.calculateSpecialBlockPositions(() -> specialBlocks);
+        } else {
+            this.area.getSpecialPositions().clear();
+        }
+        this.activePattern.updateSpecialPositions(this.area.getSpecialPositions());
     }
 
     public void flatten() {

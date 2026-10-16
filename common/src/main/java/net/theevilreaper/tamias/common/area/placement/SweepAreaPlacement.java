@@ -10,8 +10,11 @@ import net.theevilreaper.tamias.common.ground.GroundData;
 
 import net.minestom.server.timer.TaskSchedule;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 
 import static net.theevilreaper.tamias.common.area.GameAreaHelper.BLOCKS_PER_STEP;
@@ -23,7 +26,7 @@ import static net.theevilreaper.tamias.common.area.GameAreaHelper.BLOCKS_PER_STE
  */
 public final class SweepAreaPlacement extends AreaBasePlacement<Vec> {
 
-    private final List<Vec> specialPositions;
+    private final Set<Vec> specialPositions;
     private final Comparator<Vec> fillOrder;
 
     public SweepAreaPlacement(
@@ -32,8 +35,19 @@ public final class SweepAreaPlacement extends AreaBasePlacement<Vec> {
             List<Vec> specialPositions,
             Comparator<Vec> fillOrder) {
         super(instance, blockPositions);
-        this.specialPositions = specialPositions;
+        this.specialPositions = ConcurrentHashMap.newKeySet();
+        this.specialPositions.addAll(specialPositions);
         this.fillOrder = fillOrder;
+    }
+
+    /**
+     * Replaces the positions which get an additional block of the ground data instead of the ground block.
+     *
+     * @param positions the new special positions
+     */
+    public void updateSpecialPositions(Collection<Vec> positions) {
+        this.specialPositions.clear();
+        this.specialPositions.addAll(positions);
     }
 
     /**

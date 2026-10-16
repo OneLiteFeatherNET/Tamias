@@ -97,6 +97,22 @@ class GameAreaTest {
     }
 
     @Test
+    void testSpecialBlockCalculationReplacesOldPositions() {
+        GameArea gameArea = new GameArea(areaData);
+        gameArea.calculatePositions();
+
+        gameArea.calculateSpecialBlockPositions(() -> 3);
+        assertEquals(3, gameArea.getSpecialPositions().size());
+
+        gameArea.calculateSpecialBlockPositions(() -> 2);
+        assertEquals(2, gameArea.getSpecialPositions().size());
+
+        int allPositions = gameArea.getPositions().size();
+        gameArea.calculateSpecialBlockPositions(() -> allPositions + 5);
+        assertEquals(allPositions, gameArea.getSpecialPositions().size());
+    }
+
+    @Test
     void testPositionCalculationTwice() {
         AreaData areaData = AreaData.builder()
                 .lowerCorner(Vec.ZERO)

@@ -18,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.Duration;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -218,6 +219,40 @@ class GamePlacementIntegrationTest {
         assertEquals(tntPositions, new HashSet<Point>(gameArea.getTntPositions()), "The dropped TNT blocks are the respawn tickets");
 
         env.destroyInstance(instance);
+    }
+
+    @Test
+    void testSpecialBlocksArePlaced(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        GameArea gameArea = createArea(14);
+        gameArea.getPositions().forEach(pos -> instance.setBlock(pos, GameAreaHelper.GROUND_MARKER_BLOCK));
+
+        GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
+        gamePlacement.flatten();
+
+        GroundData groundData = new GroundData(Block.STONE, List.of(Block.GOLD_BLOCK));
+        gamePlacement.triggerPlacement(groundData);
+        env.tickWhile(gamePlacement::isRunning, Duration.ofSeconds(10));
+
+        long specialBlocks = gameArea.getPositions().stream()
+                .filter(pos -> instance.getBlock(pos) == Block.GOLD_BLOCK)
+                .count();
+        // 225 positions, one special block for each started 100 positions
+        assertEquals(3, specialBlocks);
+
+        env.destroyInstance(instance);
+    }
+
+    private static GameArea createArea(int size) {
+        GameArea gameArea = new GameArea(
+                AreaData.builder()
+                        .lowerCorner(Vec.ZERO)
+                        .upperCorner(new Vec(size, 0, size))
+                        .facing(Direction.NORTH)
+                        .build()
+        );
+        gameArea.calculatePositions();
+        return gameArea;
     }
 
     /**

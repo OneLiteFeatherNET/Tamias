@@ -22,6 +22,10 @@ public final class GameAreaHelper {
     public static final int TNT_SPAWN_HEIGHT = 20;
     public static final int MIN_TNT_AMOUNT = 15;
     public static final int MAX_TNT_AMOUNT = 35;
+    /**
+     * One special block is placed for each started amount of this many ground positions.
+     */
+    public static final int POSITIONS_PER_SPECIAL_BLOCK = 100;
     public static final int MIN_SPEED_BOOST_AMOUNT = 10;
     public static final int MAX_SPEED_BOOST_AMOUNT = 20;
 

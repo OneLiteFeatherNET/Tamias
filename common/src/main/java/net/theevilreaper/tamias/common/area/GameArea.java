@@ -91,10 +91,12 @@ public final class GameArea implements PlayingArea {
      */
     @Override
     public void calculateSpecialBlockPositions(IntSupplier specialBlockCount) {
+        this.specialBlocks.clear();
         // Create a copy of the area positions to avoid modifying the original list
         List<Vec> availablePositions = new ArrayList<>(this.areaPositions);
+        int count = Math.min(specialBlockCount.getAsInt(), availablePositions.size());
 
-        for (int i = 0; i < specialBlockCount.getAsInt(); i++) {
+        for (int i = 0; i < count; i++) {
             // Get a random index within the remaining available positions
             int randomIndex = ThreadLocalRandom.current().nextInt(0, availablePositions.size());
             // Add the position to special blocks
