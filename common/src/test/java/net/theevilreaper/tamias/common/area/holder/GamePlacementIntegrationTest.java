@@ -112,8 +112,7 @@ class GamePlacementIntegrationTest {
         gameArea.calculatePositions();
 
         Vec markerPosition = new Vec(1, 0, 1);
-        instance.setBlock(markerPosition, GameAreaHelper.GROUND_MARKER_BLOCK);
-        instance.setBlock(markerPosition.add(0, 1, 0), Block.AIR);
+        prepareGround(instance, markerPosition);
 
         GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
 
@@ -145,10 +144,12 @@ class GamePlacementIntegrationTest {
 
         Vec clearPosition = new Vec(1, 0, 0);
         Vec obstructedPosition = new Vec(1, 0, 1);
-        instance.setBlock(clearPosition, GameAreaHelper.GROUND_MARKER_BLOCK);
-        instance.setBlock(clearPosition.add(0, 1, 0), Block.AIR);
-        instance.setBlock(obstructedPosition, GameAreaHelper.GROUND_MARKER_BLOCK);
+        Vec overhangPosition = new Vec(1, 0, 2);
+        prepareGround(instance, clearPosition);
+        prepareGround(instance, obstructedPosition);
         instance.setBlock(obstructedPosition.add(0, 1, 0), Block.STONE);
+        prepareGround(instance, overhangPosition);
+        instance.setBlock(overhangPosition.add(0, GameAreaHelper.TNT_DROP_HEIGHT, 0), Block.STONE);
 
         GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
         gamePlacement.flatten();
@@ -163,6 +164,7 @@ class GamePlacementIntegrationTest {
 
         assertEquals(Block.TNT, instance.getBlock(clearPosition.add(0, 1, 0)));
         assertEquals(Block.STONE, instance.getBlock(obstructedPosition.add(0, 1, 0)));
+        assertEquals(Block.AIR, instance.getBlock(overhangPosition.add(0, 1, 0)), "A structure above blocks the drop path");
 
         gamePlacement.clear();
         assertEquals(Block.AIR, instance.getBlock(clearPosition.add(0, 1, 0)));
@@ -182,10 +184,7 @@ class GamePlacementIntegrationTest {
         );
         gameArea.calculatePositions();
 
-        for (Point pos : gameArea.getPositions()) {
-            instance.setBlock(pos, GameAreaHelper.GROUND_MARKER_BLOCK);
-            instance.setBlock(pos.add(0, 1, 0), Block.AIR);
-        }
+        gameArea.getPositions().forEach(pos -> prepareGround(instance, pos));
 
         GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
         gamePlacement.flatten();
@@ -225,7 +224,7 @@ class GamePlacementIntegrationTest {
     void testSpecialBlocksArePlaced(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
         GameArea gameArea = createArea(14);
-        gameArea.getPositions().forEach(pos -> instance.setBlock(pos, GameAreaHelper.GROUND_MARKER_BLOCK));
+        gameArea.getPositions().forEach(pos -> prepareGround(instance, pos));
 
         GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
         gamePlacement.flatten();
@@ -253,6 +252,16 @@ class GamePlacementIntegrationTest {
         );
         gameArea.calculatePositions();
         return gameArea;
+    }
+
+    /**
+     * Marks the given position as ground and clears the drop path above it.
+     */
+    private static void prepareGround(Instance instance, Point position) {
+        instance.setBlock(position, GameAreaHelper.GROUND_MARKER_BLOCK);
+        for (int y = 1; y <= GameAreaHelper.TNT_DROP_HEIGHT + 1; y++) {
+            instance.setBlock(position.add(0, y, 0), Block.AIR);
+        }
     }
 
     /**

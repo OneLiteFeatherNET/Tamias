@@ -36,11 +36,13 @@ public final class GamePlacement implements Placement {
     private final GameArea area;
     private final Instance instance;
     private SweepAreaPlacement activePattern;
+    private List<Vec> tntCandidates;
 
     public GamePlacement(Instance instance, GameArea area) {
         this.instance = instance;
         this.area = area;
         this.tntPlacement = new TNTPlacement(instance, new ArrayList<>());
+        this.tntCandidates = List.of();
 
         List<Vec> initialPositions = area.getPositions().stream().map(Vec.class::cast).toList();
         this.groundPatterns = new EnumMap<>(GroundFillPattern.class);
@@ -113,6 +115,12 @@ public final class GamePlacement implements Placement {
         for (SweepAreaPlacement pattern : this.groundPatterns.values()) {
             pattern.updatePositions(filteredPositions);
         }
+        // The structures on the map are static, so the free drop paths only have to be found once
+        this.tntCandidates = filteredPositions.stream()
+                .map(pos -> pos.add(0, 1, 0))
+                .filter(this::isDropPathFree)
+                .toList();
+        LOGGER.info("Found {} TNT candidates with a free drop path", this.tntCandidates.size());
         LOGGER.info("Flatten area by {} positions, {} remain as ground candidates", positionsToRemove.size(), this.area.getPositions().size());
     }
 
@@ -178,21 +186,15 @@ public final class GamePlacement implements Placement {
      * Candidates are picked from the whole known area (not just what the ground placement has
      * placed so far) so the spread covers the entire map even while ground placement - which fills
      * outward from the world origin and is much faster than the staggered TNT fall - is still
-     * running. Positions with something stacked above them are skipped, so TNT never spawns inside
-     * decorations.
+     * running. Only positions with a free drop path are used, so TNT never spawns inside or falls
+     * through a structure.
      *
      * @param countSupplier supplies how many TNT blocks should be dropped
      */
     public void dropTnt(IntSupplier countSupplier) {
-        List<Vec> candidates = new ArrayList<>();
-        for (Point pos : area.getPositions()) {
-            Point above = pos.add(0, 1, 0);
-            if (instance.getBlock(above) == Block.AIR) {
-                candidates.add((Vec) above);
-            }
-        }
-        if (candidates.isEmpty()) return;
+        if (this.tntCandidates.isEmpty()) return;
 
+        List<Vec> candidates = new ArrayList<>(this.tntCandidates);
         Collections.shuffle(candidates);
         int count = Math.min(countSupplier.getAsInt(), candidates.size());
         List<Vec> selected = selectSpreadOut(candidates, count);
@@ -201,6 +203,19 @@ public final class GamePlacement implements Placement {
         this.tntPlacement.updatePositions(selected);
         this.tntPlacement.place(GroundDataRegistry.DEFAULT_SPAWN_DATA);
         LOGGER.info("Dropping {} TNT blocks onto the game area", selected.size());
+    }
+
+    /**
+     * Checks if a TNT block can fall from {@link GameAreaHelper#TNT_DROP_HEIGHT} blocks above the target down to it.
+     *
+     * @param target the position of the TNT block
+     * @return true if every block of the drop path is air
+     */
+    private boolean isDropPathFree(Vec target) {
+        for (int y = 0; y <= GameAreaHelper.TNT_DROP_HEIGHT; y++) {
+            if (!instance.getBlock(target.add(0, y, 0)).registry().isAir()) return false;
+        }
+        return true;
     }
 
     /**

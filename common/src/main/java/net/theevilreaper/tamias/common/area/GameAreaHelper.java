@@ -19,6 +19,10 @@ public final class GameAreaHelper {
     public static final Block GROUND_MARKER_BLOCK = Block.BLUE_ICE;
 
     public static final int BLOCKS_PER_STEP = 20;
+    /**
+     * The height above its target from which a TNT block falls. The whole fall path must be free.
+     */
+    public static final int TNT_DROP_HEIGHT = 5;
     public static final int MIN_TNT_AMOUNT = 15;
     public static final int MAX_TNT_AMOUNT = 35;
     /**

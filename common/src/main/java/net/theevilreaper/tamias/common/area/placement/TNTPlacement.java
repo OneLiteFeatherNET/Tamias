@@ -17,6 +17,8 @@ import net.minestom.server.timer.TaskSchedule;
 import java.util.Iterator;
 import java.util.List;
 
+import static net.theevilreaper.tamias.common.area.GameAreaHelper.TNT_DROP_HEIGHT;
+
 /**
  * TNTPlacement is responsible for placing TNT blocks in the specified positions.
  *
@@ -64,7 +66,7 @@ public class TNTPlacement extends AreaBasePlacement<Vec> {
         FallingBlockMeta fallingBlockMeta = (FallingBlockMeta) tntEntity.getEntityMeta();
         fallingBlockMeta.setBlock(Block.TNT);
 
-        Point entityPos = pos.add(0, 5, 0);
+        Point entityPos = pos.add(0, TNT_DROP_HEIGHT, 0);
         tntEntity.setInstance(instance, entityPos);
         instance.sendGroupedPacket(new ParticlePacket(Particle.CLOUD, entityPos, Vec.ZERO, 0f, 5));
 
