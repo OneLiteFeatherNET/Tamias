@@ -19,7 +19,6 @@ public final class GameAreaHelper {
     public static final Block GROUND_MARKER_BLOCK = Block.BLUE_ICE;
 
     public static final int BLOCKS_PER_STEP = 20;
-    public static final int TNT_SPAWN_HEIGHT = 20;
     public static final int MIN_TNT_AMOUNT = 15;
     public static final int MAX_TNT_AMOUNT = 35;
     /**

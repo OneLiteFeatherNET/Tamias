@@ -109,29 +109,6 @@ public final class GameArea implements PlayingArea {
     }
 
     /**
-     * Calculates the positions for the tnt blocks.
-     */
-    @Override
-    public void calculateTntPositions(IntSupplier tntCountCalculator) {
-        int tntCount = tntCountCalculator.getAsInt();
-
-        // Create a copy of the area positions to avoid modifying the original list
-        List<Vec> availablePositions = new ArrayList<>(this.areaPositions);
-
-        for (int i = 0; i < tntCount; i++) {
-            // Get a random index within the remaining available positions
-            int randomIndex = ThreadLocalRandom.current().nextInt(0, availablePositions.size());
-            // Add the position to TNT positions
-            // Adjust the position to place TNT one block above the ground level
-            Vec point = availablePositions.remove(randomIndex);
-            System.out.println("Adding TNT at position: " + point);
-            tntPositions.add(point.add(0, 1, 0));
-        }
-
-        LOGGER.info("Calculated {} TNT positions", this.tntPositions.size());
-    }
-
-    /**
      * Replaces the tnt positions with the given ones.
      * Each position is the position of a placed TNT block and acts as a respawn ticket for a bomber.
      *

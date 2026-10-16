@@ -47,7 +47,7 @@ class GameAreaTest {
     void testRandomPositionGet() {
         GameArea gameArea = new GameArea(areaData);
         gameArea.calculatePositions();
-        gameArea.calculateTntPositions(() -> 10);
+        gameArea.setTntPositions(List.of(new Vec(1, 1, 1), new Vec(2, 1, 2)));
         assertNotNull(gameArea);
         assertFalse(gameArea.getPositions().isEmpty());
 
@@ -87,7 +87,7 @@ class GameAreaTest {
         assertNotNull(gameArea);
         gameArea.calculatePositions();
         gameArea.calculateSpecialBlockPositions(() -> 1);
-        gameArea.calculateTntPositions(() -> 1);
+        gameArea.setTntPositions(List.of(new Vec(1, 1, 1)));
         assertFalse(gameArea.getSpecialPositions().isEmpty());
         assertFalse(gameArea.getTntPositions().isEmpty());
 
