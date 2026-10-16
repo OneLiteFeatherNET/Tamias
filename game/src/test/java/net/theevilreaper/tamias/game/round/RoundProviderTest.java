@@ -33,6 +33,11 @@ class RoundProviderTest {
     }
 
     @Test
+    void testWinsComponent() {
+        assertEquals("1 / " + MAX_ROUNDS, plainText().serialize(roundProvider.getWinsComponent(1)));
+    }
+
+    @Test
     void testFirstRoundBeforeAnyIteration() {
         assertEquals(1, roundProvider.getCurrentRound());
         assertTrue(roundProvider.isFirstRound());

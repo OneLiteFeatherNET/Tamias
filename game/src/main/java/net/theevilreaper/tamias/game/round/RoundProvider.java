@@ -65,4 +65,16 @@ public final class RoundProvider {
                 .append(Component.text(" / ", NamedTextColor.GRAY))
                 .append(Component.text(phaseSeries.getMaxIterations(), NamedTextColor.AQUA));
     }
+
+    /**
+     * Creates a component which shows the given amount of won rounds out of all rounds of the game.
+     *
+     * @param wins the amount of won rounds
+     * @return the component with the won rounds
+     */
+    public Component getWinsComponent(int wins) {
+        return Component.text(wins)
+                .append(Component.text(" / ", NamedTextColor.GRAY))
+                .append(Component.text(phaseSeries.getMaxIterations(), NamedTextColor.AQUA));
+    }
 }

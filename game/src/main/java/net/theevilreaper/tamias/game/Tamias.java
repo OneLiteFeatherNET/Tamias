@@ -1,5 +1,6 @@
 package net.theevilreaper.tamias.game;
 
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.theevilreaper.aves.map.provider.MapProvider;
@@ -8,6 +9,7 @@ import net.theevilreaper.aves.util.TimeFormat;
 import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.theevilreaper.aves.util.functional.VoidConsumer;
 import net.theevilreaper.tamias.common.bootstrap.ServiceBootstrap;
+import net.theevilreaper.tamias.game.scoreboard.GameScoreboard;
 import net.theevilreaper.tamias.game.scoreboard.LobbyScoreboard;
 import net.theevilreaper.tamias.game.scoreboard.ScoreType;
 import net.theevilreaper.tamias.game.scoreboard.Scoreboard;
@@ -19,6 +21,7 @@ import net.theevilreaper.tamias.game.util.phase.LobbyPhaseData;
 import net.theevilreaper.xerus.api.phase.CyclicPhaseSeries;
 import net.theevilreaper.xerus.api.phase.LinearPhaseSeries;
 import net.theevilreaper.xerus.api.phase.Phase;
+import net.theevilreaper.xerus.api.team.Team;
 import net.theevilreaper.xerus.api.team.TeamService;
 import net.theevilreaper.xerus.api.team.event.MultiPlayerTeamEvent;
 import net.minestom.server.MinecraftServer;
@@ -76,8 +79,11 @@ import net.theevilreaper.tamias.game.phase.RestartPhase;
 import net.theevilreaper.tamias.game.phase.playing.PlayingPhase;
 import net.theevilreaper.tamias.game.phase.playing.PostPlayingPhase;
 import net.theevilreaper.tamias.game.phase.playing.PrePlayingPhase;
+import net.theevilreaper.tamias.game.player.TamiasPlayer;
+import net.theevilreaper.tamias.game.round.GameResultAnnouncer;
 import net.theevilreaper.tamias.game.round.RoundConditions;
 import net.theevilreaper.tamias.game.round.RoundProvider;
+import net.theevilreaper.tamias.game.round.RoundWins;
 import net.theevilreaper.tamias.game.stamina.StaminaService;
 import net.theevilreaper.tamias.game.team.TeamHelper;
 import net.theevilreaper.tamias.game.util.FileChecker;
@@ -103,11 +109,14 @@ public class Tamias implements ListenerHandling {
     private final StaminaService staminaService;
     private final GameConfig gameConfig;
     private final IntConsumer timeUpdater;
-    private final Scoreboard scoreboard;
+    private final LobbyScoreboard lobbyScoreboard;
+    private final GameScoreboard gameScoreboard;
     private final MapProvider mapProvider;
 
+    private volatile Scoreboard activeScoreboard;
     private RoundProvider roundProvider;
     private CyclicPhaseSeries<Phase> gameSeries;
+    private int playedRounds;
 
     public Tamias() {
         Path path = ServiceBootstrap.resolveWorkingDirectory();
@@ -117,11 +126,13 @@ public class Tamias implements ListenerHandling {
         this.mapProvider = new GameMapProvider(path, gameConfig.maxPlayers());
         TeamHelper.loadTeams(this.gameConfig.teamSize(), this.teamService);
         this.staminaService = new StaminaService();
-        this.scoreboard = new LobbyScoreboard(GameMessages.getTitleTime(this.gameConfig.lobbyTime()));
+        this.lobbyScoreboard = new LobbyScoreboard(GameMessages.getTitleTime(this.gameConfig.lobbyTime()));
+        this.gameScoreboard = new GameScoreboard();
+        this.activeScoreboard = this.lobbyScoreboard;
         this.timeUpdater = value -> {
             Component time = Component.text("Time:", NamedTextColor.GOLD).append(Component.space())
                     .append(Component.text(Strings.getTimeString(TimeFormat.MM_SS, value), NamedTextColor.YELLOW));
-            this.scoreboard.updateTitle(time);
+            this.activeScoreboard.updateTitle(time);
         };
     }
 
@@ -131,11 +142,12 @@ public class Tamias implements ListenerHandling {
 
         MinecraftServer.getCommandManager().register(new StartCommand(this.phaseSeries::getCurrentPhase));
 
-        this.scoreboard.initDefaults();
+        this.lobbyScoreboard.initDefaults();
+        this.gameScoreboard.initDefaults();
         this.createPhaseStructure();
         registerListener(MinecraftServer.getGlobalEventHandler());
         this.phaseSeries.start();
-        this.scoreboard.updateScore(ScoreType.MAP_TYPE, Component.text("Test"));
+        this.lobbyScoreboard.updateScore(ScoreType.MAP_TYPE, Component.text("Test"));
         MinecraftServer.getSchedulerManager().buildShutdownTask(this::terminate);
     }
 
@@ -174,8 +186,10 @@ public class Tamias implements ListenerHandling {
         VoidConsumer startLogic = () -> {
             for (Player player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
                 AttributeHelper.enableMovement(player);
-                this.scoreboard.addViewer(player);
+                this.gameScoreboard.addViewer(player);
             }
+            RoundWins.snapshotRoles(getTeam(GameConfig.SURVIVOR_KEY), getTeam(GameConfig.BOMBER_KEY));
+            this.refreshSharedScores();
             this.staminaService.start();
         };
 
@@ -190,36 +204,93 @@ public class Tamias implements ListenerHandling {
         gameSeries.add(new PostPlayingPhase());
         gameSeries.setMaxIterations(this.gameConfig.maxRounds());
         this.phaseSeries.add(gameSeries);
-        this.phaseSeries.add(new RestartPhase());
+        this.phaseSeries.add(new RestartPhase(() ->
+                GameResultAnnouncer.announce(this.playedRounds, MinecraftServer.getConnectionManager().getOnlinePlayers())
+        ));
     }
 
     public @NotNull Map<Class<? extends Event>, Consumer<? extends Event>> registerGameListener() {
         Map<Class<? extends Event>, Consumer<? extends Event>> listenerMap = new HashMap<>();
-        listenerMap.put(RoundEndEvent.class, new RoundEndListener(this.teamService::getTeams, this.staminaService::cleanUp, (survivors, bombers) -> {}));
+        listenerMap.put(RoundEndEvent.class, new RoundEndListener(this.teamService::getTeams, this.staminaService::cleanUp, (survivors, bombers) -> {
+            RoundWins.credit(survivors, bombers);
+            this.playedRounds++;
+            this.refreshWins();
+        }));
         GameMapProvider gameMapProvider = (GameMapProvider) this.mapProvider;
 
         // Every dropped TNT is a respawn ticket for the bomber team, null means no TNT is left
-        Supplier<Pos> randomPos = () -> gameMapProvider.getGameArea().getRandomPosition();
+        Supplier<Pos> randomPos = () -> {
+            Pos position = gameMapProvider.getGameArea().getRandomPosition();
+            this.refreshSharedScores();
+            return position;
+        };
         listenerMap.put(PlayerUseItemEvent.class, new PlayerInteractItemListener(staminaService::getStaminaBar));
         listenerMap.put(BomberRequireSpawnEvent.class, new BomberReviveListener(
                 this.staminaService::getStaminaBar,
                 randomPos,
                 player -> this.staminaService.removeStaminaBar(player.getUuid()),
-                () -> RoundConditions.checkRoundEnd(this.phaseSeries, this.teamService)
+                this::checkRoundEnd
         ));
         listenerMap.put(BomberExplodeEvent.class, new BomberExplodeListener(
                 player -> TeamHelper.switchToTNTTeam(this.teamService, player),
-                () -> RoundConditions.checkRoundEnd(this.phaseSeries, this.teamService)
+                this::checkRoundEnd
         ));
         listenerMap.put(RoleToBomberChangeEvent.class, new RoleToBomberChangeListener(
                 this.teamService,
                 this.staminaService,
                 randomPos,
-                () -> RoundConditions.checkRoundEnd(this.phaseSeries, this.teamService)
+                this::checkRoundEnd
         ));
         listenerMap.put(ProjectileCollideWithBlockEvent.class, new ProjectileBlockListener());
         listenerMap.put(ProjectileCollideWithEntityEvent.class, new ProjectileEntityListener(staminaService::getStaminaBar));
         return listenerMap;
+    }
+
+    /**
+     * Moves every online player from the lobby to the game scoreboard. Does nothing if the game scoreboard is active.
+     */
+    private void switchToGameScoreboard() {
+        if (this.activeScoreboard == this.gameScoreboard) return;
+
+        for (Player player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+            this.lobbyScoreboard.removeViewer(player);
+            this.gameScoreboard.addViewer(player);
+        }
+        this.activeScoreboard = this.gameScoreboard;
+        this.refreshWins();
+    }
+
+    /**
+     * Updates the remaining TNT tickets and survivors on the game scoreboard.
+     */
+    private void refreshSharedScores() {
+        GameMapProvider gameMapProvider = (GameMapProvider) this.mapProvider;
+        int tntTickets = gameMapProvider.getGameArea().getTntPositions().size();
+        int survivors = this.teamService.getTeam(GameConfig.SURVIVOR_KEY).map(team -> team.getPlayers().size()).orElse(0);
+        this.gameScoreboard.updateScore(ScoreType.TNT, Component.text(tntTickets));
+        this.gameScoreboard.updateScore(ScoreType.PLAYER, Component.text(survivors, NamedTextColor.GRAY));
+    }
+
+    /**
+     * Updates the round wins of every online player on the game scoreboard.
+     */
+    private void refreshWins() {
+        for (Player player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+            if (!(player instanceof TamiasPlayer tamiasPlayer)) continue;
+            this.gameScoreboard.updateScore(player, ScoreType.WINS, this.roundProvider.getWinsComponent(tamiasPlayer.getRoundWins()));
+        }
+    }
+
+    /**
+     * Refreshes the shared scores, because a survivor or a TNT ticket may be gone, and checks if the round is over.
+     */
+    private void checkRoundEnd() {
+        this.refreshSharedScores();
+        RoundConditions.checkRoundEnd(this.phaseSeries, this.teamService);
+    }
+
+    private Team getTeam(Key key) {
+        return this.teamService.getTeam(key).orElseThrow(() -> new IllegalStateException("Team " + key.asString() + " not found"));
     }
 
     void registerListener(@NotNull EventNode<Event> node) {
@@ -227,15 +298,14 @@ public class Tamias implements ListenerHandling {
                 new PlayerJoinListener(this.phaseSeries::getCurrentPhase, this.mapProvider.getActiveInstance(), gameConfig.maxPlayers())
         );
         PlayerConsumer teleportConsumer = player -> this.mapProvider.teleportToSpawn(player, false);
-        node.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(this.phaseSeries::getCurrentPhase, teleportConsumer, this.scoreboard::addViewer));
-        VoidConsumer checkRoundEnd = () -> RoundConditions.checkRoundEnd(this.phaseSeries, this.teamService);
+        node.addListener(PlayerSpawnEvent.class, new PlayerSpawnListener(this.phaseSeries::getCurrentPhase, teleportConsumer, player -> this.activeScoreboard.addViewer(player)));
         node.addListener(PlayerDisconnectEvent.class,
                 new PlayerQuitListener(
                         this.phaseSeries::getCurrentPhase,
                         key -> this.teamService.getTeam(key).orElse(null),
                         player -> this.staminaService.removeStaminaBar(player.getUuid()),
-                        checkRoundEnd,
-                        this.scoreboard::removeViewer,
+                        this::checkRoundEnd,
+                        player -> this.activeScoreboard.removeViewer(player),
                         () -> PhaseSeriesHelper.finishEarly(this.gameSeries)
                 )
         );
@@ -251,7 +321,8 @@ public class Tamias implements ListenerHandling {
         node.addListener(RoundPrepareEvent.class, new RoundPrepareListener(gameMapProvider.getSpawnArea(), gameMapProvider.getActiveInstance().get()));
 
         // Listener for rounds
-        node.addListener(RoundStartEvent.class, new RoundStartListener(this.scoreboard, this.roundProvider));
+        node.addListener(RoundStartEvent.class, _ -> this.switchToGameScoreboard());
+        node.addListener(RoundStartEvent.class, new RoundStartListener(this.gameScoreboard, this.roundProvider));
 
         //Stamina listeners
         node.addListener(StaminaCreateEvent.class, _ ->
