@@ -26,13 +26,6 @@ public interface PlayingArea extends Area {
     void calculateSpecialBlockPositions(IntSupplier specialBlockCount);
 
     /**
-     * Calculates the positions number of the TNT blocks.
-     *
-     * @param tntCountCalculator the number of TNT blocks
-     */
-    void calculateTntPositions(IntSupplier tntCountCalculator);
-
-    /**
      * Returns the game area data.
      *
      * @return the game area data

@@ -18,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.Duration;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -111,8 +112,7 @@ class GamePlacementIntegrationTest {
         gameArea.calculatePositions();
 
         Vec markerPosition = new Vec(1, 0, 1);
-        instance.setBlock(markerPosition, GameAreaHelper.GROUND_MARKER_BLOCK);
-        instance.setBlock(markerPosition.add(0, 1, 0), Block.AIR);
+        prepareGround(instance, markerPosition);
 
         GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
 
@@ -144,10 +144,12 @@ class GamePlacementIntegrationTest {
 
         Vec clearPosition = new Vec(1, 0, 0);
         Vec obstructedPosition = new Vec(1, 0, 1);
-        instance.setBlock(clearPosition, GameAreaHelper.GROUND_MARKER_BLOCK);
-        instance.setBlock(clearPosition.add(0, 1, 0), Block.AIR);
-        instance.setBlock(obstructedPosition, GameAreaHelper.GROUND_MARKER_BLOCK);
+        Vec overhangPosition = new Vec(1, 0, 2);
+        prepareGround(instance, clearPosition);
+        prepareGround(instance, obstructedPosition);
         instance.setBlock(obstructedPosition.add(0, 1, 0), Block.STONE);
+        prepareGround(instance, overhangPosition);
+        instance.setBlock(overhangPosition.add(0, GameAreaHelper.TNT_DROP_HEIGHT, 0), Block.STONE);
 
         GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
         gamePlacement.flatten();
@@ -162,6 +164,7 @@ class GamePlacementIntegrationTest {
 
         assertEquals(Block.TNT, instance.getBlock(clearPosition.add(0, 1, 0)));
         assertEquals(Block.STONE, instance.getBlock(obstructedPosition.add(0, 1, 0)));
+        assertEquals(Block.AIR, instance.getBlock(overhangPosition.add(0, 1, 0)), "A structure above blocks the drop path");
 
         gamePlacement.clear();
         assertEquals(Block.AIR, instance.getBlock(clearPosition.add(0, 1, 0)));
@@ -170,21 +173,10 @@ class GamePlacementIntegrationTest {
     }
 
     @Test
-    void testDropTntSpreadsPositionsOut(@NotNull Env env) {
+    void testDropTntPlacesTheRequestedAmount(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
-        GameArea gameArea = new GameArea(
-                AreaData.builder()
-                        .lowerCorner(Vec.ZERO)
-                        .upperCorner(new Vec(9, 0, 9))
-                        .facing(Direction.NORTH)
-                        .build()
-        );
-        gameArea.calculatePositions();
-
-        for (Point pos : gameArea.getPositions()) {
-            instance.setBlock(pos, GameAreaHelper.GROUND_MARKER_BLOCK);
-            instance.setBlock(pos.add(0, 1, 0), Block.AIR);
-        }
+        GameArea gameArea = createArea(9);
+        gameArea.getPositions().forEach(pos -> prepareGround(instance, pos));
 
         GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
         gamePlacement.flatten();
@@ -193,10 +185,94 @@ class GamePlacementIntegrationTest {
         env.tickWhile(gamePlacement::isRunning, Duration.ofSeconds(10));
 
         gamePlacement.dropTnt(() -> 9);
-        for (int i = 0; i < 60; i++) {
+        for (int i = 0; i < 80; i++) {
             env.tick();
         }
 
+        Set<Point> tntPositions = findTnt(instance, gameArea);
+        assertEquals(9, tntPositions.size());
+        assertEquals(tntPositions, new HashSet<Point>(gameArea.getTntPositions()), "The dropped TNT blocks are the respawn tickets");
+
+        env.destroyInstance(instance);
+    }
+
+    @Test
+    void testDropTntFollowsTheGroundPlacement(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        GameArea gameArea = createArea(29);
+        gameArea.getPositions().forEach(pos -> prepareGround(instance, pos));
+
+        GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
+        gamePlacement.flatten();
+
+        GroundData groundData = new GroundData(Block.STONE, null);
+        gamePlacement.triggerPlacement(groundData);
+        gamePlacement.dropTnt(() -> GameAreaHelper.MAX_TNT_AMOUNT);
+
+        boolean groundUnfinishedWhileTntLanded = false;
+        for (int i = 0; i < 200; i++) {
+            env.tick();
+            Set<Point> tntPositions = findTnt(instance, gameArea);
+            for (Point tnt : tntPositions) {
+                assertEquals(Block.STONE, instance.getBlock(tnt.sub(0, 1, 0)), "TNT at " + tnt + " landed without ground");
+            }
+            assertEquals(tntPositions, new HashSet<Point>(gameArea.getTntPositions()), "Only landed TNT is a respawn ticket");
+            if (!tntPositions.isEmpty() && gamePlacement.isRunning()) {
+                groundUnfinishedWhileTntLanded = true;
+            }
+        }
+
+        assertTrue(groundUnfinishedWhileTntLanded, "The TNT should drop while the ground is still placed");
+        assertEquals(GameAreaHelper.MAX_TNT_AMOUNT, findTnt(instance, gameArea).size());
+
+        env.destroyInstance(instance);
+    }
+
+    @Test
+    void testSpecialBlocksArePlaced(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        GameArea gameArea = createArea(14);
+        gameArea.getPositions().forEach(pos -> prepareGround(instance, pos));
+
+        GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
+        gamePlacement.flatten();
+
+        GroundData groundData = new GroundData(Block.STONE, List.of(Block.GOLD_BLOCK));
+        gamePlacement.triggerPlacement(groundData);
+        env.tickWhile(gamePlacement::isRunning, Duration.ofSeconds(10));
+
+        long specialBlocks = gameArea.getPositions().stream()
+                .filter(pos -> instance.getBlock(pos) == Block.GOLD_BLOCK)
+                .count();
+        // 225 positions, one special block for each started 100 positions
+        assertEquals(3, specialBlocks);
+
+        env.destroyInstance(instance);
+    }
+
+    private static GameArea createArea(int size) {
+        GameArea gameArea = new GameArea(
+                AreaData.builder()
+                        .lowerCorner(Vec.ZERO)
+                        .upperCorner(new Vec(size, 0, size))
+                        .facing(Direction.NORTH)
+                        .build()
+        );
+        gameArea.calculatePositions();
+        return gameArea;
+    }
+
+    /**
+     * Marks the given position as ground and clears the drop path above it.
+     */
+    private static void prepareGround(Instance instance, Point position) {
+        instance.setBlock(position, GameAreaHelper.GROUND_MARKER_BLOCK);
+        for (int y = 1; y <= GameAreaHelper.TNT_DROP_HEIGHT + 1; y++) {
+            instance.setBlock(position.add(0, y, 0), Block.AIR);
+        }
+    }
+
+    private static Set<Point> findTnt(Instance instance, GameArea gameArea) {
         Set<Point> tntPositions = new HashSet<>();
         for (Point pos : gameArea.getPositions()) {
             Point above = pos.add(0, 1, 0);
@@ -204,20 +280,7 @@ class GamePlacementIntegrationTest {
                 tntPositions.add(above);
             }
         }
-
-        assertEquals(9, tntPositions.size());
-
-        double minDistance = Double.MAX_VALUE;
-        for (Point a : tntPositions) {
-            for (Point b : tntPositions) {
-                if (a == b) continue;
-                minDistance = Math.min(minDistance, a.distance(b));
-            }
-        }
-        assertTrue(minDistance >= 2.0, "TNT positions should be spread apart, closest pair was " + minDistance + " blocks apart");
-        assertEquals(tntPositions, new HashSet<Point>(gameArea.getTntPositions()), "The dropped TNT blocks are the respawn tickets");
-
-        env.destroyInstance(instance);
+        return tntPositions;
     }
 
     /**

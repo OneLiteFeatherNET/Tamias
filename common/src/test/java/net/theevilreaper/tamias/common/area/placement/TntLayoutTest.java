@@ -1,0 +1,110 @@
+package net.theevilreaper.tamias.common.area.placement;
+
+import net.minestom.server.coordinate.Vec;
+import net.theevilreaper.tamias.common.area.GameAreaHelper;
+import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class TntLayoutTest {
+
+    private static List<Vec> grid(int size) {
+        List<Vec> positions = new ArrayList<>();
+        for (int x = 0; x < size; x++) {
+            for (int z = 0; z < size; z++) {
+                positions.add(new Vec(x, 1, z));
+            }
+        }
+        return positions;
+    }
+
+    private static int blockCount(List<TntGroup> groups) {
+        return groups.stream().mapToInt(group -> group.positions().size()).sum();
+    }
+
+    @Test
+    void testNoCandidatesPlanNothing() {
+        assertTrue(TntLayout.plan(List.of(), 10, 0.4, new Random(1)).isEmpty());
+        assertTrue(TntLayout.plan(grid(5), 0, 0.4, new Random(1)).isEmpty());
+    }
+
+    @Test
+    void testWithoutGroupRatioOnlySingleBlocksArePlanned() {
+        List<TntGroup> groups = TntLayout.plan(grid(20), 15, 0, new Random(2));
+
+        assertEquals(15, groups.size());
+        assertTrue(groups.stream().allMatch(group -> group.members().isEmpty()));
+    }
+
+    @Test
+    void testGroupRatioSplitsTheBlocks() {
+        List<TntGroup> groups = TntLayout.plan(grid(30), 25, 0.4, new Random(3));
+
+        assertEquals(25, blockCount(groups));
+        int groupedBlocks = groups.stream()
+                .filter(group -> !group.members().isEmpty())
+                .mapToInt(group -> group.positions().size())
+                .sum();
+        // 40 percent of 25 blocks are 10 blocks, a single block which is left over is not part of a group
+        assertTrue(groupedBlocks == 10 || groupedBlocks == 9, "Expected 9 or 10 grouped blocks, got " + groupedBlocks);
+    }
+
+    @Test
+    void testGroupsAreSmallAndAroundTheirCenter() {
+        List<Vec> candidates = grid(30);
+        List<TntGroup> groups = TntLayout.plan(candidates, 30, 1, new Random(4));
+
+        Set<Vec> usedPositions = new HashSet<>();
+        for (TntGroup group : groups) {
+            assertTrue(group.positions().size() <= GameAreaHelper.MAX_TNT_GROUP_SIZE);
+            for (Vec member : group.members()) {
+                Vec offset = member.sub(group.center());
+                assertTrue(Math.abs(offset.x()) <= 1 && Math.abs(offset.z()) <= 1 && offset.y() == 0,
+                        member + " is not next to " + group.center());
+            }
+            for (Vec position : group.positions()) {
+                assertTrue(candidates.contains(position), position + " is no candidate");
+                assertTrue(usedPositions.add(position), position + " is used twice");
+            }
+        }
+        assertEquals(30, blockCount(groups));
+    }
+
+    @Test
+    void testGroupsShrinkWithoutFreeNeighbours() {
+        // The candidates are too far apart to form a group
+        List<Vec> candidates = List.of(new Vec(0, 1, 0), new Vec(5, 1, 0), new Vec(10, 1, 0), new Vec(15, 1, 0));
+        List<TntGroup> groups = TntLayout.plan(candidates, 4, 1, new Random(5));
+
+        assertTrue(groups.stream().allMatch(group -> group.members().isEmpty()));
+        assertTrue(blockCount(groups) < 4);
+    }
+
+    @Test
+    void testCountIsLimitedByTheCandidates() {
+        List<TntGroup> groups = TntLayout.plan(grid(2), 10, 0, new Random(6));
+
+        assertEquals(4, blockCount(groups));
+    }
+
+    @Test
+    void testSingleBlocksAreSpreadOut() {
+        List<TntGroup> groups = TntLayout.plan(grid(10), 9, 0, new Random(7));
+
+        double minDistance = Double.MAX_VALUE;
+        for (TntGroup a : groups) {
+            for (TntGroup b : groups) {
+                if (a == b) continue;
+                minDistance = Math.min(minDistance, a.center().distance(b.center()));
+            }
+        }
+        assertTrue(minDistance >= 2.0, "TNT positions should be spread apart, closest pair was " + minDistance + " blocks apart");
+    }
+}

@@ -91,10 +91,12 @@ public final class GameArea implements PlayingArea {
      */
     @Override
     public void calculateSpecialBlockPositions(IntSupplier specialBlockCount) {
+        this.specialBlocks.clear();
         // Create a copy of the area positions to avoid modifying the original list
         List<Vec> availablePositions = new ArrayList<>(this.areaPositions);
+        int count = Math.min(specialBlockCount.getAsInt(), availablePositions.size());
 
-        for (int i = 0; i < specialBlockCount.getAsInt(); i++) {
+        for (int i = 0; i < count; i++) {
             // Get a random index within the remaining available positions
             int randomIndex = ThreadLocalRandom.current().nextInt(0, availablePositions.size());
             // Add the position to special blocks
@@ -107,26 +109,14 @@ public final class GameArea implements PlayingArea {
     }
 
     /**
-     * Calculates the positions for the tnt blocks.
+     * Adds a position to the TNT positions, e.g. when a TNT block has landed.
+     *
+     * @param position the position of the placed TNT block
      */
-    @Override
-    public void calculateTntPositions(IntSupplier tntCountCalculator) {
-        int tntCount = tntCountCalculator.getAsInt();
-
-        // Create a copy of the area positions to avoid modifying the original list
-        List<Vec> availablePositions = new ArrayList<>(this.areaPositions);
-
-        for (int i = 0; i < tntCount; i++) {
-            // Get a random index within the remaining available positions
-            int randomIndex = ThreadLocalRandom.current().nextInt(0, availablePositions.size());
-            // Add the position to TNT positions
-            // Adjust the position to place TNT one block above the ground level
-            Vec point = availablePositions.remove(randomIndex);
-            System.out.println("Adding TNT at position: " + point);
-            tntPositions.add(point.add(0, 1, 0));
+    public void addTntPosition(Vec position) {
+        synchronized (this.tntPositions) {
+            this.tntPositions.add(position);
         }
-
-        LOGGER.info("Calculated {} TNT positions", this.tntPositions.size());
     }
 
     /**
