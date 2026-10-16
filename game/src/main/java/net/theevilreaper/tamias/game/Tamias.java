@@ -195,7 +195,7 @@ public class Tamias implements ListenerHandling {
 
     public @NotNull Map<Class<? extends Event>, Consumer<? extends Event>> registerGameListener() {
         Map<Class<? extends Event>, Consumer<? extends Event>> listenerMap = new HashMap<>();
-        listenerMap.put(RoundEndEvent.class, new RoundEndListener(this.teamService::getTeams, this.staminaService::cleanUp));
+        listenerMap.put(RoundEndEvent.class, new RoundEndListener(this.teamService::getTeams, this.staminaService::cleanUp, (survivors, bombers) -> {}));
         GameMapProvider gameMapProvider = (GameMapProvider) this.mapProvider;
 
         // Every dropped TNT is a respawn ticket for the bomber team, null means no TNT is left
