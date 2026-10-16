@@ -1,6 +1,5 @@
 package net.theevilreaper.tamias.game;
 
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.theevilreaper.aves.map.provider.MapProvider;
@@ -21,7 +20,6 @@ import net.theevilreaper.tamias.game.util.phase.LobbyPhaseData;
 import net.theevilreaper.xerus.api.phase.CyclicPhaseSeries;
 import net.theevilreaper.xerus.api.phase.LinearPhaseSeries;
 import net.theevilreaper.xerus.api.phase.Phase;
-import net.theevilreaper.xerus.api.team.Team;
 import net.theevilreaper.xerus.api.team.TeamService;
 import net.theevilreaper.xerus.api.team.event.MultiPlayerTeamEvent;
 import net.minestom.server.MinecraftServer;
@@ -184,7 +182,10 @@ public class Tamias implements ListenerHandling {
         gameSeries.add(new PrePlayingPhase(this.teamService));
 
         VoidConsumer startLogic = () -> {
-            RoundWins.snapshotRoles(getTeam(GameConfig.SURVIVOR_KEY), getTeam(GameConfig.BOMBER_KEY));
+            RoundWins.snapshotRoles(
+                    TeamHelper.getTeam(this.teamService, GameConfig.SURVIVOR_KEY),
+                    TeamHelper.getTeam(this.teamService, GameConfig.BOMBER_KEY)
+            );
             this.refreshSharedScores();
             this.timeUpdater.accept(PlayingPhase.PLAYING_TIME);
             for (Player player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
@@ -288,10 +289,6 @@ public class Tamias implements ListenerHandling {
     private void checkRoundEnd() {
         this.refreshSharedScores();
         RoundConditions.checkRoundEnd(this.phaseSeries, this.teamService);
-    }
-
-    private Team getTeam(Key key) {
-        return this.teamService.getTeam(key).orElseThrow(() -> new IllegalStateException("Team " + key.asString() + " not found"));
     }
 
     void registerListener(@NotNull EventNode<Event> node) {

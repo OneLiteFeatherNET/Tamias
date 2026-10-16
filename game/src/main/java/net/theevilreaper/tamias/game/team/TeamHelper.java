@@ -1,5 +1,6 @@
 package net.theevilreaper.tamias.game.team;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
@@ -103,10 +104,8 @@ public final class TeamHelper {
         Check.argCondition(!player.hasTag(Tags.TEAM_KEY), "Need a team tag for switching teams");
         Check.argCondition(!GameConfig.SURVIVOR_KEY.asString().equals(player.getTag(Tags.TEAM_KEY)), "The player must be a survivor");
 
-        Team survivorTeam = teamService.getTeam(GameConfig.SURVIVOR_KEY)
-                .orElseThrow(() -> new IllegalStateException("Survivor team not found"));
-        Team bomberTeam = teamService.getTeam(GameConfig.BOMBER_KEY)
-                .orElseThrow(() -> new IllegalStateException("Bomber team not found"));
+        Team survivorTeam = getTeam(teamService, GameConfig.SURVIVOR_KEY);
+        Team bomberTeam = getTeam(teamService, GameConfig.BOMBER_KEY);
 
         removePlayerFromTeam(survivorTeam, player);
         addPlayerToTeam(bomberTeam, player);
@@ -127,13 +126,24 @@ public final class TeamHelper {
                 .orElseThrow(() -> new IllegalStateException("No online player found for bomber allocation"));
         onlinePlayers.remove(bomber);
 
-        Team bomberTeam = teamService.getTeam(GameConfig.BOMBER_KEY)
-                .orElseThrow(() -> new IllegalStateException("Bomber team not found"));
-        Team survivorTeam = teamService.getTeam(GameConfig.SURVIVOR_KEY)
-                .orElseThrow(() -> new IllegalStateException("Survivor team not found"));
+        Team bomberTeam = getTeam(teamService, GameConfig.BOMBER_KEY);
+        Team survivorTeam = getTeam(teamService, GameConfig.SURVIVOR_KEY);
 
         addPlayerToTeam(bomberTeam, bomber);
         onlinePlayers.forEach(survivor -> addPlayerToTeam(survivorTeam, survivor));
+    }
+
+    /**
+     * Returns the team with the given key.
+     *
+     * @param teamService the service which holds the teams
+     * @param key         the key of the team
+     * @return the team
+     * @throws IllegalStateException if the team does not exist
+     */
+    public static Team getTeam(TeamService teamService, Key key) {
+        return teamService.getTeam(key)
+                .orElseThrow(() -> new IllegalStateException("Team " + key.asString() + " not found"));
     }
 
     private TeamHelper() {
