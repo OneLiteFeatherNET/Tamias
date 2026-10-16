@@ -10,6 +10,8 @@ import net.theevilreaper.tamias.common.area.GameAreaHelper;
 import net.theevilreaper.tamias.common.area.GroundFillPattern;
 import net.theevilreaper.tamias.common.area.placement.SweepAreaPlacement;
 import net.theevilreaper.tamias.common.area.placement.TNTPlacement;
+import net.theevilreaper.tamias.common.area.placement.TntGroup;
+import net.theevilreaper.tamias.common.area.placement.TntLayout;
 import net.theevilreaper.tamias.common.ground.GroundData;
 import net.theevilreaper.tamias.common.ground.GroundDataRegistry;
 import org.slf4j.Logger;
@@ -17,7 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
@@ -41,7 +43,7 @@ public final class GamePlacement implements Placement {
     public GamePlacement(Instance instance, GameArea area) {
         this.instance = instance;
         this.area = area;
-        this.tntPlacement = new TNTPlacement(instance, new ArrayList<>());
+        this.tntPlacement = new TNTPlacement(instance, area::addTntPosition);
         this.tntCandidates = List.of();
 
         List<Vec> initialPositions = area.getPositions().stream().map(Vec.class::cast).toList();
@@ -81,23 +83,6 @@ public final class GamePlacement implements Placement {
         LOGGER.info("Using ground fill pattern {}", chosen);
         this.updateSpecialPositions(groundData);
         this.activePattern.place(groundData);
-    }
-
-    /**
-     * Picks new special positions for the given ground data, they get an additional block instead of the ground
-     * block. Nothing is picked if the ground data has no additional blocks.
-     *
-     * @param groundData the ground data which is placed next
-     */
-    private void updateSpecialPositions(GroundData groundData) {
-        if (groundData.hasAdditionalBlocks()) {
-            int positions = this.area.getPositions().size();
-            int specialBlocks = Math.ceilDiv(positions, GameAreaHelper.POSITIONS_PER_SPECIAL_BLOCK);
-            this.area.calculateSpecialBlockPositions(() -> specialBlocks);
-        } else {
-            this.area.getSpecialPositions().clear();
-        }
-        this.activePattern.updateSpecialPositions(this.area.getSpecialPositions());
     }
 
     public void flatten() {
@@ -182,27 +167,30 @@ public final class GamePlacement implements Placement {
     }
 
     /**
-     * Drops a random amount of TNT onto the ground area.
-     * Candidates are picked from the whole known area (not just what the ground placement has
-     * placed so far) so the spread covers the entire map even while ground placement - which fills
-     * outward from the world origin and is much faster than the staggered TNT fall - is still
-     * running. Only positions with a free drop path are used, so TNT never spawns inside or falls
-     * through a structure.
+     * Drops a random amount of TNT onto the ground area. A part of the TNT is dropped in groups, see
+     * {@link TntLayout}. The groups are dropped in the order of the active fill pattern and each group waits until
+     * the ground below it is placed, so the TNT follows the ground placement. A TNT block only becomes a respawn
+     * ticket once it has landed.
      *
-     * @param countSupplier supplies how many TNT blocks should be dropped
+     * @param countSupplier provides the amount of TNT blocks to drop
      */
     public void dropTnt(IntSupplier countSupplier) {
         if (this.tntCandidates.isEmpty()) return;
 
-        List<Vec> candidates = new ArrayList<>(this.tntCandidates);
-        Collections.shuffle(candidates);
-        int count = Math.min(countSupplier.getAsInt(), candidates.size());
-        List<Vec> selected = selectSpreadOut(candidates, count);
+        SweepAreaPlacement pattern = this.activePattern;
+        List<TntGroup> groups = new ArrayList<>(TntLayout.plan(
+                this.tntCandidates,
+                countSupplier.getAsInt(),
+                GameAreaHelper.TNT_GROUP_RATIO,
+                ThreadLocalRandom.current()
+        ));
+        groups.sort(Comparator.comparing(TntGroup::center, pattern.getFillOrder()));
 
-        this.area.setTntPositions(selected);
-        this.tntPlacement.updatePositions(selected);
+        this.area.setTntPositions(List.of());
+        this.tntPlacement.updateGroups(groups, pattern::isPlaced);
         this.tntPlacement.place(GroundDataRegistry.DEFAULT_SPAWN_DATA);
-        LOGGER.info("Dropping {} TNT blocks onto the game area", selected.size());
+        LOGGER.info("Dropping {} TNT blocks in {} groups onto the game area",
+                groups.stream().mapToInt(group -> group.members().size() + 1).sum(), groups.size());
     }
 
     /**
@@ -219,44 +207,19 @@ public final class GamePlacement implements Placement {
     }
 
     /**
-     * Greedily picks {@code count} positions out of the (already shuffled) candidates, preferring
-     * ones that are spread apart from each other instead of a purely random pick, which tends to
-     * clump positions together by chance. The minimum spacing is derived from how dense the
-     * candidates are relative to the requested count, and gets relaxed pass by pass until enough
-     * positions are found.
+     * Picks new special positions for the given ground data, they get an additional block instead of the ground
+     * block. Nothing is picked if the ground data has no additional blocks.
      *
-     * @param shuffledCandidates the shuffled pool of eligible positions
-     * @param count              how many positions to pick
-     * @return the picked positions, spread out as far as the candidate pool allows
+     * @param groundData the ground data which is placed next
      */
-    private static List<Vec> selectSpreadOut(List<Vec> shuffledCandidates, int count) {
-        List<Vec> selected = new ArrayList<>(count);
-        double spacing = Math.sqrt((double) shuffledCandidates.size() / count);
-
-        while (selected.size() < count && spacing >= 1.0) {
-            double spacingSquared = spacing * spacing;
-            for (Vec candidate : shuffledCandidates) {
-                if (selected.size() >= count) break;
-                if (selected.contains(candidate)) continue;
-
-                boolean farEnough = true;
-                for (Vec picked : selected) {
-                    if (picked.distanceSquared(candidate) < spacingSquared) {
-                        farEnough = false;
-                        break;
-                    }
-                }
-                if (farEnough) selected.add(candidate);
-            }
-            spacing -= 1.0;
+    private void updateSpecialPositions(GroundData groundData) {
+        if (groundData.hasAdditionalBlocks()) {
+            int positions = this.area.getPositions().size();
+            int specialBlocks = Math.ceilDiv(positions, GameAreaHelper.POSITIONS_PER_SPECIAL_BLOCK);
+            this.area.calculateSpecialBlockPositions(() -> specialBlocks);
+        } else {
+            this.area.getSpecialPositions().clear();
         }
-
-        // The candidate pool is too dense for the requested spacing - fill the rest regardless of distance.
-        for (Vec candidate : shuffledCandidates) {
-            if (selected.size() >= count) break;
-            if (!selected.contains(candidate)) selected.add(candidate);
-        }
-
-        return selected;
+        this.activePattern.updateSpecialPositions(this.area.getSpecialPositions());
     }
 }

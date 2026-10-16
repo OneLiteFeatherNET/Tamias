@@ -51,6 +51,15 @@ public final class SweepAreaPlacement extends AreaBasePlacement<Vec> {
     }
 
     /**
+     * Returns the order in which the ground blocks are placed.
+     *
+     * @return the fill order
+     */
+    public Comparator<Vec> getFillOrder() {
+        return this.fillOrder;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override

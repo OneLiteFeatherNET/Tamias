@@ -26,6 +26,16 @@ public final class GameAreaHelper {
     public static final int MIN_TNT_AMOUNT = 15;
     public static final int MAX_TNT_AMOUNT = 35;
     /**
+     * The share of the TNT blocks of a round which are dropped in groups instead of as single blocks.
+     */
+    public static final double TNT_GROUP_RATIO = 0.4;
+    public static final int MIN_TNT_GROUP_SIZE = 2;
+    public static final int MAX_TNT_GROUP_SIZE = 4;
+    /**
+     * The delay in ticks between the TNT blocks which pop up around a landed group center.
+     */
+    public static final int TNT_POP_DELAY = 2;
+    /**
      * One special block is placed for each started amount of this many ground positions.
      */
     public static final int POSITIONS_PER_SPECIAL_BLOCK = 100;

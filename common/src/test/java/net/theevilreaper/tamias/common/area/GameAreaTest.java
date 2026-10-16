@@ -87,13 +87,22 @@ class GameAreaTest {
         assertNotNull(gameArea);
         gameArea.calculatePositions();
         gameArea.calculateSpecialBlockPositions(() -> 1);
-        gameArea.setTntPositions(List.of(new Vec(1, 1, 1)));
+        gameArea.addTntPosition(new Vec(1, 1, 1));
         assertFalse(gameArea.getSpecialPositions().isEmpty());
         assertFalse(gameArea.getTntPositions().isEmpty());
 
         gameArea.reset();
         assertTrue(gameArea.getSpecialPositions().isEmpty());
         assertTrue(gameArea.getTntPositions().isEmpty());
+    }
+
+    @Test
+    void testAddTntPositionKeepsOldPositions() {
+        GameArea gameArea = new GameArea(areaData);
+        gameArea.addTntPosition(new Vec(1, 1, 1));
+        gameArea.addTntPosition(new Vec(2, 1, 2));
+
+        assertEquals(Set.of(new Vec(1, 1, 1), new Vec(2, 1, 2)), gameArea.getTntPositions());
     }
 
     @Test

@@ -109,6 +109,17 @@ public final class GameArea implements PlayingArea {
     }
 
     /**
+     * Adds a position to the TNT positions, e.g. when a TNT block has landed.
+     *
+     * @param position the position of the placed TNT block
+     */
+    public void addTntPosition(Vec position) {
+        synchronized (this.tntPositions) {
+            this.tntPositions.add(position);
+        }
+    }
+
+    /**
      * Replaces the tnt positions with the given ones.
      * Each position is the position of a placed TNT block and acts as a respawn ticket for a bomber.
      *

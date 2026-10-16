@@ -114,4 +114,15 @@ public abstract non-sealed class AreaBasePlacement<T extends Point> implements A
     public Set<Vec> getPlacedPositions() {
         return Set.copyOf((Set<Vec>) this.placedPositions);
     }
+
+    /**
+     * Checks if a block was placed at the given position during the current run.
+     * Unlike {@link #getPlacedPositions()} this doesn't copy the placed positions, so it can be called every tick.
+     *
+     * @param position the position to check
+     * @return true if a block was placed at the position
+     */
+    public boolean isPlaced(Point position) {
+        return this.placedPositions.contains(position);
+    }
 }

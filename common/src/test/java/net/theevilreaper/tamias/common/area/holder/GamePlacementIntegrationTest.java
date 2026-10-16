@@ -173,17 +173,9 @@ class GamePlacementIntegrationTest {
     }
 
     @Test
-    void testDropTntSpreadsPositionsOut(@NotNull Env env) {
+    void testDropTntPlacesTheRequestedAmount(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
-        GameArea gameArea = new GameArea(
-                AreaData.builder()
-                        .lowerCorner(Vec.ZERO)
-                        .upperCorner(new Vec(9, 0, 9))
-                        .facing(Direction.NORTH)
-                        .build()
-        );
-        gameArea.calculatePositions();
-
+        GameArea gameArea = createArea(9);
         gameArea.getPositions().forEach(pos -> prepareGround(instance, pos));
 
         GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
@@ -193,29 +185,45 @@ class GamePlacementIntegrationTest {
         env.tickWhile(gamePlacement::isRunning, Duration.ofSeconds(10));
 
         gamePlacement.dropTnt(() -> 9);
-        for (int i = 0; i < 60; i++) {
+        for (int i = 0; i < 80; i++) {
             env.tick();
         }
 
-        Set<Point> tntPositions = new HashSet<>();
-        for (Point pos : gameArea.getPositions()) {
-            Point above = pos.add(0, 1, 0);
-            if (instance.getBlock(above) == Block.TNT) {
-                tntPositions.add(above);
-            }
-        }
-
+        Set<Point> tntPositions = findTnt(instance, gameArea);
         assertEquals(9, tntPositions.size());
+        assertEquals(tntPositions, new HashSet<Point>(gameArea.getTntPositions()), "The dropped TNT blocks are the respawn tickets");
 
-        double minDistance = Double.MAX_VALUE;
-        for (Point a : tntPositions) {
-            for (Point b : tntPositions) {
-                if (a == b) continue;
-                minDistance = Math.min(minDistance, a.distance(b));
+        env.destroyInstance(instance);
+    }
+
+    @Test
+    void testDropTntFollowsTheGroundPlacement(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        GameArea gameArea = createArea(29);
+        gameArea.getPositions().forEach(pos -> prepareGround(instance, pos));
+
+        GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
+        gamePlacement.flatten();
+
+        GroundData groundData = new GroundData(Block.STONE, null);
+        gamePlacement.triggerPlacement(groundData);
+        gamePlacement.dropTnt(() -> GameAreaHelper.MAX_TNT_AMOUNT);
+
+        boolean groundUnfinishedWhileTntLanded = false;
+        for (int i = 0; i < 200; i++) {
+            env.tick();
+            Set<Point> tntPositions = findTnt(instance, gameArea);
+            for (Point tnt : tntPositions) {
+                assertEquals(Block.STONE, instance.getBlock(tnt.sub(0, 1, 0)), "TNT at " + tnt + " landed without ground");
+            }
+            assertEquals(tntPositions, new HashSet<Point>(gameArea.getTntPositions()), "Only landed TNT is a respawn ticket");
+            if (!tntPositions.isEmpty() && gamePlacement.isRunning()) {
+                groundUnfinishedWhileTntLanded = true;
             }
         }
-        assertTrue(minDistance >= 2.0, "TNT positions should be spread apart, closest pair was " + minDistance + " blocks apart");
-        assertEquals(tntPositions, new HashSet<Point>(gameArea.getTntPositions()), "The dropped TNT blocks are the respawn tickets");
+
+        assertTrue(groundUnfinishedWhileTntLanded, "The TNT should drop while the ground is still placed");
+        assertEquals(GameAreaHelper.MAX_TNT_AMOUNT, findTnt(instance, gameArea).size());
 
         env.destroyInstance(instance);
     }
@@ -262,6 +270,17 @@ class GamePlacementIntegrationTest {
         for (int y = 1; y <= GameAreaHelper.TNT_DROP_HEIGHT + 1; y++) {
             instance.setBlock(position.add(0, y, 0), Block.AIR);
         }
+    }
+
+    private static Set<Point> findTnt(Instance instance, GameArea gameArea) {
+        Set<Point> tntPositions = new HashSet<>();
+        for (Point pos : gameArea.getPositions()) {
+            Point above = pos.add(0, 1, 0);
+            if (instance.getBlock(above) == Block.TNT) {
+                tntPositions.add(above);
+            }
+        }
+        return tntPositions;
     }
 
     /**
