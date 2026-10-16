@@ -5,6 +5,7 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.packet.server.play.DisplayScoreboardPacket;
+import net.minestom.server.network.packet.server.play.TeamsPacket;
 import net.minestom.server.scoreboard.Sidebar;
 import net.minestom.testing.Collector;
 import net.minestom.testing.Env;
@@ -94,6 +95,23 @@ class GameScoreboardIntegrationTest {
 
         assertEquals("» 12", lineText(gameScoreboard.getSidebar(first), ScoreType.TNT));
         assertEquals("» 12", lineText(gameScoreboard.getSidebar(second), ScoreType.TNT));
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testUnchangedSharedValueSendsNoPackets(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        TestConnection connection = env.createConnection();
+        Player player = connection.connect(instance);
+        GameScoreboard gameScoreboard = new GameScoreboard();
+        gameScoreboard.addViewer(player);
+        gameScoreboard.updateScore(ScoreType.TNT, Component.text("12"));
+        Collector<TeamsPacket> teamPackets = connection.trackIncoming(TeamsPacket.class);
+
+        gameScoreboard.updateScore(ScoreType.TNT, Component.text("12"));
+
+        teamPackets.assertEmpty();
 
         env.destroyInstance(instance, true);
     }

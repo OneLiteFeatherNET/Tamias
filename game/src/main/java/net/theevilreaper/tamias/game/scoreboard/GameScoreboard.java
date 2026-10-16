@@ -96,7 +96,7 @@ public final class GameScoreboard implements Scoreboard, DefaultScoreLayout {
         }
         String lineId = scoreType.key().asString();
         Component content = SPACER.append(component);
-        this.sharedLines.put(lineId, content);
+        if (content.equals(this.sharedLines.put(lineId, content))) return;
         this.sidebars.values().forEach(sidebar -> sidebar.updateLineContent(lineId, content));
     }
 
