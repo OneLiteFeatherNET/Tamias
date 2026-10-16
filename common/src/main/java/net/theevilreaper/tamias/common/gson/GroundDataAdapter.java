@@ -18,6 +18,8 @@ import java.util.List;
 /**
  * Converts a {@link GroundData} from and to its json representation.
  * Blocks are stored by their namespaced key, for example {@code minecraft:sand}.
+ * A block which is not in its default state is stored with its properties, for example
+ * {@code minecraft:redstone_lamp[lit=true]}.
  *
  * @author theEvilReaper
  * @version 1.0.0
@@ -55,21 +57,34 @@ public final class GroundDataAdapter implements JsonDeserializer<GroundData>, Js
     @Override
     public JsonElement serialize(GroundData groundData, Type type, JsonSerializationContext context) {
         JsonObject object = new JsonObject();
-        object.addProperty(GROUND_KEY, groundData.groundBlock().key().asString());
+        object.addProperty(GROUND_KEY, writeBlock(groundData.groundBlock()));
         if (groundData.hasAdditionalBlocks()) {
             JsonArray array = new JsonArray();
             for (Block block : groundData.additionalBlocks()) {
-                array.add(block.key().asString());
+                array.add(writeBlock(block));
             }
             object.add(ADDITIONAL_KEY, array);
         }
         return object;
     }
 
-    private static Block parseBlock(String key) {
-        Block block = Block.fromKey(key);
+    private static String writeBlock(Block block) {
+        Block defaultBlock = Block.fromKey(block.key());
+        if (defaultBlock != null && defaultBlock.stateId() == block.stateId()) {
+            return block.key().asString();
+        }
+        return block.state();
+    }
+
+    private static Block parseBlock(String value) {
+        Block block;
+        try {
+            block = value.indexOf('[') >= 0 ? Block.fromState(value) : Block.fromKey(value);
+        } catch (IllegalArgumentException exception) {
+            throw new JsonParseException("Invalid block state '" + value + "' in ground preset", exception);
+        }
         if (block == null) {
-            throw new JsonParseException("Unknown block '" + key + "' in ground preset");
+            throw new JsonParseException("Unknown block '" + value + "' in ground preset");
         }
         return block;
     }
