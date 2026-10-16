@@ -80,9 +80,4 @@ public final class LobbyScoreboard implements Scoreboard, DefaultScoreLayout {
         }
         this.sidebar.updateLineContent(scoreType.key().asString(), component);
     }
-
-    @Override
-    public void updateScore(Player player, ScoreType scoreType, Component component) {
-        throw new UnsupportedOperationException("The LobbyScoreboard has no player specific scores");
-    }
 }

@@ -94,16 +94,4 @@ class LobbyScoreboardIntegrationTest {
                 )
         );
     }
-
-    @Test
-    void testPlayerScoreUpdateIsNotSupported(@NotNull Env env) {
-        Instance instance = env.createFlatInstance();
-        Player player = env.createPlayer(instance);
-
-        assertThrows(UnsupportedOperationException.class, () ->
-                lobbyScoreboard.updateScore(player, ScoreType.PLAYER, Component.text("1"))
-        );
-
-        env.destroyInstance(instance, true);
-    }
 }

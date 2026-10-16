@@ -101,9 +101,12 @@ public final class GameScoreboard implements Scoreboard, DefaultScoreLayout {
     }
 
     /**
-     * {@inheritDoc}
+     * Updates a given score only for the given player.
+     *
+     * @param player    the player whose score should be updated
+     * @param scoreType the type of score to update
+     * @param component the new component to set for the score
      */
-    @Override
     public void updateScore(Player player, ScoreType scoreType, Component component) {
         Sidebar sidebar = this.sidebars.get(player.getUuid());
         if (sidebar == null) return;
