@@ -61,9 +61,7 @@ public final class RoundProvider {
      * @return the current round component
      */
     public Component getCurrentRoundComponent() {
-        return Component.text(getCurrentRound())
-                .append(Component.text(" / ", NamedTextColor.GRAY))
-                .append(Component.text(phaseSeries.getMaxIterations(), NamedTextColor.AQUA));
+        return outOfMaxRounds(getCurrentRound());
     }
 
     /**
@@ -73,7 +71,11 @@ public final class RoundProvider {
      * @return the component with the won rounds
      */
     public Component getWinsComponent(int wins) {
-        return Component.text(wins)
+        return outOfMaxRounds(wins);
+    }
+
+    private Component outOfMaxRounds(int value) {
+        return Component.text(value)
                 .append(Component.text(" / ", NamedTextColor.GRAY))
                 .append(Component.text(phaseSeries.getMaxIterations(), NamedTextColor.AQUA));
     }
