@@ -37,6 +37,32 @@ class TamiasPlayerIntegrationTest extends TamiasPlayerTestBase {
     }
 
     @Test
+    void testRoundDataDefaults(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        TamiasPlayer player = (TamiasPlayer) env.createPlayer(instance, BOMBER_POS);
+
+        assertEquals(RoundRole.NONE, player.getStartRole());
+        assertEquals(0, player.getRoundWins());
+        assertEquals(0, player.getKills());
+        assertEquals(0, player.getHits());
+
+        player.setStartRole(RoundRole.BOMBER);
+        player.addRoundWin();
+        player.addRoundWin();
+        player.addKill();
+        player.addHit();
+        player.addHit();
+        player.addHit();
+
+        assertEquals(RoundRole.BOMBER, player.getStartRole());
+        assertEquals(2, player.getRoundWins());
+        assertEquals(1, player.getKills());
+        assertEquals(3, player.getHits());
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
     void testDefaultStateIsNone(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
         Player player = env.createPlayer(instance, BOMBER_POS);

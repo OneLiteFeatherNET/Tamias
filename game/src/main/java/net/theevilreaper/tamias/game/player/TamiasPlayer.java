@@ -43,6 +43,10 @@ public final class TamiasPlayer extends PermissionAwarePlayer {
 
     private final BoundingBox playerBoundingBox;
     private DisguiseState disguiseState = DisguiseState.NONE;
+    private RoundRole startRole = RoundRole.NONE;
+    private int roundWins;
+    private int kills;
+    private int hits;
 
     /**
      * {@inheritDoc}
@@ -78,6 +82,72 @@ public final class TamiasPlayer extends PermissionAwarePlayer {
      */
     public DisguiseState getDisguiseState() {
         return this.disguiseState;
+    }
+
+    /**
+     * Sets the role this player had when the current round started.
+     *
+     * @param startRole the role at round start
+     */
+    public void setStartRole(RoundRole startRole) {
+        this.startRole = startRole;
+    }
+
+    /**
+     * Returns the role this player had when the current round started.
+     *
+     * @return the role at round start
+     */
+    public RoundRole getStartRole() {
+        return this.startRole;
+    }
+
+    /**
+     * Adds a won round to this player's stats.
+     */
+    public void addRoundWin() {
+        this.roundWins++;
+    }
+
+    /**
+     * Returns the amount of rounds this player has won.
+     *
+     * @return the won rounds
+     */
+    public int getRoundWins() {
+        return this.roundWins;
+    }
+
+    /**
+     * Adds a kill (a survivor converted by this player's explosion) to this player's stats.
+     */
+    public void addKill() {
+        this.kills++;
+    }
+
+    /**
+     * Returns the amount of survivors this player has converted as a bomber.
+     *
+     * @return the kills
+     */
+    public int getKills() {
+        return this.kills;
+    }
+
+    /**
+     * Adds a hit (an egg which made a bomber explode) to this player's stats.
+     */
+    public void addHit() {
+        this.hits++;
+    }
+
+    /**
+     * Returns the amount of bombers this player has hit as a survivor.
+     *
+     * @return the hits
+     */
+    public int getHits() {
+        return this.hits;
     }
 
     @Override
