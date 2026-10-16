@@ -1,6 +1,15 @@
 package net.theevilreaper.tamias.game.listener.round;
 
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.minestom.server.component.DataComponents;
+import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.metadata.projectile.FireworkRocketMeta;
+import net.minestom.server.item.component.FireworkList;
+import net.minestom.server.network.packet.server.play.SystemChatPacket;
+import net.minestom.testing.Collector;
+import net.minestom.testing.TestConnection;
 import net.minestom.server.instance.Instance;
 import net.minestom.testing.Env;
 import net.theevilreaper.tamias.common.config.GameConfig;
@@ -11,10 +20,14 @@ import net.theevilreaper.tamias.game.round.event.RoundEndEvent;
 import net.theevilreaper.tamias.game.stamina.StaminaService;
 import net.theevilreaper.tamias.game.team.TeamHelper;
 import net.theevilreaper.tamias.game.util.SpectatorHelper;
+import net.theevilreaper.xerus.api.ColorData;
 import net.theevilreaper.xerus.api.team.Team;
 import net.theevilreaper.xerus.api.team.TeamService;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+
+import java.time.Duration;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -81,5 +94,71 @@ class RoundEndListenerIntegrationTest extends TamiasPlayerTestBase {
         assertNull(staminaService.getStaminaBar(bomber));
 
         env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testRoundEndAnnouncesTheWinner(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        TestConnection connection = env.createConnection();
+        Player survivor = connection.connect(instance);
+        TeamService teamService = TeamService.of();
+        TeamHelper.loadTeams(2, teamService);
+        TeamHelper.addPlayerToTeam(teamService.getTeam(GameConfig.SURVIVOR_KEY).orElseThrow(), survivor);
+        Collector<SystemChatPacket> messages = connection.trackIncoming(SystemChatPacket.class);
+
+        new RoundEndListener(teamService::getTeams, () -> {}).accept(new RoundEndEvent());
+
+        messages.assertSingle();
+        String message = PlainTextComponentSerializer.plainText().serialize(messages.collect().getFirst().message());
+        assertTrue(message.contains("Survivors"), "The message should name the winner: " + message);
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testRoundEndLaunchesFireworkInTheWinnerColor(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player survivor = env.createPlayer(instance);
+        Player bomber = env.createPlayer(instance);
+        TeamService teamService = TeamService.of();
+        TeamHelper.loadTeams(2, teamService);
+        TeamHelper.addPlayerToTeam(teamService.getTeam(GameConfig.SURVIVOR_KEY).orElseThrow(), survivor);
+        TeamHelper.addPlayerToTeam(teamService.getTeam(GameConfig.BOMBER_KEY).orElseThrow(), bomber);
+
+        new RoundEndListener(teamService::getTeams, () -> {}).accept(new RoundEndEvent());
+
+        List<Entity> fireworks = getFireworks(instance);
+        assertEquals(2, fireworks.size());
+        for (Entity firework : fireworks) {
+            FireworkList fireworkList = ((FireworkRocketMeta) firework.getEntityMeta()).getFireworkInfo().get(DataComponents.FIREWORKS);
+            assertNotNull(fireworkList);
+            assertEquals(ColorData.GREEN.getColor(), fireworkList.explosions().getFirst().colors().getFirst());
+        }
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testFireworkExplodesAfterTheFlight(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player bomber = env.createPlayer(instance);
+        TeamService teamService = TeamService.of();
+        TeamHelper.loadTeams(2, teamService);
+        TeamHelper.addPlayerToTeam(teamService.getTeam(GameConfig.BOMBER_KEY).orElseThrow(), bomber);
+
+        new RoundEndListener(teamService::getTeams, () -> {}).accept(new RoundEndEvent());
+        Entity firework = getFireworks(instance).getFirst();
+
+        env.tickWhile(() -> !firework.isRemoved(), Duration.ofSeconds(5));
+
+        assertTrue(firework.isRemoved());
+
+        env.destroyInstance(instance, true);
+    }
+
+    private @NotNull List<Entity> getFireworks(@NotNull Instance instance) {
+        return instance.getEntities().stream()
+                .filter(entity -> entity.getEntityType() == EntityType.FIREWORK_ROCKET)
+                .toList();
     }
 }

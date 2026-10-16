@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RoundConditionsIntegrationTest extends TamiasPlayerTestBase {
@@ -66,6 +67,46 @@ class RoundConditionsIntegrationTest extends TamiasPlayerTestBase {
         survivorTeam.addPlayer(env.createPlayer(instance));
 
         assertTrue(RoundConditions.isRoundOver(survivorTeam, bomberTeam));
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testBombersWinWithoutSurvivors(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Team survivorTeam = Team.of(GameConfig.SURVIVOR_KEY, 4);
+        Team bomberTeam = Team.of(GameConfig.BOMBER_KEY, 4);
+        bomberTeam.addPlayer(env.createPlayer(instance));
+
+        assertSame(bomberTeam, RoundConditions.getWinner(survivorTeam, bomberTeam));
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testSurvivorsWinWhenOnlySpectatingBombersAreLeft(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Team survivorTeam = Team.of(GameConfig.SURVIVOR_KEY, 4);
+        Team bomberTeam = Team.of(GameConfig.BOMBER_KEY, 4);
+        survivorTeam.addPlayer(env.createPlayer(instance));
+        Player spectator = env.createPlayer(instance);
+        SpectatorHelper.enable(spectator);
+        bomberTeam.addPlayer(spectator);
+
+        assertSame(survivorTeam, RoundConditions.getWinner(survivorTeam, bomberTeam));
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testSurvivorsWinWhenTheTimeIsUp(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Team survivorTeam = Team.of(GameConfig.SURVIVOR_KEY, 4);
+        Team bomberTeam = Team.of(GameConfig.BOMBER_KEY, 4);
+        survivorTeam.addPlayer(env.createPlayer(instance));
+        bomberTeam.addPlayer(env.createPlayer(instance));
+
+        assertSame(survivorTeam, RoundConditions.getWinner(survivorTeam, bomberTeam));
 
         env.destroyInstance(instance, true);
     }
