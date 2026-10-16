@@ -10,12 +10,14 @@ import net.theevilreaper.tamias.game.player.TamiasPlayerTestBase;
 import net.theevilreaper.tamias.game.round.event.RoundEndEvent;
 import net.theevilreaper.tamias.game.stamina.StaminaService;
 import net.theevilreaper.tamias.game.team.TeamHelper;
+import net.theevilreaper.tamias.game.util.SpectatorHelper;
 import net.theevilreaper.xerus.api.team.Team;
 import net.theevilreaper.xerus.api.team.TeamService;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -36,6 +38,24 @@ class RoundEndListenerIntegrationTest extends TamiasPlayerTestBase {
 
         assertEquals(DisguiseState.NONE, ((TamiasPlayer) player).getDisguiseState());
         assertTrue(bomberTeam.getPlayers().isEmpty());
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testRoundEndResetsSpectator(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player player = env.createPlayer(instance);
+        TeamService teamService = TeamService.of();
+        TeamHelper.loadTeams(2, teamService);
+        TeamHelper.addPlayerToTeam(teamService.getTeam(GameConfig.BOMBER_KEY).orElseThrow(), player);
+        SpectatorHelper.enable(player);
+
+        new RoundEndListener(teamService::getTeams, () -> {}).accept(new RoundEndEvent());
+
+        assertFalse(SpectatorHelper.isSpectator(player));
+        assertFalse(player.isAllowFlying());
+        assertEquals(DisguiseState.NONE, ((TamiasPlayer) player).getDisguiseState());
 
         env.destroyInstance(instance, true);
     }
