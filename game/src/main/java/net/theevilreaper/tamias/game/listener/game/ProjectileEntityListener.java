@@ -6,6 +6,7 @@ import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.game.stamina.ExplodeBar;
 import net.theevilreaper.tamias.game.stamina.StaminaBar;
 import net.theevilreaper.tamias.common.util.Tags;
+import net.theevilreaper.tamias.game.util.SpectatorHelper;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
@@ -14,6 +15,7 @@ import java.util.function.Function;
 
 /**
  * Lets a bomber explode immediately when an egg hits them. Hits on any other entity have no effect.
+ * Eggs fly through spectators.
  */
 public final class ProjectileEntityListener implements Consumer<ProjectileCollideWithEntityEvent> {
 
@@ -25,6 +27,12 @@ public final class ProjectileEntityListener implements Consumer<ProjectileCollid
 
     @Override
     public void accept(ProjectileCollideWithEntityEvent event) {
+        // A cancelled collision keeps the projectile alive, so it flies through the spectator
+        if (event.getTarget() instanceof Player player && SpectatorHelper.isSpectator(player)) {
+            event.setCancelled(true);
+            return;
+        }
+
         event.getEntity().remove();
 
         if (!(event.getTarget() instanceof Player target)) return;
