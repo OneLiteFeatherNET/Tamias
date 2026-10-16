@@ -7,7 +7,7 @@ import net.theevilreaper.xerus.api.phase.GamePhase;
 import net.kyori.adventure.audience.Audience;
 import net.minestom.server.MinecraftServer;
 import net.theevilreaper.tamias.common.event.AreaFinishBuildEvent;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,12 +32,9 @@ public final class GroundBuildPhase extends GamePhase {
 
     private final Supplier<VoidConsumer> mapPlacementTaskTrigger;
     private final GamePlacement gamePlacement;
-    private VoidConsumer taskReset;
+    private @Nullable VoidConsumer taskReset;
 
-    public GroundBuildPhase(
-            @NotNull Supplier<VoidConsumer> mapPlacementTaskTrigger,
-            @NotNull GamePlacement gamePlacement
-    ) {
+    public GroundBuildPhase(Supplier<VoidConsumer> mapPlacementTaskTrigger, GamePlacement gamePlacement) {
         super("MapBuild");
         addListener(AreaFinishBuildEvent.class, areaFinishBuildEvent -> {
             Audience.audience(MinecraftServer.getConnectionManager().getOnlinePlayers())
@@ -66,6 +63,7 @@ public final class GroundBuildPhase extends GamePhase {
     @Override
     public void finish() {
         super.finish();
+        if (this.taskReset == null) return;
         this.taskReset.apply();
     }
 }

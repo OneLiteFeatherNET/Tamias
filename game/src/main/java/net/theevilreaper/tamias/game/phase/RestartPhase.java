@@ -4,10 +4,8 @@ import net.theevilreaper.tamias.common.bootstrap.ServiceShutdown;
 import net.theevilreaper.xerus.api.phase.TimedPhase;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.theevilreaper.tamias.game.util.GameMessages;
-import org.jetbrains.annotations.NotNull;
 
 import java.time.temporal.ChronoUnit;
 
@@ -63,7 +61,7 @@ public final class RestartPhase extends TimedPhase {
      *
      * @param component the message to broadcast
      */
-    private void broadcast(@NotNull Component component) {
+    private void broadcast(Component component) {
         Audience.audience(getConnectionManager().getOnlinePlayers())
                 .sendMessage(component);
     }

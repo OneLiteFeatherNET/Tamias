@@ -16,10 +16,7 @@ public final class PostPlayingPhase extends TimedPhase {
     private final BooleanSupplier lastRoundCheck;
     private final VoidConsumer roundUpdateTrigger;
 
-    public PostPlayingPhase(
-            @NotNull BooleanSupplier lastRoundCheck,
-            @NotNull VoidConsumer roundUpdateTrigger
-    ) {
+    public PostPlayingPhase(BooleanSupplier lastRoundCheck, VoidConsumer roundUpdateTrigger) {
         super("RoundEnd", ChronoUnit.SECONDS, 1);
         this.setPaused(false);
         this.setCurrentTicks(10);

@@ -9,7 +9,6 @@ import net.theevilreaper.xerus.api.component.team.ColorComponent;
 import net.theevilreaper.xerus.api.phase.TickDirection;
 import net.theevilreaper.xerus.api.phase.TimedPhase;
 import net.theevilreaper.xerus.api.team.TeamService;
-import org.jetbrains.annotations.NotNull;
 
 import java.time.temporal.ChronoUnit;
 
@@ -30,7 +29,7 @@ public final class PrePlayingPhase extends TimedPhase {
      *
      * @param teamService the service that provides access to the teams
      */
-    public PrePlayingPhase(@NotNull TeamService teamService) {
+    public PrePlayingPhase(TeamService teamService) {
         super("Pre-Playing", ChronoUnit.SECONDS, 1);
         this.setCurrentTicks(5);
         this.setTickDirection(TickDirection.DOWN);

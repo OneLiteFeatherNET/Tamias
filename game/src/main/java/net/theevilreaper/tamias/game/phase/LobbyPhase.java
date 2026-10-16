@@ -11,7 +11,6 @@ import net.kyori.adventure.sound.Sound;
 import net.minestom.server.entity.Player;
 import net.minestom.server.sound.SoundEvent;
 import net.theevilreaper.tamias.game.util.GameMessages;
-import org.jetbrains.annotations.NotNull;
 
 import java.time.temporal.ChronoUnit;
 
@@ -37,7 +36,7 @@ public final class LobbyPhase extends TimedPhase {
      *
      * @param phaseData the data for the phase to get specific values from it
      */
-    public LobbyPhase(@NotNull LobbyPhaseData phaseData) {
+    public LobbyPhase(LobbyPhaseData phaseData) {
         super("Lobby", ChronoUnit.SECONDS, 1);
         this.setPaused(true);
         this.setCurrentTicks(phaseData.lobbyTime());
@@ -113,7 +112,7 @@ public final class LobbyPhase extends TimedPhase {
      *
      * @param player the player who should receive the update
      */
-    public void updatePlayerValues(@NotNull Player player) {
+    public void updatePlayerValues(Player player) {
         player.setLevel(getCurrentTicks());
         float currentExpCount = (float) this.getCurrentTicks() / getLobbyOrForceTime();
         player.setExp(currentExpCount);
