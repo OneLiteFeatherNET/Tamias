@@ -192,7 +192,7 @@ public class Tamias implements ListenerHandling {
 
     public @NotNull Map<Class<? extends Event>, Consumer<? extends Event>> registerGameListener() {
         Map<Class<? extends Event>, Consumer<? extends Event>> listenerMap = new HashMap<>();
-        listenerMap.put(RoundEndEvent.class, new RoundEndListener(this.teamService::getTeams));
+        listenerMap.put(RoundEndEvent.class, new RoundEndListener(this.teamService::getTeams, this.staminaService::cleanUp));
         GameMapProvider gameMapProvider = (GameMapProvider) this.mapProvider;
 
         Supplier<Pos> randomPos = () -> Pos.ZERO;//gameMapProvider.getGameArea()::getRandomPosition;
