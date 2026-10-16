@@ -4,26 +4,27 @@ import net.minestom.server.entity.Player;
 import net.minestom.testing.Env;
 import net.minestom.testing.extension.MicrotusExtension;
 import net.onelitefeather.guira.SetupDataService;
-import net.onelitefeather.guira.data.SetupData;
 import net.onelitefeather.guira.event.SetupFinishEvent;
+import net.theevilreaper.aves.map.MapEntry;
+import net.theevilreaper.tamias.setup.MapDataTestBase;
+import net.theevilreaper.tamias.setup.data.GameData;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MicrotusExtension.class)
-class SetupFinishListenerTest {
+class SetupFinishListenerTest extends MapDataTestBase {
 
     @Test
     void testSetupFinishHandling(@NotNull Env env) {
         Player player = env.createPlayer(env.createFlatInstance());
 
         SetupDataService dataService = SetupDataService.create();
-        FakeSetupData setupData = new FakeSetupData(player.getUuid());
+        FakeSetupData setupData = new FakeSetupData(player, testMapEntry);
         dataService.add(player.getUuid(), setupData);
 
         AtomicBoolean switched = new AtomicBoolean(false);
@@ -37,14 +38,13 @@ class SetupFinishListenerTest {
         assertTrue(dataService.get(player.getUuid()).isEmpty(), "the stale setup data entry must be removed from the service");
     }
 
-    private static final class FakeSetupData implements SetupData {
+    private static final class FakeSetupData extends GameData {
 
-        private final UUID id;
         private boolean saved;
         private boolean reset;
 
-        private FakeSetupData(UUID id) {
-            this.id = id;
+        private FakeSetupData(Player player, MapEntry mapEntry) {
+            super(player, mapEntry);
         }
 
         @Override
@@ -55,16 +55,6 @@ class SetupFinishListenerTest {
         @Override
         public void reset() {
             this.reset = true;
-        }
-
-        @Override
-        public void loadData() {
-            // Nothing to do here
-        }
-
-        @Override
-        public UUID getId() {
-            return this.id;
         }
     }
 }
