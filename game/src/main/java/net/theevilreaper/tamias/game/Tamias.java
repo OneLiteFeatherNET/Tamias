@@ -187,7 +187,6 @@ public class Tamias implements ListenerHandling {
                     TeamHelper.getTeam(this.teamService, GameConfig.BOMBER_KEY)
             );
             this.refreshSharedScores();
-            this.timeUpdater.accept(PlayingPhase.PLAYING_TIME);
             for (Player player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
                 AttributeHelper.enableMovement(player);
                 this.gameScoreboard.addViewer(player);

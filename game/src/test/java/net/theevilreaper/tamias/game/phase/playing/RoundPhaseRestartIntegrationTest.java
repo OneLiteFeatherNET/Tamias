@@ -9,7 +9,9 @@ import net.theevilreaper.xerus.api.team.TeamService;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -43,6 +45,16 @@ class RoundPhaseRestartIntegrationTest extends TamiasPlayerTestBase {
         runAndRestart(phase);
 
         assertEquals(initialTicks, phase.getCurrentTicks());
+    }
+
+    @Test
+    void testPlayingPhaseShowsFullTimeBeforeStartLogic(@NotNull Env env) {
+        List<String> calls = new ArrayList<>();
+        PlayingPhase phase = new PlayingPhase(time -> calls.add("time " + time), () -> calls.add("start"), HashMap::new);
+
+        phase.start();
+
+        assertEquals(List.of("time 300", "start"), calls);
     }
 
     @Test
