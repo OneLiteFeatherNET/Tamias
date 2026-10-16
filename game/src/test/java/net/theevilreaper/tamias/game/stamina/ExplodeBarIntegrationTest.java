@@ -94,7 +94,7 @@ class ExplodeBarIntegrationTest extends TamiasPlayerTestBase {
         assertEquals(Status.DRAINING, explodeBar.status);
         assertNotEquals(Status.REGENERATING, explodeBar.status);
 
-        float level = player.getLevel() - 1;
+        float level = player.getLevel() - 1F;
         // 10 draining ticks where TICK_SOUND is played (current goes from 11 down to 1)
         for (int i = 0; i < 10; i++) {
             Collector<SoundEffectPacket> tickSoundTracker = connection.trackIncoming(SoundEffectPacket.class);

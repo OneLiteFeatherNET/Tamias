@@ -21,7 +21,6 @@ import net.theevilreaper.tamias.setup.inventory.GeneralMapDataInventory;
 import net.theevilreaper.tamias.setup.map.MapDataCategory;
 
 import java.util.Optional;
-import java.util.UUID;
 
 public class GameData extends InstanceSetupData {
 
@@ -102,11 +101,11 @@ public class GameData extends InstanceSetupData {
                 triggerUpdate(InventoryTarget.GAME);
             }
             case AREA_LOWER_CORNER -> {
-                this.gameMapBuilder.areaLowerCorner(new Vec(pos.blockX(), pos.blockY() - 1, pos.blockZ()));
+                this.gameMapBuilder.areaLowerCorner(new Vec(pos.blockX(), pos.blockY() - 1D, pos.blockZ()));
                 triggerUpdate(InventoryTarget.AREA);
             }
             case AREA_UPPER_CORNER -> {
-                this.gameMapBuilder.areaUpperCorner(new Vec(pos.blockX(), pos.blockY() - 1, pos.blockZ()));
+                this.gameMapBuilder.areaUpperCorner(new Vec(pos.blockX(), pos.blockY() - 1D, pos.blockZ()));
                 triggerUpdate(InventoryTarget.AREA);
             }
             default -> {
