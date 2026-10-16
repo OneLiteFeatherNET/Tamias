@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -61,6 +62,16 @@ class RestartPhaseIntegrationTest {
 
         env.destroyInstance(instance, true);
         assertTrue(instance.getPlayers().isEmpty(), "The instance should have no players after destruction");
+    }
+
+    @Test
+    void testOnStartRunsGameEndCallback(@NotNull Env env) {
+        AtomicInteger calls = new AtomicInteger();
+        RestartPhase restartPhase = new RestartPhase(calls::incrementAndGet);
+
+        restartPhase.start();
+
+        assertEquals(1, calls.get());
     }
 
     /**

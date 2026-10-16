@@ -98,6 +98,21 @@ public final class GameMessages extends Messages {
         return withMiniPrefix("<gray>Restarting in <red>" + time + " <gray>seconds!");
     }
 
+    /**
+     * Creates the message which shows a player its own stats at the end of the game.
+     *
+     * @param wins   the amount of rounds the player has won
+     * @param rounds the amount of rounds which were played
+     * @param kills  the amount of survivors the player has converted as a bomber
+     * @param hits   the amount of bombers the player has hit as a survivor
+     * @return a component with the personal result
+     */
+    @Contract(value = "_, _, _, _ -> new", pure = true)
+    public static Component getPersonalResult(int wins, int rounds, int kills, int hits) {
+        return withMiniPrefix("<gray>You won <green>" + wins + " <gray>/ <aqua>" + rounds + " <gray>rounds · <red>"
+                + kills + " <gray>kills · <yellow>" + hits + " <gray>hits");
+    }
+
     @Contract(value = "_ -> new", pure = true)
     public static Component getJoinMessage(Player player) {
         return PREFIX.append(Component.space()).append(withMini("<color:#249D9F>" + player.getUsername() + "</color>"))
