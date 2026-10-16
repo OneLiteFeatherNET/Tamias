@@ -30,6 +30,7 @@ public final class GroundBlocks {
 
     /**
      * Returns a readable name of the given block, for example {@code Red Sand} for {@code minecraft:red_sand}.
+     * Blocks which are switched on get an {@code (On)} suffix, because they share the item with the switched off block.
      *
      * @param block the block to get the name from
      * @return the name of the block
@@ -41,6 +42,9 @@ public final class GroundBlocks {
             if (part.isEmpty()) continue;
             if (!builder.isEmpty()) builder.append(' ');
             builder.append(Character.toUpperCase(part.charAt(0))).append(part.substring(1));
+        }
+        if ("true".equals(block.getProperty("lit"))) {
+            builder.append(" (On)");
         }
         return builder.toString();
     }

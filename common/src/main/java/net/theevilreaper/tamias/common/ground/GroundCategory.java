@@ -67,15 +67,14 @@ public enum GroundCategory {
             Block.MELON, Block.PUMPKIN
     )),
     OCEAN("Ocean", Block.PRISMARINE, List.of(
-            Block.PRISMARINE, Block.PRISMARINE_BRICKS, Block.DARK_PRISMARINE, Block.SEA_LANTERN
+            Block.PRISMARINE, Block.PRISMARINE_BRICKS, Block.DARK_PRISMARINE
     )),
     NETHER("Nether", Block.NETHERRACK, List.of(
             Block.NETHERRACK, Block.NETHER_BRICKS, Block.RED_NETHER_BRICKS, Block.CRIMSON_NYLIUM,
             Block.WARPED_NYLIUM, Block.SOUL_SOIL, Block.BASALT, Block.POLISHED_BASALT,
             Block.SMOOTH_BASALT, Block.BLACKSTONE, Block.POLISHED_BLACKSTONE, Block.POLISHED_BLACKSTONE_BRICKS,
-            Block.GILDED_BLACKSTONE, Block.NETHER_WART_BLOCK, Block.WARPED_WART_BLOCK, Block.SHROOMLIGHT,
-            Block.GLOWSTONE, Block.QUARTZ_BLOCK, Block.SMOOTH_QUARTZ, Block.QUARTZ_BRICKS,
-            Block.QUARTZ_PILLAR
+            Block.GILDED_BLACKSTONE, Block.NETHER_WART_BLOCK, Block.WARPED_WART_BLOCK, Block.QUARTZ_BLOCK,
+            Block.SMOOTH_QUARTZ, Block.QUARTZ_BRICKS, Block.QUARTZ_PILLAR
     )),
     END("End", Block.END_STONE, List.of(
             Block.END_STONE, Block.END_STONE_BRICKS, Block.PURPUR_BLOCK, Block.PURPUR_PILLAR,
@@ -88,6 +87,11 @@ public enum GroundCategory {
             Block.DEEPSLATE_REDSTONE_ORE, Block.DEEPSLATE_LAPIS_ORE, Block.DEEPSLATE_DIAMOND_ORE, Block.DEEPSLATE_EMERALD_ORE,
             Block.COAL_BLOCK, Block.IRON_BLOCK, Block.COPPER_BLOCK, Block.GOLD_BLOCK,
             Block.REDSTONE_BLOCK, Block.LAPIS_BLOCK, Block.DIAMOND_BLOCK, Block.EMERALD_BLOCK
+    )),
+    LIGHT("Light", Block.SEA_LANTERN, List.of(
+            Block.GLOWSTONE, Block.SEA_LANTERN, Block.SHROOMLIGHT, Block.OCHRE_FROGLIGHT,
+            Block.VERDANT_FROGLIGHT, Block.PEARLESCENT_FROGLIGHT, lit(Block.REDSTONE_LAMP), lit(Block.COPPER_BULB),
+            lit(Block.EXPOSED_COPPER_BULB), lit(Block.WEATHERED_COPPER_BULB), lit(Block.OXIDIZED_COPPER_BULB)
     ));
 
     /**
@@ -103,6 +107,16 @@ public enum GroundCategory {
         this.displayName = displayName;
         this.icon = icon;
         this.blocks = blocks;
+    }
+
+    /**
+     * Returns the switched on state of a block which can be lit, for example a redstone lamp.
+     *
+     * @param block the block to switch on
+     * @return the lit block
+     */
+    private static Block lit(Block block) {
+        return block.withProperty("lit", "true");
     }
 
     /**
