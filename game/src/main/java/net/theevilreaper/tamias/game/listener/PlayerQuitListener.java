@@ -10,6 +10,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.theevilreaper.tamias.common.util.Tags;
 import net.theevilreaper.tamias.game.phase.LobbyPhase;
+import net.theevilreaper.tamias.game.phase.RestartPhase;
 import net.theevilreaper.tamias.game.phase.playing.PlayingPhase;
 import net.theevilreaper.tamias.game.util.GameMessages;
 
@@ -30,21 +31,42 @@ import static net.minestom.server.MinecraftServer.getConnectionManager;
  **/
 public final class PlayerQuitListener implements Consumer<PlayerDisconnectEvent> {
 
+    /**
+     * A round needs at least one bomber and one survivor.
+     */
+    private static final int MIN_GAME_PLAYERS = 2;
+
     private final Supplier<Phase> phaseSupplier;
     private final Function<Key, Team> teamFunction;
+    private final PlayerConsumer staminaRemover;
     private final VoidConsumer roundEndCheck;
     private final PlayerConsumer scoreboardConsumer;
+    private final VoidConsumer gameAbort;
 
+    /**
+     * Creates a new {@link PlayerQuitListener}.
+     *
+     * @param phaseSupplier      provides the active phase
+     * @param teamFunction       resolves a team by its key
+     * @param staminaRemover     stops and removes the stamina bar of a player
+     * @param roundEndCheck      checks if the round is over
+     * @param scoreboardConsumer removes the player from the scoreboard
+     * @param gameAbort          ends the game when too few players are left
+     */
     public PlayerQuitListener(
             Supplier<Phase> phaseSupplier,
             Function<Key, Team> teamFunction,
+            PlayerConsumer staminaRemover,
             VoidConsumer roundEndCheck,
-            PlayerConsumer scoreboardConsumer
+            PlayerConsumer scoreboardConsumer,
+            VoidConsumer gameAbort
     ) {
         this.phaseSupplier = phaseSupplier;
         this.teamFunction = teamFunction;
+        this.staminaRemover = staminaRemover;
         this.roundEndCheck = roundEndCheck;
         this.scoreboardConsumer = scoreboardConsumer;
+        this.gameAbort = gameAbort;
     }
 
     @Override
@@ -54,47 +76,59 @@ public final class PlayerQuitListener implements Consumer<PlayerDisconnectEvent>
         if (phase == null) return;
 
         Player player = event.getPlayer();
+        // The restart phase kicks every player, so there is nothing left to handle
+        if (phase instanceof RestartPhase) return;
 
-        switch (phase) {
-            case LobbyPhase lobbyPhase -> this.handleLobbyQuit(lobbyPhase, event.getPlayer());
-            case PlayingPhase playingPhase -> this.handleGameQuit(playingPhase, player);
-            default -> this.handleGeneralQuit(player);
+        Audience.audience(getConnectionManager().getOnlinePlayers()).sendMessage(GameMessages.getLeaveMessage(player));
+        this.scoreboardConsumer.accept(player);
+
+        if (phase instanceof LobbyPhase lobbyPhase) {
+            lobbyPhase.checkStopCondition(player);
+            return;
         }
+
+        this.handleGameQuit(player);
     }
 
     /**
-     * Handles the quit logic for the {@link PlayingPhase}.
+     * Handles the quit logic for all phases of a round. The player is removed from the team and the stamina bar
+     * is stopped, otherwise the bar keeps running and fires events for a player who is no longer online.
      *
-     * @param playingPhase the phase reference
-     * @param player       the involved player
+     * @param player the involved player
      */
-    private void handleGameQuit(PlayingPhase playingPhase, Player player) {
-        if (!player.hasTag(Tags.TEAM_KEY)) return;
+    private void handleGameQuit(Player player) {
+        this.removeFromTeam(player);
+        this.staminaRemover.accept(player);
 
-        String teamKeyStr = player.getTag(Tags.TEAM_KEY);
-        Team team = this.teamFunction.apply(Key.key(teamKeyStr));
+        if (getRemainingPlayers(player) < MIN_GAME_PLAYERS) {
+            this.gameAbort.apply();
+            return;
+        }
 
-        if (team == null) return;
-        team.removePlayer(player);
         this.roundEndCheck.apply();
     }
 
-    /**
-     * Handles the quit logic for the {@link LobbyPhase}.
-     *
-     * @param lobbyPhase the reference from the phase
-     * @param player     the player which is involved
-     */
-    private void handleLobbyQuit(LobbyPhase lobbyPhase, Player player) {
-        lobbyPhase.checkStopCondition();
-        Audience.audience(getConnectionManager().getOnlinePlayers()).sendMessage(GameMessages.getLeaveMessage(player));
-        this.scoreboardConsumer.accept(player);
+    private void removeFromTeam(Player player) {
+        if (!player.hasTag(Tags.TEAM_KEY)) return;
+
+        Team team = this.teamFunction.apply(Key.key(player.getTag(Tags.TEAM_KEY)));
+        player.removeTag(Tags.TEAM_KEY);
+
+        if (team == null) return;
+        team.removePlayer(player);
     }
 
     /**
-     * @param player
+     * Returns the amount of online players without the leaving player. On a regular disconnect Minestom removes the
+     * player from the online players before the disconnect event is called. The filter only applies when a player
+     * is removed directly.
+     *
+     * @param leavingPlayer the player who leaves the game
+     * @return the amount of remaining players
      */
-    private void handleGeneralQuit(Player player) {
-
+    private long getRemainingPlayers(Player leavingPlayer) {
+        return getConnectionManager().getOnlinePlayers().stream()
+                .filter(player -> player != leavingPlayer)
+                .count();
     }
 }
