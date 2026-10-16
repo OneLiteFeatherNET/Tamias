@@ -20,6 +20,10 @@ public final class GameAreaHelper {
 
     public static final int BLOCKS_PER_STEP = 20;
     /**
+     * The amount of placement steps between two place sounds of the ground.
+     */
+    public static final int GROUND_SOUND_INTERVAL = 3;
+    /**
      * The height above its target from which a TNT block falls. The whole fall path must be free.
      */
     public static final int TNT_DROP_HEIGHT = 5;

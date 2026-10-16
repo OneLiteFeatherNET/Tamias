@@ -41,6 +41,7 @@ import static net.theevilreaper.tamias.common.area.GameAreaHelper.TNT_POP_DELAY;
 public class TNTPlacement extends AreaBasePlacement<Vec> {
 
     private static final int FALL_TICKS = 5;
+    private static final Sound LANDING_SOUND = Sound.sound(SoundEvent.BLOCK_GRAVEL_FALL, Sound.Source.BLOCK, 1f, 0.6f);
     private static final Sound POP_SOUND = Sound.sound(SoundEvent.ENTITY_CHICKEN_EGG, Sound.Source.BLOCK, 0.8f, 1.2f);
 
     private final Consumer<Vec> landingConsumer;
@@ -165,6 +166,8 @@ public class TNTPlacement extends AreaBasePlacement<Vec> {
             this.fallingEntities.remove(tntEntity);
             tntEntity.remove();
             land(group.center(), groundData);
+            Point center = group.center().add(0.5);
+            instance.playSound(LANDING_SOUND, center.x(), center.y(), center.z());
 
             List<Vec> members = group.members();
             for (int i = 0; i < members.size(); i++) {

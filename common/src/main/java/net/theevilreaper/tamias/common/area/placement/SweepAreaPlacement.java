@@ -1,10 +1,13 @@
 package net.theevilreaper.tamias.common.area.placement;
 
+import net.kyori.adventure.sound.Sound;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.block.BlockSoundType;
 import net.theevilreaper.tamias.common.event.AreaFinishBuildEvent;
 import net.theevilreaper.tamias.common.ground.GroundData;
 
@@ -18,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 
 import static net.theevilreaper.tamias.common.area.GameAreaHelper.BLOCKS_PER_STEP;
+import static net.theevilreaper.tamias.common.area.GameAreaHelper.GROUND_SOUND_INTERVAL;
 
 /**
  * Places ground blocks in the order defined by the given {@link Comparator}, batched over ticks.
@@ -68,6 +72,7 @@ public final class SweepAreaPlacement extends AreaBasePlacement<Vec> {
         List<Vec> posList = new ArrayList<>(this.blockPositions);
         posList.sort(this.fillOrder);
         LinkedBlockingDeque<Vec> queue = new LinkedBlockingDeque<>(posList);
+        int[] steps = new int[1];
 
         this.buildTask = MinecraftServer.getSchedulerManager().buildTask(() -> {
             List<Vec> positions = new ArrayList<>();
@@ -81,6 +86,10 @@ public final class SweepAreaPlacement extends AreaBasePlacement<Vec> {
             }
             for (Vec pos : positions) {
                 this.doPlaceBlock(pos, groundData);
+            }
+            // One sound per step would be too noisy, so only every few steps one is played at the building front
+            if (steps[0]++ % GROUND_SOUND_INTERVAL == 0) {
+                playPlaceSound(positions.getLast(), groundData.groundBlock());
             }
             sendExpCount(queue.size());
         }).repeat(TaskSchedule.tick(1)).schedule();
@@ -98,5 +107,19 @@ public final class SweepAreaPlacement extends AreaBasePlacement<Vec> {
             groundBlock = groundData.groundBlock();
         }
         this.instance.setBlock(position, groundBlock);
+    }
+
+    /**
+     * Plays the place sound of the given block at the given position.
+     *
+     * @param position the position of the placed block
+     * @param block    the placed block
+     */
+    private void playPlaceSound(Vec position, Block block) {
+        BlockSoundType soundType = block.registry().getBlockSoundType();
+        if (soundType == null) return;
+        Point center = position.add(0.5);
+        Sound sound = Sound.sound(soundType.placeSound(), Sound.Source.BLOCK, (soundType.volume() + 1f) / 2f, soundType.pitch() * 0.8f);
+        this.instance.playSound(sound, center.x(), center.y(), center.z());
     }
 }

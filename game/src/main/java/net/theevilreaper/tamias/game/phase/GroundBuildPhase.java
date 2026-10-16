@@ -5,8 +5,10 @@ import net.theevilreaper.tamias.common.area.GameAreaHelper;
 import net.theevilreaper.tamias.common.area.holder.GamePlacement;
 import net.theevilreaper.xerus.api.phase.GamePhase;
 import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.sound.Sound;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.EventDispatcher;
+import net.minestom.server.sound.SoundEvent;
 import net.theevilreaper.tamias.common.event.AreaFinishBuildEvent;
 import net.theevilreaper.tamias.common.event.AreaSpawnTriggerEvent;
 import net.theevilreaper.tamias.game.round.event.RoundPrepareEvent;
@@ -33,6 +35,8 @@ import static net.theevilreaper.tamias.game.util.GameMessages.MAP_READY;
 public final class GroundBuildPhase extends GamePhase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GroundBuildPhase.class);
+    private static final Sound BUILD_START_SOUND = Sound.sound(SoundEvent.BLOCK_BEACON_ACTIVATE, Sound.Source.MASTER, 1f, 1f);
+    private static final Sound BUILD_FINISH_SOUND = Sound.sound(SoundEvent.ENTITY_PLAYER_LEVELUP, Sound.Source.MASTER, 1f, 1f);
 
     private final Supplier<VoidConsumer> mapPlacementTaskTrigger;
     private final GamePlacement gamePlacement;
@@ -41,8 +45,9 @@ public final class GroundBuildPhase extends GamePhase {
     public GroundBuildPhase(Supplier<VoidConsumer> mapPlacementTaskTrigger, GamePlacement gamePlacement) {
         super("MapBuild");
         addListener(AreaFinishBuildEvent.class, areaFinishBuildEvent -> {
-            Audience.audience(MinecraftServer.getConnectionManager().getOnlinePlayers())
-                    .sendMessage(MAP_READY);
+            Audience players = Audience.audience(MinecraftServer.getConnectionManager().getOnlinePlayers());
+            players.sendMessage(MAP_READY);
+            players.playSound(BUILD_FINISH_SOUND, Sound.Emitter.self());
             finish();
         });
         this.mapPlacementTaskTrigger = mapPlacementTaskTrigger;
@@ -53,8 +58,9 @@ public final class GroundBuildPhase extends GamePhase {
     protected void onStart() {
         prepareRound();
         MinecraftServer.getSchedulerManager().buildTask(() -> {
-            Audience.audience(MinecraftServer.getConnectionManager().getOnlinePlayers())
-                    .sendMessage(MAP_BUILDING);
+            Audience players = Audience.audience(MinecraftServer.getConnectionManager().getOnlinePlayers());
+            players.sendMessage(MAP_BUILDING);
+            players.playSound(BUILD_START_SOUND, Sound.Emitter.self());
             LOGGER.info("Map is building up...");
             this.taskReset = this.mapPlacementTaskTrigger.get();
             LOGGER.info("Map placement task started");
