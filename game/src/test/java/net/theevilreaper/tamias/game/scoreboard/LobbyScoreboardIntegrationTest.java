@@ -88,7 +88,22 @@ class LobbyScoreboardIntegrationTest {
                 ),
                 () -> assertThrows(UnsupportedOperationException.class, () ->
                         lobbyScoreboard.updateScore(ScoreType.ROUND_TYPE, Component.text("Round Type"))
+                ),
+                () -> assertThrows(UnsupportedOperationException.class, () ->
+                        lobbyScoreboard.updateScore(ScoreType.WINS, Component.text("Wins"))
                 )
         );
+    }
+
+    @Test
+    void testPlayerScoreUpdateIsNotSupported(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player player = env.createPlayer(instance);
+
+        assertThrows(UnsupportedOperationException.class, () ->
+                lobbyScoreboard.updateScore(player, ScoreType.PLAYER, Component.text("1"))
+        );
+
+        env.destroyInstance(instance, true);
     }
 }

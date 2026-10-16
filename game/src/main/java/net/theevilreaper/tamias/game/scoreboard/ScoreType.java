@@ -16,6 +16,7 @@ public interface ScoreType {
     TNTCount TNT = new TNTCount();
     RoundType ROUND_TYPE = new RoundType();
     MapType MAP_TYPE = new MapType();
+    WinsType WINS = new WinsType();
 
 
     /**
@@ -52,6 +53,16 @@ public interface ScoreType {
         @Override
         public Key key() {
             return Key.key("tamias:round");
+        }
+    }
+
+    /**
+     * Represents the round wins score type of a single player.
+     */
+    record WinsType() implements ScoreType {
+        @Override
+        public Key key() {
+            return Key.key("tamias:wins");
         }
     }
 
