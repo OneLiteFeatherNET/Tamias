@@ -40,6 +40,18 @@ public final class RoundConditions {
         return bomberTeam.getPlayers().stream().allMatch(SpectatorHelper::isSpectator);
     }
 
+    /**
+     * Returns the team which won the round. The bombers only win when no survivor is left.
+     * In every other case the survivors win, which includes the end of the playing time.
+     *
+     * @param survivorTeam the team of the survivors
+     * @param bomberTeam   the team of the bombers
+     * @return the team which won the round
+     */
+    public static Team getWinner(Team survivorTeam, Team bomberTeam) {
+        return survivorTeam.isEmpty() ? bomberTeam : survivorTeam;
+    }
+
     private RoundConditions() {
         // Prevent instantiation
     }

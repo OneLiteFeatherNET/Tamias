@@ -2,11 +2,14 @@ package net.theevilreaper.tamias.game.util;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.entity.Player;
 import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.common.util.Messages;
+import net.theevilreaper.xerus.api.component.team.ColorComponent;
+import net.theevilreaper.xerus.api.team.Team;
 import org.jetbrains.annotations.Contract;
 
 /**
@@ -111,6 +114,22 @@ public final class GameMessages extends Messages {
     public static Component getSpectatorMessage(Player player) {
         return PREFIX.append(Component.space()).append(withMini("<color:#249D9F>" + player.getUsername() + "</color>"))
                 .append(Component.space()).append(SPECTATOR_PART);
+    }
+
+    /**
+     * Creates the message which announces the team that won the round.
+     *
+     * @param winner the team which won the round
+     * @return a component with the win message
+     */
+    @Contract(value = "_ -> new", pure = true)
+    public static Component getWinMessage(Team winner) {
+        String teamName = GameConfig.BOMBER_KEY.equals(winner.key()) ? "Bombers" : "Survivors";
+        ColorComponent colorComponent = winner.get(ColorComponent.class);
+        TextColor teamColor = colorComponent != null ? colorComponent.colorData().getChatColor() : NamedTextColor.GOLD;
+        return withPrefix(Component.text("The ", NamedTextColor.GRAY)
+                .append(Component.text(teamName, teamColor))
+                .append(Component.text(" won the round!", NamedTextColor.GRAY)));
     }
 
     @Contract(value = "_, _ -> new", pure = true)
