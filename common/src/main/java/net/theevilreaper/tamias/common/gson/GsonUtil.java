@@ -6,6 +6,7 @@ import net.minestom.server.coordinate.Vec;
 import net.theevilreaper.aves.file.FileHandler;
 import net.theevilreaper.aves.file.GsonFileHandler;
 import net.theevilreaper.aves.file.gson.PositionGsonAdapter;
+import net.theevilreaper.tamias.common.ground.GroundData;
 import net.theevilreaper.tamias.common.map.layer.AreaData;
 
 /**
@@ -28,6 +29,7 @@ public final class GsonUtil {
                 .registerTypeAdapter(Pos.class, positionGsonAdapter)
                 .registerTypeAdapter(Vec.class, positionGsonAdapter)
                 .registerTypeAdapter(AreaData.class, new GameAreaAdapter())
+                .registerTypeAdapter(GroundData.class, new GroundDataAdapter())
                 .create();
         FILE_HANDLER = new GsonFileHandler(GSON);
     }

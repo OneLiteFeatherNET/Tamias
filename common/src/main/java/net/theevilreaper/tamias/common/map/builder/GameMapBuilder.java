@@ -5,10 +5,16 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.utils.Direction;
 import net.theevilreaper.aves.map.BaseMapBuilder;
 import net.theevilreaper.tamias.common.area.SpawnArea;
+import net.theevilreaper.tamias.common.ground.GroundData;
 import net.theevilreaper.tamias.common.map.GameMap;
 import net.theevilreaper.tamias.common.map.layer.AreaData;
 import net.theevilreaper.tamias.common.map.layer.SpawnLayer;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnmodifiableView;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Builder class for creating instances of {@link GameMap}.
@@ -23,6 +29,7 @@ public final class GameMapBuilder extends BaseMapBuilder {
     private @Nullable Pos bomberInitialSpawn;
     private final SpawnLayer.Builder spawnLayerBuilder;
     private final AreaData.Builder areaDataBuilder;
+    private final List<GroundData> groundPresets;
 
     /**
      * Constructs a new GameMapBuilder instance with default values.
@@ -31,6 +38,7 @@ public final class GameMapBuilder extends BaseMapBuilder {
         this.spawnLayerBuilder = SpawnLayer.builder();
         this.areaDataBuilder = AreaData.builder();
         this.areaDataBuilder.facing(Direction.NORTH);
+        this.groundPresets = new ArrayList<>();
     }
 
     /**
@@ -43,6 +51,7 @@ public final class GameMapBuilder extends BaseMapBuilder {
         this.bomberInitialSpawn = gameMap.getBomberInitialSpawn();
         this.spawnLayerBuilder = SpawnLayer.builder(gameMap.getSpawnData());
         this.areaDataBuilder = AreaData.builder(gameMap.getGameAreaData());
+        this.groundPresets = new ArrayList<>(gameMap.getGroundPresets());
     }
 
     /**
@@ -111,6 +120,49 @@ public final class GameMapBuilder extends BaseMapBuilder {
     }
 
     /**
+     * Adds a ground preset to the map.
+     *
+     * @param groundData the preset to add
+     * @return this builder instance for chaining
+     */
+    public GameMapBuilder addGroundPreset(GroundData groundData) {
+        this.groundPresets.add(groundData);
+        return this;
+    }
+
+    /**
+     * Replaces the ground preset at the given index.
+     *
+     * @param index      the index of the preset to replace
+     * @param groundData the new preset
+     * @return this builder instance for chaining
+     */
+    public GameMapBuilder setGroundPreset(int index, GroundData groundData) {
+        this.groundPresets.set(index, groundData);
+        return this;
+    }
+
+    /**
+     * Removes the ground preset at the given index.
+     *
+     * @param index the index of the preset to remove
+     * @return this builder instance for chaining
+     */
+    public GameMapBuilder removeGroundPreset(int index) {
+        this.groundPresets.remove(index);
+        return this;
+    }
+
+    /**
+     * Returns the ground presets of the map.
+     *
+     * @return the ground presets
+     */
+    public @UnmodifiableView List<GroundData> getGroundPresets() {
+        return Collections.unmodifiableList(this.groundPresets);
+    }
+
+    /**
      * Returns the initial spawn position for the bomber.
      *
      * @return the initial spawn
@@ -149,7 +201,8 @@ public final class GameMapBuilder extends BaseMapBuilder {
                 this.spawn,
                 this.bomberInitialSpawn,
                 this.spawnLayerBuilder.build(),
-                this.areaDataBuilder.build()
+                this.areaDataBuilder.build(),
+                this.groundPresets
         );
     }
 }
