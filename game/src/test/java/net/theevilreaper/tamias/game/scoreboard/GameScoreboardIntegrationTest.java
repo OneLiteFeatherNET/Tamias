@@ -4,8 +4,11 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.network.packet.server.play.DisplayScoreboardPacket;
 import net.minestom.server.scoreboard.Sidebar;
+import net.minestom.testing.Collector;
 import net.minestom.testing.Env;
+import net.minestom.testing.TestConnection;
 import net.minestom.testing.extension.MicrotusExtension;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -58,6 +61,22 @@ class GameScoreboardIntegrationTest {
         gameScoreboard.addViewer(player);
 
         assertSame(sidebar, gameScoreboard.getSidebar(player));
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testAddViewerTwiceSendsNoPackets(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        TestConnection connection = env.createConnection();
+        Player player = connection.connect(instance);
+        GameScoreboard gameScoreboard = new GameScoreboard();
+        gameScoreboard.addViewer(player);
+        Collector<DisplayScoreboardPacket> displayPackets = connection.trackIncoming(DisplayScoreboardPacket.class);
+
+        gameScoreboard.addViewer(player);
+
+        displayPackets.assertEmpty();
 
         env.destroyInstance(instance, true);
     }
@@ -127,6 +146,41 @@ class GameScoreboardIntegrationTest {
 
         assertNull(gameScoreboard.getSidebar(player));
         assertFalse(sidebar.getViewers().contains(player));
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testRemoveAllViewersHidesEverySidebar(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player first = env.createPlayer(instance);
+        Player second = env.createPlayer(instance);
+        GameScoreboard gameScoreboard = new GameScoreboard();
+        gameScoreboard.addViewer(first);
+        gameScoreboard.addViewer(second);
+        Sidebar firstSidebar = gameScoreboard.getSidebar(first);
+
+        gameScoreboard.removeAllViewers();
+
+        assertNull(gameScoreboard.getSidebar(first));
+        assertNull(gameScoreboard.getSidebar(second));
+        assertFalse(firstSidebar.getViewers().contains(first));
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testSharedValuesSurviveHiding(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player player = env.createPlayer(instance);
+        GameScoreboard gameScoreboard = new GameScoreboard();
+        gameScoreboard.addViewer(player);
+        gameScoreboard.removeAllViewers();
+
+        gameScoreboard.updateScore(ScoreType.ROUND_TYPE, Component.text("2 / 3"));
+        gameScoreboard.addViewer(player);
+
+        assertEquals("» 2 / 3", lineText(gameScoreboard.getSidebar(player), ScoreType.ROUND_TYPE));
 
         env.destroyInstance(instance, true);
     }

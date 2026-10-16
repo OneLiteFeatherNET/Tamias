@@ -184,12 +184,14 @@ public class Tamias implements ListenerHandling {
         gameSeries.add(new PrePlayingPhase(this.teamService));
 
         VoidConsumer startLogic = () -> {
+            RoundWins.snapshotRoles(getTeam(GameConfig.SURVIVOR_KEY), getTeam(GameConfig.BOMBER_KEY));
+            this.refreshSharedScores();
+            this.timeUpdater.accept(PlayingPhase.PLAYING_TIME);
             for (Player player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
                 AttributeHelper.enableMovement(player);
                 this.gameScoreboard.addViewer(player);
             }
-            RoundWins.snapshotRoles(getTeam(GameConfig.SURVIVOR_KEY), getTeam(GameConfig.BOMBER_KEY));
-            this.refreshSharedScores();
+            this.refreshWins();
             this.staminaService.start();
         };
 
@@ -247,17 +249,16 @@ public class Tamias implements ListenerHandling {
     }
 
     /**
-     * Moves every online player from the lobby to the game scoreboard. Does nothing if the game scoreboard is active.
+     * Hides every scoreboard while the map is built. The game scoreboard is shown again when the round is played.
      */
-    private void switchToGameScoreboard() {
-        if (this.activeScoreboard == this.gameScoreboard) return;
-
-        for (Player player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
-            this.lobbyScoreboard.removeViewer(player);
-            this.gameScoreboard.addViewer(player);
+    private void hideScoreboards() {
+        if (this.activeScoreboard == this.lobbyScoreboard) {
+            for (Player player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+                this.lobbyScoreboard.removeViewer(player);
+            }
+            this.activeScoreboard = this.gameScoreboard;
         }
-        this.activeScoreboard = this.gameScoreboard;
-        this.refreshWins();
+        this.gameScoreboard.removeAllViewers();
     }
 
     /**
@@ -321,7 +322,7 @@ public class Tamias implements ListenerHandling {
         node.addListener(RoundPrepareEvent.class, new RoundPrepareListener(gameMapProvider.getSpawnArea(), gameMapProvider.getActiveInstance().get()));
 
         // Listener for rounds
-        node.addListener(RoundStartEvent.class, _ -> this.switchToGameScoreboard());
+        node.addListener(RoundStartEvent.class, _ -> this.hideScoreboards());
         node.addListener(RoundStartEvent.class, new RoundStartListener(this.gameScoreboard, this.roundProvider));
 
         //Stamina listeners

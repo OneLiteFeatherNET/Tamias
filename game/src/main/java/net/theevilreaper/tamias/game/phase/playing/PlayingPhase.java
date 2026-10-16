@@ -21,7 +21,7 @@ import java.util.function.Supplier;
  **/
 public final class PlayingPhase extends TimedPhase {
 
-    private static final int PLAYING_TIME = 300;
+    public static final int PLAYING_TIME = 300;
 
     private final IntConsumer timeUpdater;
     private final VoidConsumer startGameLogic;

@@ -5,6 +5,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.scoreboard.Sidebar;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,11 +55,13 @@ public final class GameScoreboard implements Scoreboard, DefaultScoreLayout {
 
     /**
      * {@inheritDoc}
-     * Adding a player which already is a viewer keeps its sidebar.
+     * Adding a player which already is a viewer does nothing, so no packets are sent again.
      */
     @Override
     public void addViewer(Player player) {
-        Sidebar sidebar = this.sidebars.computeIfAbsent(player.getUuid(), _ -> createSidebar());
+        if (this.sidebars.containsKey(player.getUuid())) return;
+        Sidebar sidebar = createSidebar();
+        this.sidebars.put(player.getUuid(), sidebar);
         sidebar.addViewer(player);
     }
 
@@ -70,6 +73,17 @@ public final class GameScoreboard implements Scoreboard, DefaultScoreLayout {
         Sidebar sidebar = this.sidebars.remove(player.getUuid());
         if (sidebar == null) return;
         sidebar.removeViewer(player);
+    }
+
+    /**
+     * Hides the scoreboard for every viewer and drops their sidebars.
+     * Shared values and the title are kept, so they are shown again when the viewers are added back.
+     */
+    public void removeAllViewers() {
+        for (Sidebar sidebar : this.sidebars.values()) {
+            List.copyOf(sidebar.getViewers()).forEach(sidebar::removeViewer);
+        }
+        this.sidebars.clear();
     }
 
     /**
