@@ -13,10 +13,16 @@ import net.theevilreaper.tamias.game.player.TamiasPlayer;
 import net.theevilreaper.tamias.game.player.TamiasPlayerTestBase;
 import net.theevilreaper.tamias.game.stamina.ExplodeBar;
 import net.theevilreaper.tamias.game.stamina.StaminaFactory;
+import net.theevilreaper.tamias.game.util.SpectatorHelper;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BomberReviveListenerIntegrationTest extends TamiasPlayerTestBase {
 
@@ -27,19 +33,57 @@ class BomberReviveListenerIntegrationTest extends TamiasPlayerTestBase {
         player.setTag(Tags.TEAM_KEY, GameConfig.BOMBER_KEY.asString());
         ((TamiasPlayer) player).setDisguise(DisguiseState.HIDDEN);
 
-        Pos randomTntPos = new Pos(5, 41, 5);
-        Pos removedBlock = randomTntPos.add(0, 1, 0);
-        instance.setBlock(removedBlock, Block.TNT);
+        Pos tntBlock = new Pos(5, 42, 5);
+        instance.setBlock(tntBlock, Block.TNT);
 
+        AtomicInteger supplierCalls = new AtomicInteger();
+        AtomicBoolean roundEndChecked = new AtomicBoolean();
         ExplodeBar explodeBar = (ExplodeBar) StaminaFactory.createExplodeBar(player);
-        BomberReviveListener listener = new BomberReviveListener(_ -> explodeBar, () -> randomTntPos);
+        BomberReviveListener listener = new BomberReviveListener(
+                _ -> explodeBar,
+                () -> {
+                    supplierCalls.incrementAndGet();
+                    return tntBlock;
+                },
+                _ -> {},
+                () -> roundEndChecked.set(true)
+        );
 
         listener.accept(new BomberRequireSpawnEvent(player, explodeBar));
         env.tick();
 
-        assertEquals(Block.AIR, instance.getBlock(removedBlock));
-        assertEquals(removedBlock.add(0.5, 0, 0.5), player.getPosition().withView(0f, 0f));
+        assertEquals(1, supplierCalls.get(), "A respawn must only consume one TNT");
+        assertEquals(Block.AIR, instance.getBlock(tntBlock));
+        assertEquals(tntBlock.add(0.5, 0, 0.5), player.getPosition().withView(0f, 0f));
         assertEquals(DisguiseState.TNT_BLOCK, ((TamiasPlayer) player).getDisguiseState());
+        assertFalse(roundEndChecked.get());
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testBomberBecomesSpectatorWithoutFreeTnt(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player player = env.createPlayer(instance, new Pos(0, 40, 0));
+        player.setTag(Tags.TEAM_KEY, GameConfig.BOMBER_KEY.asString());
+
+        AtomicBoolean staminaRemoved = new AtomicBoolean();
+        AtomicBoolean roundEndChecked = new AtomicBoolean();
+        ExplodeBar explodeBar = (ExplodeBar) StaminaFactory.createExplodeBar(player);
+        BomberReviveListener listener = new BomberReviveListener(
+                _ -> explodeBar,
+                () -> null,
+                _ -> staminaRemoved.set(true),
+                () -> roundEndChecked.set(true)
+        );
+
+        BomberRequireSpawnEvent event = new BomberRequireSpawnEvent(player, explodeBar);
+        listener.accept(event);
+
+        assertTrue(event.isCancelled());
+        assertTrue(SpectatorHelper.isSpectator(player));
+        assertTrue(staminaRemoved.get());
+        assertTrue(roundEndChecked.get());
 
         env.destroyInstance(instance, true);
     }

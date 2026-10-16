@@ -195,14 +195,25 @@ public class Tamias implements ListenerHandling {
         listenerMap.put(RoundEndEvent.class, new RoundEndListener(this.teamService::getTeams, this.staminaService::cleanUp));
         GameMapProvider gameMapProvider = (GameMapProvider) this.mapProvider;
 
-        Supplier<Pos> randomPos = () -> Pos.ZERO;//gameMapProvider.getGameArea()::getRandomPosition;
+        // Every dropped TNT is a respawn ticket for the bomber team, null means no TNT is left
+        Supplier<Pos> randomPos = () -> gameMapProvider.getGameArea().getRandomPosition();
         listenerMap.put(PlayerUseItemEvent.class, new PlayerInteractItemListener(staminaService::getStaminaBar));
-        listenerMap.put(BomberRequireSpawnEvent.class, new BomberReviveListener(this.staminaService::getStaminaBar, randomPos));
+        listenerMap.put(BomberRequireSpawnEvent.class, new BomberReviveListener(
+                this.staminaService::getStaminaBar,
+                randomPos,
+                player -> this.staminaService.removeStaminaBar(player.getUuid()),
+                () -> RoundConditions.checkRoundEnd(this.phaseSeries, this.teamService)
+        ));
         listenerMap.put(BomberExplodeEvent.class, new BomberExplodeListener(
                 player -> TeamHelper.switchToTNTTeam(this.teamService, player),
                 () -> RoundConditions.checkRoundEnd(this.phaseSeries, this.teamService)
         ));
-        listenerMap.put(RoleToBomberChangeEvent.class, new RoleToBomberChangeListener(this.teamService, this.staminaService, randomPos));
+        listenerMap.put(RoleToBomberChangeEvent.class, new RoleToBomberChangeListener(
+                this.teamService,
+                this.staminaService,
+                randomPos,
+                () -> RoundConditions.checkRoundEnd(this.phaseSeries, this.teamService)
+        ));
         listenerMap.put(ProjectileCollideWithBlockEvent.class, new ProjectileBlockListener());
         listenerMap.put(ProjectileCollideWithEntityEvent.class, new ProjectileEntityListener(staminaService::getStaminaBar));
         return listenerMap;
