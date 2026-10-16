@@ -38,6 +38,7 @@ public final class PrePlayingPhase extends TimedPhase {
 
     @Override
     public void onStart() {
+        this.setCurrentTicks(5);
         super.onStart();
         TeamHelper.allocateTeams(this.teamService);
     }

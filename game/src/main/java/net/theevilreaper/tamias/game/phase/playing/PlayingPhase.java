@@ -41,6 +41,7 @@ public final class PlayingPhase extends TimedPhase {
         super("GamePhase", ChronoUnit.SECONDS, 1);
         this.timeUpdater = timeUpdater;
         this.startGameLogic = startGameLogic;
+        this.setCurrentTicks(PLAYING_TIME);
         this.setTickDirection(TickDirection.DOWN);
 
         for (Map.Entry<Class<? extends Event>, Consumer<? extends Event>> entrySet : gameListener.get().entrySet()) {
