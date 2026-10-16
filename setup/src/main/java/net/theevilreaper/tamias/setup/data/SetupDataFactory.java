@@ -26,7 +26,7 @@ public abstract class SetupDataFactory {
     @Contract(pure = true, value = "_, _, _ -> new")
     public static InstanceSetupData create(Player player, MapEntry mapEntry, boolean lobbyMode) {
         final UUID uuid = player.getUuid();
-        return lobbyMode ? new LobbyData(uuid, mapEntry) : new GameData(uuid, mapEntry);
+        return lobbyMode ? new LobbyData(player, mapEntry) : new GameData(player, mapEntry);
     }
 
     private SetupDataFactory() {

@@ -24,15 +24,15 @@ public final class LobbyData extends InstanceSetupData {
     private final PersonalInventoryBuilder viewInventory;
     private BaseMapBuilder mapBuilder;
 
-    public LobbyData(UUID uuid, MapEntry mapEntry) {
-        super(uuid, mapEntry, BossBar.Color.GREEN);
+    /**
+     * Constructs a new LobbyData instance.
+     *
+     * @param player   who owns the setup
+     * @param mapEntry the map entry associated with this game data
+     */
+    public LobbyData(Player player, MapEntry mapEntry) {
+        super(player, mapEntry, BossBar.Color.GREEN);
         this.loadData();
-        Player player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(uuid);
-
-        if (player == null) {
-            throw new IllegalArgumentException("Player with UUID " + uuid + " is not online.");
-        }
-
         this.viewInventory = new GeneralMapDataInventory(player, this.mapBuilder);
     }
 

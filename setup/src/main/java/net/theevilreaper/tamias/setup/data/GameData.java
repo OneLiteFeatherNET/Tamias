@@ -33,17 +33,12 @@ public class GameData extends InstanceSetupData {
     /**
      * Constructs a new GameData instance.
      *
-     * @param uuid       the UUID of the player
-     * @param mapEntry   the map entry associated with this game data
+     * @param player   who owns the setup
+     * @param mapEntry the map entry associated with this game data
      */
-    public GameData(UUID uuid, MapEntry mapEntry) {
-        super(uuid, mapEntry, BossBar.Color.RED);
-        Player player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(uuid);
+    public GameData(Player player, MapEntry mapEntry) {
+        super(player, mapEntry, BossBar.Color.RED);
         this.loadData();
-        if (player == null) {
-            throw new IllegalArgumentException("Player with UUID " + uuid + " is not online.");
-        }
-
         this.inventory = new GeneralMapDataInventory(player, this.gameMapBuilder);
         this.gameMapDataInventory = new GameMapDataInventory(player, this.gameMapBuilder);
         this.gameAreaDataInventory = new GameAreaDataInventory(player, this.gameMapBuilder);
@@ -114,7 +109,8 @@ public class GameData extends InstanceSetupData {
                 this.gameMapBuilder.areaUpperCorner(new Vec(pos.blockX(), pos.blockY() - 1, pos.blockZ()));
                 triggerUpdate(InventoryTarget.AREA);
             }
-            default -> {}
+            default -> {
+            }
         }
     }
 
@@ -204,7 +200,8 @@ public class GameData extends InstanceSetupData {
                     triggerUpdate(InventoryTarget.AREA);
                 }
             }
-            default -> {}
+            default -> {
+            }
         }
     }
 
