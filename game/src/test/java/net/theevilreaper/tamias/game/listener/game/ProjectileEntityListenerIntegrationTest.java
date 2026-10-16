@@ -69,6 +69,43 @@ class ProjectileEntityListenerIntegrationTest extends TamiasPlayerTestBase {
     }
 
     @Test
+    void testHitOnRegeneratingBomberDoesNotCount(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        instance.setExplosionSupplier(new ExplosionCreator());
+        Player shooter = env.createPlayer(instance);
+        Player bomber = env.createPlayer(instance);
+        bomber.setTag(Tags.TEAM_KEY, GameConfig.BOMBER_KEY.asString());
+
+        StaminaBar explodeBar = StaminaFactory.createExplodeBar(bomber);
+        explodeBar.start();
+        ProjectileEntityListener listener = new ProjectileEntityListener(_ -> explodeBar);
+        listener.accept(createHit(shooter, bomber));
+
+        listener.accept(createHit(shooter, bomber));
+
+        assertEquals(1, ((TamiasPlayer) shooter).getHits());
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testHitOnNotStartedBomberDoesNotCount(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player shooter = env.createPlayer(instance);
+        Player bomber = env.createPlayer(instance);
+        bomber.setTag(Tags.TEAM_KEY, GameConfig.BOMBER_KEY.asString());
+
+        StaminaBar explodeBar = StaminaFactory.createExplodeBar(bomber);
+        ProjectileEntityListener listener = new ProjectileEntityListener(_ -> explodeBar);
+
+        listener.accept(createHit(shooter, bomber));
+
+        assertEquals(0, ((TamiasPlayer) shooter).getHits());
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
     void testEggHitIgnoresSurvivor(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
         Player shooter = env.createPlayer(instance);

@@ -41,9 +41,9 @@ public final class ProjectileEntityListener implements Consumer<ProjectileCollid
         if (!GameConfig.BOMBER_KEY.asString().equals(target.getTag(Tags.TEAM_KEY))) return;
         if (!(staminaMapper.apply(target.getUuid()) instanceof ExplodeBar explodeBar)) return;
 
+        if (!explodeBar.explode()) return;
         if (event.getEntity() instanceof AbstractProjectile projectile && projectile.getShooter() instanceof TamiasPlayer shooter) {
             shooter.addHit();
         }
-        explodeBar.explode();
     }
 }
