@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -49,6 +50,7 @@ public class TNTPlacement extends AreaBasePlacement<Vec> {
     private final Set<Task> pendingTasks;
     private final Set<Entity> fallingEntities;
     private Predicate<Point> groundCheck;
+    private CompletableFuture<Void> landed;
 
     /**
      * Constructs a TNTPlacement instance.
@@ -75,6 +77,7 @@ public class TNTPlacement extends AreaBasePlacement<Vec> {
         this.pendingTasks = ConcurrentHashMap.newKeySet();
         this.fallingEntities = ConcurrentHashMap.newKeySet();
         this.groundCheck = _ -> true;
+        this.landed = CompletableFuture.completedFuture(null);
     }
 
     /**
@@ -109,11 +112,13 @@ public class TNTPlacement extends AreaBasePlacement<Vec> {
     @Override
     public void place(GroundData groundData) {
         if (!tryStart()) return;
+        this.landed = new CompletableFuture<>();
         List<TntGroup> queue = new ArrayList<>(this.groups);
         this.buildTask = MinecraftServer.getSchedulerManager().buildTask(() -> {
             if (queue.isEmpty()) {
                 // Only the queue is done, the pending landings must still run
                 super.stop();
+                completeIfLanded();
                 return;
             }
             Iterator<TntGroup> iterator = queue.iterator();
@@ -137,6 +142,25 @@ public class TNTPlacement extends AreaBasePlacement<Vec> {
         this.pendingTasks.clear();
         this.fallingEntities.forEach(Entity::remove);
         this.fallingEntities.clear();
+    }
+
+    /**
+     * Returns a future which completes once every TNT block of the current run has landed.
+     * It doesn't complete when the run is stopped before.
+     *
+     * @return the future of the current run, a completed one if no run was started
+     */
+    public CompletableFuture<Void> landed() {
+        return this.landed;
+    }
+
+    /**
+     * Completes the future of the current run when all groups are dropped and no TNT block is falling or waiting
+     * to pop up anymore.
+     */
+    private void completeIfLanded() {
+        if (this.buildTask != null || !this.pendingTasks.isEmpty()) return;
+        this.landed.complete(null);
     }
 
     private boolean isGroundReady(TntGroup group) {
@@ -194,6 +218,7 @@ public class TNTPlacement extends AreaBasePlacement<Vec> {
         task[0] = MinecraftServer.getSchedulerManager().buildTask(() -> {
             this.pendingTasks.remove(task[0]);
             runnable.run();
+            completeIfLanded();
         }).delay(TaskSchedule.tick(delay)).schedule();
         this.pendingTasks.add(task[0]);
     }

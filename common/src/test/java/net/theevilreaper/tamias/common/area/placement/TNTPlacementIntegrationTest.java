@@ -11,9 +11,11 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static net.theevilreaper.tamias.BlockAssertions.assertBlock;
@@ -104,6 +106,44 @@ class TNTPlacementIntegrationTest {
         assertBlock(instance, List.of(center, members.get(0), members.get(1)), Block.TNT);
         assertFalse(placement.isRunning());
 
+        env.destroyInstance(instance);
+    }
+
+    @Test
+    void testLandedCompletesOnceEveryTntHasLanded(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        instance.loadChunk(Vec.ZERO).join();
+
+        Vec center = new Vec(5, 50, 5);
+        List<Vec> members = List.of(new Vec(6, 50, 5), new Vec(5, 50, 6));
+        List<Vec> landed = new ArrayList<>();
+
+        TNTPlacement placement = new TNTPlacement(instance, landed::add);
+        placement.updateGroups(List.of(new TntGroup(center, members)), _ -> true);
+        placement.place(GroundDataRegistry.DEFAULT_SPAWN_DATA);
+        CompletableFuture<Void> landedFuture = placement.landed();
+
+        // The queue is empty after the first tick, but the group is still falling
+        env.tick();
+        env.tick();
+        assertFalse(landedFuture.isDone());
+
+        env.tickWhile(() -> !landedFuture.isDone(), Duration.ofSeconds(5));
+
+        assertEquals(1 + members.size(), landed.size());
+        env.destroyInstance(instance);
+    }
+
+    @Test
+    void testLandedCompletesWithoutGroups(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        TNTPlacement placement = new TNTPlacement(instance, _ -> {});
+        placement.updateGroups(List.of(), _ -> true);
+        placement.place(GroundDataRegistry.DEFAULT_SPAWN_DATA);
+
+        env.tickWhile(() -> !placement.landed().isDone(), Duration.ofSeconds(5));
+
+        assertTrue(placement.landed().isDone());
         env.destroyInstance(instance);
     }
 

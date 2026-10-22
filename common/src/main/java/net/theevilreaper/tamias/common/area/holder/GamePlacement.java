@@ -198,9 +198,10 @@ public final class GamePlacement implements Placement {
      * ticket once it has landed.
      *
      * @param countSupplier provides the amount of TNT blocks to drop
+     * @return a future which completes once every TNT block has landed
      */
-    public void dropTnt(IntSupplier countSupplier) {
-        if (this.tntCandidates.isEmpty()) return;
+    public CompletableFuture<Void> dropTnt(IntSupplier countSupplier) {
+        if (this.tntCandidates.isEmpty()) return CompletableFuture.completedFuture(null);
 
         SweepAreaPlacement pattern = this.activePattern;
         List<TntGroup> groups = new ArrayList<>(TntLayout.plan(
@@ -216,6 +217,7 @@ public final class GamePlacement implements Placement {
         this.tntPlacement.place(GroundDataRegistry.DEFAULT_SPAWN_DATA);
         LOGGER.info("Dropping {} TNT blocks in {} groups onto the game area",
                 groups.stream().mapToInt(group -> group.members().size() + 1).sum(), groups.size());
+        return this.tntPlacement.landed();
     }
 
     /**
