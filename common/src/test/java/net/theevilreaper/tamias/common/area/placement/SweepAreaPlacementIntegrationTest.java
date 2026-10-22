@@ -29,7 +29,7 @@ class SweepAreaPlacementIntegrationTest {
         List<Vec> positions = List.of(groundPos, specialPos);
         List<Vec> specialPositions = List.of(specialPos);
 
-        SweepAreaPlacement placement = new SweepAreaPlacement(instance, positions, specialPositions, GroundFillPattern.CIRCLE.comparator());
+        SweepAreaPlacement placement = new SweepAreaPlacement(instance, positions, specialPositions, GroundFillPattern.CIRCLE.comparator(Vec.ZERO));
         assertFalse(placement.isRunning());
 
         GroundData groundData = new GroundData(Block.GRASS_BLOCK, List.of(Block.GOLD_BLOCK));
@@ -59,7 +59,7 @@ class SweepAreaPlacementIntegrationTest {
         Instance instance = env.createFlatInstance();
         Vec pos = new Vec(1, 0, 1);
 
-        SweepAreaPlacement placement = new SweepAreaPlacement(instance, List.of(pos), List.of(), GroundFillPattern.LINE.comparator());
+        SweepAreaPlacement placement = new SweepAreaPlacement(instance, List.of(pos), List.of(), GroundFillPattern.LINE.comparator(Vec.ZERO));
         GroundData groundData = new GroundData(Block.DIRT, null);
 
         placement.place(groundData);

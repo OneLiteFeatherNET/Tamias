@@ -14,6 +14,7 @@ import net.theevilreaper.tamias.common.area.placement.TntGroup;
 import net.theevilreaper.tamias.common.area.placement.TntLayout;
 import net.theevilreaper.tamias.common.ground.GroundData;
 import net.theevilreaper.tamias.common.ground.GroundDataRegistry;
+import net.theevilreaper.tamias.common.map.layer.AreaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,14 +48,26 @@ public final class GamePlacement implements Placement {
         this.tntCandidates = List.of();
 
         List<Vec> initialPositions = area.getPositions().stream().map(Vec.class::cast).toList();
+        Vec center = getCenter(area);
         this.groundPatterns = new EnumMap<>(GroundFillPattern.class);
         for (GroundFillPattern pattern : GroundFillPattern.values()) {
-            this.groundPatterns.put(pattern, new SweepAreaPlacement(instance, initialPositions, List.of(), pattern.comparator()));
+            this.groundPatterns.put(pattern, new SweepAreaPlacement(instance, initialPositions, List.of(), pattern.comparator(center)));
         }
         this.activePattern = this.groundPatterns.get(GroundFillPattern.values()[0]);
     }
 
-    @Override
+    /**
+     * Returns the center between the two corners of the given area.
+     *
+     * @param area the area to get the center from
+     * @return the center of the area
+     */
+    private static Vec getCenter(GameArea area) {
+        AreaData areaData = area.getGameAreaData();
+        return areaData.lowerCorner().add(areaData.upperCorner()).div(2);
+    }
+
+        @Override
     public void clear() {
         this.tntPlacement.stop();
         clearSet(this.tntPlacement.getPlacedPositions());

@@ -10,10 +10,16 @@ public final class Helper {
         return pitch >= -50 && pitch <= 50;
     }
 
-    public static <T extends Point> Comparator<T> getComparator() {
+    /**
+     * Returns a comparator which orders positions by their horizontal distance to the given center.
+     *
+     * @param center the center to measure the distance from
+     * @return the comparator
+     */
+    public static <T extends Point> Comparator<T> getComparator(Point center) {
         return Comparator.comparingDouble(pos -> {
-            var x = pos.x();
-            var z = pos.z();
+            var x = pos.x() - center.x();
+            var z = pos.z() - center.z();
             return x * x + z * z;
         });
     }
