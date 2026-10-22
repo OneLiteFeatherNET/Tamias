@@ -19,9 +19,9 @@ import java.util.function.Function;
 public enum GroundFillPattern {
 
     /**
-     * Fills outward from the world origin, growing like a ring.
+     * Fills outward from the center of the area, growing like a ring.
      */
-    CIRCLE(_ -> Helper.getComparator()),
+    CIRCLE(Helper::getComparator),
 
     /**
      * Fills row by row, alternating direction each row (boustrophedon/"lawn mower" pattern).

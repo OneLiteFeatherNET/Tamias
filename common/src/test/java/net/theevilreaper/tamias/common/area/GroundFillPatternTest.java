@@ -25,4 +25,27 @@ class GroundFillPatternTest {
 
         assertEquals(expected, shuffled);
     }
+
+    @Test
+    void testCirclePatternGrowsFromTheGivenCenter() {
+        Vec center = new Vec(100, 0, 100);
+        List<Vec> positions = new ArrayList<>(List.of(
+                new Vec(103, 0, 100),
+                new Vec(100, 0, 100),
+                new Vec(98, 0, 100),
+                new Vec(101, 0, 101)
+        ));
+
+        positions.sort(GroundFillPattern.CIRCLE.comparator(center));
+
+        assertEquals(
+                List.of(
+                        new Vec(100, 0, 100),
+                        new Vec(101, 0, 101),
+                        new Vec(98, 0, 100),
+                        new Vec(103, 0, 100)
+                ),
+                positions
+        );
+    }
 }
