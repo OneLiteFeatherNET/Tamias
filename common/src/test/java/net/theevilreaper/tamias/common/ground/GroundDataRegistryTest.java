@@ -34,4 +34,16 @@ class GroundDataRegistryTest {
         assert GroundDataRegistry.instance().getGroundData().size() > 4;
         assertEquals(5, GroundDataRegistry.instance().getGroundData().size());
     }
+
+    @Test
+    void testGetRandomDataKeepsTheOrderOfTheRegistry() {
+        GroundDataRegistry registry = new TamiasGroundDataRegistry();
+        List<GroundData> order = List.copyOf(registry.getGroundData());
+
+        for (int i = 0; i < 20; i++) {
+            registry.getRandomData();
+        }
+
+        assertEquals(order, registry.getGroundData());
+    }
 }

@@ -32,7 +32,6 @@ public final class TamiasGroundDataRegistry implements GroundDataRegistry {
 
     @Override
     public GroundData getRandomData() {
-        Collections.shuffle(this.groundData);
         int randomId = ThreadLocalRandom.current().nextInt(0, this.groundData.size());
         return this.groundData.get(randomId);
     }
