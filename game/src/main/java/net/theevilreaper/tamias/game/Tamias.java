@@ -40,6 +40,7 @@ import net.theevilreaper.tamias.common.event.AreaSpawnTriggerEvent;
 import net.theevilreaper.tamias.common.event.GameAreaChunksReadyEvent;
 import net.theevilreaper.tamias.common.event.SpawnCleanupEvent;
 import net.theevilreaper.tamias.common.event.GameCleanupEvent;
+import net.theevilreaper.tamias.common.area.GameAreaHelper;
 import net.theevilreaper.tamias.common.ground.GroundData;
 import net.theevilreaper.tamias.common.ground.GroundDataRegistry;
 import net.theevilreaper.tamias.common.map.event.MapPrepareEvent;
@@ -90,6 +91,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 import java.util.function.Supplier;
@@ -174,7 +176,9 @@ public class Tamias implements ListenerHandling {
             GroundData randomData = GroundDataRegistry.instance().getRandomData();
             this.mapProvider.getGamePlacement().triggerPlacement(randomData);
             return this::resetPlayerBuildProgress;
-        }, this.mapProvider.getGamePlacement()));
+        }, () -> this.mapProvider.getGamePlacement().dropTnt(
+                () -> ThreadLocalRandom.current().nextInt(GameAreaHelper.MIN_TNT_AMOUNT, GameAreaHelper.MAX_TNT_AMOUNT + 1)
+        )));
 
         gameSeries.add(new PrePlayingPhase(this.teamService));
 
