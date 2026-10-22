@@ -173,6 +173,43 @@ class GamePlacementIntegrationTest {
     }
 
     @Test
+    void testClearRemovesGroundAndTnt(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        GameArea gameArea = new GameArea(
+                AreaData.builder()
+                        .lowerCorner(Vec.ZERO)
+                        .upperCorner(new Vec(3, 0, 3))
+                        .facing(Direction.NORTH)
+                        .build()
+        );
+        gameArea.calculatePositions();
+        for (Point position : gameArea.getPositions()) {
+            prepareGround(instance, position);
+        }
+
+        GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
+        gamePlacement.flatten();
+        gamePlacement.triggerPlacement(GroundDataRegistry.instance().getRandomData());
+        env.tickWhile(gamePlacement::isRunning, Duration.ofSeconds(10));
+        gamePlacement.dropTnt(() -> 4);
+        for (int i = 0; i < 40; i++) {
+            env.tick();
+        }
+        Set<Vec> tntPositions = Set.copyOf(gameArea.getTntPositions());
+        assertEquals(4, tntPositions.size());
+
+        gamePlacement.clear();
+
+        assertBlock(instance, Block.AIR, gameArea.getPositions());
+        for (Vec tntPosition : tntPositions) {
+            assertEquals(Block.AIR, instance.getBlock(tntPosition));
+        }
+        assertTrue(gameArea.getTntPositions().isEmpty());
+
+        env.destroyInstance(instance);
+    }
+
+    @Test
     void testDropTntPlacesTheRequestedAmount(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
         GameArea gameArea = createArea(9);

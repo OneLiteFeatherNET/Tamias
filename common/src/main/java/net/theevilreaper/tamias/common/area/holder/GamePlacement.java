@@ -57,19 +57,15 @@ public final class GamePlacement implements Placement {
     @Override
     public void clear() {
         this.tntPlacement.stop();
-        clearSet(this.tntPlacement.getPlacedPositions());
-        for (SweepAreaPlacement pattern : this.groundPatterns.values()) {
-            pattern.stop();
-            clearSet(pattern.getPlacedPositions());
-        }
-        clearSet(this.area.getPositions());
-        clearSet(this.area.getTntPositions());
-        clearSet(this.area.getSpecialPositions());
-        this.area.reset();
-    }
+        this.groundPatterns.values().forEach(SweepAreaPlacement::stop);
 
-    private <T extends Point> void clearSet(Collection<T> positions) {
-        for (T position : positions) {
+        // The placed ground positions and the special positions are part of the area positions
+        Set<Point> positions = new HashSet<>(this.area.getPositions());
+        positions.addAll(this.tntPlacement.getPlacedPositions());
+        positions.addAll(this.area.getTntPositions());
+        this.area.reset();
+
+        for (Point position : positions) {
             instance.setBlock(position, Block.AIR);
         }
     }
