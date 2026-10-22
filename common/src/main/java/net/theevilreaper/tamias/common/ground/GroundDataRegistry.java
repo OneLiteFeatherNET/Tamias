@@ -36,6 +36,7 @@ public sealed interface GroundDataRegistry permits TamiasGroundDataRegistry {
 
     /**
      * Gets a random {@link GroundData} instance from the registry.
+     * The data of the previous call is skipped if the registry contains other data.
      *
      * @return the random data
      */

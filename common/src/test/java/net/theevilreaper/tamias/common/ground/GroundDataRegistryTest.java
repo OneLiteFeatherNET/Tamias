@@ -46,4 +46,16 @@ class GroundDataRegistryTest {
 
         assertEquals(order, registry.getGroundData());
     }
+
+    @Test
+    void testGetRandomDataNeverRepeatsTheLastData() {
+        GroundDataRegistry registry = new TamiasGroundDataRegistry();
+        GroundData last = registry.getRandomData();
+
+        for (int i = 0; i < 100; i++) {
+            GroundData next = registry.getRandomData();
+            assertNotSame(last, next);
+            last = next;
+        }
+    }
 }
