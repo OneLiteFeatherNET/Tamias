@@ -20,6 +20,7 @@ import java.time.Duration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -166,8 +167,47 @@ class GamePlacementIntegrationTest {
         assertEquals(Block.STONE, instance.getBlock(obstructedPosition.add(0, 1, 0)));
         assertEquals(Block.AIR, instance.getBlock(overhangPosition.add(0, 1, 0)), "A structure above blocks the drop path");
 
-        gamePlacement.clear();
+        CompletableFuture<Void> clearing = gamePlacement.clearAsync();
+        env.tickWhile(() -> !clearing.isDone(), Duration.ofSeconds(5));
         assertEquals(Block.AIR, instance.getBlock(clearPosition.add(0, 1, 0)));
+
+        env.destroyInstance(instance);
+    }
+
+    @Test
+    void testClearRemovesGroundAndTnt(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        GameArea gameArea = new GameArea(
+                AreaData.builder()
+                        .lowerCorner(Vec.ZERO)
+                        .upperCorner(new Vec(3, 0, 3))
+                        .facing(Direction.NORTH)
+                        .build()
+        );
+        gameArea.calculatePositions();
+        for (Point position : gameArea.getPositions()) {
+            prepareGround(instance, position);
+        }
+
+        GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
+        gamePlacement.flatten();
+        gamePlacement.triggerPlacement(GroundDataRegistry.instance().getRandomData());
+        env.tickWhile(gamePlacement::isRunning, Duration.ofSeconds(10));
+        gamePlacement.dropTnt(() -> 4);
+        for (int i = 0; i < 40; i++) {
+            env.tick();
+        }
+        Set<Vec> tntPositions = Set.copyOf(gameArea.getTntPositions());
+        assertEquals(4, tntPositions.size());
+
+        CompletableFuture<Void> clearing = gamePlacement.clearAsync();
+        env.tickWhile(() -> !clearing.isDone(), Duration.ofSeconds(5));
+
+        assertBlock(instance, Block.AIR, gameArea.getPositions());
+        for (Vec tntPosition : tntPositions) {
+            assertEquals(Block.AIR, instance.getBlock(tntPosition));
+        }
+        assertTrue(gameArea.getTntPositions().isEmpty());
 
         env.destroyInstance(instance);
     }

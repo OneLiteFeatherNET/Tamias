@@ -4,6 +4,7 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.instance.batch.AbsoluteBlockBatch;
 import net.minestom.server.instance.block.Block;
 import net.theevilreaper.tamias.common.area.GameArea;
 import net.theevilreaper.tamias.common.area.GameAreaHelper;
@@ -69,22 +70,33 @@ public final class GamePlacement implements Placement {
 
         @Override
     public void clear() {
-        this.tntPlacement.stop();
-        clearSet(this.tntPlacement.getPlacedPositions());
-        for (SweepAreaPlacement pattern : this.groundPatterns.values()) {
-            pattern.stop();
-            clearSet(pattern.getPlacedPositions());
-        }
-        clearSet(this.area.getPositions());
-        clearSet(this.area.getTntPositions());
-        clearSet(this.area.getSpecialPositions());
-        this.area.reset();
+        this.clearAsync();
     }
 
-    private <T extends Point> void clearSet(Collection<T> positions) {
-        for (T position : positions) {
-            instance.setBlock(position, Block.AIR);
+    /**
+     * Stops all running placements and removes the ground and the TNT from the instance.
+     * Every position is only cleared once and all blocks are set with a single {@link AbsoluteBlockBatch}, so the
+     * players receive one update per chunk instead of one per block.
+     *
+     * @return a future which completes in the instance tick after all blocks are removed
+     */
+    public CompletableFuture<Void> clearAsync() {
+        this.tntPlacement.stop();
+        this.groundPatterns.values().forEach(SweepAreaPlacement::stop);
+
+        // The placed ground positions and the special positions are part of the area positions
+        Set<Point> positions = new HashSet<>(this.area.getPositions());
+        positions.addAll(this.tntPlacement.getPlacedPositions());
+        positions.addAll(this.area.getTntPositions());
+        this.area.reset();
+
+        AbsoluteBlockBatch batch = new AbsoluteBlockBatch();
+        for (Point position : positions) {
+            batch.setBlock(position, Block.AIR);
         }
+        CompletableFuture<Void> future = new CompletableFuture<>();
+        batch.apply(this.instance, _ -> future.complete(null));
+        return future;
     }
 
     @Override

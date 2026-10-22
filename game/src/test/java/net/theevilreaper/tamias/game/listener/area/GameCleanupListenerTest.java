@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.time.Duration;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -42,6 +43,9 @@ class GameCleanupListenerTest {
 
         GameCleanupListener listener = new GameCleanupListener(gamePlacement);
         listener.accept(new GameCleanupEvent());
+        // The blocks are cleared asynchronously by a block batch
+        Vec lastPosition = positions.getLast();
+        env.tickWhile(() -> instance.getBlock(lastPosition) != Block.AIR, Duration.ofSeconds(5));
 
         for (Vec position : positions) {
             assertEquals(Block.AIR, instance.getBlock(position));
