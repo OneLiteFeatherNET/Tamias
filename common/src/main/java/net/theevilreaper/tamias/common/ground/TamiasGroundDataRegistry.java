@@ -1,6 +1,7 @@
 package net.theevilreaper.tamias.common.ground;
 
 import net.minestom.server.instance.block.Block;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public final class TamiasGroundDataRegistry implements GroundDataRegistry {
 
     private final List<GroundData> groundData;
+    private @Nullable GroundData lastData;
 
     TamiasGroundDataRegistry() {
         this.groundData = new ArrayList<>();
@@ -32,9 +34,14 @@ public final class TamiasGroundDataRegistry implements GroundDataRegistry {
 
     @Override
     public GroundData getRandomData() {
-        Collections.shuffle(this.groundData);
-        int randomId = ThreadLocalRandom.current().nextInt(0, this.groundData.size());
-        return this.groundData.get(randomId);
+        List<GroundData> candidates = new ArrayList<>(this.groundData);
+        // The same ground shouldn't be used twice in a row, if there is another one
+        if (candidates.size() > 1) {
+            candidates.remove(this.lastData);
+        }
+        int randomId = ThreadLocalRandom.current().nextInt(0, candidates.size());
+        this.lastData = candidates.get(randomId);
+        return this.lastData;
     }
 
     @Override
