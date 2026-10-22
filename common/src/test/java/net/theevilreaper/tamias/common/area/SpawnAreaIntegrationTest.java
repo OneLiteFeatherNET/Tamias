@@ -2,6 +2,7 @@ package net.theevilreaper.tamias.common.area;
 
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
@@ -21,7 +22,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -82,6 +85,28 @@ class SpawnAreaIntegrationTest {
 
         assertEquals(maxPositions, currentPositions);
         env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testTeleportSwitchesEveryPlayerToTheInstance(@NotNull Env env) {
+        int maxPositions = 3;
+        Instance lobby = env.createFlatInstance();
+        Instance game = env.createFlatInstance();
+        List<Player> players = new ArrayList<>();
+        for (int i = 0; i < maxPositions; i++) {
+            players.add(env.createPlayer(lobby));
+        }
+        SpawnArea spawnArea = new SpawnArea(new SpawnLayer(Pos.ZERO, Direction.NORTH), maxPositions);
+        List<Player> calledBack = new ArrayList<>();
+
+        spawnArea.teleport(game, new ArrayList<>(players), () -> true, calledBack::add);
+
+        for (Player player : players) {
+            assertEquals(game, player.getInstance());
+        }
+        assertEquals(maxPositions, calledBack.size());
+        env.destroyInstance(lobby, true);
+        env.destroyInstance(game, true);
     }
 
     @Test
