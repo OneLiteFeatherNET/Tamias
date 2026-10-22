@@ -21,7 +21,7 @@ class GroundFillPatternTest {
 
         List<Vec> shuffled = new ArrayList<>(expected);
         Collections.shuffle(shuffled);
-        shuffled.sort(GroundFillPattern.LINE.comparator());
+        shuffled.sort(GroundFillPattern.LINE.comparator(Vec.ZERO));
 
         assertEquals(expected, shuffled);
     }

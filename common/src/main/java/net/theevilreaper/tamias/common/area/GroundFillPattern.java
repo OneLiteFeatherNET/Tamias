@@ -1,9 +1,11 @@
 package net.theevilreaper.tamias.common.area;
 
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.theevilreaper.tamias.common.util.Helper;
 
 import java.util.Comparator;
+import java.util.function.Function;
 
 /**
  * Defines the visual fill order a ground placement can sweep the area's positions in.
@@ -19,26 +21,27 @@ public enum GroundFillPattern {
     /**
      * Fills outward from the world origin, growing like a ring.
      */
-    CIRCLE(Helper.getComparator()),
+    CIRCLE(_ -> Helper.getComparator()),
 
     /**
      * Fills row by row, alternating direction each row (boustrophedon/"lawn mower" pattern).
      */
-    LINE(GroundFillPattern.snakeComparator());
+    LINE(_ -> GroundFillPattern.snakeComparator());
 
-    private final Comparator<Vec> comparator;
+    private final Function<Point, Comparator<Vec>> comparatorFactory;
 
-    GroundFillPattern(Comparator<Vec> comparator) {
-        this.comparator = comparator;
+    GroundFillPattern(Function<Point, Comparator<Vec>> comparatorFactory) {
+        this.comparatorFactory = comparatorFactory;
     }
 
     /**
      * Returns the fill-order comparator for this pattern.
      *
+     * @param center the center of the area, patterns which don't depend on it ignore it
      * @return the comparator positions should be sorted by before placing them
      */
-    public Comparator<Vec> comparator() {
-        return this.comparator;
+    public Comparator<Vec> comparator(Point center) {
+        return this.comparatorFactory.apply(center);
     }
 
     private static Comparator<Vec> snakeComparator() {
