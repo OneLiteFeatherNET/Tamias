@@ -80,11 +80,9 @@ public final class SpawnArea implements Area {
             Player player = players.get(i);
             if (switchInstance.getAsBoolean()) {
                 player.setInstance(instance, position).join();
-                if (callback == null) return;
-                callback.accept(player);
-                return;
+            } else {
+                player.teleport(position);
             }
-            player.teleport(position);
             if (callback != null) {
                 callback.accept(player);
             }
