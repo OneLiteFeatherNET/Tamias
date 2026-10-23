@@ -1,5 +1,6 @@
 package net.theevilreaper.tamias.game.team;
 
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.EntityType;
@@ -15,6 +16,7 @@ import net.theevilreaper.tamias.game.team.component.EntityComponent;
 import net.theevilreaper.tamias.game.team.component.ItemComponent;
 import net.theevilreaper.tamias.game.team.component.StaminaComponent;
 import net.theevilreaper.tamias.game.util.EntityHelper;
+import net.theevilreaper.tamias.game.util.GameMessages;
 import net.theevilreaper.tamias.game.util.Items;
 import net.theevilreaper.xerus.api.ColorData;
 import net.theevilreaper.xerus.api.component.team.ColorComponent;
@@ -147,6 +149,21 @@ public final class TeamHelper {
         Team survivorTeam = getTeam(teamService, GameConfig.SURVIVOR_KEY);
         if (!bomberTeam.isEmpty() || survivorTeam.getPlayers().size() < 2) return Optional.empty();
         return Players.getRandomPlayer(new ArrayList<>(survivorTeam.getPlayers()));
+    }
+
+    /**
+     * Converts a random survivor into a bomber when the last bomber left the round. The survivor is converted like
+     * a survivor who was blown up, so the new bomber also needs a free TNT to spawn on.
+     *
+     * @param teamService the team service providing teams
+     */
+    public static void replaceMissingBomber(TeamService teamService) {
+        chooseReplacementBomber(teamService).ifPresent(survivor -> {
+            // Announced before the conversion, so the survivor is still shown in the survivor color
+            Audience.audience(MinecraftServer.getConnectionManager().getOnlinePlayers())
+                    .sendMessage(GameMessages.getNewBomberMessage(survivor));
+            switchToTNTTeam(teamService, survivor);
+        });
     }
 
     /**
