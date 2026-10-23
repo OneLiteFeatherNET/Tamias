@@ -147,6 +147,8 @@ public final class LobbyPhase extends TimedPhase {
                 .count();
         if (remainingPlayers < this.phaseData.minPlayers()) {
             this.setPaused(true);
+            // The countdown restarts with the lobby time, otherwise the exp is calculated with the force start time
+            this.forceStarted = false;
             this.setCurrentTicks(this.phaseData.lobbyTime());
             setLevel();
             // A paused phase doesn't update, so the scoreboard would keep the time before the reset
