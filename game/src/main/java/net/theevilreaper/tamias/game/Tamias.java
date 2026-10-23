@@ -20,7 +20,6 @@ import net.theevilreaper.xerus.api.phase.CyclicPhaseSeries;
 import net.theevilreaper.xerus.api.phase.LinearPhaseSeries;
 import net.theevilreaper.xerus.api.phase.Phase;
 import net.theevilreaper.xerus.api.team.TeamService;
-import net.theevilreaper.xerus.api.team.event.MultiPlayerTeamEvent;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
@@ -67,7 +66,6 @@ import net.theevilreaper.tamias.game.listener.game.RoleToBomberChangeListener;
 import net.theevilreaper.tamias.game.listener.round.RoundEndListener;
 import net.theevilreaper.tamias.game.listener.round.RoundPrepareListener;
 import net.theevilreaper.tamias.game.listener.round.RoundStartListener;
-import net.theevilreaper.tamias.game.listener.team.TeamActionListener;
 import net.theevilreaper.tamias.game.map.GameMapProvider;
 import net.theevilreaper.tamias.game.phase.LobbyPhase;
 import net.theevilreaper.tamias.game.phase.GroundBuildPhase;
@@ -307,7 +305,6 @@ public class Tamias implements ListenerHandling {
                 )
         );
         node.addListener(PlayerChatEvent.class, new PlayerChatListener());
-        node.addListener(MultiPlayerTeamEvent.class, new TeamActionListener());
 
         node.addListener(MapPrepareEvent.class, new MapPrepareListener(this.mapProvider.getGamePlacement()));
         node.addListener(AreaSpawnTriggerEvent.class, new AreaSpawnListener(this.mapProvider.getSpawnPlacement()));
