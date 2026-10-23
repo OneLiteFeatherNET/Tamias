@@ -1,5 +1,6 @@
 package net.theevilreaper.tamias.game.listener;
 
+import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.theevilreaper.xerus.api.phase.Phase;
@@ -46,6 +47,8 @@ public final class PlayerSpawnListener implements Consumer<PlayerSpawnEvent> {
     public void accept(PlayerSpawnEvent event) {
         Player player = event.getPlayer();
         player.setDisplayName(Component.text(player.getUsername()));
+        // In survival the client predicts a block placement or tilling and never sends the item use to the server
+        player.setGameMode(GameMode.ADVENTURE);
 
         Phase phase = phaseSupplier.get();
 

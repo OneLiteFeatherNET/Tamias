@@ -55,6 +55,8 @@ class SpectatorHelperIntegrationTest extends TamiasPlayerTestBase {
         assertFalse(SpectatorHelper.isSpectator(player));
         assertFalse(player.isAllowFlying());
         assertFalse(player.isFlying());
+        // Adventure keeps the survivors from punching the TNT blocks to find a bomber
+        assertEquals(GameMode.ADVENTURE, player.getGameMode());
 
         env.destroyInstance(instance, true);
     }
