@@ -149,6 +149,8 @@ public final class LobbyPhase extends TimedPhase {
             this.setPaused(true);
             this.setCurrentTicks(this.phaseData.lobbyTime());
             setLevel();
+            // A paused phase doesn't update, so the scoreboard would keep the time before the reset
+            this.phaseData.timeUpdater().accept(getCurrentTicks());
         }
     }
 

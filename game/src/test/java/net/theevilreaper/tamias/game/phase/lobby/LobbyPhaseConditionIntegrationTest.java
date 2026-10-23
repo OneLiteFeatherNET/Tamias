@@ -76,6 +76,23 @@ class LobbyPhaseConditionIntegrationTest extends LobbyPhaseTestBase {
     }
 
     @Test
+    void testPhaseStopConditionUpdatesTheTime(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        List<Integer> times = new ArrayList<>();
+        LobbyPhase phase = new LobbyPhase(new LobbyPhaseData(times::add, 3, 2, LOBBY_PHASE_TIME));
+        Player leavingPlayer = env.createPlayer(instance);
+        env.createPlayer(instance);
+
+        phase.checkStartCondition();
+        phase.setCurrentTicks(LOBBY_PHASE_TIME - 10);
+        phase.checkStopCondition(leavingPlayer);
+
+        assertEquals(List.of(LOBBY_PHASE_TIME), times);
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
     void testPhaseKeepsRunningWithEnoughPlayers(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
         LobbyPhase phase = new LobbyPhase(new LobbyPhaseData(value -> {}, 3, 2, LOBBY_PHASE_TIME));
