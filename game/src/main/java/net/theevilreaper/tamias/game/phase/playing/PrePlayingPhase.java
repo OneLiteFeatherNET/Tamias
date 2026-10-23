@@ -51,6 +51,8 @@ public final class PrePlayingPhase extends TimedPhase {
 
     @Override
     protected void onFinish() {
+        // The phase is finished early when too few players are left, the game ends then and no roles are needed
+        if (getCurrentTicks() > getEndTicks()) return;
         // The roles are allocated at the end, otherwise the items and the names in the tab list reveal them too early
         TeamHelper.allocateTeams(this.teamService);
         this.teamService.getTeams().forEach(team -> {

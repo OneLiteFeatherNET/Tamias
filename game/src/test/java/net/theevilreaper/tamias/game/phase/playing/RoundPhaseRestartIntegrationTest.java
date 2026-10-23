@@ -1,7 +1,11 @@
 package net.theevilreaper.tamias.game.phase.playing;
 
+import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.testing.Env;
+import net.theevilreaper.tamias.common.util.Tags;
+import net.theevilreaper.tamias.game.player.DisguiseState;
+import net.theevilreaper.tamias.game.player.TamiasPlayer;
 import net.theevilreaper.tamias.game.player.TamiasPlayerTestBase;
 import net.theevilreaper.tamias.game.team.TeamHelper;
 import net.theevilreaper.xerus.api.phase.TimedPhase;
@@ -13,7 +17,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * The phases of a round are restarted by the {@link net.theevilreaper.xerus.api.phase.CyclicPhaseSeries} for each
@@ -35,6 +42,52 @@ class RoundPhaseRestartIntegrationTest extends TamiasPlayerTestBase {
 
         assertEquals(initialTicks, phase.getCurrentTicks());
         env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testPrePlayingPhaseAllocatesTeamsAfterTheCountdown(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        env.createPlayer(instance);
+        env.createPlayer(instance);
+        TeamService teamService = TeamService.of();
+        TeamHelper.loadTeams(2, teamService);
+
+        PrePlayingPhase phase = new PrePlayingPhase(teamService);
+        phase.start();
+        phase.setCurrentTicks(0);
+        phase.finish();
+
+        assertEquals(2, countTeamPlayers(teamService));
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testPrePlayingPhaseSkipsTheTeamAllocationWhenFinishedEarly(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player player = env.createPlayer(instance);
+        TeamService teamService = TeamService.of();
+        TeamHelper.loadTeams(2, teamService);
+
+        PrePlayingPhase phase = new PrePlayingPhase(teamService);
+        phase.start();
+        phase.finish();
+
+        assertEquals(0, countTeamPlayers(teamService));
+        assertFalse(player.hasTag(Tags.TEAM_KEY));
+        assertEquals(DisguiseState.NONE, ((TamiasPlayer) player).getDisguiseState());
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testPrePlayingPhaseFinishedEarlyWithoutPlayersDoesNotThrow() {
+        TeamService teamService = TeamService.of();
+        TeamHelper.loadTeams(2, teamService);
+
+        PrePlayingPhase phase = new PrePlayingPhase(teamService);
+        phase.start();
+
+        assertDoesNotThrow(phase::finish);
+        assertTrue(phase.isFinished());
     }
 
     @Test
@@ -65,6 +118,10 @@ class RoundPhaseRestartIntegrationTest extends TamiasPlayerTestBase {
         runAndRestart(phase);
 
         assertEquals(initialTicks, phase.getCurrentTicks());
+    }
+
+    private int countTeamPlayers(@NotNull TeamService teamService) {
+        return teamService.getTeams().stream().mapToInt(team -> team.getPlayers().size()).sum();
     }
 
     /**
