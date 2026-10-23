@@ -52,7 +52,7 @@ public final class SpectatorHelper {
         player.removeTag(Tags.SPECTATOR);
         player.setFlying(false);
         player.setAllowFlying(false);
-        player.setGameMode(GameMode.SURVIVAL);
+        player.setGameMode(GameMode.ADVENTURE);
     }
 
     /**

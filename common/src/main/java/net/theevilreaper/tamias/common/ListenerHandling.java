@@ -3,6 +3,7 @@ package net.theevilreaper.tamias.common;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockInteractEvent;
@@ -35,6 +36,7 @@ public interface ListenerHandling {
         eventNode.addListener(ItemDropEvent.class, CANCELLABLE_EVENT::accept);
         eventNode.addListener(PlayerSwapItemEvent.class, CANCELLABLE_EVENT::accept);
         eventNode.addListener(PlayerBlockInteractEvent.class, CANCELLABLE_EVENT::accept);
+        eventNode.addListener(InventoryPreClickEvent.class, CANCELLABLE_EVENT::accept);
     }
 
     /**

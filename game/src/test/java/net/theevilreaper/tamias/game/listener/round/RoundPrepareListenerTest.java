@@ -2,6 +2,7 @@ package net.theevilreaper.tamias.game.listener.round;
 
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.utils.Direction;
 import net.minestom.testing.Env;
@@ -34,6 +35,7 @@ class RoundPrepareListenerTest {
         assertEquals(expected.blockX(), player.getPosition().blockX());
         assertEquals(expected.blockY(), player.getPosition().blockY());
         assertEquals(expected.blockZ(), player.getPosition().blockZ());
+        assertEquals(0, player.getAttribute(Attribute.MOVEMENT_SPEED).getValue());
 
         env.destroyInstance(instance, true);
     }

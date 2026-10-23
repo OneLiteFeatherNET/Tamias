@@ -22,6 +22,8 @@ public final class MapPrepareListener implements Consumer<MapPrepareEvent> {
 
     @Override
     public void accept(MapPrepareEvent event) {
+        // The lobby countdown can run again when players leave, the chunks are only loaded once
+        if (this.gamePlacement.isPrepared()) return;
         this.gamePlacement.preloadChunks()
                 .thenRunAsync(
                         () -> EventDispatcher.call(new GameAreaChunksReadyEvent()),

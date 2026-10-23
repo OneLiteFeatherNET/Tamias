@@ -5,6 +5,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.packet.server.play.ExplosionPacket;
+import net.minestom.server.particle.Particle;
 import net.minestom.testing.Collector;
 import net.minestom.testing.Env;
 import net.minestom.testing.TestConnection;
@@ -41,7 +42,10 @@ class ExplosionCreatorIntegrationTest {
         instance.explode((float) pos.x(), (float) pos.y(), (float) pos.z(), 1F);
 
         explosionTracker.assertCount(1);
-        explosionTracker.assertSingle(packet -> assertEquals(pos.asVec(), packet.center()));
+        explosionTracker.assertSingle(packet -> {
+            assertEquals(pos.asVec(), packet.center());
+            assertEquals(Particle.EXPLOSION_EMITTER, packet.particle());
+        });
         assertEquals(Block.STONE, instance.getBlock(blockPos), "The explosion should not destroy any blocks");
 
         env.destroyInstance(instance, true);

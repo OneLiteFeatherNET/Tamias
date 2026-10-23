@@ -133,6 +133,33 @@ class GamePlacementIntegrationTest {
     }
 
     @Test
+    void testPrepareKeepsTheGroundOnASecondCall(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        GameArea gameArea = new GameArea(
+                AreaData.builder()
+                        .lowerCorner(Vec.ZERO)
+                        .upperCorner(new Vec(2, 0, 2))
+                        .facing(Direction.NORTH)
+                        .build()
+        );
+        gameArea.calculatePositions();
+
+        Vec markerPosition = new Vec(1, 0, 1);
+        prepareGround(instance, markerPosition);
+
+        GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
+
+        gamePlacement.prepare();
+        gamePlacement.prepare();
+
+        assertTrue(gamePlacement.isPrepared());
+        assertEquals(Set.of(markerPosition), gameArea.getPositions());
+        assertEquals(Block.BARRIER, instance.getBlock(markerPosition));
+
+        env.destroyInstance(instance);
+    }
+
+    @Test
     void testDropTntSkipsObstructedPositions(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
         GameArea gameArea = new GameArea(

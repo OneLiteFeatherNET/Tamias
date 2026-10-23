@@ -39,7 +39,7 @@ class SpectatorHelperIntegrationTest extends TamiasPlayerTestBase {
         assertEquals(DisguiseState.HIDDEN, ((TamiasPlayer) player).getDisguiseState());
         assertTrue(player.getInventory().getItemStack(0).isAir());
         assertTrue(player.getActiveEffects().isEmpty());
-        assertTrue(player.getAttribute(Attribute.MOVEMENT_SPEED).getBaseValue() > 0);
+        assertTrue(player.getAttribute(Attribute.MOVEMENT_SPEED).getValue() > 0);
 
         env.destroyInstance(instance, true);
     }
@@ -55,6 +55,8 @@ class SpectatorHelperIntegrationTest extends TamiasPlayerTestBase {
         assertFalse(SpectatorHelper.isSpectator(player));
         assertFalse(player.isAllowFlying());
         assertFalse(player.isFlying());
+        // Adventure keeps the survivors from punching the TNT blocks to find a bomber
+        assertEquals(GameMode.ADVENTURE, player.getGameMode());
 
         env.destroyInstance(instance, true);
     }

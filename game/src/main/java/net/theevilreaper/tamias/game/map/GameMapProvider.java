@@ -1,6 +1,7 @@
 package net.theevilreaper.tamias.game.map;
 
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.aves.map.BaseMap;
@@ -106,6 +107,15 @@ public final class GameMapProvider extends AbstractFalcoMapProvider implements M
      */
     public BaseMap getActiveMap() {
         return this.activeMap;
+    }
+
+    /**
+     * Returns the position where the bomber starts a round.
+     *
+     * @return the spawn of the bomber
+     */
+    public Pos getBomberSpawn() {
+        return ((GameMap) this.activeMap).getBomberInitialSpawn();
     }
 
     /**

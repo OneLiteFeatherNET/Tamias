@@ -3,6 +3,7 @@ package net.theevilreaper.tamias.game.util;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.network.packet.server.play.SetCooldownPacket;
 import net.theevilreaper.tamias.common.util.Tags;
 
 /**
@@ -34,6 +35,17 @@ public final class Items {
     public static void setShootItem(Player player) {
         player.getInventory().clear();
         player.getInventory().addItemStack(SHOOT_ITEM);
+    }
+
+    /**
+     * Shows the cooldown of the shoot item in the hotbar of the given player.
+     *
+     * @param player the player who shot
+     * @param ticks  the duration of the cooldown in ticks
+     */
+    public static void setShootCooldown(Player player, int ticks) {
+        // Without a use cooldown component the client groups the cooldown by the item type
+        player.sendPacket(new SetCooldownPacket(SHOOT_ITEM.material().key().asString(), ticks));
     }
 
     /**

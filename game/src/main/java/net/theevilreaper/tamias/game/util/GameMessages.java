@@ -74,6 +74,20 @@ public final class GameMessages extends Messages {
     }
 
     /**
+     * Returns a component for the countdown before a round is played.
+     *
+     * @param time the time in seconds until the round starts
+     * @return a component with the round start message
+     */
+    @Contract(value = "_ -> new", pure = true)
+    public static Component getRoundStartTime(int time) {
+        if (time == 1) {
+            return withMiniPrefix("<gray>The round starts in <red>" + time + " <gray>second!");
+        }
+        return withMiniPrefix("<gray>The round starts in <red>" + time + " <gray>seconds!");
+    }
+
+    /**
      * Creates a component for the title time.
      *
      * @param time the time to display
@@ -149,17 +163,28 @@ public final class GameMessages extends Messages {
 
     @Contract(value = "_, _ -> new", pure = true)
     public static Component getDeathMessage(Player target, Player killer) {
-        return withPrefix(target.getDisplayName().append(Component.space()).append(DEATH_PART).append(Component.space())
-                .append(killer.getDisplayName()));
+        return withPrefix(getName(target).append(Component.space()).append(DEATH_PART).append(Component.space())
+                .append(getName(killer)));
     }
 
     @Contract(value = "_ -> new", pure = true)
     public static Component getShotMessage(Player killer) {
-        return withPrefix(SHOT_PART.append(Component.space()).append(killer.getDisplayName()));
+        return withPrefix(SHOT_PART.append(Component.space()).append(getName(killer)));
     }
 
     @Contract
     public static Component buildChatLayout(Player player, Component message) {
-        return player.getDisplayName().append(SEPARATOR).append(message);
+        return getName(player).append(SEPARATOR).append(message);
+    }
+
+    /**
+     * Returns the display name of the player, which shows the team color, or the username if none is set.
+     *
+     * @param player the player to get the name from
+     * @return the name of the player
+     */
+    private static Component getName(Player player) {
+        Component displayName = player.getDisplayName();
+        return displayName != null ? displayName : Component.text(player.getUsername());
     }
 }
