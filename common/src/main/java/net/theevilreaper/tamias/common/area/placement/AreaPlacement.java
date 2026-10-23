@@ -2,7 +2,6 @@ package net.theevilreaper.tamias.common.area.placement;
 
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.timer.Task;
-import net.theevilreaper.tamias.common.ground.GroundData;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -18,11 +17,6 @@ import java.util.Set;
  * @since 0.1.0
  */
 public sealed interface AreaPlacement permits AreaBasePlacement {
-
-    /**
-     * Stars the placement of the area.
-     */
-    void place(GroundData groundData);
 
     /**
      * Checks if the placement is running.

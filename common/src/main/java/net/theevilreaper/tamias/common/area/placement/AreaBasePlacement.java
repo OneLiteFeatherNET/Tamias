@@ -6,7 +6,7 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.timer.Task;
-import net.theevilreaper.tamias.common.ground.GroundData;
+import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -14,14 +14,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public abstract non-sealed class AreaBasePlacement<T extends Point> implements AreaPlacement {
+public abstract non-sealed class AreaBasePlacement implements AreaPlacement {
 
     protected final Instance instance;
-    protected final List<T> blockPositions;
-    protected final Set<T> placedPositions = ConcurrentHashMap.newKeySet();
+    protected final List<Vec> blockPositions;
+    protected final Set<Vec> placedPositions = ConcurrentHashMap.newKeySet();
     protected @Nullable Task buildTask;
 
-    AreaBasePlacement(Instance instance, List<T> blockPositions) {
+    AreaBasePlacement(Instance instance, List<Vec> blockPositions) {
         this.instance = instance;
         this.blockPositions = new ArrayList<>(blockPositions);
     }
@@ -29,7 +29,7 @@ public abstract non-sealed class AreaBasePlacement<T extends Point> implements A
     /**
      * Guards against starting a placement run while one is already active and resets the
      * placed-position tracking for the new run.
-     * Subclasses must call this at the start of {@link #place(GroundData)} instead of manually
+     * Subclasses must call this at the start of their placement run instead of manually
      * checking {@link #buildTask} so {@link #getPlacedPositions()} stays accurate for every
      * placement strategy.
      *
@@ -43,14 +43,14 @@ public abstract non-sealed class AreaBasePlacement<T extends Point> implements A
 
     /**
      * Places a block at the given position and records it as placed.
-     * Subclasses must call this instead of {@link #placeBlock(Point, GroundData)} directly so the
-     * position shows up in {@link #getPlacedPositions()}.
+     * Subclasses must call this instead of setting the block directly so the position shows up in
+     * {@link #getPlacedPositions()}.
      *
-     * @param position   the position to place the block
-     * @param groundData the ground data to place with
+     * @param position the position to place the block
+     * @param block    the block to place
      */
-    protected final void doPlaceBlock(T position, GroundData groundData) {
-        placeBlock(position, groundData);
+    protected final void doPlaceBlock(Vec position, Block block) {
+        this.instance.setBlock(position, block);
         this.placedPositions.add(position);
     }
 
@@ -61,13 +61,6 @@ public abstract non-sealed class AreaBasePlacement<T extends Point> implements A
             onlinePlayer.setExp(1 - progress);
         }
     }
-
-    /**
-     * Places a block at the given position
-     *
-     * @param position the position to place the block
-     */
-    protected abstract void placeBlock(T position, GroundData groundData);
 
     /**
      * {@inheritDoc}
@@ -100,19 +93,17 @@ public abstract non-sealed class AreaBasePlacement<T extends Point> implements A
      * {@inheritDoc}
      */
     @Override
-    @SuppressWarnings("unchecked")
     public void updatePositions(List<Vec> positions) {
         this.blockPositions.clear();
-        this.blockPositions.addAll((List<T>) positions);
+        this.blockPositions.addAll(positions);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    @SuppressWarnings("unchecked")
     public Set<Vec> getPlacedPositions() {
-        return Set.copyOf((Set<Vec>) this.placedPositions);
+        return Set.copyOf(this.placedPositions);
     }
 
     /**

@@ -13,7 +13,6 @@ import net.minestom.server.network.packet.server.play.ParticlePacket;
 import net.minestom.server.particle.Particle;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.timer.Task;
-import net.theevilreaper.tamias.common.ground.GroundData;
 
 import net.minestom.server.timer.TaskSchedule;
 
@@ -39,7 +38,7 @@ import static net.theevilreaper.tamias.common.area.GameAreaHelper.TNT_POP_DELAY;
  * @version 1.0.0
  * @since 0.1.0
  */
-public class TNTPlacement extends AreaBasePlacement<Vec> {
+public class TNTPlacement extends AreaBasePlacement {
 
     private static final int FALL_TICKS = 5;
     private static final Sound LANDING_SOUND = Sound.sound(SoundEvent.BLOCK_GRAVEL_FALL, Sound.Source.BLOCK, 1f, 0.6f);
@@ -106,11 +105,10 @@ public class TNTPlacement extends AreaBasePlacement<Vec> {
     }
 
     /**
-     * {@inheritDoc}
+     * Starts dropping the TNT groups.
      * Each tick every group whose ground is placed is dropped, so the TNT keeps up with the ground placement.
      */
-    @Override
-    public void place(GroundData groundData) {
+    public void place() {
         if (!tryStart()) return;
         this.landed = new CompletableFuture<>();
         List<TntGroup> queue = new ArrayList<>(this.groups);
@@ -126,7 +124,7 @@ public class TNTPlacement extends AreaBasePlacement<Vec> {
                 TntGroup group = iterator.next();
                 if (!isGroundReady(group)) continue;
                 iterator.remove();
-                dropGroup(group, groundData);
+                dropGroup(group);
             }
         }).repeat(TaskSchedule.tick(1)).schedule();
     }
@@ -172,10 +170,9 @@ public class TNTPlacement extends AreaBasePlacement<Vec> {
     /**
      * Lets the center of the group fall down. Once it has landed, the members pop up one after another.
      *
-     * @param group      the group to drop
-     * @param groundData the ground data to use when placing the blocks
+     * @param group the group to drop
      */
-    private void dropGroup(TntGroup group, GroundData groundData) {
+    private void dropGroup(TntGroup group) {
         Entity tntEntity = new Entity(EntityType.FALLING_BLOCK);
         FallingBlockMeta fallingBlockMeta = (FallingBlockMeta) tntEntity.getEntityMeta();
         fallingBlockMeta.setBlock(Block.TNT);
@@ -188,27 +185,27 @@ public class TNTPlacement extends AreaBasePlacement<Vec> {
         schedule(FALL_TICKS, () -> {
             this.fallingEntities.remove(tntEntity);
             tntEntity.remove();
-            land(group.center(), groundData);
+            land(group.center());
             Point center = group.center().add(0.5);
             instance.playSound(LANDING_SOUND, center.x(), center.y(), center.z());
 
             List<Vec> members = group.members();
             for (int i = 0; i < members.size(); i++) {
                 Vec member = members.get(i);
-                schedule((i + 1) * TNT_POP_DELAY, () -> popUp(member, groundData));
+                schedule((i + 1) * TNT_POP_DELAY, () -> popUp(member));
             }
         });
     }
 
-    private void popUp(Vec position, GroundData groundData) {
-        land(position, groundData);
+    private void popUp(Vec position) {
+        land(position);
         Point center = position.add(0.5, 0.5, 0.5);
         instance.sendGroupedPacket(new ParticlePacket(Particle.POOF, center, new Vec(0.2), 0.02f, 8));
         instance.playSound(POP_SOUND, center.x(), center.y(), center.z());
     }
 
-    private void land(Vec position, GroundData groundData) {
-        doPlaceBlock(position, groundData);
+    private void land(Vec position) {
+        doPlaceBlock(position, Block.TNT);
         this.landingConsumer.accept(position);
     }
 
@@ -220,13 +217,5 @@ public class TNTPlacement extends AreaBasePlacement<Vec> {
             completeIfLanded();
         }).delay(TaskSchedule.tick(delay)).schedule();
         this.pendingTasks.add(task[0]);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void placeBlock(Vec position, GroundData groundData) {
-        this.instance.setBlock(position, groundData.groundBlock());
     }
 }

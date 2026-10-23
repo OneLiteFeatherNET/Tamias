@@ -6,7 +6,6 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.testing.Env;
 import net.minestom.testing.extension.MicrotusExtension;
-import net.theevilreaper.tamias.common.ground.GroundDataRegistry;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,7 +49,7 @@ class TNTPlacementIntegrationTest {
         assertNotNull(placement);
         assertInstanceOf(AreaBasePlacement.class, placement);
 
-        placement.place(GroundDataRegistry.DEFAULT_SPAWN_DATA);
+        placement.place();
         assertTrue(placement.isRunning());
 
         for (int i = 0; i < 20; i++) {
@@ -81,7 +80,7 @@ class TNTPlacementIntegrationTest {
 
         TNTPlacement placement = new TNTPlacement(instance, landed::add);
         placement.updateGroups(List.of(new TntGroup(center, members)), placedGround::contains);
-        placement.place(GroundDataRegistry.DEFAULT_SPAWN_DATA);
+        placement.place();
 
         for (int i = 0; i < 20; i++) {
             env.tick();
@@ -120,7 +119,7 @@ class TNTPlacementIntegrationTest {
 
         TNTPlacement placement = new TNTPlacement(instance, landed::add);
         placement.updateGroups(List.of(new TntGroup(center, members)), _ -> true);
-        placement.place(GroundDataRegistry.DEFAULT_SPAWN_DATA);
+        placement.place();
         CompletableFuture<Void> landedFuture = placement.landed();
 
         // The queue is empty after the first tick, but the group is still falling
@@ -139,7 +138,7 @@ class TNTPlacementIntegrationTest {
         Instance instance = env.createFlatInstance();
         TNTPlacement placement = new TNTPlacement(instance, _ -> {});
         placement.updateGroups(List.of(), _ -> true);
-        placement.place(GroundDataRegistry.DEFAULT_SPAWN_DATA);
+        placement.place();
 
         env.tickWhile(() -> !placement.landed().isDone(), Duration.ofSeconds(5));
 
@@ -160,7 +159,7 @@ class TNTPlacementIntegrationTest {
 
         TNTPlacement placement = new TNTPlacement(instance, landed::add);
         placement.updateGroups(groups, _ -> true);
-        placement.place(GroundDataRegistry.DEFAULT_SPAWN_DATA);
+        placement.place();
 
         env.tickWhile(landed::isEmpty, Duration.ofSeconds(5));
 
@@ -179,7 +178,7 @@ class TNTPlacementIntegrationTest {
 
         TNTPlacement placement = new TNTPlacement(instance, landed::add);
         placement.updateGroups(List.of(new TntGroup(center, List.of(member))), _ -> true);
-        placement.place(GroundDataRegistry.DEFAULT_SPAWN_DATA);
+        placement.place();
 
         // The group is dropped, but the center is still falling
         env.tick();

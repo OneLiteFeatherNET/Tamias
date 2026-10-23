@@ -31,6 +31,6 @@ public interface Area {
      * @return the positions
      */
     @UnmodifiableView
-    Collection<Point> getPositions();
+    Collection<? extends Point> getPositions();
 
 }

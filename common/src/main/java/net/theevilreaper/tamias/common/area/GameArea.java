@@ -81,8 +81,8 @@ public final class GameArea implements PlayingArea {
     }
 
     @Override
-    public @UnmodifiableView Set<Point> getPositions() {
-        Set<Point> result = new HashSet<>(areaPositions);
+    public @UnmodifiableView Set<Vec> getPositions() {
+        Set<Vec> result = new HashSet<>(areaPositions);
         return Collections.unmodifiableSet(result);
     }
 
