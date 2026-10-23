@@ -21,6 +21,7 @@ import java.util.Properties;
  *     <li>gameTime</li>
  *     <li>teamSize</li>
  *     <li>maxRounds</li>
+ *     <li>sentryDsn (optional, no default: without it the error reporting stays off)</li>
  * </ul>
  * <p>
  * If a property cannot be found in the file, the default value will be used.
@@ -115,7 +116,8 @@ public final class GameConfigReader {
                 .lobbyTime(lobbyTime)
                 .gameTime(maxGameTime)
                 .teamSize(teamSize)
-                .maxRounds(maxRounds);
+                .maxRounds(maxRounds)
+                .sentryDsn(properties.getProperty("sentryDsn"));
         return configBuilder.build();
     }
 }

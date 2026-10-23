@@ -13,6 +13,9 @@ dependencies {
     implementation(libs.adventure)
     implementation(libs.slf4j.api)
 
+    // Crash reporting. Only ever set up when a DSN is configured, see SentrySupport.
+    implementation(libs.sentry)
+
     // CloudNet is provided by the CloudNet wrapper at runtime and its bridge is loaded as a
     // Minestom extension (separate classloader, see the :bridge module), so :setup neither
     // references nor bundles any CloudNet artifact.
@@ -58,6 +61,8 @@ tasks {
 
     shadowJar {
         archiveClassifier.set("")
+        // Read back by Tamias as the release reported to Sentry.
+        manifest.attributes("Implementation-Version" to rootProject.version)
     }
 }
 

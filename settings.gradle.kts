@@ -35,9 +35,11 @@ dependencyResolutionManagement {
             library("luckperms.api", "net.luckperms", "api").versionRef("luckperms")
             library("luckperms.minestom.loader", "net.luckperms", "minestom-loader").versionRef("luckperms-minestom-loader")
             version("guava", "33.7.2-jre")
+            version("sentry", "8.61.1")
 
             library("game.bom", "net.onelitefeather", "aonyx-bom").versionRef("aonyx")
             library("guava", "com.google.guava", "guava").versionRef("guava")
+            library("sentry", "io.sentry", "sentry").versionRef("sentry")
             library("slf4j.api", "org.slf4j", "slf4j-api").versionRef("slf4j")
             library("slf4j.simple", "org.slf4j", "slf4j-simple").versionRef("slf4j")
 
