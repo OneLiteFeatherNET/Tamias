@@ -34,7 +34,7 @@ class GameCleanupListenerTest {
         );
         gameArea.calculatePositions();
 
-        List<Vec> positions = gameArea.getPositions().stream().map(Vec.class::cast).toList();
+        List<Vec> positions = List.copyOf(gameArea.getPositions());
         GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
 
         for (Vec position : positions) {

@@ -48,7 +48,7 @@ public final class GamePlacement implements Placement {
         this.tntPlacement = new TNTPlacement(instance, area::addTntPosition);
         this.tntCandidates = List.of();
 
-        List<Vec> initialPositions = area.getPositions().stream().map(Vec.class::cast).toList();
+        List<Vec> initialPositions = List.copyOf(area.getPositions());
         Vec center = getCenter(area);
         this.groundPatterns = new EnumMap<>(GroundFillPattern.class);
         for (GroundFillPattern pattern : GroundFillPattern.values()) {
@@ -114,14 +114,14 @@ public final class GamePlacement implements Placement {
         Set<Vec> positionsToRemove = new HashSet<>();
         replaceCornerBlock(this.area.getGameAreaData().lowerCorner());
         replaceCornerBlock(this.area.getGameAreaData().upperCorner());
-        for (Point pos : area.getPositions()) {
+        for (Vec pos : area.getPositions()) {
             Block block = instance.getBlock(pos);
             if (block != GameAreaHelper.GROUND_MARKER_BLOCK) {
-                positionsToRemove.add((Vec) pos);
+                positionsToRemove.add(pos);
             }
         }
         this.area.flattenPositions(positionsToRemove);
-        List<Vec> filteredPositions = this.area.getPositions().stream().map(Vec.class::cast).toList();
+        List<Vec> filteredPositions = List.copyOf(this.area.getPositions());
         for (SweepAreaPlacement pattern : this.groundPatterns.values()) {
             pattern.updatePositions(filteredPositions);
         }
@@ -139,9 +139,9 @@ public final class GamePlacement implements Placement {
      * This method should be called after the instance is available if it wasn't provided in the constructor.
      */
     public void applyPositions() {
-        Collection<Point> areaPositions = area.getPositions();
+        Collection<Vec> areaPositions = area.getPositions();
 
-        for (Point pos : areaPositions) {
+        for (Vec pos : areaPositions) {
             instance.setBlock(pos, Block.BARRIER);
         }
         LOGGER.info("Applied {} positions to the instance", areaPositions.size());

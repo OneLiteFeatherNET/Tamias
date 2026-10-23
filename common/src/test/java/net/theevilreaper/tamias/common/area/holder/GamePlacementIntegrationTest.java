@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.Duration;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -49,7 +50,7 @@ class GamePlacementIntegrationTest {
 
         placement.applyPositions();
 
-        Set<Point> testPositions = new HashSet<>();
+        Set<Vec> testPositions = new HashSet<>();
 
         Vec start = gameArea.getGameAreaData().lowerCorner();
         Vec end = gameArea.getGameAreaData().upperCorner();
@@ -330,7 +331,7 @@ class GamePlacementIntegrationTest {
      * @param expected  the expected block
      * @param positions the positions to check
      */
-    private void assertBlock(@NotNull Instance instance, @NotNull Block expected, @NotNull Set<Point> positions) {
+    private void assertBlock(@NotNull Instance instance, @NotNull Block expected, @NotNull Collection<? extends Point> positions) {
         String blockName = expected.name();
         for (Point testPosition : positions) {
             Block block = instance.getBlock(testPosition);
