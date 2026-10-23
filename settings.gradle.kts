@@ -87,3 +87,4 @@ dependencyResolutionManagement {
 include("common")
 include("game")
 include("setup")
+include("bridge")
