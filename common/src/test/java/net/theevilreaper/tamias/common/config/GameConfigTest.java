@@ -25,6 +25,14 @@ class GameConfigTest {
     }
 
     @Test
+    void testTeamSizeMustFitEveryPlayer() {
+        GameConfig.Builder builder = GameConfig.builder().minPlayers(2).maxPlayers(12).teamSize(11);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, builder::build);
+        assertEquals("The team size must be at least the max players", exception.getMessage());
+    }
+
+    @Test
     void testBuilderUsage() {
         GameConfig.Builder builder = GameConfig.builder();
         assertNotNull(builder);
