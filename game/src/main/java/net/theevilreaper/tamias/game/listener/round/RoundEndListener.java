@@ -54,8 +54,8 @@ public final class RoundEndListener implements Consumer<RoundEndEvent> {
         Optional<Team> survivorTeam = getTeam(teams, GameConfig.SURVIVOR_KEY);
         Optional<Team> bomberTeam = getTeam(teams, GameConfig.BOMBER_KEY);
 
-        // The winner must be determined before the teams are cleared
-        if (survivorTeam.isPresent() && bomberTeam.isPresent()) {
+        // The winner must be determined before the teams are cleared, an aborted round has no winner
+        if (!event.aborted() && survivorTeam.isPresent() && bomberTeam.isPresent()) {
             celebrate(RoundConditions.getWinner(survivorTeam.get(), bomberTeam.get()), teams);
             this.roundCredit.accept(survivorTeam.get(), bomberTeam.get());
         }

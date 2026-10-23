@@ -60,7 +60,8 @@ public final class PlayingPhase extends TimedPhase {
 
     @Override
     protected void onFinish() {
-        EventDispatcher.call(new RoundEndEvent());
+        // The phase is skipping when the game ends early, the round is aborted then
+        EventDispatcher.call(new RoundEndEvent(isSkipping()));
     }
 
     @Override

@@ -156,6 +156,30 @@ class RoundEndListenerIntegrationTest extends TamiasPlayerTestBase {
     }
 
     @Test
+    void testAbortedRoundHasNoWinner(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        TestConnection connection = env.createConnection();
+        Player survivor = connection.connect(instance);
+        TeamService teamService = TeamService.of();
+        TeamHelper.loadTeams(2, teamService);
+        Team survivorTeam = teamService.getTeam(GameConfig.SURVIVOR_KEY).orElseThrow();
+        TeamHelper.addPlayerToTeam(survivorTeam, survivor);
+        Collector<SystemChatPacket> messages = connection.trackIncoming(SystemChatPacket.class);
+        AtomicInteger credits = new AtomicInteger();
+
+        new RoundEndListener(teamService::getTeams, () -> {}, (survivors, bombers) -> credits.incrementAndGet())
+                .accept(new RoundEndEvent(true));
+
+        assertEquals(0, credits.get());
+        messages.assertEmpty();
+        assertTrue(getFireworks(instance).isEmpty());
+        assertTrue(survivorTeam.getPlayers().isEmpty());
+        assertFalse(survivor.hasTag(Tags.TEAM_KEY));
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
     void testRoundEndAnnouncesTheWinner(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
         TestConnection connection = env.createConnection();
