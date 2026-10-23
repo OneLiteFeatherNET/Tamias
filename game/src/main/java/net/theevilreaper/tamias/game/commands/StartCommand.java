@@ -1,8 +1,10 @@
 package net.theevilreaper.tamias.game.commands;
 
 import net.theevilreaper.xerus.api.phase.Phase;
+import net.kyori.adventure.permission.PermissionChecker;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.util.TriState;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.CommandContext;
@@ -24,6 +26,8 @@ import java.util.function.Supplier;
  **/
 public class StartCommand extends Command {
 
+    private static final String PERMISSION = "tamias.command.start";
+
     private final Supplier<Phase> phaseSupplier;
     private final Component unableToStart = Messages.withPrefix(
             Component.text("Unable to start the game because the timer is to low!", NamedTextColor.RED)
@@ -32,7 +36,7 @@ public class StartCommand extends Command {
     public StartCommand(@NotNull Supplier<Phase> phaseSupplier) {
         super("start");
         this.phaseSupplier = phaseSupplier;
-        this.setCondition(Conditions::playerOnly);
+        this.setCondition((sender, commandString) -> Conditions.playerOnly(sender, commandString) && hasStartPermission(sender));
         addSyntax(this::forceStart);
     }
 
@@ -58,5 +62,17 @@ public class StartCommand extends Command {
 
         lobbyPhase.setForceStarted(true);
         sender.sendMessage(GameMessages.PHASE_FORCE_STARTED);
+    }
+
+    /**
+     * Reads Adventure's {@link PermissionChecker#POINTER}, which the player implementation backs with LuckPerms.
+     * A sender without that pointer is denied.
+     *
+     * @param sender the sender to check
+     * @return {@code true} if the sender holds {@value #PERMISSION}
+     */
+    private static boolean hasStartPermission(CommandSender sender) {
+        return sender.getOrDefault(PermissionChecker.POINTER, PermissionChecker.always(TriState.FALSE))
+                .test(PERMISSION);
     }
 }
