@@ -78,6 +78,9 @@ public final class PlayerQuitListener implements Consumer<PlayerDisconnectEvent>
         Player player = event.getPlayer();
         // The restart phase kicks every player, so there is nothing left to handle
         if (phase instanceof RestartPhase) return;
+        // Minestom also calls the event for players who are kicked during the configuration, e.g. by the join
+        // listener. These players never joined the game, so there is nothing to handle
+        if (player.getInstance() == null) return;
 
         Audience.audience(getConnectionManager().getOnlinePlayers()).sendMessage(GameMessages.getLeaveMessage(player));
         this.scoreboardConsumer.accept(player);
