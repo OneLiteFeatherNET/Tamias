@@ -26,7 +26,9 @@ import org.junit.jupiter.api.Test;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -34,11 +36,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PlayerQuitListenerIntegrationTest extends TamiasPlayerTestBase {
 
     private final AtomicInteger roundEndChecks = new AtomicInteger();
     private final AtomicInteger earlyGameFinishes = new AtomicInteger();
+    private final AtomicInteger bomberReplacements = new AtomicInteger();
 
     @Test
     void testGameQuitRemovesPlayerFromTeamAndStaminaBar(@NotNull Env env) {
@@ -62,6 +66,7 @@ class PlayerQuitListenerIntegrationTest extends TamiasPlayerTestBase {
         assertNull(staminaService.getStaminaBar(bomber));
         assertEquals(1, roundEndChecks.get());
         assertEquals(0, earlyGameFinishes.get());
+        assertEquals(1, bomberReplacements.get());
 
         staminaService.cleanUp();
         env.destroyInstance(instance, true);
@@ -83,6 +88,7 @@ class PlayerQuitListenerIntegrationTest extends TamiasPlayerTestBase {
         assertFalse(survivorTeam.hasPlayer(survivor));
         assertFalse(survivor.hasTag(Tags.TEAM_KEY));
         assertEquals(0, earlyGameFinishes.get());
+        assertEquals(0, bomberReplacements.get());
 
         env.destroyInstance(instance, true);
     }
@@ -99,6 +105,42 @@ class PlayerQuitListenerIntegrationTest extends TamiasPlayerTestBase {
 
         assertEquals(1, earlyGameFinishes.get());
         assertEquals(0, roundEndChecks.get());
+        assertEquals(0, bomberReplacements.get());
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testLastBomberQuitConvertsASurvivorBeforeTheRoundEndCheck(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player bomber = env.createPlayer(instance);
+        Player firstSurvivor = env.createPlayer(instance);
+        Player secondSurvivor = env.createPlayer(instance);
+        TeamService teamService = loadTeams();
+        Team bomberTeam = teamService.getTeam(GameConfig.BOMBER_KEY).orElseThrow();
+        Team survivorTeam = teamService.getTeam(GameConfig.SURVIVOR_KEY).orElseThrow();
+        TeamHelper.addPlayerToTeam(bomberTeam, bomber);
+        TeamHelper.addPlayerToTeam(survivorTeam, firstSurvivor);
+        TeamHelper.addPlayerToTeam(survivorTeam, secondSurvivor);
+        List<Integer> bomberCountsOnRoundEndCheck = new ArrayList<>();
+
+        new PlayerQuitListener(
+                () -> new PlayingPhase(_ -> {}, () -> {}, HashMap::new),
+                key -> teamService.getTeam(key).orElse(null),
+                _ -> {},
+                () -> bomberCountsOnRoundEndCheck.add(bomberTeam.getPlayers().size()),
+                _ -> {},
+                earlyGameFinishes::incrementAndGet,
+                () -> TeamHelper.replaceMissingBomber(teamService)
+        ).accept(new PlayerDisconnectEvent(bomber));
+
+        assertFalse(bomberTeam.hasPlayer(bomber));
+        assertEquals(1, bomberTeam.getPlayers().size());
+        assertEquals(1, survivorTeam.getPlayers().size());
+        Player newBomber = bomberTeam.getPlayers().iterator().next();
+        assertTrue(newBomber == firstSurvivor || newBomber == secondSurvivor);
+        assertEquals(GameConfig.BOMBER_KEY.asString(), newBomber.getTag(Tags.TEAM_KEY));
+        assertEquals(List.of(1), bomberCountsOnRoundEndCheck);
 
         env.destroyInstance(instance, true);
     }
@@ -140,7 +182,8 @@ class PlayerQuitListenerIntegrationTest extends TamiasPlayerTestBase {
                 player -> staminaService.removeStaminaBar(player.getUuid()),
                 roundEndChecks::incrementAndGet,
                 _ -> {},
-                earlyGameFinishes::incrementAndGet
+                earlyGameFinishes::incrementAndGet,
+                bomberReplacements::incrementAndGet
         );
     }
 

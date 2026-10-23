@@ -42,6 +42,7 @@ public final class PlayerQuitListener implements Consumer<PlayerDisconnectEvent>
     private final VoidConsumer roundEndCheck;
     private final PlayerConsumer scoreboardConsumer;
     private final VoidConsumer earlyGameFinish;
+    private final VoidConsumer bomberReplacement;
 
     /**
      * Creates a new {@link PlayerQuitListener}.
@@ -52,6 +53,7 @@ public final class PlayerQuitListener implements Consumer<PlayerDisconnectEvent>
      * @param roundEndCheck      checks if the round is over
      * @param scoreboardConsumer removes the player from the scoreboard
      * @param earlyGameFinish    ends the game when too few players are left
+     * @param bomberReplacement  chooses a new bomber when the last bomber left the round
      */
     public PlayerQuitListener(
             Supplier<Phase> phaseSupplier,
@@ -59,7 +61,8 @@ public final class PlayerQuitListener implements Consumer<PlayerDisconnectEvent>
             PlayerConsumer staminaRemover,
             VoidConsumer roundEndCheck,
             PlayerConsumer scoreboardConsumer,
-            VoidConsumer earlyGameFinish
+            VoidConsumer earlyGameFinish,
+            VoidConsumer bomberReplacement
     ) {
         this.phaseSupplier = phaseSupplier;
         this.teamFunction = teamFunction;
@@ -67,6 +70,7 @@ public final class PlayerQuitListener implements Consumer<PlayerDisconnectEvent>
         this.roundEndCheck = roundEndCheck;
         this.scoreboardConsumer = scoreboardConsumer;
         this.earlyGameFinish = earlyGameFinish;
+        this.bomberReplacement = bomberReplacement;
     }
 
     @Override
@@ -90,7 +94,7 @@ public final class PlayerQuitListener implements Consumer<PlayerDisconnectEvent>
             return;
         }
 
-        this.handleGameQuit(player);
+        this.handleGameQuit(player, phase);
     }
 
     /**
@@ -98,8 +102,9 @@ public final class PlayerQuitListener implements Consumer<PlayerDisconnectEvent>
      * is stopped, otherwise the bar keeps running and fires events for a player who is no longer online.
      *
      * @param player the involved player
+     * @param phase  the active phase
      */
-    private void handleGameQuit(Player player) {
+    private void handleGameQuit(Player player, Phase phase) {
         this.removeFromTeam(player);
         this.staminaRemover.accept(player);
 
@@ -108,6 +113,10 @@ public final class PlayerQuitListener implements Consumer<PlayerDisconnectEvent>
             return;
         }
 
+        // The round continues with a new bomber instead of ending directly for the survivors
+        if (phase instanceof PlayingPhase) {
+            this.bomberReplacement.apply();
+        }
         this.roundEndCheck.apply();
     }
 
