@@ -20,6 +20,9 @@ public final class AttributeHelper {
     // Multiplies the total value by zero, so the base value of the player stays untouched
     private static final AttributeModifier FREEZE_MODIFIER =
             new AttributeModifier(FREEZE_KEY, -1.0, AttributeOperation.ADD_MULTIPLIED_TOTAL);
+    // The client scales the FOV by the movement speed, unless the walking speed of the abilities is zero
+    private static final float FROZEN_FIELD_VIEW_MODIFIER = 0.0f;
+    private static final float DEFAULT_FIELD_VIEW_MODIFIER = 0.1f;
 
     /**
      * Disables the movement of the player.
@@ -29,6 +32,7 @@ public final class AttributeHelper {
     public static void disableMovement(Player player) {
         player.getAttribute(Attribute.MOVEMENT_SPEED).addModifier(FREEZE_MODIFIER);
         player.getAttribute(Attribute.JUMP_STRENGTH).addModifier(FREEZE_MODIFIER);
+        player.setFieldViewModifier(FROZEN_FIELD_VIEW_MODIFIER);
     }
 
     /**
@@ -39,6 +43,7 @@ public final class AttributeHelper {
     public static void enableMovement(Player player) {
         player.getAttribute(Attribute.MOVEMENT_SPEED).removeModifier(FREEZE_KEY);
         player.getAttribute(Attribute.JUMP_STRENGTH).removeModifier(FREEZE_KEY);
+        player.setFieldViewModifier(DEFAULT_FIELD_VIEW_MODIFIER);
     }
 
     private AttributeHelper() {

@@ -23,6 +23,7 @@ class AttributeHelperTest {
         AttributeHelper.disableMovement(player);
         assertEquals(0.0, player.getAttribute(Attribute.MOVEMENT_SPEED).getValue());
         assertEquals(0.0, player.getAttribute(Attribute.JUMP_STRENGTH).getValue());
+        assertEquals(0.0f, player.getFieldViewModifier());
         assertEquals(speed, player.getAttribute(Attribute.MOVEMENT_SPEED).getBaseValue());
 
         env.destroyInstance(instance, true);
@@ -42,6 +43,7 @@ class AttributeHelperTest {
         assertEquals(speed, player.getAttribute(Attribute.MOVEMENT_SPEED).getValue());
         assertTrue(player.getAttribute(Attribute.MOVEMENT_SPEED).modifiers().isEmpty());
         assertTrue(player.getAttribute(Attribute.JUMP_STRENGTH).modifiers().isEmpty());
+        assertEquals(0.1f, player.getFieldViewModifier());
 
         env.destroyInstance(instance, true);
     }
