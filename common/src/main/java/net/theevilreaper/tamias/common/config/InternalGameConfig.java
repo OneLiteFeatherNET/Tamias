@@ -1,5 +1,7 @@
 package net.theevilreaper.tamias.common.config;
 
+import org.jetbrains.annotations.Nullable;
+
 /**
  * The {@link InternalGameConfig} is the fallback configuration if no other configuration is available.
  * It provides default values for the game configuration.
@@ -10,6 +12,8 @@ package net.theevilreaper.tamias.common.config;
  * @param lobbyTime  the time in seconds before the game starts
  * @param gameTime   the duration of a round in seconds
  * @param teamSize   the general size of each team
+ * @param maxRounds  the maximum rounds for the game
+ * @param sentryDsn  the DSN Sentry reports to, or {@code null} to keep the error reporting off
  * @author theEvilReaper
  * @version 1.0.0
  * @since 1.0.0
@@ -20,7 +24,8 @@ record InternalGameConfig(
         int lobbyTime,
         int gameTime,
         int teamSize,
-        int maxRounds
+        int maxRounds,
+        @Nullable String sentryDsn
 ) implements GameConfig {
 
     /**
@@ -52,7 +57,8 @@ record InternalGameConfig(
                     LOBBY_PHASE_TIME,
                     MAX_GAME_TIME,
                     GENERAL_TEAM_SIZE,
-                    MAX_ROUNDS
+                    MAX_ROUNDS,
+                    null
             );
         }
 

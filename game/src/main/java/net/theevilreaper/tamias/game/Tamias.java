@@ -7,6 +7,7 @@ import net.theevilreaper.aves.util.TimeFormat;
 import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.theevilreaper.aves.util.functional.VoidConsumer;
 import net.theevilreaper.tamias.common.bootstrap.ServiceBootstrap;
+import net.theevilreaper.tamias.monitoring.SentrySupport;
 import net.theevilreaper.tamias.game.scoreboard.GameScoreboard;
 import net.theevilreaper.tamias.game.scoreboard.LobbyScoreboard;
 import net.theevilreaper.tamias.game.scoreboard.ScoreType;
@@ -116,6 +117,10 @@ public class Tamias implements ListenerHandling {
     public Tamias() {
         Path path = ServiceBootstrap.resolveWorkingDirectory();
         this.gameConfig = new GameConfigReader(path.resolve("config")).getConfig();
+        // Set up right after the config is known so anything that goes wrong while the rest of the
+        // game is wired up is already covered. Stays off entirely when no DSN is configured.
+        SentrySupport.init(this.gameConfig.sentryDsn(), serviceVersion(),
+                SentrySupport.serviceName(path), MinecraftServer.getExceptionManager());
         this.phaseSeries = new LinearPhaseSeries<>("game");
         this.teamService = TeamService.of();
         this.mapProvider = new GameMapProvider(path, gameConfig.maxPlayers());
@@ -132,6 +137,16 @@ public class Tamias implements ListenerHandling {
                     .append(Component.text(Strings.getTimeString(TimeFormat.MM_SS, value), NamedTextColor.YELLOW));
             this.activeScoreboard.updateTitle(time);
         };
+    }
+
+    /**
+     * Reads the version of this build from the jar manifest.
+     *
+     * @return the version from the jar manifest, or {@code unknown} when not run from a jar
+     */
+    private static String serviceVersion() {
+        String version = Tamias.class.getPackage().getImplementationVersion();
+        return version == null ? "unknown" : version;
     }
 
     public void initialize() {
