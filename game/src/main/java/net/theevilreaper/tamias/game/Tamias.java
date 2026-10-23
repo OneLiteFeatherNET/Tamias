@@ -26,7 +26,6 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
-import net.minestom.server.event.entity.projectile.ProjectileCollideWithBlockEvent;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEvent;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.PlayerChatEvent;
@@ -63,7 +62,6 @@ import net.theevilreaper.tamias.game.listener.area.MapPrepareListener;
 import net.theevilreaper.tamias.game.listener.game.BomberExplodeListener;
 import net.theevilreaper.tamias.game.listener.game.BomberReviveListener;
 import net.theevilreaper.tamias.game.listener.game.PlayerInteractItemListener;
-import net.theevilreaper.tamias.game.listener.game.ProjectileBlockListener;
 import net.theevilreaper.tamias.game.listener.game.ProjectileEntityListener;
 import net.theevilreaper.tamias.game.listener.game.RoleToBomberChangeListener;
 import net.theevilreaper.tamias.game.listener.round.RoundEndListener;
@@ -246,7 +244,6 @@ public class Tamias implements ListenerHandling {
                 randomPos,
                 this::checkRoundEnd
         ));
-        listenerMap.put(ProjectileCollideWithBlockEvent.class, new ProjectileBlockListener());
         listenerMap.put(ProjectileCollideWithEntityEvent.class, new ProjectileEntityListener(staminaService::getStaminaBar));
         return listenerMap;
     }
