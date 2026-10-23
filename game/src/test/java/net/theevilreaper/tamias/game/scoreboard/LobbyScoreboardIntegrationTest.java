@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.packet.server.play.TeamsPacket;
+import net.minestom.server.scoreboard.Sidebar;
 import net.minestom.testing.Collector;
 import net.minestom.testing.Env;
 import net.minestom.testing.TestConnection;
@@ -20,11 +21,12 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(MicrotusExtension.class)
 class LobbyScoreboardIntegrationTest {
 
+    private static final String MAP_NAME = "Arena";
     private static LobbyScoreboard lobbyScoreboard;
 
     @BeforeAll
     static void setup() {
-        lobbyScoreboard = new LobbyScoreboard(Component.text("Lobby Scoreboard"));
+        lobbyScoreboard = new LobbyScoreboard(Component.text("Lobby Scoreboard"), MAP_NAME);
         lobbyScoreboard.initDefaults();
     }
 
@@ -77,6 +79,14 @@ class LobbyScoreboardIntegrationTest {
         collector.assertEmpty();
         env.destroyInstance(instance, true);
         assertTrue(instance.getPlayers().isEmpty(), "Instance should have no players after destruction");
+    }
+
+    @Test
+    void testScoreboardShowsTheMapName() {
+        Sidebar.ScoreboardLine mapLine = lobbyScoreboard.getSidebar().getLine(ScoreType.MAP_TYPE.key().asString());
+
+        assertNotNull(mapLine);
+        assertEquals(DefaultScoreLayout.SPACER.append(Component.text(MAP_NAME)), mapLine.getContent());
     }
 
     @Test

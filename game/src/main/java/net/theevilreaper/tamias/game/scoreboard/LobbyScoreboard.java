@@ -19,14 +19,17 @@ import static net.theevilreaper.tamias.game.scoreboard.ScoreType.PLAYER;
 public final class LobbyScoreboard implements Scoreboard, DefaultScoreLayout {
 
     private final Sidebar sidebar;
+    private final String mapName;
 
     /**
      * Constructs a new LobbyScoreboard with the specified display name.
      *
      * @param displayName the display name for the scoreboard
+     * @param mapName     the name of the map which is played
      */
-    public LobbyScoreboard(Component displayName) {
+    public LobbyScoreboard(Component displayName, String mapName) {
         this.sidebar = new Sidebar(displayName);
+        this.mapName = mapName;
     }
 
     /**
@@ -42,7 +45,7 @@ public final class LobbyScoreboard implements Scoreboard, DefaultScoreLayout {
      */
     @Override
     public void initDefaults() {
-        this.initLobbyScoreboard(sidebar, "not-set");
+        this.initLobbyScoreboard(sidebar, this.mapName);
     }
 
     /**
@@ -79,5 +82,9 @@ public final class LobbyScoreboard implements Scoreboard, DefaultScoreLayout {
             throw new UnsupportedOperationException("Cannot update TNT, ROUND or WINS scores in LobbyScoreboard");
         }
         this.sidebar.updateLineContent(scoreType.key().asString(), component);
+    }
+
+    Sidebar getSidebar() {
+        return this.sidebar;
     }
 }

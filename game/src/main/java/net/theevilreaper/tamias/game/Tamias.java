@@ -121,7 +121,10 @@ public class Tamias implements ListenerHandling {
         this.mapProvider = new GameMapProvider(path, gameConfig.maxPlayers());
         TeamHelper.loadTeams(this.gameConfig.teamSize(), this.teamService);
         this.staminaService = new StaminaService();
-        this.lobbyScoreboard = new LobbyScoreboard(GameMessages.getTitleTime(this.gameConfig.lobbyTime()));
+        this.lobbyScoreboard = new LobbyScoreboard(
+                GameMessages.getTitleTime(this.gameConfig.lobbyTime()),
+                this.mapProvider.getActiveMap().name()
+        );
         this.gameScoreboard = new GameScoreboard();
         this.activeScoreboard = this.lobbyScoreboard;
         this.timeUpdater = value -> {
