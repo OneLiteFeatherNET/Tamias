@@ -4,6 +4,11 @@ import net.minestom.server.utils.validate.Check;
 
 public final class GameConfigBuilder implements GameConfig.Builder {
 
+    /**
+     * A round needs at least one bomber and one survivor.
+     */
+    private static final int MIN_GAME_PLAYERS = 2;
+
     private int minPlayers;
     private int maxPlayers;
     private int lobbyTime;
@@ -13,6 +18,7 @@ public final class GameConfigBuilder implements GameConfig.Builder {
 
     @Override
     public GameConfig.Builder minPlayers(int minPlayers) {
+        Check.argCondition(minPlayers < MIN_GAME_PLAYERS, "The min players must be at least " + MIN_GAME_PLAYERS);
         this.minPlayers = minPlayers;
         return this;
     }

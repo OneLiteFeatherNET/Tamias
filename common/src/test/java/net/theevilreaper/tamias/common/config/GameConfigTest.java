@@ -17,17 +17,25 @@ class GameConfigTest {
     }
 
     @Test
+    void testInvalidMinPlayersUsage() {
+        GameConfig.Builder builder = GameConfig.builder();
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> builder.minPlayers(1));
+        assertEquals("The min players must be at least 2", exception.getMessage());
+    }
+
+    @Test
     void testBuilderUsage() {
         GameConfig.Builder builder = GameConfig.builder();
         assertNotNull(builder);
 
-        builder.gameTime(500).lobbyTime(12).minPlayers(1).maxPlayers(12).teamSize(12);
+        builder.gameTime(500).lobbyTime(12).minPlayers(2).maxPlayers(12).teamSize(12);
 
         GameConfig config = builder.build();
 
         assertEquals(500, config.gameTime());
         assertEquals(12, config.lobbyTime());
-        assertEquals(1, config.minPlayers());
+        assertEquals(2, config.minPlayers());
         assertEquals(12, config.maxPlayers());
         assertEquals(12, config.teamSize());
     }
