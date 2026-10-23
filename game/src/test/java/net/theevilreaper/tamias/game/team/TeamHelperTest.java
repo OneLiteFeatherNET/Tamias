@@ -43,6 +43,61 @@ class TeamHelperTest extends TamiasPlayerTestBase {
     }
 
     @Test
+    void testReplacementBomberIsAChosenSurvivor(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Team survivorTeam = teamService.getTeam(GameConfig.SURVIVOR_KEY).orElseThrow();
+        Player firstSurvivor = env.createPlayer(instance);
+        Player secondSurvivor = env.createPlayer(instance);
+        TeamHelper.addPlayerToTeam(survivorTeam, firstSurvivor);
+        TeamHelper.addPlayerToTeam(survivorTeam, secondSurvivor);
+
+        Player replacement = TeamHelper.chooseReplacementBomber(teamService).orElseThrow();
+
+        assertTrue(replacement == firstSurvivor || replacement == secondSurvivor);
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testNoReplacementBomberWhileABomberIsLeft(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Team survivorTeam = teamService.getTeam(GameConfig.SURVIVOR_KEY).orElseThrow();
+        TeamHelper.addPlayerToTeam(teamService.getTeam(GameConfig.BOMBER_KEY).orElseThrow(), env.createPlayer(instance));
+        TeamHelper.addPlayerToTeam(survivorTeam, env.createPlayer(instance));
+        TeamHelper.addPlayerToTeam(survivorTeam, env.createPlayer(instance));
+
+        assertTrue(TeamHelper.chooseReplacementBomber(teamService).isEmpty());
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testNoReplacementBomberForTheLastSurvivor(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Team survivorTeam = teamService.getTeam(GameConfig.SURVIVOR_KEY).orElseThrow();
+        TeamHelper.addPlayerToTeam(survivorTeam, env.createPlayer(instance));
+
+        assertTrue(TeamHelper.chooseReplacementBomber(teamService).isEmpty());
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testReplaceMissingBomberConvertsASurvivor(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Team survivorTeam = teamService.getTeam(GameConfig.SURVIVOR_KEY).orElseThrow();
+        Team bomberTeam = teamService.getTeam(GameConfig.BOMBER_KEY).orElseThrow();
+        TeamHelper.addPlayerToTeam(survivorTeam, env.createPlayer(instance));
+        TeamHelper.addPlayerToTeam(survivorTeam, env.createPlayer(instance));
+
+        TeamHelper.replaceMissingBomber(teamService);
+
+        assertEquals(1, bomberTeam.getPlayers().size());
+        assertEquals(1, survivorTeam.getPlayers().size());
+        Player newBomber = bomberTeam.getPlayers().iterator().next();
+        assertEquals(GameConfig.BOMBER_KEY.asString(), newBomber.getTag(Tags.TEAM_KEY));
+        assertEquals(DisguiseState.TNT_BLOCK, ((TamiasPlayer) newBomber).getDisguiseState());
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
     void testTeamAllocationWithEmptyService() {
         TeamService emptyService = TeamService.of();
         assertThrowsExactly(

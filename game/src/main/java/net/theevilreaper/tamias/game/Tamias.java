@@ -305,7 +305,8 @@ public class Tamias implements ListenerHandling {
                         player -> this.staminaService.removeStaminaBar(player.getUuid()),
                         this::checkRoundEnd,
                         player -> this.activeScoreboard.removeViewer(player),
-                        () -> PhaseSeriesHelper.finishEarly(this.gameSeries)
+                        () -> PhaseSeriesHelper.finishEarly(this.gameSeries),
+                        () -> TeamHelper.replaceMissingBomber(this.teamService)
                 )
         );
         node.addListener(PlayerChatEvent.class, new PlayerChatListener());

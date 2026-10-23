@@ -26,6 +26,7 @@ public final class GameMessages extends Messages {
     private static final Component DEATH_PART;
     private static final Component SHOT_PART;
     private static final Component SPECTATOR_PART;
+    private static final Component NEW_BOMBER_PART;
     private static final Component TITLE_TIME;
 
     public static final Component CHOOSING_NEW_TNT;
@@ -46,6 +47,7 @@ public final class GameMessages extends Messages {
         DEATH_PART = withMini("<yellow>was blown up by");
         SHOT_PART = withMini("<yellow> You were shot by");
         SPECTATOR_PART = withMini("<gray>has no TNT left and is now spectating!");
+        NEW_BOMBER_PART = withMini("<yellow>replaces the bomber who left the game!");
         CHOOSING_NEW_TNT = withMiniPrefix("<red>Choosing new tnt<gold>....");
         TITLE_TIME = Component.text("Time:", NamedTextColor.GOLD).append(Component.space());
         GAME_END_KICK_MESSAGE = Component.text("The game is over. Thanks for playing it. <3", NamedTextColor.RED);
@@ -137,6 +139,17 @@ public final class GameMessages extends Messages {
     public static Component getLeaveMessage(Player player) {
         return PREFIX.append(Component.space()).append(withMini("<color:#249D9F>" + player.getUsername() + "</color>"))
                 .append(Component.space()).append(LEAVE_PART);
+    }
+
+    /**
+     * Creates the message which announces the survivor who replaces the bomber that left the game.
+     *
+     * @param player the new bomber
+     * @return a component with the new bomber message
+     */
+    @Contract(value = "_ -> new", pure = true)
+    public static Component getNewBomberMessage(Player player) {
+        return withPrefix(getName(player).append(Component.space()).append(NEW_BOMBER_PART));
     }
 
     @Contract(value = "_ -> new", pure = true)
