@@ -12,8 +12,9 @@ public class TamiasLauncher {
     static void main() {
         // minestom-extensions loads platform extensions - the CloudNet bridge and our
         // :bridge permission extension among them - from the extensions/ folder. Running
-        // standalone simply loads none. This also performs MinecraftServer.init().
-        ExtensionBootstrap bootstrap = ExtensionBootstrap.init();
+        // standalone simply loads none. This also performs MinecraftServer.init(Auth), which is the
+        // only point at which Velocity forwarding can still be turned on.
+        ExtensionBootstrap bootstrap = ExtensionBootstrap.init(ServiceBootstrap.resolveAuth());
         // Every player must be a TamiasPlayer - EntityHelper relies on it for the bomber disguise
         MinecraftServer.getConnectionManager().setPlayerProvider(TamiasPlayer::new);
         LuckPermsSupport.bootstrap();
