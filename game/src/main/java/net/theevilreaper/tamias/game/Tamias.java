@@ -144,7 +144,6 @@ public class Tamias implements ListenerHandling {
         this.createPhaseStructure();
         registerListener(MinecraftServer.getGlobalEventHandler());
         this.phaseSeries.start();
-        this.lobbyScoreboard.updateScore(ScoreType.MAP_TYPE, Component.text("Test"));
         MinecraftServer.getSchedulerManager().buildShutdownTask(this::terminate);
     }
 
