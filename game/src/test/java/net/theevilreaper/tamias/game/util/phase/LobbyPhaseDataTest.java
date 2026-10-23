@@ -19,7 +19,7 @@ class LobbyPhaseDataTest {
         assertNotNull(data);
 
         assertEquals(13, data.maxPlayers());
-        assertEquals(1, data.minPlayers());
+        assertEquals(2, data.minPlayers());
         assertEquals(30, data.lobbyTime());
         assertSame(dummyUpdater, data.timeUpdater());
     }
