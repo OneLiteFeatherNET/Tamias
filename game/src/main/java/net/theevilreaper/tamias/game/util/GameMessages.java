@@ -74,6 +74,20 @@ public final class GameMessages extends Messages {
     }
 
     /**
+     * Returns a component for the countdown before a round is played.
+     *
+     * @param time the time in seconds until the round starts
+     * @return a component with the round start message
+     */
+    @Contract(value = "_ -> new", pure = true)
+    public static Component getRoundStartTime(int time) {
+        if (time == 1) {
+            return withMiniPrefix("<gray>The round starts in <red>" + time + " <gray>second!");
+        }
+        return withMiniPrefix("<gray>The round starts in <red>" + time + " <gray>seconds!");
+    }
+
+    /**
      * Creates a component for the title time.
      *
      * @param time the time to display

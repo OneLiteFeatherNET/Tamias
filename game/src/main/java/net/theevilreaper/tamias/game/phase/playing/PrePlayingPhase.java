@@ -1,10 +1,15 @@
 package net.theevilreaper.tamias.game.phase.playing;
 
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
+import net.minestom.server.sound.SoundEvent;
 import net.theevilreaper.tamias.game.stamina.event.StaminaCreateEvent;
 import net.theevilreaper.tamias.game.team.TeamHelper;
+import net.theevilreaper.tamias.game.util.GameMessages;
 import net.theevilreaper.xerus.api.component.team.ColorComponent;
 import net.theevilreaper.xerus.api.phase.TickDirection;
 import net.theevilreaper.xerus.api.phase.TimedPhase;
@@ -21,6 +26,8 @@ import java.time.temporal.ChronoUnit;
  * @since 1.0.0
  */
 public final class PrePlayingPhase extends TimedPhase {
+
+    private static final Sound PLING = Sound.sound(SoundEvent.BLOCK_NOTE_BLOCK_BELL, Sound.Source.MASTER, 1.0f, 1.0f);
 
     private final TeamService teamService;
 
@@ -61,6 +68,9 @@ public final class PrePlayingPhase extends TimedPhase {
 
     @Override
     public void onUpdate() {
-        // Nothing to do here at the moment
+        // The first update runs directly at the start and the phase finishes one update after the last tick
+        Audience players = Audience.audience(MinecraftServer.getConnectionManager().getOnlinePlayers());
+        players.sendMessage(GameMessages.getRoundStartTime(getCurrentTicks() + 1));
+        players.playSound(PLING, Sound.Emitter.self());
     }
 }
