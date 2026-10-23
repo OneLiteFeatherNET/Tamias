@@ -5,6 +5,11 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEvent;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.network.packet.server.play.SoundEffectPacket;
+import net.minestom.server.network.packet.server.play.SystemChatPacket;
+import net.minestom.server.sound.SoundEvent;
+import net.minestom.testing.Collector;
+import net.minestom.testing.TestConnection;
 import net.minestom.testing.Env;
 import net.minestom.testing.FlexibleListener;
 import net.theevilreaper.tamias.common.config.GameConfig;
@@ -45,6 +50,30 @@ class ProjectileEntityListenerIntegrationTest extends TamiasPlayerTestBase {
 
         assertEquals(0, bomber.getLevel());
         assertEquals(0, bomber.getAttribute(Attribute.MOVEMENT_SPEED).getValue());
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testHitOnBomberGivesFeedback(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        instance.setExplosionSupplier(new ExplosionCreator());
+        TestConnection shooterConnection = env.createConnection();
+        Player shooter = shooterConnection.connect(instance);
+        TestConnection bomberConnection = env.createConnection();
+        Player bomber = bomberConnection.connect(instance);
+        bomber.setTag(Tags.TEAM_KEY, GameConfig.BOMBER_KEY.asString());
+
+        StaminaBar explodeBar = StaminaFactory.createExplodeBar(bomber);
+        explodeBar.start();
+        ProjectileEntityListener listener = new ProjectileEntityListener(_ -> explodeBar);
+        Collector<SoundEffectPacket> shooterSounds = shooterConnection.trackIncoming(SoundEffectPacket.class);
+        Collector<SystemChatPacket> bomberMessages = bomberConnection.trackIncoming(SystemChatPacket.class);
+
+        listener.accept(createHit(shooter, bomber));
+
+        shooterSounds.assertSingle(packet -> assertEquals(SoundEvent.ENTITY_ARROW_HIT_PLAYER, packet.soundEvent()));
+        bomberMessages.assertSingle();
 
         env.destroyInstance(instance, true);
     }

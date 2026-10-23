@@ -3,6 +3,11 @@ package net.theevilreaper.tamias.game.listener.game;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.network.packet.server.play.SoundEffectPacket;
+import net.minestom.server.network.packet.server.play.SystemChatPacket;
+import net.minestom.server.sound.SoundEvent;
+import net.minestom.testing.Collector;
+import net.minestom.testing.TestConnection;
 import net.minestom.testing.Env;
 import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.common.explosion.ExplosionCreator;
@@ -53,6 +58,25 @@ class BomberExplodeListenerIntegrationTest extends TamiasPlayerTestBase {
 
         assertEquals(List.of(nearSurvivor), converted);
         assertEquals(1, roundEndChecks.get());
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testExplosionGivesFeedback(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        instance.setExplosionSupplier(new ExplosionCreator());
+        TestConnection bomberConnection = env.createConnection();
+        Player bomber = bomberConnection.connect(instance, new Pos(0, 40, 0));
+        bomber.setTag(Tags.TEAM_KEY, GameConfig.BOMBER_KEY.asString());
+        createPlayer(env, instance, new Pos(2, 40, 0), GameConfig.SURVIVOR_KEY.asString());
+        Collector<SoundEffectPacket> bomberSounds = bomberConnection.trackIncoming(SoundEffectPacket.class);
+        Collector<SystemChatPacket> bomberMessages = bomberConnection.trackIncoming(SystemChatPacket.class);
+
+        new BomberExplodeListener(_ -> {}, () -> {}).accept(new BomberExplodeEvent(bomber, bomber.getPosition().asVec()));
+
+        bomberSounds.assertSingle(packet -> assertEquals(SoundEvent.ENTITY_ARROW_HIT_PLAYER, packet.soundEvent()));
+        bomberMessages.assertSingle();
 
         env.destroyInstance(instance, true);
     }

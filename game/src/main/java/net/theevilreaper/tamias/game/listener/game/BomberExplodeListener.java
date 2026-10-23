@@ -1,10 +1,14 @@
 package net.theevilreaper.tamias.game.listener.game;
 
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.sound.Sound;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.potion.Potion;
 import net.minestom.server.potion.PotionEffect;
+import net.minestom.server.sound.SoundEvent;
 import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.theevilreaper.aves.util.functional.VoidConsumer;
 import net.theevilreaper.tamias.common.config.GameConfig;
@@ -13,17 +17,20 @@ import net.theevilreaper.tamias.game.player.TamiasPlayer;
 import net.theevilreaper.tamias.game.attribute.AttributeHelper;
 import net.theevilreaper.tamias.game.event.BomberExplodeEvent;
 import net.theevilreaper.tamias.game.util.EntityHelper;
+import net.theevilreaper.tamias.game.util.GameMessages;
 
 import java.util.List;
 import java.util.function.Consumer;
 
 /**
  * Handles the explosion of a bomber. Every survivor within {@link #INFECTION_RADIUS} becomes a bomber.
+ * The bomber hears a hit sound and every player gets told who was blown up.
  */
 @SuppressWarnings("java:S3252")
 public class BomberExplodeListener implements Consumer<BomberExplodeEvent> {
 
     private static final Potion BLINDNESS = new Potion(PotionEffect.BLINDNESS, (byte) 1, Integer.MAX_VALUE);
+    static final Sound HIT_SOUND = Sound.sound(SoundEvent.ENTITY_ARROW_HIT_PLAYER, Sound.Source.MASTER, 1f, 1f);
     static final double INFECTION_RADIUS = 3.0;
 
     private final PlayerConsumer survivorConverter;
@@ -59,6 +66,10 @@ public class BomberExplodeListener implements Consumer<BomberExplodeEvent> {
                 .toList();
         if (survivors.isEmpty()) return;
 
+        player.playSound(HIT_SOUND);
+        // Announced before the conversion, so the survivor is still shown in the survivor color
+        Audience players = Audience.audience(MinecraftServer.getConnectionManager().getOnlinePlayers());
+        survivors.forEach(survivor -> players.sendMessage(GameMessages.getDeathMessage(survivor, player)));
         if (player instanceof TamiasPlayer bomber) {
             survivors.forEach(_ -> bomber.addKill());
         }
