@@ -21,27 +21,29 @@ import java.util.function.Supplier;
  **/
 public final class PlayingPhase extends TimedPhase {
 
-    private static final int PLAYING_TIME = 300;
-
+    private final int playingTime;
     private final IntConsumer timeUpdater;
     private final VoidConsumer startGameLogic;
 
     /**
      * Creates a new instance of the {@link PlayingPhase} with the given parameters.
      *
+     * @param playingTime    the duration of the round in seconds
      * @param timeUpdater    the updater for time update
      * @param startGameLogic the logic to start the game
      * @param gameListener   a map of listeners which are required for the game
      */
     public PlayingPhase(
+            int playingTime,
             IntConsumer timeUpdater,
             VoidConsumer startGameLogic,
             Supplier<Map<Class<? extends Event>, Consumer<? extends Event>>> gameListener
     ) {
         super("GamePhase", ChronoUnit.SECONDS, 1);
+        this.playingTime = playingTime;
         this.timeUpdater = timeUpdater;
         this.startGameLogic = startGameLogic;
-        this.setCurrentTicks(PLAYING_TIME);
+        this.setCurrentTicks(playingTime);
         this.setTickDirection(TickDirection.DOWN);
 
         for (Map.Entry<Class<? extends Event>, Consumer<? extends Event>> entrySet : gameListener.get().entrySet()) {
@@ -51,10 +53,10 @@ public final class PlayingPhase extends TimedPhase {
 
     @Override
     public void onStart() {
-        this.setCurrentTicks(PLAYING_TIME);
+        this.setCurrentTicks(this.playingTime);
         super.onStart();
         EventDispatcher.call(new SpawnCleanupEvent());
-        this.timeUpdater.accept(PLAYING_TIME);
+        this.timeUpdater.accept(this.playingTime);
         this.startGameLogic.apply();
     }
 

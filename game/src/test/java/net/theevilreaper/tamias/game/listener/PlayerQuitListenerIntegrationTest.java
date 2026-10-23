@@ -58,7 +58,7 @@ class PlayerQuitListenerIntegrationTest extends TamiasPlayerTestBase {
         staminaService.start();
         assertNotNull(staminaService.getStaminaBar(bomber));
 
-        createListener(new PlayingPhase(_ -> {}, () -> {}, HashMap::new), teamService, staminaService)
+        createListener(new PlayingPhase(300, _ -> {}, () -> {}, HashMap::new), teamService, staminaService)
                 .accept(new PlayerDisconnectEvent(bomber));
 
         assertFalse(bomberTeam.hasPlayer(bomber));
@@ -100,7 +100,7 @@ class PlayerQuitListenerIntegrationTest extends TamiasPlayerTestBase {
         env.createPlayer(instance);
         TeamService teamService = loadTeams();
 
-        createListener(new PlayingPhase(_ -> {}, () -> {}, HashMap::new), teamService, new StaminaService())
+        createListener(new PlayingPhase(300, _ -> {}, () -> {}, HashMap::new), teamService, new StaminaService())
                 .accept(new PlayerDisconnectEvent(leavingPlayer));
 
         assertEquals(1, earlyGameFinishes.get());
@@ -125,7 +125,7 @@ class PlayerQuitListenerIntegrationTest extends TamiasPlayerTestBase {
         List<Integer> bomberCountsOnRoundEndCheck = new ArrayList<>();
 
         new PlayerQuitListener(
-                () -> new PlayingPhase(_ -> {}, () -> {}, HashMap::new),
+                () -> new PlayingPhase(300, _ -> {}, () -> {}, HashMap::new),
                 key -> teamService.getTeam(key).orElse(null),
                 _ -> {},
                 () -> bomberCountsOnRoundEndCheck.add(bomberTeam.getPlayers().size()),
@@ -155,7 +155,7 @@ class PlayerQuitListenerIntegrationTest extends TamiasPlayerTestBase {
         // A player who is kicked by the join listener is never spawned and has no instance
         Player kickedPlayer = new TamiasPlayer(new ConfigurationConnection(), new GameProfile(UUID.randomUUID(), "Kicked"));
 
-        createListener(new PlayingPhase(_ -> {}, () -> {}, HashMap::new), loadTeams(), new StaminaService())
+        createListener(new PlayingPhase(300, _ -> {}, () -> {}, HashMap::new), loadTeams(), new StaminaService())
                 .accept(new PlayerDisconnectEvent(kickedPlayer));
 
         messages.assertEmpty();

@@ -21,7 +21,7 @@ class PlayingPhaseIntegrationTest {
     @Test
     void testRegularFinishEndsTheRound(@NotNull Env env) {
         List<RoundEndEvent> events = trackRoundEnd();
-        PlayingPhase phase = new PlayingPhase(_ -> {}, () -> {}, HashMap::new);
+        PlayingPhase phase = new PlayingPhase(300, _ -> {}, () -> {}, HashMap::new);
         phase.start();
 
         phase.finish();
@@ -30,9 +30,20 @@ class PlayingPhaseIntegrationTest {
     }
 
     @Test
+    void testRoundUsesTheGivenPlayingTime(@NotNull Env env) {
+        List<Integer> times = new ArrayList<>();
+        PlayingPhase phase = new PlayingPhase(120, times::add, () -> {}, HashMap::new);
+
+        phase.start();
+
+        assertEquals(120, phase.getCurrentTicks());
+        assertEquals(List.of(120), times);
+    }
+
+    @Test
     void testSkippedFinishAbortsTheRound(@NotNull Env env) {
         List<RoundEndEvent> events = trackRoundEnd();
-        PlayingPhase phase = new PlayingPhase(_ -> {}, () -> {}, HashMap::new);
+        PlayingPhase phase = new PlayingPhase(300, _ -> {}, () -> {}, HashMap::new);
         phase.start();
 
         phase.setSkipping(true);

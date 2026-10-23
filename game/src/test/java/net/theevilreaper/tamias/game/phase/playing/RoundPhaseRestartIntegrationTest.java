@@ -92,7 +92,7 @@ class RoundPhaseRestartIntegrationTest extends TamiasPlayerTestBase {
 
     @Test
     void testPlayingPhaseRestoresTicksOnRestart() {
-        PlayingPhase phase = new PlayingPhase(_ -> {}, () -> {}, HashMap::new);
+        PlayingPhase phase = new PlayingPhase(300, _ -> {}, () -> {}, HashMap::new);
         int initialTicks = phase.getCurrentTicks();
 
         runAndRestart(phase);
@@ -103,7 +103,7 @@ class RoundPhaseRestartIntegrationTest extends TamiasPlayerTestBase {
     @Test
     void testPlayingPhaseShowsFullTimeBeforeStartLogic(@NotNull Env env) {
         List<String> calls = new ArrayList<>();
-        PlayingPhase phase = new PlayingPhase(time -> calls.add("time " + time), () -> calls.add("start"), HashMap::new);
+        PlayingPhase phase = new PlayingPhase(300, time -> calls.add("time " + time), () -> calls.add("start"), HashMap::new);
 
         phase.start();
 
