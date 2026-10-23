@@ -148,6 +148,27 @@ class TNTPlacementIntegrationTest {
     }
 
     @Test
+    void testEveryReadyGroupIsDroppedInTheSameTick(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        instance.loadChunk(Vec.ZERO).join();
+
+        List<TntGroup> groups = List.of(
+                new TntGroup(new Vec(2, 50, 2), List.of()),
+                new TntGroup(new Vec(8, 50, 8), List.of())
+        );
+        List<Vec> landed = new ArrayList<>();
+
+        TNTPlacement placement = new TNTPlacement(instance, landed::add);
+        placement.updateGroups(groups, _ -> true);
+        placement.place(GroundDataRegistry.DEFAULT_SPAWN_DATA);
+
+        env.tickWhile(landed::isEmpty, Duration.ofSeconds(5));
+
+        assertEquals(groups.size(), landed.size(), "Both groups are ready, so they must land together");
+        env.destroyInstance(instance);
+    }
+
+    @Test
     void testStopCancelsTheTntWhichHasNotLanded(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
         instance.loadChunk(Vec.ZERO).join();
