@@ -114,7 +114,7 @@ class ExplodeBarIntegrationTest extends TamiasPlayerTestBase {
         eventListener.followup(event -> {
             assertEquals(player, event.getPlayer());
             assertEquals(explodeBar, event.getExplodeBar());
-            assertEquals(0, player.getAttribute(Attribute.MOVEMENT_SPEED).getBaseValue());
+            assertEquals(0, player.getAttribute(Attribute.MOVEMENT_SPEED).getValue());
         });
 
         // Regeneration ticks 1..5 (current goes from 0 to 5)

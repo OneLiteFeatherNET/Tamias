@@ -1,7 +1,10 @@
 package net.theevilreaper.tamias.game.attribute;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.attribute.Attribute;
+import net.minestom.server.entity.attribute.AttributeModifier;
+import net.minestom.server.entity.attribute.AttributeOperation;
 
 /**
  * The {@link AttributeHelper} is a helper class to adjust some attributes of the player.
@@ -13,11 +16,10 @@ import net.minestom.server.entity.attribute.Attribute;
 @SuppressWarnings("java:S3252")
 public final class AttributeHelper {
 
-    private static final double ZERO_MOVEMENT = 0.0;
-    private static final double DEFAULT_MOVE_SPEED = 0.1;
-
-    private static final double DEFAULT_JUMP_HEIGHT = 0.42;
-    private static final double ZERO_JUMP = 0.0;
+    private static final Key FREEZE_KEY = Key.key("tamias", "freeze");
+    // Multiplies the total value by zero, so the base value of the player stays untouched
+    private static final AttributeModifier FREEZE_MODIFIER =
+            new AttributeModifier(FREEZE_KEY, -1.0, AttributeOperation.ADD_MULTIPLIED_TOTAL);
 
     /**
      * Disables the movement of the player.
@@ -25,8 +27,8 @@ public final class AttributeHelper {
      * @param player the player to disable the movement
      */
     public static void disableMovement(Player player) {
-        player.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(ZERO_MOVEMENT);
-        player.getAttribute(Attribute.JUMP_STRENGTH).setBaseValue(ZERO_JUMP);
+        player.getAttribute(Attribute.MOVEMENT_SPEED).addModifier(FREEZE_MODIFIER);
+        player.getAttribute(Attribute.JUMP_STRENGTH).addModifier(FREEZE_MODIFIER);
     }
 
     /**
@@ -35,8 +37,8 @@ public final class AttributeHelper {
      * @param player the player to enable the movement
      */
     public static void enableMovement(Player player) {
-        player.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(DEFAULT_MOVE_SPEED);
-        player.getAttribute(Attribute.JUMP_STRENGTH).setBaseValue(DEFAULT_JUMP_HEIGHT);
+        player.getAttribute(Attribute.MOVEMENT_SPEED).removeModifier(FREEZE_KEY);
+        player.getAttribute(Attribute.JUMP_STRENGTH).removeModifier(FREEZE_KEY);
     }
 
     private AttributeHelper() {

@@ -35,7 +35,7 @@ class RoundPrepareListenerTest {
         assertEquals(expected.blockX(), player.getPosition().blockX());
         assertEquals(expected.blockY(), player.getPosition().blockY());
         assertEquals(expected.blockZ(), player.getPosition().blockZ());
-        assertEquals(0, player.getAttribute(Attribute.MOVEMENT_SPEED).getBaseValue());
+        assertEquals(0, player.getAttribute(Attribute.MOVEMENT_SPEED).getValue());
 
         env.destroyInstance(instance, true);
     }

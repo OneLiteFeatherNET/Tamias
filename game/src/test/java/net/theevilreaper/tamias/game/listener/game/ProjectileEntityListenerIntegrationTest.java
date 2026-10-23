@@ -44,7 +44,7 @@ class ProjectileEntityListenerIntegrationTest extends TamiasPlayerTestBase {
         listener.accept(createHit(shooter, bomber));
 
         assertEquals(0, bomber.getLevel());
-        assertEquals(0, bomber.getAttribute(Attribute.MOVEMENT_SPEED).getBaseValue());
+        assertEquals(0, bomber.getAttribute(Attribute.MOVEMENT_SPEED).getValue());
 
         env.destroyInstance(instance, true);
     }

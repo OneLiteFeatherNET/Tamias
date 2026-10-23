@@ -97,7 +97,7 @@ class RoundEndListenerIntegrationTest extends TamiasPlayerTestBase {
 
         assertTrue(player.getInventory().getItemStack(0).isAir());
         assertTrue(player.getActiveEffects().isEmpty());
-        assertTrue(player.getAttribute(Attribute.MOVEMENT_SPEED).getBaseValue() > 0);
+        assertTrue(player.getAttribute(Attribute.MOVEMENT_SPEED).getValue() > 0);
         assertFalse(player.hasTag(Tags.TEAM_KEY));
 
         env.destroyInstance(instance, true);
