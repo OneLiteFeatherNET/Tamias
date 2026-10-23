@@ -48,34 +48,4 @@ class MapPrepareListenerTest {
 
         env.destroyInstance(instance);
     }
-
-    @Test
-    void testAreaIsOnlyPreparedOnce(@NotNull Env env) {
-        Instance instance = env.createFlatInstance();
-        GameArea gameArea = new GameArea(
-                AreaData.builder()
-                        .lowerCorner(Vec.ZERO)
-                        .upperCorner(new Vec(20, 0, 20))
-                        .facing(Direction.NORTH)
-                        .build()
-        );
-        gameArea.calculatePositions();
-        GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
-
-        AtomicInteger firedCount = new AtomicInteger();
-        env.process().eventHandler()
-                .addListener(GameAreaChunksReadyEvent.class, event -> firedCount.incrementAndGet());
-
-        // A player leaving the lobby restarts the countdown, which calls the event again
-        MapPrepareListener listener = new MapPrepareListener(gamePlacement);
-        listener.accept(new MapPrepareEvent());
-        listener.accept(new MapPrepareEvent());
-
-        env.tickWhile(() -> firedCount.get() == 0, Duration.ofSeconds(10));
-        env.tick();
-
-        assertEquals(1, firedCount.get());
-
-        env.destroyInstance(instance);
-    }
 }

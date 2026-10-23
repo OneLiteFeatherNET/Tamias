@@ -10,17 +10,11 @@ import org.slf4j.LoggerFactory;
 
 import java.util.function.Consumer;
 
-/**
- * Prepares the game area once the lobby countdown reaches its preparation time.
- * The countdown can run again when players leave the lobby, but the area is only prepared once:
- * a second flatten would treat the placed barriers as foreign blocks and remove the whole ground.
- */
 public final class MapPrepareListener implements Consumer<MapPrepareEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MapPrepareListener.class);
 
     private final GamePlacement gamePlacement;
-    private boolean prepared;
 
     public MapPrepareListener(GamePlacement gamePlacement) {
         this.gamePlacement = gamePlacement;
@@ -28,8 +22,8 @@ public final class MapPrepareListener implements Consumer<MapPrepareEvent> {
 
     @Override
     public void accept(MapPrepareEvent event) {
-        if (this.prepared) return;
-        this.prepared = true;
+        // The lobby countdown can run again when players leave, the chunks are only loaded once
+        if (this.gamePlacement.isPrepared()) return;
         this.gamePlacement.preloadChunks()
                 .thenRunAsync(
                         () -> EventDispatcher.call(new GameAreaChunksReadyEvent()),

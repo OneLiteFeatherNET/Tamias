@@ -40,6 +40,7 @@ public final class GamePlacement implements Placement {
     private final Instance instance;
     private SweepAreaPlacement activePattern;
     private List<Vec> tntCandidates;
+    private boolean prepared;
 
     public GamePlacement(Instance instance, GameArea area) {
         this.instance = instance;
@@ -109,7 +110,27 @@ public final class GamePlacement implements Placement {
         this.activePattern.place(groundData);
     }
 
-    public void flatten() {
+    /**
+     * Prepares the game area once: keeps only the marked ground positions and replaces them with barriers.
+     * Further calls are ignored, a second flatten would treat the barriers as foreign blocks and remove the whole ground.
+     */
+    public void prepare() {
+        if (this.prepared) return;
+        this.prepared = true;
+        flatten();
+        applyPositions();
+    }
+
+    /**
+     * Returns whether the game area is already prepared.
+     *
+     * @return true if {@link #prepare()} was called before
+     */
+    public boolean isPrepared() {
+        return this.prepared;
+    }
+
+    void flatten() {
         Set<Vec> positionsToRemove = new HashSet<>();
         replaceCornerBlock(this.area.getGameAreaData().lowerCorner());
         replaceCornerBlock(this.area.getGameAreaData().upperCorner());
@@ -137,7 +158,7 @@ public final class GamePlacement implements Placement {
      * Applies the calculated positions to the given instance.
      * This method should be called after the instance is available if it wasn't provided in the constructor.
      */
-    public void applyPositions() {
+    void applyPositions() {
         Collection<Vec> areaPositions = area.getPositions();
 
         for (Vec pos : areaPositions) {

@@ -15,7 +15,6 @@ public final class GameAreaPrepareListener implements Consumer<GameAreaChunksRea
 
     @Override
     public void accept(GameAreaChunksReadyEvent event) {
-        this.gamePlacement.flatten();
-        this.gamePlacement.applyPositions();
+        this.gamePlacement.prepare();
     }
 }
