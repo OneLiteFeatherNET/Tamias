@@ -91,6 +91,7 @@ class RoundEndListenerIntegrationTest extends TamiasPlayerTestBase {
         TeamHelper.addPlayerToTeam(teamService.getTeam(GameConfig.BOMBER_KEY).orElseThrow(), player);
         player.addEffect(new Potion(PotionEffect.BLINDNESS, (byte) 1, Integer.MAX_VALUE));
         AttributeHelper.disableMovement(player);
+        player.setLevel(10);
         assertFalse(player.getInventory().getItemStack(0).isAir());
 
         new RoundEndListener(teamService::getTeams, () -> {}, NO_CREDIT).accept(new RoundEndEvent());
@@ -99,6 +100,7 @@ class RoundEndListenerIntegrationTest extends TamiasPlayerTestBase {
         assertTrue(player.getActiveEffects().isEmpty());
         assertTrue(player.getAttribute(Attribute.MOVEMENT_SPEED).getValue() > 0);
         assertFalse(player.hasTag(Tags.TEAM_KEY));
+        assertEquals(0, player.getLevel());
 
         env.destroyInstance(instance, true);
     }

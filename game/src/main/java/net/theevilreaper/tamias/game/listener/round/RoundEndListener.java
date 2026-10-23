@@ -97,6 +97,8 @@ public final class RoundEndListener implements Consumer<RoundEndEvent> {
         player.removeTag(Tags.TEAM_KEY);
         player.getInventory().clear();
         player.setDisplayName(Component.text(player.getUsername()));
+        player.setLevel(0);
+        player.setExp(0f);
         for (TimedPotion activeEffect : new ArrayList<>(player.getActiveEffects())) {
             player.removeEffect(activeEffect.potion().effect());
         }
