@@ -64,9 +64,10 @@ public final class SweepAreaPlacement extends AreaBasePlacement {
     }
 
     /**
-     * {@inheritDoc}
+     * Starts the placement of the ground with the given data.
+     *
+     * @param groundData the data which defines the ground and the special blocks
      */
-    @Override
     public void place(GroundData groundData) {
         if (!tryStart()) return;
         List<Vec> posList = new ArrayList<>(this.blockPositions);
@@ -85,7 +86,7 @@ public final class SweepAreaPlacement extends AreaBasePlacement {
                 return;
             }
             for (Vec pos : positions) {
-                this.doPlaceBlock(pos, groundData);
+                this.doPlaceBlock(pos, getBlock(pos, groundData));
             }
             // One sound per step would be too noisy, so only every few steps one is played at the building front
             if (steps[0]++ % GROUND_SOUND_INTERVAL == 0) {
@@ -96,17 +97,17 @@ public final class SweepAreaPlacement extends AreaBasePlacement {
     }
 
     /**
-     * {@inheritDoc}
+     * Returns the block for the given position, special positions get an additional block of the ground data.
+     *
+     * @param position   the position of the block
+     * @param groundData the data which defines the ground and the special blocks
+     * @return the block to place
      */
-    @Override
-    protected void placeBlock(Vec position, GroundData groundData) {
-        Block groundBlock;
+    private Block getBlock(Vec position, GroundData groundData) {
         if (this.specialPositions.contains(position)) {
-            groundBlock = groundData.getAddtionalBlock();
-        } else {
-            groundBlock = groundData.groundBlock();
+            return groundData.getAddtionalBlock();
         }
-        this.instance.setBlock(position, groundBlock);
+        return groundData.groundBlock();
     }
 
     /**

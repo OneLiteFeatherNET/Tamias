@@ -6,7 +6,7 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.timer.Task;
-import net.theevilreaper.tamias.common.ground.GroundData;
+import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ public abstract non-sealed class AreaBasePlacement implements AreaPlacement {
     /**
      * Guards against starting a placement run while one is already active and resets the
      * placed-position tracking for the new run.
-     * Subclasses must call this at the start of {@link #place(GroundData)} instead of manually
+     * Subclasses must call this at the start of their placement run instead of manually
      * checking {@link #buildTask} so {@link #getPlacedPositions()} stays accurate for every
      * placement strategy.
      *
@@ -43,14 +43,14 @@ public abstract non-sealed class AreaBasePlacement implements AreaPlacement {
 
     /**
      * Places a block at the given position and records it as placed.
-     * Subclasses must call this instead of {@link #placeBlock(Vec, GroundData)} directly so the
-     * position shows up in {@link #getPlacedPositions()}.
+     * Subclasses must call this instead of setting the block directly so the position shows up in
+     * {@link #getPlacedPositions()}.
      *
-     * @param position   the position to place the block
-     * @param groundData the ground data to place with
+     * @param position the position to place the block
+     * @param block    the block to place
      */
-    protected final void doPlaceBlock(Vec position, GroundData groundData) {
-        placeBlock(position, groundData);
+    protected final void doPlaceBlock(Vec position, Block block) {
+        this.instance.setBlock(position, block);
         this.placedPositions.add(position);
     }
 
@@ -61,13 +61,6 @@ public abstract non-sealed class AreaBasePlacement implements AreaPlacement {
             onlinePlayer.setExp(1 - progress);
         }
     }
-
-    /**
-     * Places a block at the given position
-     *
-     * @param position the position to place the block
-     */
-    protected abstract void placeBlock(Vec position, GroundData groundData);
 
     /**
      * {@inheritDoc}

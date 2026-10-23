@@ -14,7 +14,6 @@ import net.theevilreaper.tamias.common.area.placement.TNTPlacement;
 import net.theevilreaper.tamias.common.area.placement.TntGroup;
 import net.theevilreaper.tamias.common.area.placement.TntLayout;
 import net.theevilreaper.tamias.common.ground.GroundData;
-import net.theevilreaper.tamias.common.ground.GroundDataRegistry;
 import net.theevilreaper.tamias.common.map.layer.AreaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -214,7 +213,7 @@ public final class GamePlacement implements Placement {
 
         this.area.setTntPositions(List.of());
         this.tntPlacement.updateGroups(groups, pattern::isPlaced);
-        this.tntPlacement.place(GroundDataRegistry.DEFAULT_SPAWN_DATA);
+        this.tntPlacement.place();
         LOGGER.info("Dropping {} TNT blocks in {} groups onto the game area",
                 groups.stream().mapToInt(group -> group.members().size() + 1).sum(), groups.size());
         return this.tntPlacement.landed();
