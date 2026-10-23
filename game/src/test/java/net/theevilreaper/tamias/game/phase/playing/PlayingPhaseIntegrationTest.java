@@ -1,6 +1,5 @@
 package net.theevilreaper.tamias.game.phase.playing;
 
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.EventListener;
 import net.minestom.testing.Env;
 import net.minestom.testing.extension.MicrotusExtension;
@@ -20,7 +19,7 @@ class PlayingPhaseIntegrationTest {
 
     @Test
     void testRegularFinishEndsTheRound(@NotNull Env env) {
-        List<RoundEndEvent> events = trackRoundEnd();
+        List<RoundEndEvent> events = trackRoundEnd(env);
         PlayingPhase phase = new PlayingPhase(300, _ -> {}, () -> {}, HashMap::new);
         phase.start();
 
@@ -42,7 +41,7 @@ class PlayingPhaseIntegrationTest {
 
     @Test
     void testSkippedFinishAbortsTheRound(@NotNull Env env) {
-        List<RoundEndEvent> events = trackRoundEnd();
+        List<RoundEndEvent> events = trackRoundEnd(env);
         PlayingPhase phase = new PlayingPhase(300, _ -> {}, () -> {}, HashMap::new);
         phase.start();
 
@@ -52,9 +51,9 @@ class PlayingPhaseIntegrationTest {
         assertEquals(List.of(new RoundEndEvent(true)), events);
     }
 
-    private @NotNull List<RoundEndEvent> trackRoundEnd() {
+    private @NotNull List<RoundEndEvent> trackRoundEnd(Env env) {
         List<RoundEndEvent> events = new ArrayList<>();
-        MinecraftServer.getGlobalEventHandler().addListener(EventListener.of(RoundEndEvent.class, events::add));
+        env.process().eventHandler().addListener(EventListener.of(RoundEndEvent.class, events::add));
         return events;
     }
 }
