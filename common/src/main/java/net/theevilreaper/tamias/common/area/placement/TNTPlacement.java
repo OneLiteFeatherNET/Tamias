@@ -107,7 +107,7 @@ public class TNTPlacement extends AreaBasePlacement<Vec> {
 
     /**
      * {@inheritDoc}
-     * Each tick the first group whose ground is placed is dropped.
+     * Each tick every group whose ground is placed is dropped, so the TNT keeps up with the ground placement.
      */
     @Override
     public void place(GroundData groundData) {
@@ -127,7 +127,6 @@ public class TNTPlacement extends AreaBasePlacement<Vec> {
                 if (!isGroundReady(group)) continue;
                 iterator.remove();
                 dropGroup(group, groundData);
-                return;
             }
         }).repeat(TaskSchedule.tick(1)).schedule();
     }
