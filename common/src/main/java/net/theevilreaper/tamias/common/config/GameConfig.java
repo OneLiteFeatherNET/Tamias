@@ -2,6 +2,7 @@ package net.theevilreaper.tamias.common.config;
 
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * The {@link GameConfig} interface represents the structure for a configuration which is used by the game.
@@ -85,6 +86,13 @@ public sealed interface GameConfig permits GameConfigImpl, InternalGameConfig {
     int maxRounds();
 
     /**
+     * Returns the DSN Sentry reports to.
+     *
+     * @return the DSN, or {@code null} to keep the error reporting off
+     */
+    @Nullable String sentryDsn();
+
+    /**
      * The {@link Builder} interface is used to create a new game configuration.
      * It provides methods to set the values for the configuration.
      *
@@ -142,6 +150,14 @@ public sealed interface GameConfig permits GameConfigImpl, InternalGameConfig {
          * @return the builder instance
          */
         Builder maxRounds(int maxRounds);
+
+        /**
+         * Sets the DSN Sentry reports to.
+         *
+         * @param sentryDsn the DSN, or {@code null} to keep the error reporting off
+         * @return the builder instance
+         */
+        Builder sentryDsn(@Nullable String sentryDsn);
 
         /**
          * Builds the game configuration.
