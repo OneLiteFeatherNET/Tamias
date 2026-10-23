@@ -64,9 +64,9 @@ public sealed interface GameConfig permits GameConfigImpl, InternalGameConfig {
     int lobbyTime();
 
     /**
-     * Returns the maximum game time in seconds.
+     * Returns the duration of a round in seconds.
      *
-     * @return the maximum game time
+     * @return the duration of a round
      */
     int gameTime();
 
@@ -120,9 +120,9 @@ public sealed interface GameConfig permits GameConfigImpl, InternalGameConfig {
         Builder lobbyTime(int lobbyTime);
 
         /**
-         * Sets the maximum game time in seconds.
+         * Sets the duration of a round in seconds.
          *
-         * @param gameTime the maximum game time
+         * @param gameTime the duration of a round
          * @return the builder instance
          */
         Builder gameTime(int gameTime);
