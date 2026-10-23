@@ -41,6 +41,22 @@ class PhaseSeriesHelperTest {
     }
 
     @Test
+    void testFinishEarlyMarksTheActivePhaseAsSkipping() {
+        CountingPhase roundStart = new CountingPhase("roundStart");
+        CyclicPhaseSeries<Phase> gameSeries = new CyclicPhaseSeries<>("game");
+        gameSeries.add(roundStart);
+        LinearPhaseSeries<Phase> series = new LinearPhaseSeries<>("series");
+        series.add(gameSeries);
+        series.add(new CountingPhase("restart"));
+        series.start();
+
+        PhaseSeriesHelper.finishEarly(gameSeries);
+
+        assertTrue(roundStart.skippingOnFinish, "The phase must know about the early end while it finishes");
+        assertFalse(roundStart.isSkipping());
+    }
+
+    @Test
     void testFinishEarlyIsIgnoredForAFinishedSeries() {
         CountingPhase roundStart = new CountingPhase("roundStart");
         CyclicPhaseSeries<Phase> gameSeries = new CyclicPhaseSeries<>("game");
@@ -60,6 +76,7 @@ class PhaseSeriesHelperTest {
     private static final class CountingPhase extends Phase {
 
         private final AtomicInteger starts = new AtomicInteger();
+        private boolean skippingOnFinish;
 
         private CountingPhase(@NotNull String name) {
             super(name);
@@ -68,6 +85,12 @@ class PhaseSeriesHelperTest {
         @Override
         protected void onStart() {
             this.starts.incrementAndGet();
+        }
+
+        @Override
+        public void finish() {
+            this.skippingOnFinish = isSkipping();
+            super.finish();
         }
     }
 }

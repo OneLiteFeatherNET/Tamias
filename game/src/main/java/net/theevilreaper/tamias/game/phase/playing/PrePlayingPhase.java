@@ -2,15 +2,12 @@ package net.theevilreaper.tamias.game.phase.playing;
 
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.sound.Sound;
-import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.sound.SoundEvent;
 import net.theevilreaper.tamias.game.stamina.event.StaminaCreateEvent;
 import net.theevilreaper.tamias.game.team.TeamHelper;
 import net.theevilreaper.tamias.game.util.GameMessages;
-import net.theevilreaper.xerus.api.component.team.ColorComponent;
 import net.theevilreaper.xerus.api.phase.TickDirection;
 import net.theevilreaper.xerus.api.phase.TimedPhase;
 import net.theevilreaper.xerus.api.team.TeamService;
@@ -55,15 +52,6 @@ public final class PrePlayingPhase extends TimedPhase {
         if (getCurrentTicks() > getEndTicks()) return;
         // The roles are allocated at the end, otherwise the items and the names in the tab list reveal them too early
         TeamHelper.allocateTeams(this.teamService);
-        this.teamService.getTeams().forEach(team -> {
-            ColorComponent colorComponent = team.get(ColorComponent.class);
-            if (colorComponent != null) {
-                for (Player player : team.getPlayers()) {
-                    Component displayName = Component.text(player.getUsername(), colorComponent.colorData().getChatColor());
-                    player.setDisplayName(displayName);
-                }
-            }
-        });
 
         EventDispatcher.call(new StaminaCreateEvent());
     }

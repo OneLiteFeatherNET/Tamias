@@ -15,7 +15,8 @@ public final class PhaseSeriesHelper {
     /**
      * Finishes the given series before all of its phases are played, e.g. to end the game when too few players are
      * left. The active phase is finished as usual, so its cleanup still runs, but the series does not advance to its
-     * next phase. Afterward the parent series continues with the phase after the given series.
+     * next phase. The phase is marked as skipping while it finishes, so it can tell an early end from a regular one.
+     * Afterward the parent series continues with the phase after the given series.
      *
      * @param series the series to finish
      */
@@ -26,6 +27,7 @@ public final class PhaseSeriesHelper {
         // Finishing the active phase advances the series, which is skipped while the series is marked as finished
         series.setFinished(true);
         if (activePhase != null) {
+            activePhase.setSkipping(true);
             activePhase.finish();
         }
         series.setFinished(false);
