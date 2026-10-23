@@ -2,6 +2,7 @@ package net.theevilreaper.tamias.game.team;
 
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
@@ -65,7 +66,7 @@ public final class TeamHelper {
 
     /**
      * Adds a player to the target team and applies all attached team components
-     * (e.g. team key tag, TNT entity transformation, initial team items).
+     * (e.g. team key tag, TNT entity transformation, initial team items, team colored display name).
      *
      * @param team   the team to receive the player
      * @param player the player to add
@@ -83,6 +84,12 @@ public final class TeamHelper {
         if (itemComp != null) {
             itemComp.itemApplier().accept(player);
         }
+
+        // Converted players must show their new team as well, not only the players of the allocation
+        ColorComponent colorComp = team.get(ColorComponent.class);
+        if (colorComp != null) {
+            player.setDisplayName(Component.text(player.getUsername(), colorComp.colorData().getChatColor()));
+        }
     }
 
     /**
@@ -95,6 +102,7 @@ public final class TeamHelper {
         team.removePlayer(player);
         player.removeTag(Tags.TEAM_KEY);
         player.getInventory().clear();
+        player.setDisplayName(Component.text(player.getUsername()));
         EntityHelper.switchToPlayer(player);
     }
 

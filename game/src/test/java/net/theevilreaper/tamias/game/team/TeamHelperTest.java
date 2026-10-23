@@ -1,10 +1,12 @@
 package net.theevilreaper.tamias.game.team;
 
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.testing.Env;
 import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.common.util.Tags;
+import net.theevilreaper.xerus.api.ColorData;
 import net.theevilreaper.xerus.api.team.Team;
 import net.theevilreaper.xerus.api.team.TeamService;
 import net.theevilreaper.tamias.game.player.DisguiseState;
@@ -94,6 +96,33 @@ class TeamHelperTest extends TamiasPlayerTestBase {
         Player newBomber = bomberTeam.getPlayers().iterator().next();
         assertEquals(GameConfig.BOMBER_KEY.asString(), newBomber.getTag(Tags.TEAM_KEY));
         assertEquals(DisguiseState.TNT_BLOCK, ((TamiasPlayer) newBomber).getDisguiseState());
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testTeamColorIsAppliedToTheDisplayName(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player player = env.createPlayer(instance);
+        Team survivorTeam = teamService.getTeam(GameConfig.SURVIVOR_KEY).orElseThrow();
+
+        TeamHelper.addPlayerToTeam(survivorTeam, player);
+        assertEquals(Component.text(player.getUsername(), ColorData.GREEN.getChatColor()), player.getDisplayName());
+
+        TeamHelper.removePlayerFromTeam(survivorTeam, player);
+        assertEquals(Component.text(player.getUsername()), player.getDisplayName());
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testConvertedSurvivorShowsTheBomberColor(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player player = env.createPlayer(instance);
+        TeamHelper.addPlayerToTeam(teamService.getTeam(GameConfig.SURVIVOR_KEY).orElseThrow(), player);
+
+        TeamHelper.switchToTNTTeam(teamService, player);
+
+        assertEquals(Component.text(player.getUsername(), ColorData.RED.getChatColor()), player.getDisplayName());
         env.destroyInstance(instance, true);
     }
 
