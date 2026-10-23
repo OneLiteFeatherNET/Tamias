@@ -5,14 +5,19 @@ import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.entity.metadata.projectile.FireworkRocketMeta;
 import net.minestom.server.item.component.FireworkList;
+import net.minestom.server.potion.Potion;
+import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.network.packet.server.play.SystemChatPacket;
 import net.minestom.testing.Collector;
 import net.minestom.testing.TestConnection;
 import net.minestom.server.instance.Instance;
 import net.minestom.testing.Env;
 import net.theevilreaper.tamias.common.config.GameConfig;
+import net.theevilreaper.tamias.common.util.Tags;
+import net.theevilreaper.tamias.game.attribute.AttributeHelper;
 import net.theevilreaper.tamias.game.player.DisguiseState;
 import net.theevilreaper.tamias.game.player.TamiasPlayer;
 import net.theevilreaper.tamias.game.player.TamiasPlayerTestBase;
@@ -73,6 +78,27 @@ class RoundEndListenerIntegrationTest extends TamiasPlayerTestBase {
         assertFalse(SpectatorHelper.isSpectator(player));
         assertFalse(player.isAllowFlying());
         assertEquals(DisguiseState.NONE, ((TamiasPlayer) player).getDisguiseState());
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testRoundEndResetsExplodedBomber(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player player = env.createPlayer(instance);
+        TeamService teamService = TeamService.of();
+        TeamHelper.loadTeams(2, teamService);
+        TeamHelper.addPlayerToTeam(teamService.getTeam(GameConfig.BOMBER_KEY).orElseThrow(), player);
+        player.addEffect(new Potion(PotionEffect.BLINDNESS, (byte) 1, Integer.MAX_VALUE));
+        AttributeHelper.disableMovement(player);
+        assertFalse(player.getInventory().getItemStack(0).isAir());
+
+        new RoundEndListener(teamService::getTeams, () -> {}, NO_CREDIT).accept(new RoundEndEvent());
+
+        assertTrue(player.getInventory().getItemStack(0).isAir());
+        assertTrue(player.getActiveEffects().isEmpty());
+        assertTrue(player.getAttribute(Attribute.MOVEMENT_SPEED).getBaseValue() > 0);
+        assertFalse(player.hasTag(Tags.TEAM_KEY));
 
         env.destroyInstance(instance, true);
     }

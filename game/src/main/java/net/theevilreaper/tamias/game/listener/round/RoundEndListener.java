@@ -2,11 +2,15 @@ package net.theevilreaper.tamias.game.listener.round;
 
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.util.RGBLike;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
+import net.minestom.server.potion.TimedPotion;
 import net.theevilreaper.aves.util.functional.VoidConsumer;
 import net.theevilreaper.tamias.common.config.GameConfig;
+import net.theevilreaper.tamias.common.util.Tags;
+import net.theevilreaper.tamias.game.attribute.AttributeHelper;
 import net.theevilreaper.tamias.game.round.RoundConditions;
 import net.theevilreaper.tamias.game.round.event.RoundEndEvent;
 import net.theevilreaper.tamias.game.util.EntityHelper;
@@ -16,6 +20,7 @@ import net.theevilreaper.tamias.game.util.SpectatorHelper;
 import net.theevilreaper.xerus.api.component.team.ColorComponent;
 import net.theevilreaper.xerus.api.team.Team;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -30,7 +35,7 @@ public final class RoundEndListener implements Consumer<RoundEndEvent> {
 
     /**
      * Creates a new {@link RoundEndListener} that stops the stamina bars, announces the winner of the round, resets
-     * spectators, shows every team member as a normal player again and clears all teams when a round ends.
+     * every team member to a normal player and clears all teams when a round ends.
      *
      * @param teamClear      a supplier that provides the list of teams to clear
      * @param staminaCleanup stops and removes the stamina bars of the round, so they don't keep running in the next one
@@ -56,10 +61,7 @@ public final class RoundEndListener implements Consumer<RoundEndEvent> {
         }
 
         for (Team team : teams) {
-            team.getPlayers().forEach(player -> {
-                SpectatorHelper.disable(player);
-                EntityHelper.switchToPlayer(player);
-            });
+            team.getPlayers().forEach(RoundEndListener::resetPlayer);
             team.clearPlayers();
         }
     }
@@ -81,6 +83,24 @@ public final class RoundEndListener implements Consumer<RoundEndEvent> {
                 FireworkUtil.launch(player, fireworkColor);
             }
         }
+    }
+
+    /**
+     * Removes everything the player got during the round, so nothing is carried over into the next one.
+     * An exploded bomber keeps its blindness and frozen movement when the round ends before the respawn.
+     *
+     * @param player the player to reset
+     */
+    private static void resetPlayer(Player player) {
+        SpectatorHelper.disable(player);
+        EntityHelper.switchToPlayer(player);
+        player.removeTag(Tags.TEAM_KEY);
+        player.getInventory().clear();
+        player.setDisplayName(Component.text(player.getUsername()));
+        for (TimedPotion activeEffect : new ArrayList<>(player.getActiveEffects())) {
+            player.removeEffect(activeEffect.potion().effect());
+        }
+        AttributeHelper.enableMovement(player);
     }
 
     private Optional<Team> getTeam(List<Team> teams, Key key) {

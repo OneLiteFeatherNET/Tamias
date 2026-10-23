@@ -40,11 +40,12 @@ public final class PrePlayingPhase extends TimedPhase {
     public void onStart() {
         this.setCurrentTicks(5);
         super.onStart();
-        TeamHelper.allocateTeams(this.teamService);
     }
 
     @Override
     protected void onFinish() {
+        // The roles are allocated at the end, otherwise the items and the names in the tab list reveal them too early
+        TeamHelper.allocateTeams(this.teamService);
         this.teamService.getTeams().forEach(team -> {
             ColorComponent colorComponent = team.get(ColorComponent.class);
             if (colorComponent != null) {
