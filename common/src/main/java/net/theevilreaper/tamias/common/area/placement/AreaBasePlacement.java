@@ -14,14 +14,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public abstract non-sealed class AreaBasePlacement<T extends Point> implements AreaPlacement {
+public abstract non-sealed class AreaBasePlacement implements AreaPlacement {
 
     protected final Instance instance;
-    protected final List<T> blockPositions;
-    protected final Set<T> placedPositions = ConcurrentHashMap.newKeySet();
+    protected final List<Vec> blockPositions;
+    protected final Set<Vec> placedPositions = ConcurrentHashMap.newKeySet();
     protected @Nullable Task buildTask;
 
-    AreaBasePlacement(Instance instance, List<T> blockPositions) {
+    AreaBasePlacement(Instance instance, List<Vec> blockPositions) {
         this.instance = instance;
         this.blockPositions = new ArrayList<>(blockPositions);
     }
@@ -43,13 +43,13 @@ public abstract non-sealed class AreaBasePlacement<T extends Point> implements A
 
     /**
      * Places a block at the given position and records it as placed.
-     * Subclasses must call this instead of {@link #placeBlock(Point, GroundData)} directly so the
+     * Subclasses must call this instead of {@link #placeBlock(Vec, GroundData)} directly so the
      * position shows up in {@link #getPlacedPositions()}.
      *
      * @param position   the position to place the block
      * @param groundData the ground data to place with
      */
-    protected final void doPlaceBlock(T position, GroundData groundData) {
+    protected final void doPlaceBlock(Vec position, GroundData groundData) {
         placeBlock(position, groundData);
         this.placedPositions.add(position);
     }
@@ -67,7 +67,7 @@ public abstract non-sealed class AreaBasePlacement<T extends Point> implements A
      *
      * @param position the position to place the block
      */
-    protected abstract void placeBlock(T position, GroundData groundData);
+    protected abstract void placeBlock(Vec position, GroundData groundData);
 
     /**
      * {@inheritDoc}
@@ -100,19 +100,17 @@ public abstract non-sealed class AreaBasePlacement<T extends Point> implements A
      * {@inheritDoc}
      */
     @Override
-    @SuppressWarnings("unchecked")
     public void updatePositions(List<Vec> positions) {
         this.blockPositions.clear();
-        this.blockPositions.addAll((List<T>) positions);
+        this.blockPositions.addAll(positions);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    @SuppressWarnings("unchecked")
     public Set<Vec> getPlacedPositions() {
-        return Set.copyOf((Set<Vec>) this.placedPositions);
+        return Set.copyOf(this.placedPositions);
     }
 
     /**

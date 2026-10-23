@@ -39,7 +39,7 @@ import static net.theevilreaper.tamias.common.area.GameAreaHelper.TNT_POP_DELAY;
  * @version 1.0.0
  * @since 0.1.0
  */
-public class TNTPlacement extends AreaBasePlacement<Vec> {
+public class TNTPlacement extends AreaBasePlacement {
 
     private static final int FALL_TICKS = 5;
     private static final Sound LANDING_SOUND = Sound.sound(SoundEvent.BLOCK_GRAVEL_FALL, Sound.Source.BLOCK, 1f, 0.6f);

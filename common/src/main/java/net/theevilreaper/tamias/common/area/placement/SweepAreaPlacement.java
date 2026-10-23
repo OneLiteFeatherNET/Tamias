@@ -28,7 +28,7 @@ import static net.theevilreaper.tamias.common.area.GameAreaHelper.GROUND_SOUND_I
  * The fill order is fully pluggable - see {@link net.theevilreaper.tamias.common.area.GroundFillPattern}
  * for the available patterns - the batching/tracking logic here stays the same for all of them.
  */
-public final class SweepAreaPlacement extends AreaBasePlacement<Vec> {
+public final class SweepAreaPlacement extends AreaBasePlacement {
 
     private final Set<Vec> specialPositions;
     private final Comparator<Vec> fillOrder;
