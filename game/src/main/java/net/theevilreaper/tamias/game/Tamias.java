@@ -199,6 +199,7 @@ public class Tamias implements ListenerHandling {
 
         gameSeries.add(
                 new PlayingPhase(
+                        this.gameConfig.gameTime(),
                         timeUpdater,
                         startLogic,
                         this::registerGameListener

@@ -8,7 +8,7 @@ package net.theevilreaper.tamias.common.config;
  * @param minPlayers the minimum number of players required to start a game
  * @param maxPlayers the maximum number of players allowed in the game
  * @param lobbyTime  the time in seconds before the game starts
- * @param gameTime   the maximum duration of a game in minutes
+ * @param gameTime   the duration of a round in seconds
  * @param teamSize   the general size of each team
  * @author theEvilReaper
  * @version 1.0.0

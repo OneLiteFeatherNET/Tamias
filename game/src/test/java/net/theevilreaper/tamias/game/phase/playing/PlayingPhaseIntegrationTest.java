@@ -1,6 +1,5 @@
 package net.theevilreaper.tamias.game.phase.playing;
 
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.EventListener;
 import net.minestom.testing.Env;
 import net.minestom.testing.extension.MicrotusExtension;
@@ -20,8 +19,8 @@ class PlayingPhaseIntegrationTest {
 
     @Test
     void testRegularFinishEndsTheRound(@NotNull Env env) {
-        List<RoundEndEvent> events = trackRoundEnd();
-        PlayingPhase phase = new PlayingPhase(_ -> {}, () -> {}, HashMap::new);
+        List<RoundEndEvent> events = trackRoundEnd(env);
+        PlayingPhase phase = new PlayingPhase(300, _ -> {}, () -> {}, HashMap::new);
         phase.start();
 
         phase.finish();
@@ -30,9 +29,20 @@ class PlayingPhaseIntegrationTest {
     }
 
     @Test
+    void testRoundUsesTheGivenPlayingTime(@NotNull Env env) {
+        List<Integer> times = new ArrayList<>();
+        PlayingPhase phase = new PlayingPhase(120, times::add, () -> {}, HashMap::new);
+
+        phase.start();
+
+        assertEquals(120, phase.getCurrentTicks());
+        assertEquals(List.of(120), times);
+    }
+
+    @Test
     void testSkippedFinishAbortsTheRound(@NotNull Env env) {
-        List<RoundEndEvent> events = trackRoundEnd();
-        PlayingPhase phase = new PlayingPhase(_ -> {}, () -> {}, HashMap::new);
+        List<RoundEndEvent> events = trackRoundEnd(env);
+        PlayingPhase phase = new PlayingPhase(300, _ -> {}, () -> {}, HashMap::new);
         phase.start();
 
         phase.setSkipping(true);
@@ -41,9 +51,9 @@ class PlayingPhaseIntegrationTest {
         assertEquals(List.of(new RoundEndEvent(true)), events);
     }
 
-    private @NotNull List<RoundEndEvent> trackRoundEnd() {
+    private @NotNull List<RoundEndEvent> trackRoundEnd(Env env) {
         List<RoundEndEvent> events = new ArrayList<>();
-        MinecraftServer.getGlobalEventHandler().addListener(EventListener.of(RoundEndEvent.class, events::add));
+        env.process().eventHandler().addListener(EventListener.of(RoundEndEvent.class, events::add));
         return events;
     }
 }

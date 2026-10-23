@@ -33,6 +33,11 @@ class GameConfigTest {
     }
 
     @Test
+    void testDefaultRoundTakesFiveMinutes() {
+        assertEquals(300, InternalGameConfig.defaultConfig().gameTime());
+    }
+
+    @Test
     void testBuilderUsage() {
         GameConfig.Builder builder = GameConfig.builder();
         assertNotNull(builder);
