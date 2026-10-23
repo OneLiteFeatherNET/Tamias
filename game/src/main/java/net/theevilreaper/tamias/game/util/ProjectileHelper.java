@@ -17,7 +17,8 @@ import java.util.function.Function;
  **/
 public final class ProjectileHelper {
 
-    private static final double PROJECTILE_POWER = 3.0;
+    // Same speed as a thrown vanilla egg, a faster egg is hard to follow for the shooter
+    private static final double PROJECTILE_POWER = 1.5;
     private static final double PROJECTILE_UNCERTAINTY = 1.0;
 
     private ProjectileHelper() { }

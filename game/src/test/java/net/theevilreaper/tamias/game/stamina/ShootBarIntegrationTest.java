@@ -4,6 +4,8 @@ import net.kyori.adventure.sound.Sound;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.item.Material;
+import net.minestom.server.network.packet.server.play.SetCooldownPacket;
 import net.minestom.server.network.packet.server.play.SoundEffectPacket;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.testing.Collector;
@@ -105,6 +107,40 @@ class ShootBarIntegrationTest {
         soundTracker.assertSingle(this::assertSoundLevelUp);
         assertEquals(16, waitingTicks);
         assertEquals(Status.READY, shootBar.status);
+    }
+
+    @Test
+    void testShootSendsCooldown(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        TestConnection connection = env.createConnection();
+        Player player = connection.connect(instance, Pos.ZERO);
+        StaminaBar shootBar = StaminaFactory.createShootBar(player);
+        shootBar.onStart();
+        Collector<SetCooldownPacket> cooldownTracker = connection.trackIncoming(SetCooldownPacket.class);
+
+        shootBar.triggerAction();
+
+        cooldownTracker.assertSingle(packet -> {
+            assertEquals(Material.IRON_HOE.key().asString(), packet.cooldownGroup());
+            assertEquals(170, packet.cooldownTicks());
+        });
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testShootIgnoredWhileRegenerating(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player player = env.createPlayer(instance);
+        StaminaBar shootBar = StaminaFactory.createShootBar(player);
+        shootBar.onStart();
+
+        shootBar.triggerAction();
+        shootBar.triggerAction();
+
+        assertEquals(1, instance.getEntities().stream().filter(entity -> entity != player).count());
+
+        env.destroyInstance(instance, true);
     }
 
     @Test

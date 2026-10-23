@@ -74,6 +74,8 @@ public final class ExplodeBar extends StaminaBar {
         if (status == Status.DRAINING || status == Status.REGENERATING) return;
         status = Status.DRAINING;
         this.regeneratedEventFired = false;
+        // The bomb item is used up, the bomber gets a new one on the respawn
+        this.player.getInventory().clear();
         EntityHelper.prime(this.player);
     }
 
