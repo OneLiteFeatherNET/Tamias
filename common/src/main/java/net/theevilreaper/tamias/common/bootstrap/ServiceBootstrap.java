@@ -68,7 +68,7 @@ public final class ServiceBootstrap {
      */
     public static void installShutdownHandling() {
         MinecraftServer.getCommandManager().register(new StopCommand());
-        Thread.ofPlatform().name("cygnus-console-input").daemon().start(ServiceBootstrap::listenForConsoleInput);
+        Thread.ofPlatform().name("tamias-console-input").daemon().start(ServiceBootstrap::listenForConsoleInput);
     }
 
     /**
