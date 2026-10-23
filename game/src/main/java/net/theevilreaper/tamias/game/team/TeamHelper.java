@@ -21,7 +21,9 @@ import net.theevilreaper.xerus.api.component.team.ColorComponent;
 import net.theevilreaper.xerus.api.team.Team;
 import net.theevilreaper.xerus.api.team.TeamService;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -131,6 +133,20 @@ public final class TeamHelper {
 
         addPlayerToTeam(bomberTeam, bomber);
         onlinePlayers.forEach(survivor -> addPlayerToTeam(survivorTeam, survivor));
+    }
+
+    /**
+     * Chooses a random survivor who replaces the bomber team when no bomber is left, e.g. because the last bomber
+     * left the game. At least one survivor must remain afterward, otherwise the round is over anyway.
+     *
+     * @param teamService the team service providing teams
+     * @return the chosen survivor or an empty optional if no replacement is required or possible
+     */
+    public static Optional<Player> chooseReplacementBomber(TeamService teamService) {
+        Team bomberTeam = getTeam(teamService, GameConfig.BOMBER_KEY);
+        Team survivorTeam = getTeam(teamService, GameConfig.SURVIVOR_KEY);
+        if (!bomberTeam.isEmpty() || survivorTeam.getPlayers().size() < 2) return Optional.empty();
+        return Players.getRandomPlayer(new ArrayList<>(survivorTeam.getPlayers()));
     }
 
     /**
