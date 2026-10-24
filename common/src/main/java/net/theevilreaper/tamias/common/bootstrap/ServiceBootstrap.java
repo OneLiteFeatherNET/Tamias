@@ -1,5 +1,6 @@
 package net.theevilreaper.tamias.common.bootstrap;
 
+import net.minestom.server.Auth;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
 import org.slf4j.Logger;
@@ -14,7 +15,7 @@ import java.nio.file.Paths;
 
 /**
  * Wires the parts a CloudNet-managed service process needs: reading the bind address CloudNet
- * assigns per-service, and reacting to CloudNet's stdin-based stop signal instead of being killed
+ * assigns per-service, resolving how incoming connections are authenticated, and reacting to CloudNet's stdin-based stop signal instead of being killed
  * after a timeout.
  *
  * @author TheMeinerLP
@@ -27,6 +28,7 @@ public final class ServiceBootstrap {
     private static final String DEFAULT_BIND_HOST = "localhost";
     private static final int DEFAULT_BIND_PORT = 25565;
     private static final String DEFAULT_WORKING_DIR = "";
+    static final String VELOCITY_SECRET_PROPERTY = "minestom-velocity-secret";
 
     private ServiceBootstrap() {
     }
@@ -59,6 +61,49 @@ public final class ServiceBootstrap {
      */
     public static Path resolveWorkingDirectory() {
         return Paths.get(System.getProperty("service.working.dir", DEFAULT_WORKING_DIR));
+    }
+
+    /**
+     * Resolves how incoming connections are authenticated from the
+     * {@code minestom-velocity-secret} system property.
+     *
+     * @return the result of {@link #resolveAuth(String)} for the property value
+     */
+    public static Auth resolveAuth() {
+        return resolveAuth(System.getProperty(VELOCITY_SECRET_PROPERTY));
+    }
+
+    /**
+     * Resolves how incoming connections are authenticated.
+     * <p>
+     * A secret puts the server behind a Velocity proxy: it is the {@code forwarding.secret} of that
+     * proxy, and players are then expected to arrive through it rather than connect directly.
+     * Without a secret the server keeps authenticating in offline mode, which is what a standalone
+     * run needs.
+     * </p>
+     * <p>
+     * The result has to reach {@code ExtensionBootstrap.init(Auth)} - Minestom binds the
+     * {@link Auth} to the server process at that point and offers no way to switch it afterwards.
+     * </p>
+     *
+     * @param secret the configured forwarding secret, may be {@code null}
+     * @return {@link Auth.Velocity} carrying the trimmed secret, or {@link Auth.Offline} if the
+     * secret is absent or blank
+     */
+    static Auth resolveAuth(String secret) {
+        if (secret == null) {
+            return new Auth.Offline();
+        }
+        String trimmed = secret.trim();
+        if (trimmed.isEmpty()) {
+            // An empty secret is a start script whose variable did not expand, not a deliberate
+            // choice, and Minestom would reject it with an exception that names no source.
+            LOGGER.warn("{} is set but empty - falling back to offline mode authentication",
+                    VELOCITY_SECRET_PROPERTY);
+            return new Auth.Offline();
+        }
+        LOGGER.info("Velocity modern forwarding enabled - authenticating players through the proxy");
+        return new Auth.Velocity(trimmed);
     }
 
     /**
