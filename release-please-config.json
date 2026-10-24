@@ -11,7 +11,10 @@
       "release-type": "java",
       "changelog-path": "CHANGELOG.md",
       "extra-files": [
-        { "type": "generic", "path": "gradle.properties" }
+        {
+          "type": "generic",
+          "path": "build.gradle.kts"
+        }
       ]
     }
   }
