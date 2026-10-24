@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
  * Pins the assumption every other test relies on: the LuckPerms loader is kept off the test class
- * path, so Cygnus runs in its LuckPerms-free mode while tests execute.
+ * path, so Tamias runs in its LuckPerms-free mode while tests execute.
  *
  * @author TheMeinerLP
  * @version 1.0.0
@@ -29,9 +29,9 @@ class LuckPermsSupportTest {
     @Test
     void testNoteFallbackGrantDoesNotThrowOnRepeatedCalls() {
         assertDoesNotThrow(() -> {
-            LuckPermsSupport.noteFallbackGrant("cygnus.test");
-            LuckPermsSupport.noteFallbackGrant("cygnus.test");
-            LuckPermsSupport.noteFallbackGrant("cygnus.other");
+            LuckPermsSupport.noteFallbackGrant("tamias.test");
+            LuckPermsSupport.noteFallbackGrant("tamias.test");
+            LuckPermsSupport.noteFallbackGrant("tamias.other");
         });
     }
 }

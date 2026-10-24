@@ -2,13 +2,12 @@ package net.theevilreaper.tamias.common.bootstrap;
 
 import net.kyori.adventure.permission.PermissionChecker;
 import net.kyori.adventure.util.TriState;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.entity.Player;
 
 /**
- * Shuts the service down cleanly. Reserved for non-player senders (the console/CloudNet) and
+ * Shuts the service down cleanly through {@link ServiceShutdown#request()}. Reserved for non-player senders (the console/CloudNet) and
  * players holding {@value #PERMISSION}, since a service should not be stoppable by regular players.
  *
  * @author TheMeinerLP
@@ -17,7 +16,7 @@ import net.minestom.server.entity.Player;
  **/
 public final class StopCommand extends Command {
 
-    private static final String PERMISSION = "cygnus.command.stop";
+    static final String PERMISSION = "tamias.command.stop";
 
     /**
      * Creates a new instance of the {@link StopCommand} and wires its condition and executor.
@@ -25,10 +24,7 @@ public final class StopCommand extends Command {
     public StopCommand() {
         super("stop");
         setCondition((sender, commandString) -> !(sender instanceof Player) || hasStopPermission(sender));
-        setDefaultExecutor((sender, context) -> Thread.ofPlatform().name("cygnus-shutdown").start(() -> {
-            MinecraftServer.stopCleanly();
-            System.exit(0);
-        }));
+        setDefaultExecutor((sender, context) -> ServiceShutdown.request());
     }
 
     /**

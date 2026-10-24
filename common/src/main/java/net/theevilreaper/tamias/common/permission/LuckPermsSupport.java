@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Decides whether Cygnus runs with LuckPerms.
+ * Decides whether Tamias runs with LuckPerms.
  * <p>
  * Minestom has no plugin folder, so LuckPerms is bootstrapped from {@code main} and shipped inside
  * the fat jar. A class path that leaves the loader out - the test class path does exactly that -

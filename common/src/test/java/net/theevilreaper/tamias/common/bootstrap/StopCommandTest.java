@@ -31,6 +31,11 @@ class StopCommandTest {
     }
 
     @Test
+    void testStopPermissionNode() {
+        assertEquals("tamias.command.stop", StopCommand.PERMISSION, "the stop permission node must use the tamias namespace");
+    }
+
+    @Test
     void testConsoleSenderIsAlwaysAllowed(@NotNull Env env) {
         StopCommand command = new StopCommand();
         CommandSender consoleSender = env.process().command().getConsoleSender();
@@ -51,7 +56,7 @@ class StopCommandTest {
 
     /**
      * A player which adds nothing to {@link PermissionAwarePlayer}, so the command sees the same
-     * pointer a Cygnus player carries.
+     * pointer a Tamias player carries.
      */
     private static final class TestPlayer extends PermissionAwarePlayer {
 
