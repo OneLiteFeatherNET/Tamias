@@ -38,6 +38,27 @@ class GameConfigTest {
     }
 
     @Test
+    void testDefaultConfigHasNoSentryDsn() {
+        assertNull(InternalGameConfig.defaultConfig().sentryDsn(), "error reporting must be opt-in");
+    }
+
+    @Test
+    void testBuilderKeepsTheSentryDsn() {
+        GameConfig config = GameConfig.builder().minPlayers(2).maxPlayers(12).teamSize(12)
+                .sentryDsn("https://key@sentry.example/1").build();
+
+        assertEquals("https://key@sentry.example/1", config.sentryDsn());
+    }
+
+    @Test
+    void testBuilderTurnsABlankSentryDsnIntoNull() {
+        GameConfig config = GameConfig.builder().minPlayers(2).maxPlayers(12).teamSize(12)
+                .sentryDsn("   ").build();
+
+        assertNull(config.sentryDsn(), "a blank DSN means reporting stays off");
+    }
+
+    @Test
     void testBuilderUsage() {
         GameConfig.Builder builder = GameConfig.builder();
         assertNotNull(builder);

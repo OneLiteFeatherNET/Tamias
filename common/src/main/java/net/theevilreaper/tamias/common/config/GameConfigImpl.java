@@ -1,5 +1,7 @@
 package net.theevilreaper.tamias.common.config;
 
+import org.jetbrains.annotations.Nullable;
+
 /**
  * The {@link GameConfigImpl} is the implementation of the {@link GameConfig} interface.
  * It represents a configuration which is used to adjust some settings for the game.
@@ -10,6 +12,8 @@ package net.theevilreaper.tamias.common.config;
  * @param lobbyTime  the time in seconds before the game starts
  * @param gameTime   the duration of a round in seconds
  * @param teamSize   the general size of each team
+ * @param maxRounds  the maximum rounds for the game
+ * @param sentryDsn  the DSN Sentry reports to, or {@code null} to keep the error reporting off
  * @author theEvilReaper
  * @version 1.0.0
  * @since 1.0.0
@@ -20,7 +24,8 @@ public record GameConfigImpl(
         int lobbyTime,
         int gameTime,
         int teamSize,
-        int maxRounds
+        int maxRounds,
+        @Nullable String sentryDsn
 ) implements GameConfig {
 
 }
