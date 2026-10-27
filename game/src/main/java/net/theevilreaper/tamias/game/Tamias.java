@@ -24,6 +24,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
+import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEvent;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
@@ -36,6 +37,7 @@ import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.common.config.GameConfigReader;
 import net.theevilreaper.tamias.common.event.AreaSpawnTriggerEvent;
 import net.theevilreaper.tamias.common.event.GameAreaChunksReadyEvent;
+import net.theevilreaper.tamias.common.event.GameStartEvent;
 import net.theevilreaper.tamias.common.event.SpawnCleanupEvent;
 import net.theevilreaper.tamias.common.event.GameCleanupEvent;
 import net.theevilreaper.tamias.common.area.GameAreaHelper;
@@ -165,7 +167,10 @@ public class Tamias implements ListenerHandling {
 
     private void createPhaseStructure() {
 
-        this.phaseSeries.add(new LobbyPhase(new LobbyPhaseData(this.timeUpdater, this.gameConfig)));
+        LobbyPhase lobbyPhase = new LobbyPhase(new LobbyPhaseData(this.timeUpdater, this.gameConfig));
+        // Signals components outside of the game module (e.g. the CloudNet bridge) that the game runs
+        lobbyPhase.addFinishedCallback(() -> EventDispatcher.call(new GameStartEvent()));
+        this.phaseSeries.add(lobbyPhase);
 
         CyclicPhaseSeries<Phase> gameSeries = new CyclicPhaseSeries<>("game");
         this.gameSeries = gameSeries;
