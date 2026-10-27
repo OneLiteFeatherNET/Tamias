@@ -3,7 +3,6 @@ package net.theevilreaper.tamias.game.phase.playing;
 import net.minestom.server.event.EventListener;
 import net.minestom.testing.Env;
 import net.minestom.testing.extension.MicrotusExtension;
-import net.theevilreaper.tamias.common.event.RoundInGameEvent;
 import net.theevilreaper.tamias.game.round.event.RoundEndEvent;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -50,28 +49,6 @@ class PlayingPhaseIntegrationTest {
         phase.finish();
 
         assertEquals(List.of(new RoundEndEvent(true)), events);
-    }
-
-    @Test
-    void testStartSignalsTheRoundInGameOnce(@NotNull Env env) {
-        List<RoundInGameEvent> events = new ArrayList<>();
-        env.process().eventHandler().addListener(EventListener.of(RoundInGameEvent.class, events::add));
-        PlayingPhase phase = new PlayingPhase(300, _ -> {}, () -> {}, HashMap::new);
-
-        phase.start();
-
-        assertEquals(1, events.size(), "starting the phase must signal the round in game exactly once");
-    }
-
-    @Test
-    void testRoundInGameIsSignaledAfterTheGameLogicStarted(@NotNull Env env) {
-        List<String> order = new ArrayList<>();
-        env.process().eventHandler().addListener(EventListener.of(RoundInGameEvent.class, _ -> order.add("signal")));
-        PlayingPhase phase = new PlayingPhase(300, _ -> {}, () -> order.add("logic"), HashMap::new);
-
-        phase.start();
-
-        assertEquals(List.of("logic", "signal"), order, "the signal must follow the game logic start");
     }
 
     private @NotNull List<RoundEndEvent> trackRoundEnd(Env env) {

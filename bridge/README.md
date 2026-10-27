@@ -14,9 +14,9 @@ reject every player, staff included.
 
 ## INGAME service state
 
-`PlayingPhase.onStart()` dispatches a `RoundInGameEvent` (from `:common`) once the game logic of
-the round has started. `InGameListener` reacts to it, once per service lifetime, by calling
-`BridgeServiceHelper.changeToIngame(true)` followed by `ServiceInfoHolder.publishServiceInfoUpdate()`.
+A finished callback of the `LobbyPhase` dispatches a `GameStartEvent` (from `:common`) once the
+lobby is over, before the first round is prepared. `InGameListener` reacts to it, once per service
+lifetime, by calling `BridgeServiceHelper.changeToIngame(true)` followed by `ServiceInfoHolder.publishServiceInfoUpdate()`.
 The service is then `INGAME` for the whole cluster and CloudNet starts a fresh service of the task,
 so new players land on a lobby-state service instead of this running game.
 

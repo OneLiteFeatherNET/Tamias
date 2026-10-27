@@ -1,6 +1,6 @@
 package net.theevilreaper.tamias.bridge;
 
-import net.theevilreaper.tamias.common.event.RoundInGameEvent;
+import net.theevilreaper.tamias.common.event.GameStartEvent;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +17,7 @@ class InGameListenerTest {
         AtomicInteger calls = new AtomicInteger();
         InGameListener listener = new InGameListener(calls::incrementAndGet);
 
-        listener.accept(new RoundInGameEvent());
+        listener.accept(new GameStartEvent());
 
         assertEquals(1, calls.get(), "switch must run once");
     }
@@ -28,8 +28,8 @@ class InGameListenerTest {
         AtomicInteger calls = new AtomicInteger();
         InGameListener listener = new InGameListener(calls::incrementAndGet);
 
-        listener.accept(new RoundInGameEvent());
-        listener.accept(new RoundInGameEvent());
+        listener.accept(new GameStartEvent());
+        listener.accept(new GameStartEvent());
 
         assertEquals(1, calls.get(), "switch must stay idempotent");
     }
@@ -41,7 +41,7 @@ class InGameListenerTest {
             throw new IllegalStateException("no cloudnet");
         });
 
-        assertDoesNotThrow(() -> listener.accept(new RoundInGameEvent()));
+        assertDoesNotThrow(() -> listener.accept(new GameStartEvent()));
     }
 
     @Test
@@ -53,8 +53,8 @@ class InGameListenerTest {
             throw new IllegalStateException("no cloudnet");
         });
 
-        listener.accept(new RoundInGameEvent());
-        listener.accept(new RoundInGameEvent());
+        listener.accept(new GameStartEvent());
+        listener.accept(new GameStartEvent());
 
         assertEquals(1, calls.get(), "a failure must not trigger a second service start");
     }

@@ -9,7 +9,7 @@ import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.extensions.Extension;
 import net.onelitefeather.minestom.extensions.processor.ExtensionInfo;
-import net.theevilreaper.tamias.common.event.RoundInGameEvent;
+import net.theevilreaper.tamias.common.event.GameStartEvent;
 
 /**
  * Minestom extension that teaches the CloudNet bridge how Tamias resolves permissions.
@@ -24,9 +24,10 @@ import net.theevilreaper.tamias.common.event.RoundInGameEvent;
  * so this glue cannot live in the application. The {@code CloudNet_Bridge} dependency declared below
  * makes this extension load after the bridge and share its classloader hierarchy.
  * <p>
- * The same extension also reports the round as in game: on {@link RoundInGameEvent} it switches the
- * service to {@code INGAME} so CloudNet starts a fresh service of the task. A jar carries only one
- * extension entry point, so this lives here and shares the {@code CloudNet_Bridge} dependency.
+ * The same extension also reports the game as in game: on {@link GameStartEvent}, which is called once
+ * the lobby phase finishes, it switches the service to {@code INGAME} so CloudNet starts a fresh service
+ * of the task. A jar carries only one extension entry point, so this lives here and shares the
+ * {@code CloudNet_Bridge} dependency.
  * <p>
  * {@link ExtensionInfo} generates {@code extension.json} at compile time; the version is supplied by
  * the build through {@code -Aminestom.extension.version}.
@@ -53,7 +54,7 @@ public final class TamiasBridgePermissionExtension extends Extension {
                 .registerProvider(MinestomPermissionChecker.class, "tamias-luckperms", checker)
                 .markAsDefaultService();
 
-        inGameNode.addListener(RoundInGameEvent.class, new InGameListener(new CloudNetServiceStateSwitch()));
+        inGameNode.addListener(GameStartEvent.class, new InGameListener(new CloudNetServiceStateSwitch()));
         MinecraftServer.getGlobalEventHandler().addChild(inGameNode);
     }
 

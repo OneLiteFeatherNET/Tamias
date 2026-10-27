@@ -6,7 +6,6 @@ import net.theevilreaper.xerus.api.phase.TickDirection;
 import net.theevilreaper.xerus.api.phase.TimedPhase;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventDispatcher;
-import net.theevilreaper.tamias.common.event.RoundInGameEvent;
 import net.theevilreaper.tamias.common.event.SpawnCleanupEvent;
 
 import java.time.temporal.ChronoUnit;
@@ -59,8 +58,6 @@ public final class PlayingPhase extends TimedPhase {
         EventDispatcher.call(new SpawnCleanupEvent());
         this.timeUpdater.accept(this.playingTime);
         this.startGameLogic.apply();
-        // Signals components outside of the game module (e.g. the CloudNet bridge) that the round runs
-        EventDispatcher.call(new RoundInGameEvent());
     }
 
     @Override
