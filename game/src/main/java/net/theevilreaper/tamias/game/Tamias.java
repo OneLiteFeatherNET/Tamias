@@ -193,7 +193,10 @@ public class Tamias implements ListenerHandling {
         gameSeries.add(new GroundBuildPhase(() -> {
             GroundData randomData = GroundDataRegistry.instance().getRandomData();
             this.mapProvider.getGamePlacement().triggerPlacement(randomData);
-            return this::resetPlayerBuildProgress;
+            return () -> {
+                this.mapProvider.getGamePlacement().stopPlacements();
+                resetPlayerBuildProgress();
+            };
         }, () -> this.mapProvider.getGamePlacement().dropTnt(
                 () -> ThreadLocalRandom.current().nextInt(GameAreaHelper.MIN_TNT_AMOUNT, GameAreaHelper.MAX_TNT_AMOUNT + 1)
         )));

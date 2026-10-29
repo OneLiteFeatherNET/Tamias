@@ -195,4 +195,32 @@ class TNTPlacementIntegrationTest {
 
         env.destroyInstance(instance);
     }
+
+    @Test
+    void testStopInsideLandingCancelsTheMembersWhichPopUp(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        instance.loadChunk(Vec.ZERO).join();
+
+        Vec center = new Vec(5, 50, 5);
+        Vec member = new Vec(6, 50, 5);
+        List<Vec> landed = new ArrayList<>();
+        TNTPlacement[] placementRef = new TNTPlacement[1];
+
+        // The placement is stopped while the center lands, the member must not pop up afterwards
+        TNTPlacement placement = new TNTPlacement(instance, position -> {
+            landed.add(position);
+            placementRef[0].stop();
+        });
+        placementRef[0] = placement;
+        placement.updateGroups(List.of(new TntGroup(center, List.of(member))), _ -> true);
+        placement.place();
+
+        for (int i = 0; i < 30; i++) {
+            env.tick();
+        }
+
+        assertEquals(List.of(center), landed, "Only the center landed before the stop");
+        assertEquals(Block.AIR, instance.getBlock(member), "A member must not pop up after the placement was stopped");
+        env.destroyInstance(instance);
+    }
 }

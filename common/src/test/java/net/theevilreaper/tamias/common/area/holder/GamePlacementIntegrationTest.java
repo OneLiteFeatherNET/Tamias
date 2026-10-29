@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -380,5 +381,45 @@ class GamePlacementIntegrationTest {
         for (T point : expected) {
             assertTrue(given.contains(point), "The position " + point + " should be in the area");
         }
+    }
+
+    @Test
+    void testStopPlacementsStopsRunningGroundWithoutRemovingBlocks(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        GameArea gameArea = new GameArea(
+                AreaData.builder()
+                        .lowerCorner(Vec.ZERO)
+                        .upperCorner(new Vec(40, 0, 40))
+                        .facing(Direction.NORTH)
+                        .build()
+        );
+        gameArea.calculatePositions();
+        GamePlacement placement = new GamePlacement(instance, gameArea);
+        placement.applyPositions();
+
+        placement.triggerPlacement(GroundDataRegistry.instance().getRandomData());
+        for (int i = 0; i < 3; i++) {
+            env.tick();
+        }
+        assertTrue(placement.isRunning(), "The ground must still be placing before the stop");
+
+        placement.stopPlacements();
+        assertFalse(placement.isRunning(), "The ground placement must be stopped");
+
+        long placedAfterStop = countPlacedGround(instance, gameArea);
+        for (int i = 0; i < 30; i++) {
+            env.tick();
+        }
+
+        assertEquals(placedAfterStop, countPlacedGround(instance, gameArea), "No ground may be placed after the stop");
+        assertTrue(placedAfterStop > 0, "The already placed ground must stay in the instance");
+        assertTrue(placedAfterStop < gameArea.getPositions().size(), "The ground must not have been finished");
+        env.destroyInstance(instance);
+    }
+
+    private static long countPlacedGround(Instance instance, GameArea gameArea) {
+        return gameArea.getPositions().stream()
+                .filter(position -> instance.getBlock(position) != Block.BARRIER)
+                .count();
     }
 }

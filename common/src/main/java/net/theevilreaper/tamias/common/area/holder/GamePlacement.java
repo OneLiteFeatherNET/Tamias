@@ -74,6 +74,15 @@ public final class GamePlacement implements Placement {
     }
 
     /**
+     * Stops the TNT placement and all ground patterns without removing any block.
+     * The blocks which are already placed stay in the instance, the TNT which has not landed yet is cancelled.
+     */
+    public void stopPlacements() {
+        this.tntPlacement.stop();
+        this.groundPatterns.values().forEach(SweepAreaPlacement::stop);
+    }
+
+    /**
      * Stops all running placements and removes the ground and the TNT from the instance.
      * Every position is only cleared once and all blocks are set with a single {@link AbsoluteBlockBatch}, so the
      * players receive one update per chunk instead of one per block.
@@ -81,8 +90,7 @@ public final class GamePlacement implements Placement {
      * @return a future which completes in the instance tick after all blocks are removed
      */
     public CompletableFuture<Void> clearAsync() {
-        this.tntPlacement.stop();
-        this.groundPatterns.values().forEach(SweepAreaPlacement::stop);
+        stopPlacements();
 
         // The placed ground positions and the special positions are part of the area positions
         Set<Point> positions = new HashSet<>(this.area.getPositions());

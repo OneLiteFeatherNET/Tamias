@@ -158,9 +158,16 @@ public final class GameArea implements PlayingArea {
         return this.areaData;
     }
 
+    /**
+     * Returns a copy of the tnt positions, so the caller can iterate it while TNT is still landing.
+     *
+     * @return a copy of the positions of the placed TNT blocks
+     */
     @Override
     public Set<Vec> getTntPositions() {
-        return this.tntPositions;
+        synchronized (this.tntPositions) {
+            return new HashSet<>(this.tntPositions);
+        }
     }
 
     @Override
