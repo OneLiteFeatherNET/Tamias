@@ -25,6 +25,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -128,6 +129,54 @@ class GamePlacementIntegrationTest {
 
         assertEquals(randomData.groundBlock(), instance.getBlock(markerPosition));
         assertEquals(Block.AIR, instance.getBlock(new Vec(0, 0, 0)));
+
+        env.destroyInstance(instance);
+    }
+
+    @Test
+    void testFlattenKeepsGroundMarkerInLowerCorner(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        GameArea gameArea = new GameArea(
+                AreaData.builder()
+                        .lowerCorner(Vec.ZERO)
+                        .upperCorner(new Vec(2, 0, 2))
+                        .facing(Direction.NORTH)
+                        .build()
+        );
+        gameArea.calculatePositions();
+
+        Vec cornerMarker = Vec.ZERO;
+        prepareGround(instance, cornerMarker);
+
+        GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
+        gamePlacement.prepare();
+
+        assertTrue(gameArea.getPositions().contains(cornerMarker), "A ground marker in the lower corner must stay part of the area");
+        assertEquals(Block.BARRIER, instance.getBlock(cornerMarker));
+
+        env.destroyInstance(instance);
+    }
+
+    @Test
+    void testFlattenRemovesNonMarkerBlockInUpperCorner(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        GameArea gameArea = new GameArea(
+                AreaData.builder()
+                        .lowerCorner(Vec.ZERO)
+                        .upperCorner(new Vec(2, 0, 2))
+                        .facing(Direction.NORTH)
+                        .build()
+        );
+        gameArea.calculatePositions();
+
+        Vec upperCorner = new Vec(2, 0, 2);
+        instance.setBlock(upperCorner, Block.RED_CONCRETE);
+
+        GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
+        gamePlacement.flatten();
+
+        assertFalse(gameArea.getPositions().contains(upperCorner), "A corner without a ground marker is not ground");
+        assertEquals(Block.AIR, instance.getBlock(upperCorner));
 
         env.destroyInstance(instance);
     }

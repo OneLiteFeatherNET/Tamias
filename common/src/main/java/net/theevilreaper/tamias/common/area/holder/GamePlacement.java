@@ -174,7 +174,7 @@ public final class GamePlacement implements Placement {
      */
     private void replaceCornerBlock(Point position) {
         Block block = instance.getBlock(position);
-        if (block == Block.AIR || block == Block.BARRIER) return;
+        if (block == Block.AIR || block == Block.BARRIER || block == GameAreaHelper.GROUND_MARKER_BLOCK) return;
         instance.setBlock(position, Block.AIR);
     }
 
