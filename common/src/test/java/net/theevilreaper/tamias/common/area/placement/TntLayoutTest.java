@@ -78,13 +78,31 @@ class TntLayoutTest {
     }
 
     @Test
-    void testGroupsShrinkWithoutFreeNeighbours() {
+    void testMissingBlocksAreBackfilledWithoutFreeNeighbours() {
         // The candidates are too far apart to form a group
         List<Vec> candidates = List.of(new Vec(0, 1, 0), new Vec(5, 1, 0), new Vec(10, 1, 0), new Vec(15, 1, 0));
         List<TntGroup> groups = TntLayout.plan(candidates, 4, 1, new Random(5));
 
         assertTrue(groups.stream().allMatch(group -> group.members().isEmpty()));
-        assertTrue(blockCount(groups) < 4);
+        assertEquals(4, blockCount(groups), "All requested TNT blocks should be dropped as single blocks");
+    }
+
+    @Test
+    void testNoPositionIsUsedTwiceWhenNeighboursAreScarce() {
+        // Only the direct left and right neighbours of a candidate are free, so the groups have to be small
+        List<Vec> candidates = new ArrayList<>();
+        for (int x = 0; x < 10; x++) {
+            candidates.add(new Vec(x, 1, 0));
+        }
+        List<TntGroup> groups = TntLayout.plan(candidates, 10, 1, new Random(8));
+
+        Set<Vec> usedPositions = new HashSet<>();
+        for (TntGroup group : groups) {
+            for (Vec position : group.positions()) {
+                assertTrue(usedPositions.add(position), position + " is used twice");
+            }
+        }
+        assertEquals(10, blockCount(groups), "All requested TNT blocks should be dropped");
     }
 
     @Test
