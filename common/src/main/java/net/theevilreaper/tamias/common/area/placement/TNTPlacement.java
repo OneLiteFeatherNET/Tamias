@@ -50,6 +50,7 @@ public class TNTPlacement extends AreaBasePlacement {
     private final Set<Entity> fallingEntities;
     private Predicate<Point> groundCheck;
     private CompletableFuture<Void> landed;
+    private volatile boolean stopped;
 
     /**
      * Constructs a TNTPlacement instance.
@@ -110,6 +111,7 @@ public class TNTPlacement extends AreaBasePlacement {
      */
     public void place() {
         if (!tryStart()) return;
+        this.stopped = false;
         this.landed = new CompletableFuture<>();
         List<TntGroup> queue = new ArrayList<>(this.groups);
         this.buildTask = MinecraftServer.getSchedulerManager().buildTask(() -> {
@@ -134,6 +136,7 @@ public class TNTPlacement extends AreaBasePlacement {
      */
     @Override
     public void stop() {
+        this.stopped = true;
         super.stop();
         this.pendingTasks.forEach(Task::cancel);
         this.pendingTasks.clear();
@@ -156,7 +159,7 @@ public class TNTPlacement extends AreaBasePlacement {
      * to pop up anymore.
      */
     private void completeIfLanded() {
-        if (this.buildTask != null || !this.pendingTasks.isEmpty()) return;
+        if (this.stopped || this.buildTask != null || !this.pendingTasks.isEmpty()) return;
         this.landed.complete(null);
     }
 
@@ -204,12 +207,21 @@ public class TNTPlacement extends AreaBasePlacement {
         instance.playSound(POP_SOUND, center.x(), center.y(), center.z());
     }
 
+    /**
+     * Places the TNT block and reports its position. Nothing happens once the placement is stopped, because a
+     * landing can still be triggered by a block which lands during the stop.
+     *
+     * @param position the position where the TNT lands
+     */
     private void land(Vec position) {
+        if (this.stopped) return;
         doPlaceBlock(position, Block.TNT);
         this.landingConsumer.accept(position);
     }
 
     private void schedule(int delay, Runnable runnable) {
+        // A stopped placement must not start new landings, e.g. the members of a group which lands during the stop
+        if (this.stopped) return;
         Task[] task = new Task[1];
         task[0] = MinecraftServer.getSchedulerManager().buildTask(() -> {
             this.pendingTasks.remove(task[0]);
