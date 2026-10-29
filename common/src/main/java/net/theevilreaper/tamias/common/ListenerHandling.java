@@ -36,7 +36,7 @@ public interface ListenerHandling {
         eventNode.addListener(ItemDropEvent.class, CANCELLABLE_EVENT::accept);
         eventNode.addListener(PlayerSwapItemEvent.class, CANCELLABLE_EVENT::accept);
         eventNode.addListener(PlayerBlockInteractEvent.class, CANCELLABLE_EVENT::accept);
-        eventNode.addListener(InventoryPreClickEvent.class, CANCELLABLE_EVENT::accept);
+       // eventNode.addListener(InventoryPreClickEvent.class, CANCELLABLE_EVENT::accept);
     }
 
     /**
