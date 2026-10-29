@@ -17,6 +17,7 @@ import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.instance.Instance;
 import net.theevilreaper.tamias.common.ListenerHandling;
 import net.theevilreaper.tamias.common.bootstrap.ServiceBootstrap;
+import net.theevilreaper.tamias.setup.command.GameModeCommand;
 import net.theevilreaper.tamias.setup.dialog.event.DialogRequestEvent;
 import net.theevilreaper.tamias.setup.event.DirectionSetEvent;
 import net.theevilreaper.tamias.setup.event.PlayerMapSelectEvent;
@@ -52,6 +53,7 @@ public final class TamiasSetup implements ListenerHandling {
         this.setupDataService = SetupDataService.create();
         this.mapSetupInventory = new MapSetupInventory(this.mapProvider::getEntries);
         MinecraftServer.getSchedulerManager().buildShutdownTask(this::terminate);
+        MinecraftServer.getCommandManager().register(new GameModeCommand());
     }
 
     public void initialize() {
