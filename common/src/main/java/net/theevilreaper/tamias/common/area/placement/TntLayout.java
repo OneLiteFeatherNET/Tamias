@@ -56,6 +56,19 @@ public final class TntLayout {
             int memberCount = i < groupSizes.size() ? groupSizes.get(i) - 1 : 0;
             groups.add(new TntGroup(anchor, takeNeighbours(anchor, memberCount, freePositions, random)));
         }
+
+        // Groups which lost neighbours are topped up with single blocks, so the requested amount is dropped
+        int missing = total - groups.stream().mapToInt(group -> group.positions().size()).sum();
+        if (missing > 0) {
+            List<Vec> remaining = new ArrayList<>(freePositions.size());
+            for (Vec candidate : candidates) {
+                if (freePositions.contains(candidate)) remaining.add(candidate);
+            }
+            Collections.shuffle(remaining, random);
+            for (Vec position : selectSpreadOut(remaining, missing)) {
+                groups.add(new TntGroup(position, List.of()));
+            }
+        }
         return groups;
     }
 
