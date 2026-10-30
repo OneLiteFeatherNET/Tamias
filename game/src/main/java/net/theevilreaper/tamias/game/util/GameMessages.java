@@ -6,6 +6,8 @@ import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.minimessage.tag.Tag;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.entity.Player;
+import net.theevilreaper.aves.util.Strings;
+import net.theevilreaper.aves.util.TimeFormat;
 import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.common.util.Messages;
 import net.theevilreaper.xerus.api.component.team.ColorComponent;
@@ -92,12 +94,12 @@ public final class GameMessages extends Messages {
     /**
      * Creates a component for the title time.
      *
-     * @param time the time to display
-     * @return a component with the title time
+     * @param time the time in seconds to display
+     * @return a component with the title time in the format {@code MM:SS}
      */
     @Contract(value = "_ -> new", pure = true)
     public static Component getTitleTime(int time) {
-        return TITLE_TIME.append(Component.text(time, NamedTextColor.YELLOW));
+        return TITLE_TIME.append(Component.text(Strings.getTimeString(TimeFormat.MM_SS, time), NamedTextColor.YELLOW));
     }
 
     /**

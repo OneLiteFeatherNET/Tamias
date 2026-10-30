@@ -2,8 +2,6 @@ package net.theevilreaper.tamias.game;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.theevilreaper.aves.util.Strings;
-import net.theevilreaper.aves.util.TimeFormat;
 import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.theevilreaper.aves.util.functional.VoidConsumer;
 import net.theevilreaper.tamias.common.bootstrap.ServiceBootstrap;
@@ -135,11 +133,7 @@ public class Tamias implements ListenerHandling {
         );
         this.gameScoreboard = new GameScoreboard();
         this.activeScoreboard = this.lobbyScoreboard;
-        this.timeUpdater = value -> {
-            Component time = Component.text("Time:", NamedTextColor.GOLD).append(Component.space())
-                    .append(Component.text(Strings.getTimeString(TimeFormat.MM_SS, value), NamedTextColor.YELLOW));
-            this.activeScoreboard.updateTitle(time);
-        };
+        this.timeUpdater = value -> this.activeScoreboard.updateTitle(GameMessages.getTitleTime(value));
     }
 
     /**
