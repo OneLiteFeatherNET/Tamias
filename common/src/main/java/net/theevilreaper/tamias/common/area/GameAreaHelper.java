@@ -40,6 +40,26 @@ public final class GameAreaHelper {
      */
     public static final int TNT_POP_DELAY = 2;
     /**
+     * The chance that a round gets supply drops.
+     */
+    public static final double SUPPLY_DROP_CHANCE = 0.2;
+    public static final int MIN_SUPPLY_DROPS = 1;
+    public static final int MAX_SUPPLY_DROPS = 2;
+    /**
+     * The height above its target from which a supply drop falls. The whole fall path must be free.
+     */
+    public static final int SUPPLY_DROP_HEIGHT = 20;
+    public static final int MIN_SUPPLY_DROP_MEMBERS = 3;
+    public static final int MAX_SUPPLY_DROP_MEMBERS = 5;
+    /**
+     * The horizontal radius around a supply drop in which its members land.
+     */
+    public static final int SUPPLY_SCATTER_RADIUS = 3;
+    /**
+     * The radius of the ring which a supply drop places into the ground around its impact.
+     */
+    public static final int SUPPLY_RING_RADIUS = 2;
+    /**
      * One special block is placed for each started amount of this many ground positions.
      */
     public static final int POSITIONS_PER_SPECIAL_BLOCK = 100;

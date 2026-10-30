@@ -25,6 +25,12 @@ class TntLayoutTest {
         return positions;
     }
 
+    private static double horizontalDistanceSquared(Vec a, Vec b) {
+        double dx = a.x() - b.x();
+        double dz = a.z() - b.z();
+        return dx * dx + dz * dz;
+    }
+
     private static int blockCount(List<TntGroup> groups) {
         return groups.stream().mapToInt(group -> group.positions().size()).sum();
     }
@@ -124,5 +130,46 @@ class TntLayoutTest {
             }
         }
         assertTrue(minDistance >= 2.0, "TNT positions should be spread apart, closest pair was " + minDistance + " blocks apart");
+    }
+
+    @Test
+    void testSupplyDropIsPlannedWithMembersAroundItsCenter() {
+        List<TntGroup> groups = TntLayout.plan(grid(30), 25, 0.4, 1, _ -> true, new Random(7));
+        List<TntGroup> supply = groups.stream().filter(TntGroup::isSupply).toList();
+
+        assertEquals(1, supply.size());
+        TntGroup drop = supply.getFirst();
+        int members = drop.members().size();
+        assertTrue(members >= GameAreaHelper.MIN_SUPPLY_DROP_MEMBERS && members <= GameAreaHelper.MAX_SUPPLY_DROP_MEMBERS,
+                "Expected 3 to 5 members, got " + members);
+        double radius = GameAreaHelper.SUPPLY_SCATTER_RADIUS;
+        assertTrue(drop.members().stream().allMatch(member -> horizontalDistanceSquared(member, drop.center()) <= radius * radius));
+        assertEquals(25, blockCount(groups));
+    }
+
+    @Test
+    void testSupplyDropsKeepTheirDistance() {
+        List<TntGroup> supply = TntLayout.plan(grid(40), 30, 0.4, 2, _ -> true, new Random(8))
+                .stream().filter(TntGroup::isSupply).toList();
+
+        assertEquals(2, supply.size());
+        double min = 2 * GameAreaHelper.SUPPLY_SCATTER_RADIUS + 1;
+        assertTrue(horizontalDistanceSquared(supply.get(0).center(), supply.get(1).center()) >= min * min);
+    }
+
+    @Test
+    void testNoSupplyDropWithoutFreeHighPath() {
+        List<TntGroup> groups = TntLayout.plan(grid(30), 25, 0.4, 2, _ -> false, new Random(9));
+
+        assertTrue(groups.stream().noneMatch(TntGroup::isSupply));
+        assertEquals(25, blockCount(groups));
+    }
+
+    @Test
+    void testPositionsAreNotPlannedTwice() {
+        List<TntGroup> groups = TntLayout.plan(grid(30), 25, 0.4, 2, _ -> true, new Random(10));
+        Set<Vec> unique = new HashSet<>();
+
+        groups.forEach(group -> group.positions().forEach(position -> assertTrue(unique.add(position), "Planned twice: " + position)));
     }
 }
