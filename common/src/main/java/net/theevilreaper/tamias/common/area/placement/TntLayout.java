@@ -83,7 +83,9 @@ public final class TntLayout {
 
     /**
      * Plans the supply drops. An anchor needs a free fall path and keeps enough distance to the other supply drops,
-     * so their rings and the areas where their members land don't overlap.
+     * so their rings and the areas where their members land don't overlap. Anchors with room for at least
+     * {@link net.theevilreaper.tamias.common.area.GameAreaHelper#MIN_SUPPLY_DROP_MEMBERS} members are preferred, the
+     * other anchors are only used if no such anchor is left.
      *
      * @param candidates    the positions where a TNT block can be placed
      * @param total         the amount of TNT blocks of the round
@@ -107,18 +109,39 @@ public final class TntLayout {
         int blocks = 0;
 
         List<TntGroup> drops = new ArrayList<>(supplyDrops);
-        for (Vec anchor : shuffled) {
-            if (drops.size() >= supplyDrops || blocks >= total) break;
-            if (!freePositions.contains(anchor) || !anchorCheck.test(anchor)) continue;
-            if (!isFarEnough(anchor, drops, minDistance)) continue;
+        for (boolean requireRoom : new boolean[]{true, false}) {
+            for (Vec anchor : shuffled) {
+                if (drops.size() >= supplyDrops || blocks >= total) return drops;
+                if (!freePositions.contains(anchor) || !anchorCheck.test(anchor)) continue;
+                if (!isFarEnough(anchor, drops, minDistance)) continue;
+                if (requireRoom && countWithinRadius(anchor, freePositions) < MIN_SUPPLY_DROP_MEMBERS) continue;
 
-            freePositions.remove(anchor);
-            int memberCount = Math.min(random.nextInt(MIN_SUPPLY_DROP_MEMBERS, MAX_SUPPLY_DROP_MEMBERS + 1), total - blocks - 1);
-            List<Vec> members = takeWithinRadius(anchor, memberCount, freePositions, random);
-            drops.add(new TntGroup(anchor, members, TntDropType.SUPPLY, List.of()));
-            blocks += 1 + members.size();
+                freePositions.remove(anchor);
+                int memberCount = Math.min(random.nextInt(MIN_SUPPLY_DROP_MEMBERS, MAX_SUPPLY_DROP_MEMBERS + 1), total - blocks - 1);
+                List<Vec> members = takeWithinRadius(anchor, memberCount, freePositions, random);
+                drops.add(new TntGroup(anchor, members, TntDropType.SUPPLY, List.of()));
+                blocks += 1 + members.size();
+            }
         }
         return drops;
+    }
+
+    /**
+     * Counts the free positions around the given anchor where a member of a supply drop can land.
+     *
+     * @param anchor        the center of the supply drop
+     * @param freePositions the positions which are still free
+     * @return the amount of free positions within the scatter radius, without the anchor
+     */
+    private static int countWithinRadius(Vec anchor, Set<Vec> freePositions) {
+        double radiusSquared = (double) SUPPLY_SCATTER_RADIUS * SUPPLY_SCATTER_RADIUS;
+        int count = 0;
+        for (Vec position : freePositions) {
+            if (!position.equals(anchor) && horizontalDistanceSquared(position, anchor) <= radiusSquared) {
+                count++;
+            }
+        }
+        return count;
     }
 
     private static boolean isFarEnough(Vec position, List<TntGroup> drops, double minDistance) {

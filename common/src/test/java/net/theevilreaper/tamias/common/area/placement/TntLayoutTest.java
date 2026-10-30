@@ -172,4 +172,24 @@ class TntLayoutTest {
 
         groups.forEach(group -> group.positions().forEach(position -> assertTrue(unique.add(position), "Planned twice: " + position)));
     }
+
+    @Test
+    void testSupplyDropPrefersAnAnchorWithRoomForItsMembers() {
+        // Many isolated positions without neighbours and one small field where a supply drop has enough room
+        List<Vec> candidates = new ArrayList<>();
+        for (int i = 0; i < 200; i++) {
+            candidates.add(new Vec(100 + i * 10, 1, 100));
+        }
+        for (int x = 0; x < 5; x++) {
+            for (int z = 0; z < 5; z++) {
+                candidates.add(new Vec(x, 1, z));
+            }
+        }
+
+        TntGroup drop = TntLayout.plan(candidates, 20, 0.4, 1, _ -> true, new Random(11))
+                .stream().filter(TntGroup::isSupply).findFirst().orElseThrow();
+
+        assertTrue(drop.members().size() >= GameAreaHelper.MIN_SUPPLY_DROP_MEMBERS,
+                "The supply drop should land where its members have room, got " + drop.members().size());
+    }
 }
