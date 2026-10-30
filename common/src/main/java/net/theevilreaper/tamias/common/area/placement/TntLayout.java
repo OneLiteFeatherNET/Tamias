@@ -9,6 +9,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.random.RandomGenerator;
 
@@ -62,12 +63,37 @@ public final class TntLayout {
             Predicate<Vec> supplyAnchorCheck,
             RandomGenerator random
     ) {
+        return plan(candidates, count, groupRatio, supplyDrops, supplyAnchorCheck, (_, _) -> true, random);
+    }
+
+    /**
+     * Plans the TNT groups for a round with supply drops. The supply drops are planned first, so they get a free spot
+     * with enough space around it. The remaining TNT is planned like a round without supply drops.
+     *
+     * @param candidates        the positions where a TNT block can be placed
+     * @param count             the amount of TNT blocks to place, the TNT of the supply drops is part of it
+     * @param groupRatio        the share of the remaining TNT blocks which are placed in groups, between 0 and 1
+     * @param supplyDrops       the amount of supply drops to plan, fewer are planned if no anchor fits
+     * @param supplyAnchorCheck checks if a supply drop can fall down onto a position
+     * @param memberCheck       checks if a member can fly from the anchor of a supply drop to a position
+     * @param random            the random generator to use
+     * @return the planned groups, the supply drops first
+     */
+    public static List<TntGroup> plan(
+            Collection<Vec> candidates,
+            int count,
+            double groupRatio,
+            int supplyDrops,
+            Predicate<Vec> supplyAnchorCheck,
+            BiPredicate<Vec, Vec> memberCheck,
+            RandomGenerator random
+    ) {
         if (candidates.isEmpty() || count <= 0) return List.of();
         if (supplyDrops <= 0) return planGroups(candidates, count, groupRatio, random);
 
         int total = Math.min(count, candidates.size());
         Set<Vec> freePositions = new HashSet<>(candidates);
-        List<TntGroup> groups = new ArrayList<>(planSupplyDrops(candidates, total, supplyDrops, supplyAnchorCheck, freePositions, random));
+        List<TntGroup> groups = new ArrayList<>(planSupplyDrops(candidates, total, supplyDrops, supplyAnchorCheck, memberCheck, freePositions, random));
         if (groups.isEmpty()) return planGroups(candidates, count, groupRatio, random);
 
         int supplyBlocks = groups.stream().mapToInt(group -> group.positions().size()).sum();
@@ -91,6 +117,7 @@ public final class TntLayout {
      * @param total         the amount of TNT blocks of the round
      * @param supplyDrops   the amount of supply drops to plan
      * @param anchorCheck   checks if a supply drop can fall down onto a position
+     * @param memberCheck   checks if a member can fly from the anchor to a position
      * @param freePositions the positions which are still free, the taken ones are removed
      * @param random        the random generator to use
      * @return the planned supply drops
@@ -100,6 +127,7 @@ public final class TntLayout {
             int total,
             int supplyDrops,
             Predicate<Vec> anchorCheck,
+            BiPredicate<Vec, Vec> memberCheck,
             Set<Vec> freePositions,
             RandomGenerator random
     ) {
@@ -114,11 +142,11 @@ public final class TntLayout {
                 if (drops.size() >= supplyDrops || blocks >= total) return drops;
                 if (!freePositions.contains(anchor) || !anchorCheck.test(anchor)) continue;
                 if (!isFarEnough(anchor, drops, minDistance)) continue;
-                if (requireRoom && countWithinRadius(anchor, freePositions) < MIN_SUPPLY_DROP_MEMBERS) continue;
+                if (requireRoom && countWithinRadius(anchor, freePositions, memberCheck) < MIN_SUPPLY_DROP_MEMBERS) continue;
 
                 freePositions.remove(anchor);
                 int memberCount = Math.min(random.nextInt(MIN_SUPPLY_DROP_MEMBERS, MAX_SUPPLY_DROP_MEMBERS + 1), total - blocks - 1);
-                List<Vec> members = takeWithinRadius(anchor, memberCount, freePositions, random);
+                List<Vec> members = takeWithinRadius(anchor, memberCount, freePositions, memberCheck, random);
                 drops.add(new TntGroup(anchor, members, TntDropType.SUPPLY, List.of()));
                 blocks += 1 + members.size();
             }
@@ -131,13 +159,15 @@ public final class TntLayout {
      *
      * @param anchor        the center of the supply drop
      * @param freePositions the positions which are still free
-     * @return the amount of free positions within the scatter radius, without the anchor
+     * @param memberCheck   checks if a member can fly from the anchor to a position
+     * @return the amount of reachable free positions within the scatter radius, without the anchor
      */
-    private static int countWithinRadius(Vec anchor, Set<Vec> freePositions) {
+    private static int countWithinRadius(Vec anchor, Set<Vec> freePositions, BiPredicate<Vec, Vec> memberCheck) {
         double radiusSquared = (double) SUPPLY_SCATTER_RADIUS * SUPPLY_SCATTER_RADIUS;
         int count = 0;
         for (Vec position : freePositions) {
-            if (!position.equals(anchor) && horizontalDistanceSquared(position, anchor) <= radiusSquared) {
+            if (!position.equals(anchor) && horizontalDistanceSquared(position, anchor) <= radiusSquared
+                    && memberCheck.test(anchor, position)) {
                 count++;
             }
         }
@@ -158,16 +188,23 @@ public final class TntLayout {
      * @param anchor        the center of the supply drop
      * @param amount        the amount of positions to take
      * @param freePositions the positions which are still free, the taken ones are removed
+     * @param memberCheck   checks if a member can fly from the anchor to a position
      * @param random        the random generator to use
      * @return the taken positions
      */
-    private static List<Vec> takeWithinRadius(Vec anchor, int amount, Set<Vec> freePositions, RandomGenerator random) {
+    private static List<Vec> takeWithinRadius(
+            Vec anchor,
+            int amount,
+            Set<Vec> freePositions,
+            BiPredicate<Vec, Vec> memberCheck,
+            RandomGenerator random
+    ) {
         if (amount <= 0) return List.of();
 
         double radiusSquared = (double) SUPPLY_SCATTER_RADIUS * SUPPLY_SCATTER_RADIUS;
         List<Vec> nearby = new ArrayList<>();
         for (Vec position : freePositions) {
-            if (horizontalDistanceSquared(position, anchor) <= radiusSquared) {
+            if (horizontalDistanceSquared(position, anchor) <= radiusSquared && memberCheck.test(anchor, position)) {
                 nearby.add(position);
             }
         }

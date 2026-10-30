@@ -9,6 +9,7 @@ import net.minestom.server.instance.block.Block;
 import net.theevilreaper.tamias.common.area.GameArea;
 import net.theevilreaper.tamias.common.area.GameAreaHelper;
 import net.theevilreaper.tamias.common.area.GroundFillPattern;
+import net.theevilreaper.tamias.common.area.placement.SupplyArc;
 import net.theevilreaper.tamias.common.area.placement.SupplyRing;
 import net.theevilreaper.tamias.common.area.placement.SweepAreaPlacement;
 import net.theevilreaper.tamias.common.area.placement.TNTPlacement;
@@ -270,6 +271,7 @@ public final class GamePlacement implements Placement {
                 GameAreaHelper.TNT_GROUP_RATIO,
                 supplyDrops,
                 this.supplyCandidates::contains,
+                (anchor, member) -> SupplyArc.isFree(anchor, member, position -> this.instance.getBlock(position).air()),
                 random
         )) {
             groups.add(group.isSupply() && withRing ? group.withRing(SupplyRing.positions(group.center().sub(0, 1, 0), this.area.getPositions())) : group);

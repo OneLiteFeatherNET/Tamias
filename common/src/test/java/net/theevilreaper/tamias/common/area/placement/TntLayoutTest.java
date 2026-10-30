@@ -11,6 +11,7 @@ import java.util.Random;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TntLayoutTest {
@@ -191,5 +192,17 @@ class TntLayoutTest {
 
         assertTrue(drop.members().size() >= GameAreaHelper.MIN_SUPPLY_DROP_MEMBERS,
                 "The supply drop should land where its members have room, got " + drop.members().size());
+    }
+
+    @Test
+    void testSupplyDropOnlyTakesMembersWithAFreeArc() {
+        // Only the members on the left of the anchor can be reached
+        List<TntGroup> groups = TntLayout.plan(grid(30), 25, 0.4, 1, _ -> true,
+                (anchor, member) -> member.x() < anchor.x(), new Random(12));
+        TntGroup drop = groups.stream().filter(TntGroup::isSupply).findFirst().orElseThrow();
+
+        assertFalse(drop.members().isEmpty());
+        assertTrue(drop.members().stream().allMatch(member -> member.x() < drop.center().x()));
+        assertEquals(25, blockCount(groups));
     }
 }

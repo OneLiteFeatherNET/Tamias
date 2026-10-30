@@ -47,11 +47,6 @@ public class TNTPlacement extends AreaBasePlacement {
      * The ticks a supply drop needs to fall down from {@link net.theevilreaper.tamias.common.area.GameAreaHelper#SUPPLY_DROP_HEIGHT}.
      */
     static final int SUPPLY_FALL_TICKS = 30;
-    /**
-     * The ticks a member of a supply drop flies from the impact to its position.
-     */
-    static final int SUPPLY_ARC_TICKS = 12;
-    private static final double SUPPLY_ARC_HEIGHT = 2.5;
     private static final Sound SUPPLY_LAUNCH_SOUND = Sound.sound(SoundEvent.ENTITY_FIREWORK_ROCKET_LAUNCH, Sound.Source.BLOCK, 0.6f, 0.8f);
     private static final Sound SUPPLY_IMPACT_SOUND = Sound.sound(SoundEvent.ENTITY_FIREWORK_ROCKET_BLAST, Sound.Source.BLOCK, 0.7f, 0.9f);
     private static final float LANDING_VOLUME = 0.6f;
@@ -293,16 +288,14 @@ public class TNTPlacement extends AreaBasePlacement {
      * @param target the position of the member
      */
     private void throwMember(Vec from, Vec target) {
-        Vec start = from.add(0.5, 0, 0.5);
-        Vec end = target.add(0.5, 0, 0.5);
-        Entity tntEntity = spawnFallingTnt(start, false);
+        Entity tntEntity = spawnFallingTnt(from.add(0.5, 0, 0.5), false);
 
-        for (int tick = 1; tick < SUPPLY_ARC_TICKS; tick++) {
-            double progress = (double) tick / SUPPLY_ARC_TICKS;
-            Vec position = start.lerp(end, progress).add(0, 4 * SUPPLY_ARC_HEIGHT * progress * (1 - progress), 0);
-            schedule(tick, () -> tntEntity.teleport(position.asPos()));
+        List<Vec> points = SupplyArc.points(from, target);
+        for (int i = 0; i < points.size(); i++) {
+            Vec position = points.get(i);
+            schedule(i + 1, () -> tntEntity.teleport(position.asPos()));
         }
-        schedule(SUPPLY_ARC_TICKS, () -> {
+        schedule(SupplyArc.TICKS, () -> {
             this.fallingEntities.remove(tntEntity);
             tntEntity.remove();
             land(target);
