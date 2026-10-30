@@ -169,8 +169,8 @@ public final class GamePlacement implements Placement {
         this.supplyCandidates = this.tntCandidates.stream()
                 .filter(pos -> isDropPathFree(pos, GameAreaHelper.SUPPLY_DROP_HEIGHT))
                 .collect(Collectors.toUnmodifiableSet());
-        LOGGER.info("Found {} TNT candidates for a supply drop", this.supplyCandidates.size());
         LOGGER.info("Found {} TNT candidates with a free drop path", this.tntCandidates.size());
+        LOGGER.info("Found {} TNT candidates for a supply drop", this.supplyCandidates.size());
         LOGGER.info("Flatten area by {} positions, {} remain as ground candidates", positionsToRemove.size(), this.area.getPositions().size());
     }
 
@@ -261,6 +261,8 @@ public final class GamePlacement implements Placement {
         if (this.tntCandidates.isEmpty()) return CompletableFuture.completedFuture(null);
 
         SweepAreaPlacement pattern = this.activePattern;
+        // Without an impact block no ring is placed, so a supply drop doesn't have to wait for the ground of a ring
+        boolean withRing = this.groundData != null && this.groundData.hasImpactBlock();
         List<TntGroup> groups = new ArrayList<>();
         for (TntGroup group : TntLayout.plan(
                 this.tntCandidates,
@@ -270,7 +272,7 @@ public final class GamePlacement implements Placement {
                 this.supplyCandidates::contains,
                 random
         )) {
-            groups.add(group.isSupply() ? group.withRing(SupplyRing.positions(group.center().sub(0, 1, 0), this.area.getPositions())) : group);
+            groups.add(group.isSupply() && withRing ? group.withRing(SupplyRing.positions(group.center().sub(0, 1, 0), this.area.getPositions())) : group);
         }
         groups.sort(Comparator.comparing(TntGroup::center, pattern.getFillOrder()));
 
@@ -291,7 +293,7 @@ public final class GamePlacement implements Placement {
      */
     private void placeRing(TntGroup group) {
         GroundData currentData = this.groundData;
-        if (currentData == null || currentData.impactBlock() == null) return;
+        if (currentData == null || !currentData.hasImpactBlock()) return;
         Block impactBlock = currentData.impactBlock();
         Set<Vec> specialPositions = this.area.getSpecialPositions();
         for (Vec position : group.ring()) {
