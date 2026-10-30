@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -41,7 +42,9 @@ import static net.theevilreaper.tamias.common.area.GameAreaHelper.TNT_POP_DELAY;
 public class TNTPlacement extends AreaBasePlacement {
 
     private static final int FALL_TICKS = 5;
-    private static final Sound LANDING_SOUND = Sound.sound(SoundEvent.BLOCK_GRAVEL_FALL, Sound.Source.BLOCK, 1f, 0.6f);
+    private static final float LANDING_VOLUME = 0.6f;
+    private static final float LANDING_MIN_PITCH = 0.7f;
+    private static final float LANDING_MAX_PITCH = 0.95f;
     private static final Sound POP_SOUND = Sound.sound(SoundEvent.ENTITY_CHICKEN_EGG, Sound.Source.BLOCK, 0.8f, 1.2f);
 
     private final Consumer<Vec> landingConsumer;
@@ -190,7 +193,7 @@ public class TNTPlacement extends AreaBasePlacement {
             tntEntity.remove();
             land(group.center());
             Point center = group.center().add(0.5);
-            instance.playSound(LANDING_SOUND, center.x(), center.y(), center.z());
+            instance.playSound(landingSound(), center.x(), center.y(), center.z());
 
             List<Vec> members = group.members();
             for (int i = 0; i < members.size(); i++) {
@@ -198,6 +201,17 @@ public class TNTPlacement extends AreaBasePlacement {
                 schedule((i + 1) * TNT_POP_DELAY, () -> popUp(member));
             }
         });
+    }
+
+    /**
+     * Creates the soft plop which is played when a TNT block lands.
+     * The pitch varies a bit, so several blocks which land at the same time don't merge into one sound.
+     *
+     * @return the sound for the landing
+     */
+    private static Sound landingSound() {
+        float pitch = ThreadLocalRandom.current().nextFloat(LANDING_MIN_PITCH, LANDING_MAX_PITCH);
+        return Sound.sound(SoundEvent.ENTITY_ITEM_PICKUP, Sound.Source.BLOCK, LANDING_VOLUME, pitch);
     }
 
     private void popUp(Vec position) {
