@@ -110,6 +110,19 @@ class SpawnAreaIntegrationTest {
     }
 
     @Test
+    void testTeleportResetsTheVelocity(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player player = env.createPlayer(instance);
+        player.setVelocity(new Vec(10, 5, 10));
+        SpawnArea spawnArea = new SpawnArea(new SpawnLayer(Pos.ZERO, Direction.NORTH), 1);
+
+        spawnArea.teleport(instance, new ArrayList<>(List.of(player)), () -> false);
+
+        assertEquals(Vec.ZERO, player.getVelocity());
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
     void testSpawnBlockRemove(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
         instance.setGenerator(new VoidGenerator());

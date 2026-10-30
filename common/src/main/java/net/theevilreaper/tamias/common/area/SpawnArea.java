@@ -81,7 +81,8 @@ public final class SpawnArea implements Area {
             if (switchInstance.getAsBoolean()) {
                 player.setInstance(instance, position).join();
             } else {
-                player.teleport(position);
+                // Without an explicit velocity the client keeps its momentum and could slide off the spawn block
+                player.teleport(position, Vec.ZERO);
             }
             if (callback != null) {
                 callback.accept(player);
