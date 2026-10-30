@@ -26,6 +26,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import static net.theevilreaper.tamias.common.area.GameAreaHelper.SUPPLY_DROP_HEIGHT;
 import static net.theevilreaper.tamias.common.area.GameAreaHelper.TNT_DROP_HEIGHT;
 import static net.theevilreaper.tamias.common.area.GameAreaHelper.TNT_POP_DELAY;
 
@@ -42,12 +43,24 @@ import static net.theevilreaper.tamias.common.area.GameAreaHelper.TNT_POP_DELAY;
 public class TNTPlacement extends AreaBasePlacement {
 
     private static final int FALL_TICKS = 5;
+    /**
+     * The ticks a supply drop needs to fall down from {@link net.theevilreaper.tamias.common.area.GameAreaHelper#SUPPLY_DROP_HEIGHT}.
+     */
+    static final int SUPPLY_FALL_TICKS = 30;
+    /**
+     * The ticks a member of a supply drop flies from the impact to its position.
+     */
+    static final int SUPPLY_ARC_TICKS = 12;
+    private static final double SUPPLY_ARC_HEIGHT = 2.5;
+    private static final Sound SUPPLY_LAUNCH_SOUND = Sound.sound(SoundEvent.ENTITY_FIREWORK_ROCKET_LAUNCH, Sound.Source.BLOCK, 0.6f, 0.8f);
+    private static final Sound SUPPLY_IMPACT_SOUND = Sound.sound(SoundEvent.ENTITY_FIREWORK_ROCKET_BLAST, Sound.Source.BLOCK, 0.7f, 0.9f);
     private static final float LANDING_VOLUME = 0.6f;
     private static final float LANDING_MIN_PITCH = 0.7f;
     private static final float LANDING_MAX_PITCH = 0.95f;
     private static final Sound POP_SOUND = Sound.sound(SoundEvent.ENTITY_CHICKEN_EGG, Sound.Source.BLOCK, 0.8f, 1.2f);
 
     private final Consumer<Vec> landingConsumer;
+    private final Consumer<TntGroup> impactConsumer;
     private final List<TntGroup> groups;
     private final Set<Task> pendingTasks;
     private final Set<Entity> fallingEntities;
@@ -74,8 +87,21 @@ public class TNTPlacement extends AreaBasePlacement {
      * @param landingConsumer receives the position of each TNT block once it is placed
      */
     public TNTPlacement(Instance instance, Consumer<Vec> landingConsumer) {
+        this(instance, landingConsumer, _ -> {});
+    }
+
+    /**
+     * Constructs a TNTPlacement instance without positions. The positions are set with
+     * {@link #updateGroups(List, Predicate)}.
+     *
+     * @param instance        the instance where the TNT will be placed
+     * @param landingConsumer receives the position of each TNT block once it is placed
+     * @param impactConsumer  receives each supply drop once its center has landed
+     */
+    public TNTPlacement(Instance instance, Consumer<Vec> landingConsumer, Consumer<TntGroup> impactConsumer) {
         super(instance, List.of());
         this.landingConsumer = landingConsumer;
+        this.impactConsumer = impactConsumer;
         this.groups = new ArrayList<>();
         this.pendingTasks = ConcurrentHashMap.newKeySet();
         this.fallingEntities = ConcurrentHashMap.newKeySet();
@@ -170,6 +196,10 @@ public class TNTPlacement extends AreaBasePlacement {
         for (Vec position : group.positions()) {
             if (!this.groundCheck.test(position.sub(0, 1, 0))) return false;
         }
+        // The ring is placed into the ground, so the ground below it must exist before the impact
+        for (Vec ringPosition : group.ring()) {
+            if (!this.groundCheck.test(ringPosition)) return false;
+        }
         return true;
     }
 
@@ -179,13 +209,12 @@ public class TNTPlacement extends AreaBasePlacement {
      * @param group the group to drop
      */
     private void dropGroup(TntGroup group) {
-        Entity tntEntity = new Entity(EntityType.FALLING_BLOCK);
-        FallingBlockMeta fallingBlockMeta = (FallingBlockMeta) tntEntity.getEntityMeta();
-        fallingBlockMeta.setBlock(Block.TNT);
-
+        if (group.isSupply()) {
+            dropSupply(group);
+            return;
+        }
         Point entityPos = group.center().add(0, TNT_DROP_HEIGHT, 0);
-        tntEntity.setInstance(instance, entityPos);
-        this.fallingEntities.add(tntEntity);
+        Entity tntEntity = spawnFallingTnt(entityPos, true);
         instance.sendGroupedPacket(new ParticlePacket(Particle.CLOUD, entityPos, Vec.ZERO, 0f, 5));
 
         schedule(FALL_TICKS, () -> {
@@ -201,6 +230,102 @@ public class TNTPlacement extends AreaBasePlacement {
                 schedule((i + 1) * TNT_POP_DELAY, () -> popUp(member));
             }
         });
+    }
+
+    /**
+     * Lets the center of a supply drop fall down from high above with braking thrusters below it. Once it has landed,
+     * the impact is reported and the members fly in small arcs to their positions.
+     *
+     * @param group the supply drop
+     */
+    private void dropSupply(TntGroup group) {
+        Vec target = group.center().add(0.5, 0, 0.5);
+        Vec start = target.add(0, SUPPLY_DROP_HEIGHT, 0);
+        Entity tntEntity = spawnFallingTnt(start, false);
+        instance.playSound(SUPPLY_LAUNCH_SOUND, start.x(), start.y(), start.z());
+
+        // The entity is moved per tick instead of using the physics, so the drop lands exactly on its target
+        for (int tick = 1; tick < SUPPLY_FALL_TICKS; tick++) {
+            Vec position = start.lerp(target, (double) tick / SUPPLY_FALL_TICKS);
+            schedule(tick, () -> {
+                tntEntity.teleport(position.asPos());
+                sendThrusters(position);
+            });
+        }
+        schedule(SUPPLY_FALL_TICKS, () -> impact(group, tntEntity));
+    }
+
+    private void sendThrusters(Vec position) {
+        Vec below = position.sub(0, 0.6, 0);
+        instance.sendGroupedPacket(new ParticlePacket(Particle.FIREWORK, below, new Vec(0.15, 0.3, 0.15), 0.05f, 4));
+        instance.sendGroupedPacket(new ParticlePacket(Particle.SMOKE, below, new Vec(0.2, 0.2, 0.2), 0.01f, 2));
+    }
+
+    /**
+     * Lands the center of the supply drop, reports the impact and throws the members.
+     *
+     * @param group     the supply drop
+     * @param tntEntity the falling center
+     */
+    private void impact(TntGroup group, Entity tntEntity) {
+        this.fallingEntities.remove(tntEntity);
+        tntEntity.remove();
+        land(group.center());
+        // The landing can stop the placement, then neither the impact nor the members must follow
+        if (this.stopped) return;
+
+        Point center = group.center().add(0.5);
+        instance.playSound(SUPPLY_IMPACT_SOUND, center.x(), center.y(), center.z());
+        instance.sendGroupedPacket(new ParticlePacket(Particle.POOF, center, new Vec(0.6, 0.2, 0.6), 0.05f, 20));
+        this.impactConsumer.accept(group);
+
+        List<Vec> members = group.members();
+        for (int i = 0; i < members.size(); i++) {
+            Vec member = members.get(i);
+            schedule((i + 1) * TNT_POP_DELAY, () -> throwMember(group.center(), member));
+        }
+    }
+
+    /**
+     * Lets a member of a supply drop fly in a small arc from the impact to its position.
+     *
+     * @param from   the position of the impact
+     * @param target the position of the member
+     */
+    private void throwMember(Vec from, Vec target) {
+        Vec start = from.add(0.5, 0, 0.5);
+        Vec end = target.add(0.5, 0, 0.5);
+        Entity tntEntity = spawnFallingTnt(start, false);
+
+        for (int tick = 1; tick < SUPPLY_ARC_TICKS; tick++) {
+            double progress = (double) tick / SUPPLY_ARC_TICKS;
+            Vec position = start.lerp(end, progress).add(0, 4 * SUPPLY_ARC_HEIGHT * progress * (1 - progress), 0);
+            schedule(tick, () -> tntEntity.teleport(position.asPos()));
+        }
+        schedule(SUPPLY_ARC_TICKS, () -> {
+            this.fallingEntities.remove(tntEntity);
+            tntEntity.remove();
+            land(target);
+            Point center = target.add(0.5);
+            instance.playSound(landingSound(), center.x(), center.y(), center.z());
+        });
+    }
+
+    /**
+     * Spawns a falling TNT block, it is removed when the placement is stopped.
+     *
+     * @param position the position of the entity
+     * @param gravity  if the entity falls by itself, a supply drop is moved per tick instead
+     * @return the spawned entity
+     */
+    private Entity spawnFallingTnt(Point position, boolean gravity) {
+        Entity tntEntity = new Entity(EntityType.FALLING_BLOCK);
+        FallingBlockMeta fallingBlockMeta = (FallingBlockMeta) tntEntity.getEntityMeta();
+        fallingBlockMeta.setBlock(Block.TNT);
+        tntEntity.setNoGravity(!gravity);
+        tntEntity.setInstance(instance, position);
+        this.fallingEntities.add(tntEntity);
+        return tntEntity;
     }
 
     /**
