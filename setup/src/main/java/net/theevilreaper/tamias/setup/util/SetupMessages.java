@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Contract;
 public class SetupMessages extends Messages {
 
     public static final Component SELECT_MAP_FIRST;
+    public static final Component NOT_ON_GROUND;
     public static final Component NO_SPACE_SEPARATOR;
     public static final Component TELEPORT_CLICK;
     public static final Component DELETE_CLICK;
@@ -20,6 +21,7 @@ public class SetupMessages extends Messages {
 
     static {
         SELECT_MAP_FIRST = Messages.withPrefix(Component.text("Please select a map first before executing this function", NamedTextColor.RED));
+        NOT_ON_GROUND = Messages.withPrefix(Component.text("You have to stand on the ground to set an area corner", NamedTextColor.RED));
         NO_SPACE_SEPARATOR = Component.text("»", NamedTextColor.GRAY);
 
         TELEPORT_CLICK = NO_SPACE_SEPARATOR

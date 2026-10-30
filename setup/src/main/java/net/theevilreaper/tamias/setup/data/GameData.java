@@ -19,10 +19,13 @@ import net.theevilreaper.tamias.setup.inventory.GameAreaDataInventory;
 import net.theevilreaper.tamias.setup.inventory.GameMapDataInventory;
 import net.theevilreaper.tamias.setup.inventory.GeneralMapDataInventory;
 import net.theevilreaper.tamias.setup.map.MapDataCategory;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
 public class GameData extends InstanceSetupData {
+
+    private static final double GROUND_OFFSET = 0.01;
 
     private final GeneralMapDataInventory inventory;
     private final GameMapDataInventory gameMapDataInventory;
@@ -101,16 +104,31 @@ public class GameData extends InstanceSetupData {
                 triggerUpdate(InventoryTarget.GAME);
             }
             case AREA_LOWER_CORNER -> {
-                this.gameMapBuilder.areaLowerCorner(new Vec(pos.blockX(), pos.blockY() - 1D, pos.blockZ()));
+                this.gameMapBuilder.areaLowerCorner(groundCorner(pos, this.gameMapBuilder.getAreaDataBuilder().upperCorner()));
                 triggerUpdate(InventoryTarget.AREA);
             }
             case AREA_UPPER_CORNER -> {
-                this.gameMapBuilder.areaUpperCorner(new Vec(pos.blockX(), pos.blockY() - 1D, pos.blockZ()));
+                this.gameMapBuilder.areaUpperCorner(groundCorner(pos, this.gameMapBuilder.getAreaDataBuilder().lowerCorner()));
                 triggerUpdate(InventoryTarget.AREA);
             }
             default -> {
             }
         }
+    }
+
+    /**
+     * Returns the block position the player stands on. If the other corner is already set, its height is used,
+     * so that both corners of the area always share the same y level.
+     *
+     * @param pos         the position of the player
+     * @param otherCorner the other corner of the area, if already set
+     * @return the corner position
+     */
+    private static Vec groundCorner(Pos pos, @Nullable Vec otherCorner) {
+        int blockY = otherCorner != null
+                ? otherCorner.blockY()
+                : (int) Math.floor(pos.y() - GROUND_OFFSET);
+        return new Vec(pos.blockX(), blockY, pos.blockZ());
     }
 
     /**
