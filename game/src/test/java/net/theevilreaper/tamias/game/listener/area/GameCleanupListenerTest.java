@@ -41,7 +41,7 @@ class GameCleanupListenerTest {
             instance.setBlock(position, Block.STONE);
         }
 
-        GameCleanupListener listener = new GameCleanupListener(gamePlacement);
+        GameCleanupListener listener = new GameCleanupListener(gamePlacement, () -> false);
         listener.accept(new GameCleanupEvent());
         // The blocks are cleared asynchronously by a block batch
         Vec lastPosition = positions.getLast();
@@ -49,6 +49,36 @@ class GameCleanupListenerTest {
 
         for (Vec position : positions) {
             assertEquals(Block.AIR, instance.getBlock(position));
+        }
+
+        env.destroyInstance(instance);
+    }
+
+    @Test
+    void testGameCleanupKeepsBlocksAfterLastRound(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        GameArea gameArea = new GameArea(
+                AreaData.builder()
+                        .lowerCorner(Vec.ZERO)
+                        .upperCorner(new Vec(1, 0, 1))
+                        .facing(Direction.NORTH)
+                        .build()
+        );
+        gameArea.calculatePositions();
+
+        List<Vec> positions = List.copyOf(gameArea.getPositions());
+        GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
+
+        for (Vec position : positions) {
+            instance.setBlock(position, Block.STONE);
+        }
+
+        GameCleanupListener listener = new GameCleanupListener(gamePlacement, () -> true);
+        listener.accept(new GameCleanupEvent());
+        env.tick();
+
+        for (Vec position : positions) {
+            assertEquals(Block.STONE, instance.getBlock(position));
         }
 
         env.destroyInstance(instance);
