@@ -337,7 +337,7 @@ public class Tamias implements ListenerHandling {
         node.addListener(AreaSpawnTriggerEvent.class, new AreaSpawnListener(this.mapProvider.getSpawnPlacement()));
         node.addListener(GameAreaChunksReadyEvent.class, new GameAreaPrepareListener(this.mapProvider.getGamePlacement()));
         node.addListener(SpawnCleanupEvent.class, new SpawnCleanupListener(this.mapProvider.getSpawnPlacement()));
-        node.addListener(GameCleanupEvent.class, new GameCleanupListener(this.mapProvider.getGamePlacement()));
+        node.addListener(GameCleanupEvent.class, new GameCleanupListener(this.mapProvider.getGamePlacement(), this.roundProvider::isLastRound));
         node.addListener(RoundPrepareEvent.class, new RoundPrepareListener(this.mapProvider.getSpawnArea(), this.mapProvider.getActiveInstance().get()));
 
         // Listener for rounds
