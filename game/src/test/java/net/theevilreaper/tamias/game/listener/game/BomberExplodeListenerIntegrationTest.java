@@ -63,6 +63,27 @@ class BomberExplodeListenerIntegrationTest extends TamiasPlayerTestBase {
     }
 
     @Test
+    void testShotExplosionConvertsNoSurvivor(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        instance.setExplosionSupplier(new ExplosionCreator());
+        Player bomber = createPlayer(env, instance, new Pos(0, 40, 0), GameConfig.BOMBER_KEY.asString());
+        createPlayer(env, instance, new Pos(1, 40, 0), GameConfig.SURVIVOR_KEY.asString());
+
+        List<Player> converted = new ArrayList<>();
+        AtomicInteger roundEndChecks = new AtomicInteger();
+        BomberExplodeListener listener = new BomberExplodeListener(converted::add, roundEndChecks::incrementAndGet);
+
+        listener.accept(new BomberExplodeEvent(bomber, bomber.getPosition().asVec(), true));
+
+        assertEquals(List.of(), converted);
+        assertEquals(0, roundEndChecks.get());
+        assertEquals(0, ((TamiasPlayer) bomber).getKills());
+        assertEquals(DisguiseState.HIDDEN, ((TamiasPlayer) bomber).getDisguiseState());
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
     void testExplosionGivesFeedback(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
         instance.setExplosionSupplier(new ExplosionCreator());

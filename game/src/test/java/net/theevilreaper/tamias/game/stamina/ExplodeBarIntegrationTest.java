@@ -287,6 +287,23 @@ class ExplodeBarIntegrationTest extends TamiasPlayerTestBase {
     }
 
     @Test
+    void testExplodeMarksEventAsShot(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        instance.setExplosionSupplier(new ExplosionCreator());
+        Player player = env.createPlayer(instance);
+        ExplodeBar explodeBar = (ExplodeBar) StaminaFactory.createExplodeBar(player);
+        explodeBar.onStart();
+
+        AtomicBoolean shot = new AtomicBoolean();
+        env.process().eventHandler().addListener(BomberExplodeEvent.class, event -> shot.set(event.isShot()));
+        explodeBar.explode();
+
+        assertTrue(shot.get());
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
     void testExplodeWhileDraining(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
         instance.setExplosionSupplier(new ExplosionCreator());

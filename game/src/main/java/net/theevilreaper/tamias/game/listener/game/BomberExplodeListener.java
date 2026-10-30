@@ -24,6 +24,7 @@ import java.util.function.Consumer;
 
 /**
  * Handles the explosion of a bomber. Every survivor within {@link #INFECTION_RADIUS} becomes a bomber.
+ * A bomber who was shot infects nobody, otherwise the shooter would be blown up by a close hit.
  * The bomber hears a hit sound and every player gets told who was blown up.
  */
 @SuppressWarnings("java:S3252")
@@ -56,6 +57,7 @@ public class BomberExplodeListener implements Consumer<BomberExplodeEvent> {
         EntityHelper.hide(player);
         player.addEffect(BLINDNESS);
         AttributeHelper.disableMovement(player);
+        if (event.isShot()) return;
 
         // Collect first, converting a survivor teleports them and changes the nearby entities
         List<Player> survivors = instance.getNearbyEntities(event.getPosition(), INFECTION_RADIUS).stream()
