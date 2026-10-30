@@ -61,4 +61,27 @@ class GroundDataTest {
             assertSame(expected.get(i), given.get(i));
         }
     }
+
+    @Test
+    void testImpactBlockCantBeAir() {
+        assertThrowsExactly(
+                IllegalArgumentException.class,
+                () -> new GroundData(Block.ICE, null, Block.AIR),
+                "The impact block can't be air"
+        );
+    }
+
+    @Test
+    void testGroundDataWithoutImpactBlock() {
+        GroundData groundData = new GroundData(Block.ICE, null);
+        assertNull(groundData.impactBlock());
+        assertFalse(groundData.hasImpactBlock());
+    }
+
+    @Test
+    void testGroundDataWithImpactBlock() {
+        GroundData groundData = new GroundData(Block.ICE, null, Block.PACKED_ICE);
+        assertEquals(Block.PACKED_ICE, groundData.impactBlock());
+        assertTrue(groundData.hasImpactBlock());
+    }
 }

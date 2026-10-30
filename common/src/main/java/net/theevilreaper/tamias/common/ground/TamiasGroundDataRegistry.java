@@ -21,10 +21,10 @@ public final class TamiasGroundDataRegistry implements GroundDataRegistry {
     }
 
     private void initDefaults() {
-        this.groundData.add(new GroundData(Block.ORANGE_TERRACOTTA, null));
-        this.groundData.add(new GroundData(Block.ICE, null));
-        this.groundData.add(new GroundData(Block.GREEN_TERRACOTTA, null));
-        this.groundData.add(new GroundData(Block.RED_TERRACOTTA, null));
+        this.groundData.add(new GroundData(Block.ORANGE_TERRACOTTA, null, Block.YELLOW_TERRACOTTA));
+        this.groundData.add(new GroundData(Block.ICE, null, Block.PACKED_ICE));
+        this.groundData.add(new GroundData(Block.GREEN_TERRACOTTA, null, Block.LIME_TERRACOTTA));
+        this.groundData.add(new GroundData(Block.RED_TERRACOTTA, null, Block.PINK_TERRACOTTA));
     }
 
     @Override
