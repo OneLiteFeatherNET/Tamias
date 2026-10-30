@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -319,6 +320,103 @@ class GamePlacementIntegrationTest {
         env.destroyInstance(instance);
     }
 
+    /**
+     * Places the ground and drops the TNT with one forced supply drop.
+     */
+    private static Set<Point> dropWithSupply(Env env, Instance instance, GameArea gameArea, GamePlacement gamePlacement, GroundData groundData) {
+        return dropWithSupply(env, instance, gameArea, gamePlacement, groundData, () -> {});
+    }
+
+    private static Set<Point> dropWithSupply(
+            Env env,
+            Instance instance,
+            GameArea gameArea,
+            GamePlacement gamePlacement,
+            GroundData groundData,
+            Runnable beforeDrop
+    ) {
+        gameArea.getPositions().forEach(pos -> prepareHighGround(instance, pos));
+        gamePlacement.flatten();
+        gamePlacement.triggerPlacement(groundData);
+        env.tickWhile(gamePlacement::isRunning, Duration.ofSeconds(10));
+        beforeDrop.run();
+
+        CompletableFuture<Void> landed = gamePlacement.dropTnt(() -> 15, 1, new Random(4));
+        env.tickWhile(() -> !landed.isDone(), Duration.ofSeconds(10));
+        assertTrue(landed.isDone());
+        return findTnt(instance, gameArea);
+    }
+
+    private static Set<Point> findBlocks(Instance instance, GameArea gameArea, Block block) {
+        Set<Point> positions = new HashSet<>();
+        for (Vec position : gameArea.getPositions()) {
+            if (instance.getBlock(position) == block) positions.add(position);
+        }
+        return positions;
+    }
+
+    @Test
+    void testRingIsPlacedWithTheImpactBlock(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        GameArea gameArea = createArea(14);
+        GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
+
+        Set<Point> tnt = dropWithSupply(env, instance, gameArea, gamePlacement, new GroundData(Block.STONE, null, Block.GOLD_BLOCK));
+        Set<Point> ring = findBlocks(instance, gameArea, Block.GOLD_BLOCK);
+
+        assertEquals(15, tnt.size());
+        assertFalse(ring.isEmpty(), "The supply drop places a ring");
+        boolean aroundOneTnt = tnt.stream().anyMatch(center -> ring.stream().allMatch(position -> {
+            double dx = position.x() - center.x();
+            double dz = position.z() - center.z();
+            double distance = dx * dx + dz * dz;
+            return distance >= 1.5 * 1.5 && distance < 2.5 * 2.5;
+        }));
+        assertTrue(aroundOneTnt, "The ring lies around the impact of the supply drop");
+
+        env.destroyInstance(instance);
+    }
+
+    @Test
+    void testRingKeepsSpecialPositions(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        GameArea gameArea = createArea(14);
+        GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
+        // Every position counts as special once the ground is placed, so the ring must not change any of them
+        dropWithSupply(env, instance, gameArea, gamePlacement, new GroundData(Block.STONE, null, Block.GOLD_BLOCK),
+                () -> gameArea.getSpecialPositions().addAll(gameArea.getPositions()));
+
+        assertTrue(findBlocks(instance, gameArea, Block.GOLD_BLOCK).isEmpty());
+        env.destroyInstance(instance);
+    }
+
+    @Test
+    void testDropWithoutImpactBlockPlacesNoRing(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        GameArea gameArea = createArea(14);
+        GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
+
+        dropWithSupply(env, instance, gameArea, gamePlacement, new GroundData(Block.STONE, null));
+
+        assertEquals(gameArea.getPositions().size(), findBlocks(instance, gameArea, Block.STONE).size());
+        env.destroyInstance(instance);
+    }
+
+    @Test
+    void testClearRemovesTheRing(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        GameArea gameArea = createArea(14);
+        GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
+        dropWithSupply(env, instance, gameArea, gamePlacement, new GroundData(Block.STONE, null, Block.GOLD_BLOCK));
+        List<Vec> areaPositions = List.copyOf(gameArea.getPositions());
+
+        CompletableFuture<Void> cleared = gamePlacement.clearAsync();
+        env.tickWhile(() -> !cleared.isDone(), Duration.ofSeconds(5));
+
+        assertTrue(areaPositions.stream().noneMatch(position -> instance.getBlock(position) == Block.GOLD_BLOCK));
+        env.destroyInstance(instance);
+    }
+
     private static GameArea createArea(int size) {
         GameArea gameArea = new GameArea(
                 AreaData.builder()
@@ -337,6 +435,16 @@ class GamePlacementIntegrationTest {
     private static void prepareGround(Instance instance, Point position) {
         instance.setBlock(position, GameAreaHelper.GROUND_MARKER_BLOCK);
         for (int y = 1; y <= GameAreaHelper.TNT_DROP_HEIGHT + 1; y++) {
+            instance.setBlock(position.add(0, y, 0), Block.AIR);
+        }
+    }
+
+    /**
+     * Marks the given position as ground and clears the drop path of a supply drop above it.
+     */
+    private static void prepareHighGround(Instance instance, Point position) {
+        instance.setBlock(position, GameAreaHelper.GROUND_MARKER_BLOCK);
+        for (int y = 1; y <= GameAreaHelper.SUPPLY_DROP_HEIGHT + 1; y++) {
             instance.setBlock(position.add(0, y, 0), Block.AIR);
         }
     }

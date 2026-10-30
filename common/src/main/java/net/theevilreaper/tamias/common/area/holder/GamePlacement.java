@@ -9,12 +9,14 @@ import net.minestom.server.instance.block.Block;
 import net.theevilreaper.tamias.common.area.GameArea;
 import net.theevilreaper.tamias.common.area.GameAreaHelper;
 import net.theevilreaper.tamias.common.area.GroundFillPattern;
+import net.theevilreaper.tamias.common.area.placement.SupplyRing;
 import net.theevilreaper.tamias.common.area.placement.SweepAreaPlacement;
 import net.theevilreaper.tamias.common.area.placement.TNTPlacement;
 import net.theevilreaper.tamias.common.area.placement.TntGroup;
 import net.theevilreaper.tamias.common.area.placement.TntLayout;
 import net.theevilreaper.tamias.common.ground.GroundData;
 import net.theevilreaper.tamias.common.map.layer.AreaData;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +31,8 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.IntSupplier;
+import java.util.random.RandomGenerator;
+import java.util.stream.Collectors;
 
 public final class GamePlacement implements Placement {
 
@@ -40,13 +44,16 @@ public final class GamePlacement implements Placement {
     private final Instance instance;
     private SweepAreaPlacement activePattern;
     private List<Vec> tntCandidates;
+    private Set<Vec> supplyCandidates;
+    private @Nullable GroundData groundData;
     private boolean prepared;
 
     public GamePlacement(Instance instance, GameArea area) {
         this.instance = instance;
         this.area = area;
-        this.tntPlacement = new TNTPlacement(instance, area::addTntPosition);
+        this.tntPlacement = new TNTPlacement(instance, area::addTntPosition, this::placeRing);
         this.tntCandidates = List.of();
+        this.supplyCandidates = Set.of();
 
         List<Vec> initialPositions = List.copyOf(area.getPositions());
         Vec center = getCenter(area);
@@ -114,6 +121,7 @@ public final class GamePlacement implements Placement {
         GroundFillPattern chosen = patterns[ThreadLocalRandom.current().nextInt(patterns.length)];
         this.activePattern = this.groundPatterns.get(chosen);
         LOGGER.info("Using ground fill pattern {}", chosen);
+        this.groundData = groundData;
         this.updateSpecialPositions(groundData);
         this.activePattern.place(groundData);
     }
@@ -156,8 +164,12 @@ public final class GamePlacement implements Placement {
         // The structures on the map are static, so the free drop paths only have to be found once
         this.tntCandidates = filteredPositions.stream()
                 .map(pos -> pos.add(0, 1, 0))
-                .filter(this::isDropPathFree)
+                .filter(pos -> isDropPathFree(pos, GameAreaHelper.TNT_DROP_HEIGHT))
                 .toList();
+        this.supplyCandidates = this.tntCandidates.stream()
+                .filter(pos -> isDropPathFree(pos, GameAreaHelper.SUPPLY_DROP_HEIGHT))
+                .collect(Collectors.toUnmodifiableSet());
+        LOGGER.info("Found {} TNT candidates for a supply drop", this.supplyCandidates.size());
         LOGGER.info("Found {} TNT candidates with a free drop path", this.tntCandidates.size());
         LOGGER.info("Flatten area by {} positions, {} remain as ground candidates", positionsToRemove.size(), this.area.getPositions().size());
     }
@@ -224,38 +236,79 @@ public final class GamePlacement implements Placement {
      * {@link TntLayout}. The groups are dropped in the order of the active fill pattern and each group waits until
      * the ground below it is placed, so the TNT follows the ground placement. A TNT block only becomes a respawn
      * ticket once it has landed.
+     * Some rounds get supply drops, see {@link GameAreaHelper#SUPPLY_DROP_CHANCE}.
      *
      * @param countSupplier provides the amount of TNT blocks to drop
      * @return a future which completes once every TNT block has landed
      */
     public CompletableFuture<Void> dropTnt(IntSupplier countSupplier) {
+        RandomGenerator random = ThreadLocalRandom.current();
+        int supplyDrops = random.nextDouble() < GameAreaHelper.SUPPLY_DROP_CHANCE
+                ? random.nextInt(GameAreaHelper.MIN_SUPPLY_DROPS, GameAreaHelper.MAX_SUPPLY_DROPS + 1)
+                : 0;
+        return dropTnt(countSupplier, supplyDrops, random);
+    }
+
+    /**
+     * Drops a random amount of TNT onto the ground area with the given amount of supply drops.
+     *
+     * @param countSupplier provides the amount of TNT blocks to drop
+     * @param supplyDrops   the amount of supply drops, fewer are dropped if no position fits
+     * @param random        the random generator to plan the TNT with
+     * @return a future which completes once every TNT block has landed
+     */
+    CompletableFuture<Void> dropTnt(IntSupplier countSupplier, int supplyDrops, RandomGenerator random) {
         if (this.tntCandidates.isEmpty()) return CompletableFuture.completedFuture(null);
 
         SweepAreaPlacement pattern = this.activePattern;
-        List<TntGroup> groups = new ArrayList<>(TntLayout.plan(
+        List<TntGroup> groups = new ArrayList<>();
+        for (TntGroup group : TntLayout.plan(
                 this.tntCandidates,
                 countSupplier.getAsInt(),
                 GameAreaHelper.TNT_GROUP_RATIO,
-                ThreadLocalRandom.current()
-        ));
+                supplyDrops,
+                this.supplyCandidates::contains,
+                random
+        )) {
+            groups.add(group.isSupply() ? group.withRing(SupplyRing.positions(group.center().sub(0, 1, 0), this.area.getPositions())) : group);
+        }
         groups.sort(Comparator.comparing(TntGroup::center, pattern.getFillOrder()));
 
         this.area.setTntPositions(List.of());
         this.tntPlacement.updateGroups(groups, pattern::isPlaced);
         this.tntPlacement.place();
-        LOGGER.info("Dropping {} TNT blocks in {} groups onto the game area",
-                groups.stream().mapToInt(group -> group.members().size() + 1).sum(), groups.size());
+        LOGGER.info("Dropping {} TNT blocks in {} groups with {} supply drops onto the game area",
+                groups.stream().mapToInt(group -> group.members().size() + 1).sum(), groups.size(),
+                groups.stream().filter(TntGroup::isSupply).count());
         return this.tntPlacement.landed();
     }
 
     /**
-     * Checks if a TNT block can fall from {@link GameAreaHelper#TNT_DROP_HEIGHT} blocks above the target down to it.
+     * Places the ring of a supply drop into the ground with the impact block of the current ground data.
+     * Special positions keep their additional block.
+     *
+     * @param group the supply drop which has landed
+     */
+    private void placeRing(TntGroup group) {
+        GroundData currentData = this.groundData;
+        if (currentData == null || currentData.impactBlock() == null) return;
+        Block impactBlock = currentData.impactBlock();
+        Set<Vec> specialPositions = this.area.getSpecialPositions();
+        for (Vec position : group.ring()) {
+            if (specialPositions.contains(position)) continue;
+            this.instance.setBlock(position, impactBlock);
+        }
+    }
+
+    /**
+     * Checks if a TNT block can fall from the given height above the target down to it.
      *
      * @param target the position of the TNT block
+     * @param height the height above the target from which the TNT block falls
      * @return true if every block of the drop path is air
      */
-    private boolean isDropPathFree(Vec target) {
-        for (int y = 0; y <= GameAreaHelper.TNT_DROP_HEIGHT; y++) {
+    private boolean isDropPathFree(Vec target, int height) {
+        for (int y = 0; y <= height; y++) {
             if (!instance.getBlock(target.add(0, y, 0)).registry().isAir()) return false;
         }
         return true;
