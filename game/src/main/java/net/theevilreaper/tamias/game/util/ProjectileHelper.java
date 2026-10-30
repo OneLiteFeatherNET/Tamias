@@ -1,9 +1,7 @@
 package net.theevilreaper.tamias.game.util;
 
 import ca.atlasengine.projectiles.AbstractProjectile;
-import ca.atlasengine.projectiles.entities.ThrownItemProjectile;
 import net.minestom.server.coordinate.Pos;
-import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.tamias.common.util.Tags;
@@ -44,7 +42,7 @@ public final class ProjectileHelper {
      * @return a new instance of the {@link AbstractProjectile}
      */
     public static AbstractProjectile createProjectile(Player player) {
-        ThrownItemProjectile projectile = new ThrownItemProjectile(EntityType.EGG, player);
+        EggProjectile projectile = new EggProjectile(player);
         projectile.getEntityMeta().setOnFire(true);
         return projectile;
     }

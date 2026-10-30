@@ -7,7 +7,10 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.item.ThrownEggMeta;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.network.packet.server.play.SpawnEntityPacket;
+import net.minestom.testing.Collector;
 import net.minestom.testing.Env;
+import net.minestom.testing.TestConnection;
 import net.minestom.testing.extension.MicrotusExtension;
 import net.theevilreaper.tamias.common.util.Tags;
 import org.jetbrains.annotations.NotNull;
@@ -80,5 +83,19 @@ class ProjectileHelperIntegrationTest {
 
         // A horizontal shot keeps flying horizontally, only the uncertainty may tilt it a bit
         assertTrue(Math.abs(projectile.getVelocity().y()) < 1, "Vertical velocity was " + projectile.getVelocity().y());
+    }
+
+    @Test
+    void testSpawnPacketContainsTheShooter(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        TestConnection connection = env.createConnection();
+        Player player = connection.connect(instance);
+        Collector<SpawnEntityPacket> spawnPackets = connection.trackIncoming(SpawnEntityPacket.class);
+
+        AbstractProjectile projectile = ProjectileHelper.createProjectile(player);
+        ProjectileHelper.spawnProjectile(player, ignored -> projectile);
+
+        // Without the owner the client lets the egg collide with the moving shooter right after the spawn
+        spawnPackets.assertSingle(packet -> assertEquals(player.getEntityId(), packet.data()));
     }
 }
