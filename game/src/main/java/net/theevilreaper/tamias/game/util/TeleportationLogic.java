@@ -1,6 +1,7 @@
 package net.theevilreaper.tamias.game.util;
 
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.theevilreaper.tamias.common.config.GameConfig;
@@ -68,7 +69,7 @@ public final class TeleportationLogic {
     public static CompletableFuture<Void> teleport(Team team, Pos pos, @Nullable PlayerConsumer callback) {
         List<CompletableFuture<Void>> futures = new ArrayList<>();
         for (Player player : team.getPlayers()) {
-            CompletableFuture<Void> future = player.teleport(pos);
+            CompletableFuture<Void> future = player.teleport(pos, Vec.ZERO);
             if (callback != null) {
                 future = future.thenAccept(_ -> callback.accept(player));
             }

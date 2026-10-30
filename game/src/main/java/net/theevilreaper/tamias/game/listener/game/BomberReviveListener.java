@@ -4,6 +4,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
@@ -92,7 +93,8 @@ public final class BomberReviveListener implements Consumer<BomberRequireSpawnEv
         instance.setBlock(tntPos, Block.AIR);
 
         // Stand exactly where the removed TNT block was, so the disguise replaces it seamlessly
-        player.teleport(tntPos.add(0.5, 0, 0.5)).thenRun(() -> EntityHelper.switchToTNT(player));
+        // Without an explicit velocity the client keeps its momentum and slides away from the TNT position
+        player.teleport(tntPos.add(0.5, 0, 0.5), Vec.ZERO).thenRun(() -> EntityHelper.switchToTNT(player));
         player.playSound(RESPAWN);
         AttributeHelper.enableMovement(player);
         Items.setBombItem(player);

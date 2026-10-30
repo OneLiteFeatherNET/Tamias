@@ -23,6 +23,7 @@ import net.theevilreaper.xerus.api.phase.Phase;
 import net.theevilreaper.xerus.api.team.TeamService;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventDispatcher;
@@ -210,7 +211,7 @@ public class Tamias implements ListenerHandling {
             );
             this.refreshSharedScores();
             for (Player bomber : TeamHelper.getTeam(this.teamService, GameConfig.BOMBER_KEY).getPlayers()) {
-                bomber.teleport(this.mapProvider.getBomberSpawn());
+                bomber.teleport(this.mapProvider.getBomberSpawn(), Vec.ZERO);
             }
             for (Player player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
                 AttributeHelper.enableMovement(player);

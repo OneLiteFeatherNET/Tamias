@@ -1,6 +1,7 @@
 package net.theevilreaper.tamias.game.listener.game;
 
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
@@ -42,7 +43,10 @@ class RoleToBomberChangeListenerIntegrationTest extends TamiasPlayerTestBase {
         RoleToBomberChangeListener listener = new RoleToBomberChangeListener(
                 teamService, staminaService, () -> tntBlock, () -> roundEndChecked.set(true)
         );
+        // A running player must not keep their momentum and slide away from the TNT position
+        player.setVelocity(new Vec(10, 5, 10));
         listener.accept(new RoleToBomberChangeEvent(player));
+        assertEquals(Vec.ZERO, player.getVelocity());
         env.tick();
 
         assertEquals(Block.AIR, instance.getBlock(tntBlock));

@@ -3,6 +3,7 @@ package net.theevilreaper.tamias.game.listener.game;
 import net.kyori.adventure.audience.Audience;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
 import net.theevilreaper.aves.util.functional.VoidConsumer;
@@ -77,6 +78,7 @@ public final class RoleToBomberChangeListener implements Consumer<RoleToBomberCh
 
         // Stand exactly where the removed TNT block was, so the disguise replaces it seamlessly
         player.getInstance().setBlock(tntPos, Block.AIR);
-        player.teleport(tntPos.add(0.5, 0, 0.5));
+        // Without an explicit velocity the client keeps its momentum and slides away from the TNT position
+        player.teleport(tntPos.add(0.5, 0, 0.5), Vec.ZERO);
     }
 }

@@ -2,6 +2,7 @@ package net.theevilreaper.tamias.game.map;
 
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.utils.validate.Check;
 import net.theevilreaper.aves.map.BaseMap;
@@ -84,7 +85,7 @@ public final class GameMapProvider extends AbstractFalcoMapProvider implements M
             player.setInstance(this.activeInstance, this.activeMap.spawn());
             return;
         }
-        player.teleport(this.activeMap.spawn());
+        player.teleport(this.activeMap.spawn(), Vec.ZERO);
     }
 
     /**
