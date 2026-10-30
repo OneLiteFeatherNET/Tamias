@@ -29,8 +29,11 @@ public final class ProjectileHelper {
         projectile.setTag(Tags.SHOOTER_ID, player.getUuid());
 
         final Pos origin = player.getPosition().add(0, player.getEyeHeight() - 0.1, 0);
+        // Aim at a target point, the rotation based shot would add the server-simulated fall velocity
+        // of a jumping player, which the client never had, and let the egg drop into the ground
+        final Pos target = origin.add(player.getPosition().direction());
         // The projectile spawns itself into the shooter's instance
-        projectile.shoot(origin, PROJECTILE_POWER, PROJECTILE_UNCERTAINTY);
+        projectile.shoot(origin, target, PROJECTILE_POWER, PROJECTILE_UNCERTAINTY);
     }
 
     /**
