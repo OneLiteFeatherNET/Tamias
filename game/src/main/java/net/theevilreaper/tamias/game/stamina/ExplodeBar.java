@@ -129,12 +129,13 @@ public final class ExplodeBar extends StaminaBar {
      * @param shot true if an egg hit the bomber and caused the explosion
      */
     private void handleExplosion(boolean shot) {
-        EventDispatcher.call(new BomberExplodeEvent(player, player.getPosition().asVec(), shot));
-        this.player.playSound(EXPLODE_SOUND);
         this.status = Status.REGENERATING;
         // If the player explodes, we need to disable the movement and clear the inventory
+        // Done before the event, the explosion can end the round and the reset of the player must not be undone
         AttributeHelper.disableMovement(this.player);
         this.player.getInventory().clear();
+        EventDispatcher.call(new BomberExplodeEvent(player, player.getPosition().asVec(), shot));
+        this.player.playSound(EXPLODE_SOUND);
     }
 
     /**
