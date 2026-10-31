@@ -1,26 +1,30 @@
 package net.theevilreaper.tamias.game.util;
 
-import ca.atlasengine.projectiles.AbstractProjectile;
-import ca.atlasengine.projectiles.entities.ThrownItemProjectile;
+import net.kyori.adventure.sound.Sound;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.item.ThrownEggMeta;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.network.packet.server.play.SoundEffectPacket;
 import net.minestom.server.network.packet.server.play.SpawnEntityPacket;
+import net.minestom.server.sound.SoundEvent;
 import net.minestom.testing.Collector;
 import net.minestom.testing.Env;
 import net.minestom.testing.TestConnection;
-import net.minestom.testing.extension.MicrotusExtension;
 import net.theevilreaper.tamias.common.util.Tags;
+import net.theevilreaper.tamias.game.player.TamiasPlayerTestBase;
+import net.theevilreaper.tamias.game.projectile.ThrownProjectile;
+import net.theevilreaper.tamias.game.projectile.VanillaProjectile;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(MicrotusExtension.class)
-class ProjectileHelperIntegrationTest {
+/**
+ * The shooter is a {@link net.theevilreaper.tamias.game.player.TamiasPlayer}, its known movement feeds the launch.
+ */
+class ProjectileHelperIntegrationTest extends TamiasPlayerTestBase {
 
     @Test
     void testCreationWithoutAPlayerInstance(@NotNull Env env) {
@@ -42,9 +46,9 @@ class ProjectileHelperIntegrationTest {
         Instance instance = env.createFlatInstance();
         Player player = env.createPlayer(instance);
 
-        AbstractProjectile projectile = ProjectileHelper.createProjectile(player);
+        VanillaProjectile projectile = ProjectileHelper.createProjectile(player);
         assertNotNull(projectile);
-        assertInstanceOf(ThrownItemProjectile.class, projectile);
+        assertInstanceOf(ThrownProjectile.class, projectile);
         assertEquals(EntityType.EGG, projectile.getEntityType());
         assertSame(player, projectile.getShooter());
 
@@ -60,7 +64,7 @@ class ProjectileHelperIntegrationTest {
         Instance instance = env.createFlatInstance();
         Player player = env.createPlayer(instance);
 
-        AbstractProjectile projectile = ProjectileHelper.createProjectile(player);
+        VanillaProjectile projectile = ProjectileHelper.createProjectile(player);
         ProjectileHelper.spawnProjectile(player, ignored -> projectile);
 
         assertEquals(player.getUuid(), projectile.getTag(Tags.SHOOTER_ID));
@@ -78,7 +82,7 @@ class ProjectileHelperIntegrationTest {
         }
         assertTrue(player.getVelocity().y() < -5, "The server should simulate a fall velocity for the player");
 
-        AbstractProjectile projectile = ProjectileHelper.createProjectile(player);
+        VanillaProjectile projectile = ProjectileHelper.createProjectile(player);
         ProjectileHelper.spawnProjectile(player, ignored -> projectile);
 
         // A horizontal shot keeps flying horizontally, only the uncertainty may tilt it a bit
@@ -92,10 +96,28 @@ class ProjectileHelperIntegrationTest {
         Player player = connection.connect(instance);
         Collector<SpawnEntityPacket> spawnPackets = connection.trackIncoming(SpawnEntityPacket.class);
 
-        AbstractProjectile projectile = ProjectileHelper.createProjectile(player);
+        VanillaProjectile projectile = ProjectileHelper.createProjectile(player);
         ProjectileHelper.spawnProjectile(player, ignored -> projectile);
 
         // Without the owner the client lets the egg collide with the moving shooter right after the spawn
         spawnPackets.assertSingle(packet -> assertEquals(player.getEntityId(), packet.data()));
+    }
+
+    @Test
+    void testThrowSoundIsPlayedAtTheShooter(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        TestConnection connection = env.createConnection();
+        Player player = connection.connect(instance, new Pos(0, 50, 0));
+        Collector<SoundEffectPacket> soundTracker = connection.trackIncoming(SoundEffectPacket.class);
+
+        ProjectileHelper.spawnProjectile(player, ProjectileHelper::createProjectile);
+
+        // The pitch is 0.4 / (random * 0.4 + 0.8) for a random value in [0, 1)
+        soundTracker.assertSingle(packet -> {
+            assertEquals(SoundEvent.ENTITY_EGG_THROW, packet.soundEvent(), "The egg throw sound should be played");
+            assertEquals(Sound.Source.PLAYER, packet.source(), "The egg throw sound should come from players");
+            assertEquals(0.5f, packet.volume(), "The egg throw sound should use volume 0.5");
+            assertTrue(packet.pitch() > 0.33f && packet.pitch() <= 0.5f, "The pitch was " + packet.pitch());
+        });
     }
 }

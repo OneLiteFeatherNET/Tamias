@@ -1,6 +1,5 @@
 package net.theevilreaper.tamias.game.listener.game;
 
-import ca.atlasengine.projectiles.AbstractProjectile;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.event.entity.projectile.ProjectileCollideWithEntityEvent;
@@ -20,6 +19,7 @@ import net.theevilreaper.tamias.game.stamina.StaminaBar;
 import net.theevilreaper.tamias.game.stamina.StaminaFactory;
 import net.theevilreaper.tamias.game.player.TamiasPlayer;
 import net.theevilreaper.tamias.game.player.TamiasPlayerTestBase;
+import net.theevilreaper.tamias.game.projectile.VanillaProjectile;
 import net.theevilreaper.tamias.game.util.ProjectileHelper;
 import net.theevilreaper.tamias.game.util.SpectatorHelper;
 import org.jetbrains.annotations.NotNull;
@@ -157,6 +157,25 @@ class ProjectileEntityListenerIntegrationTest extends TamiasPlayerTestBase {
     }
 
     @Test
+    void testListenerLeavesTheRemovalToTheProjectile(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player shooter = env.createPlayer(instance);
+        Player survivor = env.createPlayer(instance);
+        survivor.setTag(Tags.TEAM_KEY, GameConfig.SURVIVOR_KEY.asString());
+
+        StaminaBar shootBar = StaminaFactory.createShootBar(survivor);
+        shootBar.start();
+        ProjectileEntityListener listener = new ProjectileEntityListener(_ -> shootBar);
+
+        ProjectileCollideWithEntityEvent hit = createHit(shooter, survivor);
+        listener.accept(hit);
+
+        assertFalse(hit.getEntity().isRemoved(), "The projectile removes itself, the listener must not remove it first");
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
     void testEggFliesThroughSpectator(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
         Player shooter = env.createPlayer(instance);
@@ -181,7 +200,7 @@ class ProjectileEntityListenerIntegrationTest extends TamiasPlayerTestBase {
     }
 
     private ProjectileCollideWithEntityEvent createHit(Player shooter, Player target) {
-        AbstractProjectile projectile = ProjectileHelper.createProjectile(shooter);
+        VanillaProjectile projectile = ProjectileHelper.createProjectile(shooter);
         return new ProjectileCollideWithEntityEvent(projectile, target.getPosition(), target);
     }
 }
