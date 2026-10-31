@@ -47,6 +47,8 @@ public final class TamiasPlayer extends PermissionAwarePlayer {
     private int roundWins;
     private int kills;
     private int hits;
+    private Pos lastTickPosition;
+    private Vec knownMovement = Vec.ZERO;
 
     /**
      * {@inheritDoc}
@@ -148,6 +150,28 @@ public final class TamiasPlayer extends PermissionAwarePlayer {
      */
     public int getHits() {
         return this.hits;
+    }
+
+    /**
+     * Returns how far this player moved during the last tick, in blocks per tick.
+     * Projectiles use it as the movement of their shooter, the way vanilla uses the movement the client reported.
+     *
+     * @return the movement of the last tick
+     */
+    public Vec getKnownMovement() {
+        return this.knownMovement;
+    }
+
+    /**
+     * Measures the movement of this tick. Player packets are interpreted in {@link Player#update(long)}, so the position
+     * after the super call contains everything the client sent during this tick.
+     */
+    @Override
+    public void update(long time) {
+        super.update(time);
+        final Pos position = getPosition();
+        this.knownMovement = this.lastTickPosition == null ? Vec.ZERO : position.sub(this.lastTickPosition).asVec();
+        this.lastTickPosition = position;
     }
 
     @Override
