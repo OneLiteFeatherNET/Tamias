@@ -1,10 +1,10 @@
 package net.theevilreaper.tamias.game.util;
 
-import ca.atlasengine.projectiles.entities.ThrownItemProjectile;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.packet.server.play.SpawnEntityPacket;
+import net.theevilreaper.tamias.game.projectile.ThrownProjectile;
 
 /**
  * A thrown egg which tells the client who shot it.
@@ -16,7 +16,7 @@ import net.minestom.server.network.packet.server.play.SpawnEntityPacket;
  * @version 1.0.0
  * @since 1.0.0
  */
-public final class EggProjectile extends ThrownItemProjectile {
+public final class EggProjectile extends ThrownProjectile {
 
     /**
      * Creates an unspawned egg.

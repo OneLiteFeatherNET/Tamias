@@ -9,7 +9,6 @@ dependencies {
     implementation(project(":common"))
     implementation(platform(libs.game.bom))
     implementation(platform(libs.falco.bom))
-    implementation(libs.atlas.projectiles)
     implementation(libs.adventure)
     implementation(libs.slf4j.api)
 
