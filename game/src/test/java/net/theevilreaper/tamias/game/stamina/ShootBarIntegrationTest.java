@@ -90,7 +90,7 @@ class ShootBarIntegrationTest {
         assertEquals(Status.REGENERATING, shootBar.status);
 
         int waitingTicks = 0;
-        while (waitingTicks < 16) {
+        while (waitingTicks < ShootBar.MAX_TIME) {
             shootBar.consume();
             assertEquals(Status.REGENERATING, shootBar.status);
             ++waitingTicks;
@@ -100,12 +100,12 @@ class ShootBarIntegrationTest {
 
         Collector<SoundEffectPacket> soundTracker = connection.trackIncoming(SoundEffectPacket.class);
 
-        // The status should be ready after the 16 ticks
+        // The status should be ready after the MAX_TIME ticks
         shootBar.consume();
 
         soundTracker.assertSingle();
         soundTracker.assertSingle(this::assertSoundLevelUp);
-        assertEquals(16, waitingTicks);
+        assertEquals(ShootBar.MAX_TIME, waitingTicks);
         assertEquals(Status.READY, shootBar.status);
     }
 
@@ -122,7 +122,7 @@ class ShootBarIntegrationTest {
 
         cooldownTracker.assertSingle(packet -> {
             assertEquals(Material.IRON_HOE.key().asString(), packet.cooldownGroup());
-            assertEquals(170, packet.cooldownTicks());
+            assertEquals(ShootBar.COOLDOWN_TICKS, packet.cooldownTicks());
         });
 
         env.destroyInstance(instance, true);

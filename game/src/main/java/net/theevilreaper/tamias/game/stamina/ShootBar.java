@@ -21,10 +21,10 @@ import java.time.temporal.ChronoUnit;
 public final class ShootBar extends StaminaBar {
 
     private static final Sound LEVEL_UP = Sound.sound(SoundEvent.ENTITY_PLAYER_LEVELUP, Sound.Source.MASTER, 1F, 1F);
-    private static final int MAX_TIME = 16;
+    static final int MAX_TIME = 11;
     private static final int PERIOD_MILLIS = 500;
     // The bar is ready again on the consume after MAX_TIME, a server tick takes 50 ms
-    private static final int COOLDOWN_TICKS = (MAX_TIME + 1) * PERIOD_MILLIS / 50;
+    static final int COOLDOWN_TICKS = (MAX_TIME + 1) * PERIOD_MILLIS / 50;
     private int currentTime;
 
     /**
