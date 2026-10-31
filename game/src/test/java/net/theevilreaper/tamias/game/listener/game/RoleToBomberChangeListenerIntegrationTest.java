@@ -12,6 +12,7 @@ import net.theevilreaper.tamias.game.stamina.ExplodeBar;
 import net.theevilreaper.tamias.game.stamina.StaminaFactory;
 import net.theevilreaper.tamias.game.stamina.StaminaService;
 import net.theevilreaper.tamias.game.team.TeamHelper;
+import net.theevilreaper.tamias.game.util.SpawnProtection;
 import net.theevilreaper.tamias.game.util.SpectatorHelper;
 import net.theevilreaper.xerus.api.team.TeamService;
 import org.jetbrains.annotations.NotNull;
@@ -53,6 +54,7 @@ class RoleToBomberChangeListenerIntegrationTest extends TamiasPlayerTestBase {
         assertEquals(tntBlock.add(0.5, 0, 0.5), player.getPosition().withView(0f, 0f));
         assertInstanceOf(ExplodeBar.class, staminaService.getStaminaBar(player));
         assertFalse(SpectatorHelper.isSpectator(player));
+        assertTrue(SpawnProtection.isProtected(player));
         assertFalse(roundEndChecked.get());
 
         staminaService.cleanUp();

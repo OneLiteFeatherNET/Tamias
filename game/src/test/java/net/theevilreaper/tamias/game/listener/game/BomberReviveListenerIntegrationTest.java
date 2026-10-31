@@ -14,6 +14,7 @@ import net.theevilreaper.tamias.game.player.TamiasPlayer;
 import net.theevilreaper.tamias.game.player.TamiasPlayerTestBase;
 import net.theevilreaper.tamias.game.stamina.ExplodeBar;
 import net.theevilreaper.tamias.game.stamina.StaminaFactory;
+import net.theevilreaper.tamias.game.util.SpawnProtection;
 import net.theevilreaper.tamias.game.util.SpectatorHelper;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -60,6 +61,7 @@ class BomberReviveListenerIntegrationTest extends TamiasPlayerTestBase {
         assertEquals(Block.AIR, instance.getBlock(tntBlock));
         assertEquals(tntBlock.add(0.5, 0, 0.5), player.getPosition().withView(0f, 0f));
         assertEquals(DisguiseState.TNT_BLOCK, ((TamiasPlayer) player).getDisguiseState());
+        assertTrue(SpawnProtection.isProtected(player));
         assertFalse(roundEndChecked.get());
 
         env.destroyInstance(instance, true);

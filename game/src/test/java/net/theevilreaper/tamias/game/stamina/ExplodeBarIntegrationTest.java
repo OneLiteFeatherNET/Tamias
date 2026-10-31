@@ -20,6 +20,7 @@ import net.theevilreaper.tamias.game.player.TamiasPlayer;
 import net.theevilreaper.tamias.game.player.TamiasPlayerTestBase;
 import net.theevilreaper.tamias.game.stamina.StaminaBar.Status;
 import net.theevilreaper.tamias.game.util.Items;
+import net.theevilreaper.tamias.game.util.SpawnProtection;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
@@ -206,6 +207,21 @@ class ExplodeBarIntegrationTest extends TamiasPlayerTestBase {
         explodeBar.triggerAction();
 
         assertTrue(player.getInventory().getItemStack(0).isAir());
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testTriggerActionEndsSpawnProtection(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player player = env.createPlayer(instance);
+        StaminaBar explodeBar = StaminaFactory.createExplodeBar(player);
+        explodeBar.onStart();
+        SpawnProtection.enable(player);
+
+        explodeBar.triggerAction();
+
+        assertFalse(SpawnProtection.isProtected(player));
 
         env.destroyInstance(instance, true);
     }

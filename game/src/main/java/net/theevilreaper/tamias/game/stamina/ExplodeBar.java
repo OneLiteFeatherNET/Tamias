@@ -8,6 +8,7 @@ import net.theevilreaper.tamias.game.attribute.AttributeHelper;
 import net.theevilreaper.tamias.game.event.BomberExplodeEvent;
 import net.theevilreaper.tamias.game.event.BomberRequireSpawnEvent;
 import net.theevilreaper.tamias.game.util.EntityHelper;
+import net.theevilreaper.tamias.game.util.SpawnProtection;
 
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
@@ -74,6 +75,8 @@ public final class ExplodeBar extends StaminaBar {
         if (status == Status.DRAINING || status == Status.REGENERATING) return;
         status = Status.DRAINING;
         this.regeneratedEventFired = false;
+        // A primed bomber is no longer protected, otherwise the bomber could walk to a survivor without any risk
+        SpawnProtection.disable(this.player);
         // The bomb item is used up, the bomber gets a new one on the respawn
         this.player.getInventory().clear();
         EntityHelper.prime(this.player);
