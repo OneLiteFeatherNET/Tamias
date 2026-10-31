@@ -13,6 +13,7 @@ import net.theevilreaper.tamias.game.stamina.StaminaBar;
 import net.theevilreaper.tamias.game.stamina.StaminaService;
 import net.theevilreaper.tamias.game.team.component.StaminaComponent;
 import net.theevilreaper.tamias.game.util.GameMessages;
+import net.theevilreaper.tamias.game.util.SpawnProtection;
 import net.theevilreaper.tamias.game.util.SpectatorHelper;
 import net.theevilreaper.xerus.api.team.Team;
 import net.theevilreaper.xerus.api.team.TeamService;
@@ -80,5 +81,6 @@ public final class RoleToBomberChangeListener implements Consumer<RoleToBomberCh
         player.getInstance().setBlock(tntPos, Block.AIR);
         // Without an explicit velocity the client keeps its momentum and slides away from the TNT position
         player.teleport(tntPos.add(0.5, 0, 0.5), Vec.ZERO);
+        SpawnProtection.enable(player);
     }
 }

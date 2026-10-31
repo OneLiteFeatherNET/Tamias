@@ -16,6 +16,7 @@ import net.theevilreaper.tamias.game.round.event.RoundEndEvent;
 import net.theevilreaper.tamias.game.util.EntityHelper;
 import net.theevilreaper.tamias.game.util.FireworkUtil;
 import net.theevilreaper.tamias.game.util.GameMessages;
+import net.theevilreaper.tamias.game.util.SpawnProtection;
 import net.theevilreaper.tamias.game.util.SpectatorHelper;
 import net.theevilreaper.xerus.api.component.team.ColorComponent;
 import net.theevilreaper.xerus.api.team.Team;
@@ -93,6 +94,7 @@ public final class RoundEndListener implements Consumer<RoundEndEvent> {
      */
     private static void resetPlayer(Player player) {
         SpectatorHelper.disable(player);
+        SpawnProtection.disable(player);
         EntityHelper.switchToPlayer(player);
         player.removeTag(Tags.TEAM_KEY);
         player.getInventory().clear();

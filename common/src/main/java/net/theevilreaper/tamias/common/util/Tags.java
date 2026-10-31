@@ -17,6 +17,8 @@ public final class Tags {
     public static final Tag<Byte> ITEM_TAG = Tag.Byte("itemTag");
     public static final Tag<UUID> SHOOTER_ID = Tag.UUID("shooter");
     public static final Tag<Boolean> SPECTATOR = Tag.Boolean("spectator");
+    // Stores the time in milliseconds until the bomber can't be shot after a respawn
+    public static final Tag<Long> SPAWN_PROTECTION = Tag.Long("spawn_protection");
 
     private Tags() {
         // Nothing to do here due a utility class

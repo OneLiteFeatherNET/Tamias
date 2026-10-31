@@ -21,6 +21,7 @@ import net.theevilreaper.tamias.game.stamina.StaminaBar;
 import net.theevilreaper.tamias.game.util.EntityHelper;
 import net.theevilreaper.tamias.game.util.GameMessages;
 import net.theevilreaper.tamias.game.util.Items;
+import net.theevilreaper.tamias.game.util.SpawnProtection;
 import net.theevilreaper.tamias.game.util.SpectatorHelper;
 
 import java.util.ArrayList;
@@ -98,5 +99,6 @@ public final class BomberReviveListener implements Consumer<BomberRequireSpawnEv
         player.playSound(RESPAWN);
         AttributeHelper.enableMovement(player);
         Items.setBombItem(player);
+        SpawnProtection.enable(player);
     }
 }
