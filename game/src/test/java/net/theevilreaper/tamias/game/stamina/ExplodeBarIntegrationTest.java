@@ -12,6 +12,7 @@ import net.minestom.testing.Env;
 import net.minestom.testing.FlexibleListener;
 import net.minestom.testing.TestConnection;
 import net.theevilreaper.tamias.common.explosion.ExplosionCreator;
+import net.theevilreaper.tamias.game.attribute.AttributeHelper;
 import net.theevilreaper.tamias.game.event.BomberExplodeEvent;
 import net.theevilreaper.tamias.game.event.BomberRequireSpawnEvent;
 import net.theevilreaper.tamias.game.player.DisguiseState;
@@ -337,6 +338,24 @@ class ExplodeBarIntegrationTest extends TamiasPlayerTestBase {
 
         assertFalse(exploded.get());
         assertEquals(Status.REGENERATING, explodeBar.status);
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testExplodeKeepsMovementWhenTheRoundEnds(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        instance.setExplosionSupplier(new ExplosionCreator());
+        Player player = env.createPlayer(instance);
+        ExplodeBar explodeBar = (ExplodeBar) StaminaFactory.createExplodeBar(player);
+        explodeBar.onStart();
+        double defaultSpeed = player.getAttribute(Attribute.MOVEMENT_SPEED).getValue();
+
+        // Blowing up the last survivor ends the round, which resets the bomber within the event
+        env.process().eventHandler().addListener(BomberExplodeEvent.class, event -> AttributeHelper.enableMovement(event.getPlayer()));
+        explodeBar.explode();
+
+        assertEquals(defaultSpeed, player.getAttribute(Attribute.MOVEMENT_SPEED).getValue());
 
         env.destroyInstance(instance, true);
     }
