@@ -13,10 +13,12 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class GroundDataRegistryTest {
 
+    private static final int DEFAULT_GROUNDS = 10;
+
     @Order(1)
     @Test
     void testDefaultCapacity() {
-        assertEquals(4, GroundDataRegistry.instance().getGroundData().size());
+        assertEquals(DEFAULT_GROUNDS, GroundDataRegistry.instance().getGroundData().size());
     }
 
     @Order(2)
@@ -24,15 +26,27 @@ class GroundDataRegistryTest {
     void testGetRandomData() {
         GroundData groundData = GroundDataRegistry.instance().getRandomData();
         assertNotNull(groundData);
-        assertNull(groundData.additionalBlocks());
+        assertNotNull(groundData.groundBlock());
     }
 
     @Order(3)
     @Test
     void testGroundDataAdd() {
         GroundDataRegistry.instance().add(new GroundData(Block.AMETHYST_BLOCK, List.of(Block.GOLD_BLOCK)));
-        assert GroundDataRegistry.instance().getGroundData().size() > 4;
-        assertEquals(5, GroundDataRegistry.instance().getGroundData().size());
+        assertEquals(DEFAULT_GROUNDS + 1, GroundDataRegistry.instance().getGroundData().size());
+    }
+
+    @Test
+    void testDefaultAccentsDontChangeTheMovement() {
+        List<Block> forbidden = List.of(Block.SOUL_SAND, Block.SLIME_BLOCK, Block.HONEY_BLOCK, Block.MAGMA_BLOCK,
+                Block.ICE, Block.PACKED_ICE, Block.BLUE_ICE);
+        for (GroundData data : new TamiasGroundDataRegistry().getGroundData()) {
+            if (!data.hasAdditionalBlocks()) continue;
+            for (Block block : data.additionalBlocks()) {
+                assertFalse(forbidden.contains(block), block + " changes how " + data.groundBlock() + " plays");
+                assertTrue(block.occludes(), block + " is not a full ground block");
+            }
+        }
     }
 
     @Test
