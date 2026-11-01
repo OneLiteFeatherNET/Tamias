@@ -29,14 +29,14 @@ class SweepAreaPlacementIntegrationTest {
         List<Vec> positions = List.of(groundPos, specialPos);
         List<Vec> specialPositions = List.of(specialPos);
 
-        SweepAreaPlacement placement = new SweepAreaPlacement(instance, positions, specialPositions, GroundFillPattern.CIRCLE.comparator(Vec.ZERO));
+        SweepAreaPlacement placement = new SweepAreaPlacement(instance, positions, specialPositions);
         assertFalse(placement.isRunning());
 
         GroundData groundData = new GroundData(Block.GRASS_BLOCK, List.of(Block.GOLD_BLOCK));
 
         FlexibleListener<AreaFinishBuildEvent> listener = env.listen(AreaFinishBuildEvent.class);
 
-        placement.place(groundData);
+        placement.place(groundData, GroundFillPattern.CIRCLE.comparator(Vec.ZERO));
         assertTrue(placement.isRunning());
         assertNotNull(placement.getTask());
 
@@ -59,10 +59,10 @@ class SweepAreaPlacementIntegrationTest {
         Instance instance = env.createFlatInstance();
         Vec pos = new Vec(1, 0, 1);
 
-        SweepAreaPlacement placement = new SweepAreaPlacement(instance, List.of(pos), List.of(), GroundFillPattern.LINE.comparator(Vec.ZERO));
+        SweepAreaPlacement placement = new SweepAreaPlacement(instance, List.of(pos), List.of());
         GroundData groundData = new GroundData(Block.DIRT, null);
 
-        placement.place(groundData);
+        placement.place(groundData, GroundFillPattern.LINE.comparator(Vec.ZERO));
         assertTrue(placement.isRunning());
 
         placement.stop();

@@ -24,24 +24,24 @@ import static net.theevilreaper.tamias.common.area.GameAreaHelper.BLOCKS_PER_STE
 import static net.theevilreaper.tamias.common.area.GameAreaHelper.GROUND_SOUND_INTERVAL;
 
 /**
- * Places ground blocks in the order defined by the given {@link Comparator}, batched over ticks.
- * The fill order is fully pluggable - see {@link net.theevilreaper.tamias.common.area.GroundFillPattern}
- * for the available patterns - the batching/tracking logic here stays the same for all of them.
+ * Places ground blocks batched over ticks. The fill order is passed per run, so one placement serves every
+ * {@link net.theevilreaper.tamias.common.area.GroundFillPattern} - the batching/tracking logic stays the same for all of them.
  */
 public final class SweepAreaPlacement extends AreaBasePlacement {
 
     private final Set<Vec> specialPositions;
-    private final Comparator<Vec> fillOrder;
 
-    public SweepAreaPlacement(
-            Instance instance,
-            List<Vec> blockPositions,
-            List<Vec> specialPositions,
-            Comparator<Vec> fillOrder) {
+    /**
+     * Creates a new placement.
+     *
+     * @param instance         the instance to place the blocks in
+     * @param blockPositions   the positions of the ground
+     * @param specialPositions the positions which get an additional block of the ground data
+     */
+    public SweepAreaPlacement(Instance instance, List<Vec> blockPositions, List<Vec> specialPositions) {
         super(instance, blockPositions);
         this.specialPositions = ConcurrentHashMap.newKeySet();
         this.specialPositions.addAll(specialPositions);
-        this.fillOrder = fillOrder;
     }
 
     /**
@@ -55,23 +55,15 @@ public final class SweepAreaPlacement extends AreaBasePlacement {
     }
 
     /**
-     * Returns the order in which the ground blocks are placed.
-     *
-     * @return the fill order
-     */
-    public Comparator<Vec> getFillOrder() {
-        return this.fillOrder;
-    }
-
-    /**
      * Starts the placement of the ground with the given data.
      *
      * @param groundData the data which defines the ground and the special blocks
+     * @param fillOrder  the order in which the ground blocks are placed
      */
-    public void place(GroundData groundData) {
+    public void place(GroundData groundData, Comparator<Vec> fillOrder) {
         if (!tryStart()) return;
         List<Vec> posList = new ArrayList<>(this.blockPositions);
-        posList.sort(this.fillOrder);
+        posList.sort(fillOrder);
         LinkedBlockingDeque<Vec> queue = new LinkedBlockingDeque<>(posList);
         int[] steps = new int[1];
 
