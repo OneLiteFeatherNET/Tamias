@@ -35,8 +35,7 @@ class GameAreaTest {
         assertFalse(gameArea.getPositions().isEmpty());
 
         assertNotEquals(0, gameArea.getPositions().size());
-        assertNotEquals(GameAreaHelper.MAX_TNT_AMOUNT + 1, gameArea.getTntPositions().size());
-        assertNotEquals(GameAreaHelper.MIN_TNT_AMOUNT - 1, gameArea.getTntPositions().size());
+        assertTrue(gameArea.getTntPositions().isEmpty());
         assertTrue(gameArea.getSpecialPositions().isEmpty());
 
         assertNotNull(gameArea.getGameAreaData());
