@@ -45,6 +45,26 @@ class GroundFillPatternTest {
     }
 
     @Test
+    void testGalaxyArmsGrowAheadOfTheGaps() {
+        Vec center = new Vec(50, 0, 50);
+        // Without rotation an arm passes the angle radius * twist, the gap lies half a sector further
+        Vec arm = onCircle(center, 10, 10 * 0.25);
+        Vec otherArm = onCircle(center, 10, 10 * 0.25 + Math.TAU / 3);
+        Vec gap = onCircle(center, 5, 5 * 0.25 + Math.TAU / 6);
+
+        List<Vec> positions = new ArrayList<>(List.of(gap, arm, center, otherArm));
+        positions.sort(GroundFillPattern.galaxyComparator(center, 0));
+
+        assertEquals(center, positions.getFirst());
+        assertEquals(Set.of(arm, otherArm), Set.copyOf(positions.subList(1, 3)), "Both arms reach a radius of 10 at the same time");
+        assertEquals(gap, positions.getLast(), "The gap between the arms fills behind the arms");
+    }
+
+    private static Vec onCircle(Vec center, double radius, double angle) {
+        return center.add(radius * Math.cos(angle), 0, radius * Math.sin(angle));
+    }
+
+    @Test
     void testCirclePatternGrowsFromTheGivenCenter() {
         Vec center = new Vec(100, 0, 100);
         List<Vec> positions = new ArrayList<>(List.of(
