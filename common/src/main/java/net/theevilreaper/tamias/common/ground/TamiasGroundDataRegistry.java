@@ -20,11 +20,21 @@ public final class TamiasGroundDataRegistry implements GroundDataRegistry {
         this.initDefaults();
     }
 
+    /**
+     * Adds the default grounds. The additional blocks are only scattered as accents, so they don't change how
+     * the ground plays: blocks which change the movement or deal damage (e.g. soul sand, slime, magma) are left out.
+     */
     private void initDefaults() {
         this.groundData.add(new GroundData(Block.ORANGE_TERRACOTTA, null));
         this.groundData.add(new GroundData(Block.ICE, null));
         this.groundData.add(new GroundData(Block.GREEN_TERRACOTTA, null));
         this.groundData.add(new GroundData(Block.RED_TERRACOTTA, null));
+        this.groundData.add(new GroundData(Block.WHITE_TERRACOTTA, List.of(Block.LIGHT_BLUE_GLAZED_TERRACOTTA, Block.YELLOW_GLAZED_TERRACOTTA)));
+        this.groundData.add(new GroundData(Block.MOSS_BLOCK, List.of(Block.MOSSY_COBBLESTONE, Block.MOSSY_STONE_BRICKS)));
+        this.groundData.add(new GroundData(Block.SANDSTONE, List.of(Block.CHISELED_SANDSTONE, Block.CUT_SANDSTONE)));
+        this.groundData.add(new GroundData(Block.QUARTZ_BLOCK, List.of(Block.CHISELED_QUARTZ_BLOCK, Block.QUARTZ_PILLAR)));
+        this.groundData.add(new GroundData(Block.PRISMARINE_BRICKS, List.of(Block.DARK_PRISMARINE, Block.PRISMARINE)));
+        this.groundData.add(new GroundData(Block.DEEPSLATE_TILES, List.of(Block.CRACKED_DEEPSLATE_TILES, Block.DEEPSLATE_BRICKS)));
     }
 
     @Override
