@@ -48,7 +48,7 @@ public final class GamePlacement implements Placement {
         this.tntCandidates = List.of();
         this.center = getCenter(area);
         this.groundPlacement = new SweepAreaPlacement(instance, List.copyOf(area.getPositions()), List.of());
-        this.activeFillOrder = GroundFillPattern.values()[0].comparator(this.center);
+        this.activeFillOrder = GroundFillPattern.CIRCLE.comparator(GroundFillPattern.Context.of(this.center));
     }
 
     /**
@@ -106,7 +106,9 @@ public final class GamePlacement implements Placement {
         if (this.groundPlacement.isRunning()) return;
         GroundFillPattern[] patterns = GroundFillPattern.values();
         GroundFillPattern chosen = patterns[ThreadLocalRandom.current().nextInt(patterns.length)];
-        this.activeFillOrder = chosen.comparator(this.center);
+        this.activeFillOrder = chosen.comparator(
+                new GroundFillPattern.Context(this.center, this.area.getPositions(), ThreadLocalRandom.current())
+        );
         LOGGER.info("Using ground fill pattern {}", chosen);
         this.updateSpecialPositions(groundData);
         this.groundPlacement.place(groundData, this.activeFillOrder);

@@ -38,7 +38,7 @@ class SweepAreaPlacementIntegrationTest {
 
         FlexibleListener<AreaFinishBuildEvent> listener = env.listen(AreaFinishBuildEvent.class);
 
-        placement.place(groundData, GroundFillPattern.CIRCLE.comparator(Vec.ZERO));
+        placement.place(groundData, GroundFillPattern.CIRCLE.comparator(GroundFillPattern.Context.of(Vec.ZERO)));
         assertTrue(placement.isRunning());
         assertNotNull(placement.getTask());
 
@@ -67,7 +67,7 @@ class SweepAreaPlacementIntegrationTest {
         env.process().eventHandler().addListener(AreaBuildProgressEvent.class, event -> progress.add(event.progress()));
         SweepAreaPlacement placement = new SweepAreaPlacement(instance, positions, List.of());
 
-        placement.place(new GroundData(Block.DIRT, null), GroundFillPattern.LINE.comparator(Vec.ZERO));
+        placement.place(new GroundData(Block.DIRT, null), GroundFillPattern.LINE.comparator(GroundFillPattern.Context.of(Vec.ZERO)));
         for (int i = 0; i < 10 && placement.isRunning(); i++) {
             env.tick();
         }
@@ -88,7 +88,7 @@ class SweepAreaPlacementIntegrationTest {
         SweepAreaPlacement placement = new SweepAreaPlacement(instance, List.of(pos), List.of());
         GroundData groundData = new GroundData(Block.DIRT, null);
 
-        placement.place(groundData, GroundFillPattern.LINE.comparator(Vec.ZERO));
+        placement.place(groundData, GroundFillPattern.LINE.comparator(GroundFillPattern.Context.of(Vec.ZERO)));
         assertTrue(placement.isRunning());
 
         placement.stop();
