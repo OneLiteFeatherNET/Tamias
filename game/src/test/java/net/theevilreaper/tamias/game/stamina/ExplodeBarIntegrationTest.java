@@ -24,6 +24,8 @@ import net.theevilreaper.tamias.game.util.SpawnProtection;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -170,8 +172,33 @@ class ExplodeBarIntegrationTest extends TamiasPlayerTestBase {
     private void assertTickSound(@NotNull SoundEffectPacket packet) {
         assertEquals(SoundEvent.UI_BUTTON_CLICK, packet.soundEvent());
         assertEquals(1.0f, packet.volume());
-        assertEquals(10f, packet.pitch());
         assertEquals(Sound.Source.MASTER, packet.source());
+    }
+
+    @Test
+    void testTickPitchRisesDuringCountdown(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        instance.setExplosionSupplier(new ExplosionCreator());
+        TestConnection connection = env.createConnection();
+        Player player = connection.connect(instance, Pos.ZERO);
+        StaminaBar explodeBar = StaminaFactory.createExplodeBar(player);
+        explodeBar.onStart();
+        explodeBar.triggerAction();
+
+        List<Float> pitches = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            Collector<SoundEffectPacket> tickSoundTracker = connection.trackIncoming(SoundEffectPacket.class);
+            explodeBar.consume();
+            tickSoundTracker.assertSingle(packet -> pitches.add(packet.pitch()));
+        }
+
+        assertEquals(0.8f, pitches.getFirst(), 1e-6f);
+        assertEquals(2.0f, pitches.getLast(), 1e-6f);
+        for (int i = 1; i < pitches.size(); i++) {
+            assertTrue(pitches.get(i) > pitches.get(i - 1), "the pitch must rise with every tick: " + pitches);
+        }
+
+        env.destroyInstance(instance, true);
     }
 
     @Test
