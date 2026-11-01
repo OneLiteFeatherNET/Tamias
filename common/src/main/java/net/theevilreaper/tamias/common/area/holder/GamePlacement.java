@@ -15,6 +15,7 @@ import net.theevilreaper.tamias.common.area.placement.TntGroup;
 import net.theevilreaper.tamias.common.area.placement.TntLayout;
 import net.theevilreaper.tamias.common.ground.GroundData;
 import net.theevilreaper.tamias.common.map.layer.AreaData;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +28,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.IntSupplier;
+import java.util.function.ToDoubleFunction;
 
 public final class GamePlacement implements Placement {
 
@@ -37,7 +39,8 @@ public final class GamePlacement implements Placement {
     private final GameArea area;
     private final Instance instance;
     private final Vec center;
-    private Comparator<Vec> activeFillOrder;
+    private ToDoubleFunction<Point> activeFillOrder;
+    private @Nullable GroundFillPattern lastPattern;
     private List<Vec> tntCandidates;
     private boolean prepared;
 
@@ -48,7 +51,7 @@ public final class GamePlacement implements Placement {
         this.tntCandidates = List.of();
         this.center = getCenter(area);
         this.groundPlacement = new SweepAreaPlacement(instance, List.copyOf(area.getPositions()), List.of());
-        this.activeFillOrder = GroundFillPattern.values()[0].comparator(this.center);
+        this.activeFillOrder = GroundFillPattern.CIRCLE.order(GroundFillPattern.Context.of(this.center));
     }
 
     /**
@@ -104,9 +107,11 @@ public final class GamePlacement implements Placement {
     @Override
     public void triggerPlacement(GroundData groundData) {
         if (this.groundPlacement.isRunning()) return;
-        GroundFillPattern[] patterns = GroundFillPattern.values();
-        GroundFillPattern chosen = patterns[ThreadLocalRandom.current().nextInt(patterns.length)];
-        this.activeFillOrder = chosen.comparator(this.center);
+        GroundFillPattern chosen = GroundFillPattern.next(this.lastPattern, ThreadLocalRandom.current());
+        this.lastPattern = chosen;
+        this.activeFillOrder = chosen.order(
+                new GroundFillPattern.Context(this.center, this.area.getPositions(), ThreadLocalRandom.current())
+        );
         LOGGER.info("Using ground fill pattern {}", chosen);
         this.updateSpecialPositions(groundData);
         this.groundPlacement.place(groundData, this.activeFillOrder);
@@ -229,7 +234,8 @@ public final class GamePlacement implements Placement {
                 GameAreaHelper.TNT_GROUP_RATIO,
                 ThreadLocalRandom.current()
         ));
-        groups.sort(Comparator.comparing(TntGroup::center, this.activeFillOrder));
+        ToDoubleFunction<Point> fillOrder = this.activeFillOrder;
+        groups.sort(Comparator.comparingDouble(group -> fillOrder.applyAsDouble(group.center())));
 
         this.area.setTntPositions(List.of());
         this.tntPlacement.updateGroups(groups, this.groundPlacement::isPlaced);
