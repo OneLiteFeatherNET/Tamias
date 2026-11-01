@@ -1,6 +1,7 @@
 package net.theevilreaper.tamias.game.player;
 
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.EntityPose;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.entity.MetadataDef;
@@ -245,6 +246,34 @@ class TamiasPlayerIntegrationTest extends TamiasPlayerTestBase {
 
         bomber.setDisguise(DisguiseState.NONE);
         assertEquals(playerHeight, bomber.getBoundingBox().height());
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testDisguiseBoundingBoxIgnoresSneaking(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        TamiasPlayer bomber = (TamiasPlayer) env.createPlayer(instance, BOMBER_POS);
+        bomber.setDisguise(DisguiseState.TNT_BLOCK);
+
+        // Viewers never see the sneak, so the hit box must stay the TNT box and not shrink to the sneaking box
+        bomber.setSneaking(true);
+        assertEquals(EntityPose.SNEAKING, bomber.getPose(), "precondition: the bomber must be in the sneaking pose");
+
+        assertEquals(TamiasPlayer.DISGUISE_BOUNDING_BOX, bomber.getBoundingBox());
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testPlayerBoundingBoxFollowsSneakingWithoutDisguise(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        TamiasPlayer player = (TamiasPlayer) env.createPlayer(instance, BOMBER_POS);
+        double standingHeight = player.getBoundingBox().height();
+
+        player.setSneaking(true);
+
+        assertTrue(player.getBoundingBox().height() < standingHeight, "a visible player keeps the vanilla sneaking box");
 
         env.destroyInstance(instance, true);
     }

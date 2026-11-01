@@ -78,6 +78,15 @@ public final class TamiasPlayer extends PermissionAwarePlayer {
     }
 
     /**
+     * Minestom replaces the bounding box by a pose box while sneaking (or swimming, gliding), viewers never see
+     * that pose on a disguise. Without this a sneaking bomber would shrink to 0.6 blocks and eggs would fly through the TNT.
+     */
+    @Override
+    public BoundingBox getBoundingBox() {
+        return this.disguiseState == DisguiseState.NONE ? super.getBoundingBox() : DISGUISE_BOUNDING_BOX;
+    }
+
+    /**
      * Returns the current disguise state.
      *
      * @return the disguise state
