@@ -15,6 +15,7 @@ import net.theevilreaper.tamias.common.area.placement.TntGroup;
 import net.theevilreaper.tamias.common.area.placement.TntLayout;
 import net.theevilreaper.tamias.common.ground.GroundData;
 import net.theevilreaper.tamias.common.map.layer.AreaData;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +39,7 @@ public final class GamePlacement implements Placement {
     private final Instance instance;
     private final Vec center;
     private Comparator<Vec> activeFillOrder;
+    private @Nullable GroundFillPattern lastPattern;
     private List<Vec> tntCandidates;
     private boolean prepared;
 
@@ -104,8 +106,8 @@ public final class GamePlacement implements Placement {
     @Override
     public void triggerPlacement(GroundData groundData) {
         if (this.groundPlacement.isRunning()) return;
-        GroundFillPattern[] patterns = GroundFillPattern.values();
-        GroundFillPattern chosen = patterns[ThreadLocalRandom.current().nextInt(patterns.length)];
+        GroundFillPattern chosen = GroundFillPattern.next(this.lastPattern, ThreadLocalRandom.current());
+        this.lastPattern = chosen;
         this.activeFillOrder = chosen.comparator(
                 new GroundFillPattern.Context(this.center, this.area.getPositions(), ThreadLocalRandom.current())
         );

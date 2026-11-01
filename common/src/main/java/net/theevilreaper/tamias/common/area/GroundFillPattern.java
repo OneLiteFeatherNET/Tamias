@@ -3,6 +3,7 @@ package net.theevilreaper.tamias.common.area;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.theevilreaper.tamias.common.util.Helper;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -48,6 +49,21 @@ public enum GroundFillPattern {
      */
     public Comparator<Vec> comparator(Context context) {
         return this.comparatorFactory.apply(context);
+    }
+
+    /**
+     * Picks a random pattern which differs from the previous one, so the same pattern never runs twice in a row.
+     *
+     * @param previous the pattern of the last run, null if there was none
+     * @param random   the random generator to use
+     * @return the picked pattern
+     */
+    public static GroundFillPattern next(@Nullable GroundFillPattern previous, RandomGenerator random) {
+        GroundFillPattern[] patterns = values();
+        if (previous == null || patterns.length == 1) return patterns[random.nextInt(patterns.length)];
+        // Skips the previous pattern by drawing from the remaining ones and shifting past it
+        int index = random.nextInt(patterns.length - 1);
+        return patterns[index >= previous.ordinal() ? index + 1 : index];
     }
 
     /**

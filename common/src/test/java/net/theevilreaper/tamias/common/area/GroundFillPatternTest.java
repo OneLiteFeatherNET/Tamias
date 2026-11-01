@@ -5,9 +5,13 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class GroundFillPatternTest {
 
@@ -24,6 +28,20 @@ class GroundFillPatternTest {
         shuffled.sort(GroundFillPattern.LINE.comparator(GroundFillPattern.Context.of(Vec.ZERO)));
 
         assertEquals(expected, shuffled);
+    }
+
+    @Test
+    void testNextPatternNeverRepeatsThePrevious() {
+        Random random = new Random(7);
+        GroundFillPattern previous = null;
+        Set<GroundFillPattern> seen = EnumSet.noneOf(GroundFillPattern.class);
+        for (int i = 0; i < 200; i++) {
+            GroundFillPattern next = GroundFillPattern.next(previous, random);
+            assertNotEquals(previous, next);
+            seen.add(next);
+            previous = next;
+        }
+        assertEquals(EnumSet.allOf(GroundFillPattern.class), seen, "Every pattern should be picked at some point");
     }
 
     @Test
