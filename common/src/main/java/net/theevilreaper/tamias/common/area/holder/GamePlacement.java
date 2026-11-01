@@ -21,10 +21,8 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
@@ -34,11 +32,12 @@ public final class GamePlacement implements Placement {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GamePlacement.class);
 
-    private final Map<GroundFillPattern, SweepAreaPlacement> groundPatterns;
+    private final SweepAreaPlacement groundPlacement;
     private final TNTPlacement tntPlacement;
     private final GameArea area;
     private final Instance instance;
-    private SweepAreaPlacement activePattern;
+    private final Vec center;
+    private Comparator<Vec> activeFillOrder;
     private List<Vec> tntCandidates;
     private boolean prepared;
 
@@ -47,14 +46,9 @@ public final class GamePlacement implements Placement {
         this.area = area;
         this.tntPlacement = new TNTPlacement(instance, area::addTntPosition);
         this.tntCandidates = List.of();
-
-        List<Vec> initialPositions = List.copyOf(area.getPositions());
-        Vec center = getCenter(area);
-        this.groundPatterns = new EnumMap<>(GroundFillPattern.class);
-        for (GroundFillPattern pattern : GroundFillPattern.values()) {
-            this.groundPatterns.put(pattern, new SweepAreaPlacement(instance, initialPositions, List.of(), pattern.comparator(center)));
-        }
-        this.activePattern = this.groundPatterns.get(GroundFillPattern.values()[0]);
+        this.center = getCenter(area);
+        this.groundPlacement = new SweepAreaPlacement(instance, List.copyOf(area.getPositions()), List.of());
+        this.activeFillOrder = GroundFillPattern.values()[0].comparator(this.center);
     }
 
     /**
@@ -68,7 +62,7 @@ public final class GamePlacement implements Placement {
         return areaData.lowerCorner().add(areaData.upperCorner()).div(2);
     }
 
-        @Override
+    @Override
     public void clear() {
         this.clearAsync();
     }
@@ -79,7 +73,7 @@ public final class GamePlacement implements Placement {
      */
     public void stopPlacements() {
         this.tntPlacement.stop();
-        this.groundPatterns.values().forEach(SweepAreaPlacement::stop);
+        this.groundPlacement.stop();
     }
 
     /**
@@ -109,13 +103,13 @@ public final class GamePlacement implements Placement {
 
     @Override
     public void triggerPlacement(GroundData groundData) {
-        if (this.activePattern.isRunning()) return;
+        if (this.groundPlacement.isRunning()) return;
         GroundFillPattern[] patterns = GroundFillPattern.values();
         GroundFillPattern chosen = patterns[ThreadLocalRandom.current().nextInt(patterns.length)];
-        this.activePattern = this.groundPatterns.get(chosen);
+        this.activeFillOrder = chosen.comparator(this.center);
         LOGGER.info("Using ground fill pattern {}", chosen);
         this.updateSpecialPositions(groundData);
-        this.activePattern.place(groundData);
+        this.groundPlacement.place(groundData, this.activeFillOrder);
     }
 
     /**
@@ -150,9 +144,7 @@ public final class GamePlacement implements Placement {
         }
         this.area.flattenPositions(positionsToRemove);
         List<Vec> filteredPositions = List.copyOf(this.area.getPositions());
-        for (SweepAreaPlacement pattern : this.groundPatterns.values()) {
-            pattern.updatePositions(filteredPositions);
-        }
+        this.groundPlacement.updatePositions(filteredPositions);
         // The structures on the map are static, so the free drop paths only have to be found once
         this.tntCandidates = filteredPositions.stream()
                 .map(pos -> pos.add(0, 1, 0))
@@ -216,7 +208,7 @@ public final class GamePlacement implements Placement {
     }
 
     public boolean isRunning() {
-        return this.activePattern.isRunning();
+        return this.groundPlacement.isRunning();
     }
 
     /**
@@ -231,17 +223,16 @@ public final class GamePlacement implements Placement {
     public CompletableFuture<Void> dropTnt(IntSupplier countSupplier) {
         if (this.tntCandidates.isEmpty()) return CompletableFuture.completedFuture(null);
 
-        SweepAreaPlacement pattern = this.activePattern;
         List<TntGroup> groups = new ArrayList<>(TntLayout.plan(
                 this.tntCandidates,
                 countSupplier.getAsInt(),
                 GameAreaHelper.TNT_GROUP_RATIO,
                 ThreadLocalRandom.current()
         ));
-        groups.sort(Comparator.comparing(TntGroup::center, pattern.getFillOrder()));
+        groups.sort(Comparator.comparing(TntGroup::center, this.activeFillOrder));
 
         this.area.setTntPositions(List.of());
-        this.tntPlacement.updateGroups(groups, pattern::isPlaced);
+        this.tntPlacement.updateGroups(groups, this.groundPlacement::isPlaced);
         this.tntPlacement.place();
         LOGGER.info("Dropping {} TNT blocks in {} groups onto the game area",
                 groups.stream().mapToInt(group -> group.members().size() + 1).sum(), groups.size());
@@ -275,6 +266,6 @@ public final class GamePlacement implements Placement {
         } else {
             this.area.getSpecialPositions().clear();
         }
-        this.activePattern.updateSpecialPositions(this.area.getSpecialPositions());
+        this.groundPlacement.updateSpecialPositions(this.area.getSpecialPositions());
     }
 }

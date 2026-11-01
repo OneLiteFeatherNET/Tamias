@@ -5,9 +5,11 @@ import net.theevilreaper.xerus.api.phase.GamePhase;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.timer.Task;
+import net.theevilreaper.tamias.common.event.AreaBuildProgressEvent;
 import net.theevilreaper.tamias.common.event.AreaFinishBuildEvent;
 import net.theevilreaper.tamias.common.event.AreaSpawnTriggerEvent;
 import net.theevilreaper.tamias.game.round.event.RoundPrepareEvent;
@@ -79,6 +81,7 @@ public final class GroundBuildPhase extends GamePhase {
             this.groundBuilt = true;
             this.finishIfBuilt();
         });
+        addListener(AreaBuildProgressEvent.class, event -> showBuildProgress(event.progress()));
         this.mapPlacementTaskTrigger = mapPlacementTaskTrigger;
         this.tntDropTrigger = tntDropTrigger;
         this.groundDelay = groundDelay;
@@ -117,6 +120,18 @@ public final class GroundBuildPhase extends GamePhase {
         players.sendMessage(MAP_READY);
         players.playSound(BUILD_FINISH_SOUND, Sound.Emitter.self());
         finish();
+    }
+
+    /**
+     * Shows the build progress of the ground in the experience bar of every online player.
+     *
+     * @param progress the share of placed ground blocks from 0 to 1
+     */
+    private static void showBuildProgress(double progress) {
+        for (Player player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+            player.setLevel((int) (progress * 100));
+            player.setExp((float) progress);
+        }
     }
 
     /**

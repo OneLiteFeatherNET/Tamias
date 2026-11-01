@@ -8,6 +8,7 @@ import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockSoundType;
+import net.theevilreaper.tamias.common.event.AreaBuildProgressEvent;
 import net.theevilreaper.tamias.common.event.AreaFinishBuildEvent;
 import net.theevilreaper.tamias.common.ground.GroundData;
 
@@ -24,24 +25,25 @@ import static net.theevilreaper.tamias.common.area.GameAreaHelper.BLOCKS_PER_STE
 import static net.theevilreaper.tamias.common.area.GameAreaHelper.GROUND_SOUND_INTERVAL;
 
 /**
- * Places ground blocks in the order defined by the given {@link Comparator}, batched over ticks.
- * The fill order is fully pluggable - see {@link net.theevilreaper.tamias.common.area.GroundFillPattern}
- * for the available patterns - the batching/tracking logic here stays the same for all of them.
+ * Places ground blocks batched over ticks. The fill order is passed per run, so one placement serves every
+ * {@link net.theevilreaper.tamias.common.area.GroundFillPattern} - the batching/tracking logic stays the same for all of them.
+ * After each step an {@link AreaBuildProgressEvent} is called, so the game decides how to show the progress.
  */
 public final class SweepAreaPlacement extends AreaBasePlacement {
 
     private final Set<Vec> specialPositions;
-    private final Comparator<Vec> fillOrder;
 
-    public SweepAreaPlacement(
-            Instance instance,
-            List<Vec> blockPositions,
-            List<Vec> specialPositions,
-            Comparator<Vec> fillOrder) {
+    /**
+     * Creates a new placement.
+     *
+     * @param instance         the instance to place the blocks in
+     * @param blockPositions   the positions of the ground
+     * @param specialPositions the positions which get an additional block of the ground data
+     */
+    public SweepAreaPlacement(Instance instance, List<Vec> blockPositions, List<Vec> specialPositions) {
         super(instance, blockPositions);
         this.specialPositions = ConcurrentHashMap.newKeySet();
         this.specialPositions.addAll(specialPositions);
-        this.fillOrder = fillOrder;
     }
 
     /**
@@ -55,23 +57,16 @@ public final class SweepAreaPlacement extends AreaBasePlacement {
     }
 
     /**
-     * Returns the order in which the ground blocks are placed.
-     *
-     * @return the fill order
-     */
-    public Comparator<Vec> getFillOrder() {
-        return this.fillOrder;
-    }
-
-    /**
      * Starts the placement of the ground with the given data.
      *
      * @param groundData the data which defines the ground and the special blocks
+     * @param fillOrder  the order in which the ground blocks are placed
      */
-    public void place(GroundData groundData) {
+    public void place(GroundData groundData, Comparator<Vec> fillOrder) {
         if (!tryStart()) return;
         List<Vec> posList = new ArrayList<>(this.blockPositions);
-        posList.sort(this.fillOrder);
+        posList.sort(fillOrder);
+        int total = posList.size();
         LinkedBlockingDeque<Vec> queue = new LinkedBlockingDeque<>(posList);
         int[] steps = new int[1];
 
@@ -92,7 +87,7 @@ public final class SweepAreaPlacement extends AreaBasePlacement {
             if (steps[0]++ % GROUND_SOUND_INTERVAL == 0) {
                 playPlaceSound(positions.getLast(), groundData.groundBlock());
             }
-            sendExpCount(queue.size());
+            EventDispatcher.call(new AreaBuildProgressEvent(1 - (double) queue.size() / total));
         }).repeat(TaskSchedule.tick(1)).schedule();
     }
 
