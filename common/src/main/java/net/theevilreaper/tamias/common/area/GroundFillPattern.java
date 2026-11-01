@@ -2,10 +2,10 @@ package net.theevilreaper.tamias.common.area;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
-import net.theevilreaper.tamias.common.util.Helper;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -16,13 +16,17 @@ import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
+import java.util.function.ToDoubleFunction;
 import java.util.random.RandomGenerator;
 
 /**
  * Defines the visual fill order a ground placement can sweep the area's positions in.
- * Adding a new pattern only requires a new constant with its own {@link Comparator} - the
+ * Adding a new pattern only requires a new constant with its own fill order - the
  * placement/batching/tracking logic itself is shared and does not need to change.
  * A pattern gets a {@link Context} for each run, so it can depend on the ground positions or on randomness.
+ * <p>
+ * The fill order is a key per position, a lower key is placed earlier. The key is computed once per position
+ * before sorting instead of on every comparison, so even complex patterns stay cheap on large areas.
  *
  * @author theEvilReaper
  * @version 1.0.0
@@ -33,29 +37,29 @@ public enum GroundFillPattern {
     /**
      * Fills outward from the center of the area, growing like a ring.
      */
-    CIRCLE(context -> Helper.getComparator(context.center())),
+    CIRCLE(context -> GroundFillPattern.circleOrder(context.center())),
 
     /**
      * Fills row by row, alternating direction each row (boustrophedon/"lawn mower" pattern).
      */
-    LINE(_ -> GroundFillPattern.snakeComparator()),
+    LINE(_ -> GroundFillPattern::snakeKey),
 
     /**
      * Grows spiral arms out of the center like a galaxy, the space between the arms fills behind them.
      * The arms are rotated randomly each run.
      */
-    GALAXY(context -> GroundFillPattern.galaxyComparator(context.center(), context.random().nextDouble(Math.TAU))),
+    GALAXY(context -> GroundFillPattern.galaxyOrder(context.center(), context.random().nextDouble(Math.TAU))),
 
     /**
      * Grows a circle from a few random spots at once, like drops falling into a puddle, until the circles meet.
      */
-    DROPS(GroundFillPattern::dropsComparator),
+    DROPS(GroundFillPattern::dropsOrder),
 
     /**
      * Grows irregularly from the center like moss, only from block to neighbouring block.
      * So it flows around holes and structures in the ground, separate parts of the ground grow one after another.
      */
-    ORGANIC(GroundFillPattern::organicComparator);
+    ORGANIC(GroundFillPattern::organicOrder);
 
     private static final int GALAXY_ARMS = 3;
     /**
@@ -85,23 +89,61 @@ public enum GroundFillPattern {
      */
     private static final double ORGANIC_SLOW_COST = 15;
     private static final int[][] NEIGHBOURS = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+    /**
+     * The width of a row in the key of the line pattern, it must be larger than any x coordinate range of an area.
+     */
+    private static final double LINE_ROW_WIDTH = 1 << 22;
 
-    private final Function<Context, Comparator<Vec>> comparatorFactory;
+    private final Function<Context, ToDoubleFunction<Point>> orderFactory;
 
-    GroundFillPattern(Function<Context, Comparator<Vec>> comparatorFactory) {
-        this.comparatorFactory = comparatorFactory;
+    GroundFillPattern(Function<Context, ToDoubleFunction<Point>> orderFactory) {
+        this.orderFactory = orderFactory;
     }
 
     /**
-     * Returns the fill-order comparator for this pattern.
-     * The comparator only uses the x and z coordinates, so it also orders positions above the ground, e.g. TNT.
+     * Returns the fill order of this pattern as a key per position, a lower key is placed earlier.
+     * The key only uses the x and z coordinates, so it also orders positions above the ground, e.g. TNT.
      *
      * @param context the data of the run, patterns which don't need a part of it ignore it
-     * @return the comparator positions should be sorted by before placing them
+     * @return the key function
+     */
+    public ToDoubleFunction<Point> order(Context context) {
+        return this.orderFactory.apply(context);
+    }
+
+    /**
+     * Returns the fill order of this pattern as a comparator. It computes the key on every comparison, so it is
+     * meant for small lists. Use {@link #sort(Collection, ToDoubleFunction)} for the ground positions.
+     *
+     * @param context the data of the run, patterns which don't need a part of it ignore it
+     * @return the comparator
      */
     public Comparator<Vec> comparator(Context context) {
-        return this.comparatorFactory.apply(context);
+        return Comparator.comparingDouble(order(context)::applyAsDouble);
     }
+
+    /**
+     * Sorts the given positions by the given fill order. The key is computed once per position.
+     *
+     * @param positions the positions to sort
+     * @param order     the fill order, a lower key is placed earlier
+     * @return a new list with the sorted positions
+     */
+    public static List<Vec> sort(Collection<Vec> positions, ToDoubleFunction<? super Vec> order) {
+        Keyed[] keyed = new Keyed[positions.size()];
+        int index = 0;
+        for (Vec position : positions) {
+            keyed[index++] = new Keyed(position, order.applyAsDouble(position));
+        }
+        Arrays.sort(keyed, Comparator.comparingDouble(Keyed::key));
+        List<Vec> sorted = new ArrayList<>(keyed.length);
+        for (Keyed entry : keyed) {
+            sorted.add(entry.position());
+        }
+        return sorted;
+    }
+
+    private record Keyed(Vec position, double key) { }
 
     /**
      * Picks a random pattern which differs from the previous one, so the same pattern never runs twice in a row.
@@ -139,16 +181,42 @@ public enum GroundFillPattern {
     }
 
     /**
-     * Returns a comparator which orders positions along spiral arms around the given center.
+     * Returns a fill order which grows outward from the given center by the squared distance.
+     *
+     * @param center the center to grow from
+     * @return the key function
+     */
+    static ToDoubleFunction<Point> circleOrder(Point center) {
+        return pos -> {
+            double dx = pos.x() - center.x();
+            double dz = pos.z() - center.z();
+            return dx * dx + dz * dz;
+        };
+    }
+
+    /**
+     * Returns the key of the line pattern: row by row along z, the x direction alternates each row.
+     *
+     * @param pos the position
+     * @return the key
+     */
+    private static double snakeKey(Point pos) {
+        double row = Math.floor(pos.z());
+        boolean reversed = Math.floorMod((long) row, 2) != 0;
+        return row * LINE_ROW_WIDTH + (reversed ? -pos.x() : pos.x());
+    }
+
+    /**
+     * Returns a fill order along spiral arms around the given center.
      * A block is placed at its distance to the center plus a delay for its distance to the closest arm.
      *
      * @param center   the center of the galaxy
      * @param rotation the rotation of the arms in radians
-     * @return the comparator
+     * @return the key function
      */
-    static Comparator<Vec> galaxyComparator(Point center, double rotation) {
+    static ToDoubleFunction<Point> galaxyOrder(Point center, double rotation) {
         double sector = Math.TAU / GALAXY_ARMS;
-        return Comparator.comparingDouble(pos -> {
+        return pos -> {
             double dx = pos.x() - center.x();
             double dz = pos.z() - center.z();
             double radius = Math.hypot(dx, dz);
@@ -157,31 +225,31 @@ public enum GroundFillPattern {
             double inSector = (armAngle % sector + sector) % sector;
             double angleToArm = Math.min(inSector, sector - inSector);
             return radius + GALAXY_GAP_DELAY * angleToArm * radius;
-        });
+        };
     }
 
     /**
-     * Returns a comparator which grows circles from a random amount of random drop spots.
+     * Returns a fill order which grows circles from a random amount of random drop spots.
      *
      * @param context the data of the run
-     * @return the comparator
+     * @return the key function
      */
-    private static Comparator<Vec> dropsComparator(Context context) {
+    private static ToDoubleFunction<Point> dropsOrder(Context context) {
         int amount = context.random().nextInt(MIN_DROPS, MAX_DROPS + 1);
         List<Vec> inner = innerPositions(context.positions(), context.center());
-        return dropsComparator(pickDropSpots(inner, amount, context.random()), context.center());
+        return dropsOrder(pickDropSpots(inner, amount, context.random()), context.center());
     }
 
     /**
-     * Returns a comparator which orders positions by their distance to the closest drop spot.
+     * Returns a fill order by the distance to the closest drop spot.
      *
      * @param spots  the spots the circles grow from
      * @param center the fallback spot if no spot is given
-     * @return the comparator
+     * @return the key function
      */
-    static Comparator<Vec> dropsComparator(List<Vec> spots, Point center) {
+    static ToDoubleFunction<Point> dropsOrder(List<Vec> spots, Point center) {
         List<Point> origins = spots.isEmpty() ? List.of(center) : List.copyOf(spots);
-        return Comparator.comparingDouble(pos -> distanceToClosest(pos, origins));
+        return pos -> distanceToClosest(pos, origins);
     }
 
     /**
@@ -250,16 +318,16 @@ public enum GroundFillPattern {
     }
 
     /**
-     * Returns a comparator which orders positions by the time the organic growth reaches them.
+     * Returns a fill order by the time the organic growth reaches a position.
      * Positions which are not part of the ground are placed last.
      *
      * @param context the data of the run
-     * @return the comparator
+     * @return the key function
      */
-    static Comparator<Vec> organicComparator(Context context) {
-        if (context.positions().isEmpty()) return Helper.getComparator(context.center());
+    static ToDoubleFunction<Point> organicOrder(Context context) {
+        if (context.positions().isEmpty()) return circleOrder(context.center());
         Map<Long, Double> arrival = organicArrival(context.positions(), context.center(), context.random());
-        return Comparator.comparingDouble(pos -> arrival.getOrDefault(columnKey(pos.blockX(), pos.blockZ()), Double.MAX_VALUE));
+        return pos -> arrival.getOrDefault(columnKey(pos.blockX(), pos.blockZ()), Double.MAX_VALUE);
     }
 
     /**
@@ -366,15 +434,4 @@ public enum GroundFillPattern {
     }
 
     private record Step(long key, double time) { }
-
-    private static Comparator<Vec> snakeComparator() {
-        return (a, b) -> {
-            int rowCompare = Double.compare(a.z(), b.z());
-            if (rowCompare != 0) return rowCompare;
-
-            boolean reversed = Math.floorMod((long) Math.floor(a.z()), 2) != 0;
-            int columnCompare = Double.compare(a.x(), b.x());
-            return reversed ? -columnCompare : columnCompare;
-        };
-    }
 }

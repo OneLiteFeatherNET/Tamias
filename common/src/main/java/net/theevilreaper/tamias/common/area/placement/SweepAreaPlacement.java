@@ -8,6 +8,7 @@ import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockSoundType;
+import net.theevilreaper.tamias.common.area.GroundFillPattern;
 import net.theevilreaper.tamias.common.event.AreaBuildProgressEvent;
 import net.theevilreaper.tamias.common.event.AreaFinishBuildEvent;
 import net.theevilreaper.tamias.common.ground.GroundData;
@@ -15,11 +16,11 @@ import net.theevilreaper.tamias.common.ground.GroundData;
 import net.minestom.server.timer.TaskSchedule;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.function.ToDoubleFunction;
 
 import static net.theevilreaper.tamias.common.area.GameAreaHelper.BLOCKS_PER_STEP;
 import static net.theevilreaper.tamias.common.area.GameAreaHelper.GROUND_SOUND_INTERVAL;
@@ -60,12 +61,11 @@ public final class SweepAreaPlacement extends AreaBasePlacement {
      * Starts the placement of the ground with the given data.
      *
      * @param groundData the data which defines the ground and the special blocks
-     * @param fillOrder  the order in which the ground blocks are placed
+     * @param fillOrder  the key per position which defines the order of the ground blocks, a lower key is placed earlier
      */
-    public void place(GroundData groundData, Comparator<Vec> fillOrder) {
+    public void place(GroundData groundData, ToDoubleFunction<? super Vec> fillOrder) {
         if (!tryStart()) return;
-        List<Vec> posList = new ArrayList<>(this.blockPositions);
-        posList.sort(fillOrder);
+        List<Vec> posList = GroundFillPattern.sort(this.blockPositions, fillOrder);
         int total = posList.size();
         LinkedBlockingDeque<Vec> queue = new LinkedBlockingDeque<>(posList);
         int[] steps = new int[1];

@@ -35,6 +35,20 @@ class GroundFillPatternTest {
     }
 
     @Test
+    void testSortMatchesTheComparatorOfEveryPattern() {
+        List<Vec> positions = grid(25);
+        Vec center = new Vec(12, 0, 12);
+        for (GroundFillPattern pattern : GroundFillPattern.values()) {
+            GroundFillPattern.Context context = new GroundFillPattern.Context(center, positions, new Random(2));
+            var order = pattern.order(context);
+            List<Vec> expected = new ArrayList<>(positions);
+            expected.sort(Comparator.comparingDouble(order::applyAsDouble));
+
+            assertEquals(expected, GroundFillPattern.sort(positions, order), pattern + " sorts differently");
+        }
+    }
+
+    @Test
     void testNextPatternNeverRepeatsThePrevious() {
         Random random = new Random(7);
         GroundFillPattern previous = null;
@@ -57,7 +71,7 @@ class GroundFillPatternTest {
         Vec gap = onCircle(center, 5, 5 * 0.25 + Math.TAU / 6);
 
         List<Vec> positions = new ArrayList<>(List.of(gap, arm, center, otherArm));
-        positions.sort(GroundFillPattern.galaxyComparator(center, 0));
+        positions.sort(Comparator.comparingDouble(GroundFillPattern.galaxyOrder(center, 0)));
 
         assertEquals(center, positions.getFirst());
         assertEquals(Set.of(arm, otherArm), Set.copyOf(positions.subList(1, 3)), "Both arms reach a radius of 10 at the same time");
@@ -98,7 +112,7 @@ class GroundFillPatternTest {
                 new Vec(10, 0, 0), new Vec(21, 0, 0), new Vec(0, 0, 0), new Vec(3, 0, 0), new Vec(20, 0, 0)
         ));
 
-        positions.sort(GroundFillPattern.dropsComparator(spots, Vec.ZERO));
+        positions.sort(Comparator.comparingDouble(GroundFillPattern.dropsOrder(spots, Vec.ZERO)));
 
         assertEquals(Set.copyOf(spots), Set.copyOf(positions.subList(0, 2)), "Every spot starts at the same time");
         assertEquals(List.of(new Vec(21, 0, 0), new Vec(3, 0, 0), new Vec(10, 0, 0)), positions.subList(2, 5));
@@ -108,7 +122,7 @@ class GroundFillPatternTest {
     void testDropsFallBackToTheCenterWithoutPositions() {
         assertTrue(GroundFillPattern.pickDropSpots(List.of(), 3, new Random(1)).isEmpty());
         List<Vec> positions = new ArrayList<>(List.of(new Vec(5, 0, 0), new Vec(1, 0, 0)));
-        positions.sort(GroundFillPattern.dropsComparator(List.of(), Vec.ZERO));
+        positions.sort(Comparator.comparingDouble(GroundFillPattern.dropsOrder(List.of(), Vec.ZERO)));
         assertEquals(new Vec(1, 0, 0), positions.getFirst());
     }
 
@@ -116,7 +130,7 @@ class GroundFillPatternTest {
     void testOrganicGrowthSpreadsFromBlockToBlock() {
         List<Vec> positions = grid(20);
         Vec center = new Vec(10, 0, 10);
-        positions.sort(GroundFillPattern.organicComparator(new GroundFillPattern.Context(center, positions, new Random(5))));
+        positions.sort(GroundFillPattern.ORGANIC.comparator(new GroundFillPattern.Context(center, positions, new Random(5))));
 
         assertEquals(center, positions.getFirst());
         assertGrowsFromNeighbours(positions, 1);
@@ -134,7 +148,7 @@ class GroundFillPatternTest {
         }
         List<Vec> positions = new ArrayList<>(far);
         positions.addAll(near);
-        positions.sort(GroundFillPattern.organicComparator(new GroundFillPattern.Context(Vec.ZERO, positions, new Random(5))));
+        positions.sort(GroundFillPattern.ORGANIC.comparator(new GroundFillPattern.Context(Vec.ZERO, positions, new Random(5))));
 
         assertEquals(Set.copyOf(near), Set.copyOf(positions.subList(0, 25)), "The part closest to the center grows first");
         assertEquals(Set.copyOf(far), Set.copyOf(positions.subList(25, 50)));
@@ -144,7 +158,7 @@ class GroundFillPatternTest {
     @Test
     void testOrganicGrowthIgnoresTheHeight() {
         List<Vec> ground = grid(10);
-        Comparator<Vec> comparator = GroundFillPattern.organicComparator(new GroundFillPattern.Context(Vec.ZERO, ground, new Random(9)));
+        Comparator<Vec> comparator = GroundFillPattern.ORGANIC.comparator(new GroundFillPattern.Context(Vec.ZERO, ground, new Random(9)));
         List<Vec> sortedGround = new ArrayList<>(ground);
         sortedGround.sort(comparator);
         List<Vec> above = new ArrayList<>(ground.stream().map(pos -> pos.add(0, 1, 0)).toList());
