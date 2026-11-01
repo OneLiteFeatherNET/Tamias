@@ -48,7 +48,7 @@ public record GroundData(Block groundBlock, @Nullable List<Block> additionalBloc
      *
      * @return the additional block
      */
-    public Block getAddtionalBlock() {
+    public Block getAdditionalBlock() {
         if (additionalBlocks == null || additionalBlocks.isEmpty()) return groundBlock();
         if (additionalBlocks.size() == 1) return additionalBlocks.getFirst();
         int index = ThreadLocalRandom.current().nextInt(0, this.additionalBlocks.size());

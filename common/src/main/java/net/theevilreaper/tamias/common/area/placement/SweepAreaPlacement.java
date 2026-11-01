@@ -105,7 +105,7 @@ public final class SweepAreaPlacement extends AreaBasePlacement {
      */
     private Block getBlock(Vec position, GroundData groundData) {
         if (this.specialPositions.contains(position)) {
-            return groundData.getAddtionalBlock();
+            return groundData.getAdditionalBlock();
         }
         return groundData.groundBlock();
     }

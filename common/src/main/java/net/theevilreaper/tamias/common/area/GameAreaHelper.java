@@ -43,8 +43,6 @@ public final class GameAreaHelper {
      * One special block is placed for each started amount of this many ground positions.
      */
     public static final int POSITIONS_PER_SPECIAL_BLOCK = 100;
-    public static final int MIN_SPEED_BOOST_AMOUNT = 10;
-    public static final int MAX_SPEED_BOOST_AMOUNT = 20;
 
     private GameAreaHelper() {
         throw new UnsupportedOperationException("This class can't be instantiated");
