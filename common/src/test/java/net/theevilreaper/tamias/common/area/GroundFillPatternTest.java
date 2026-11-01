@@ -11,7 +11,9 @@ import java.util.Random;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GroundFillPatternTest {
 
@@ -58,6 +60,64 @@ class GroundFillPatternTest {
         assertEquals(center, positions.getFirst());
         assertEquals(Set.of(arm, otherArm), Set.copyOf(positions.subList(1, 3)), "Both arms reach a radius of 10 at the same time");
         assertEquals(gap, positions.getLast(), "The gap between the arms fills behind the arms");
+    }
+
+    @Test
+    void testDropSpotsAreSpreadOverTheArea() {
+        List<Vec> grid = grid(30);
+        List<Vec> spots = GroundFillPattern.pickDropSpots(grid, 4, new Random(3));
+
+        assertEquals(4, Set.copyOf(spots).size());
+        assertTrue(grid.containsAll(spots));
+        for (Vec spot : spots) {
+            for (Vec other : spots) {
+                if (spot != other) {
+                    assertTrue(spot.distance(other) > 5, spot + " and " + other + " are too close");
+                }
+            }
+        }
+    }
+
+    @Test
+    void testDropSpotsAreNotPickedAtTheEdge() {
+        Vec center = new Vec(15, 0, 15);
+        List<Vec> inner = GroundFillPattern.innerPositions(grid(31), center);
+
+        assertTrue(inner.contains(center));
+        assertTrue(inner.contains(new Vec(15, 0, 6)), "9 blocks from the center is within 60 % of the largest distance");
+        assertFalse(inner.contains(new Vec(15, 0, 0)), "The edge is too far away from the center");
+        assertFalse(inner.contains(new Vec(0, 0, 0)), "The corner is too far away from the center");
+    }
+
+    @Test
+    void testDropsGrowFromEverySpot() {
+        List<Vec> spots = List.of(new Vec(0, 0, 0), new Vec(20, 0, 0));
+        List<Vec> positions = new ArrayList<>(List.of(
+                new Vec(10, 0, 0), new Vec(21, 0, 0), new Vec(0, 0, 0), new Vec(3, 0, 0), new Vec(20, 0, 0)
+        ));
+
+        positions.sort(GroundFillPattern.dropsComparator(spots, Vec.ZERO));
+
+        assertEquals(Set.copyOf(spots), Set.copyOf(positions.subList(0, 2)), "Every spot starts at the same time");
+        assertEquals(List.of(new Vec(21, 0, 0), new Vec(3, 0, 0), new Vec(10, 0, 0)), positions.subList(2, 5));
+    }
+
+    @Test
+    void testDropsFallBackToTheCenterWithoutPositions() {
+        assertTrue(GroundFillPattern.pickDropSpots(List.of(), 3, new Random(1)).isEmpty());
+        List<Vec> positions = new ArrayList<>(List.of(new Vec(5, 0, 0), new Vec(1, 0, 0)));
+        positions.sort(GroundFillPattern.dropsComparator(List.of(), Vec.ZERO));
+        assertEquals(new Vec(1, 0, 0), positions.getFirst());
+    }
+
+    private static List<Vec> grid(int size) {
+        List<Vec> grid = new ArrayList<>();
+        for (int x = 0; x < size; x++) {
+            for (int z = 0; z < size; z++) {
+                grid.add(new Vec(x, 0, z));
+            }
+        }
+        return grid;
     }
 
     private static Vec onCircle(Vec center, double radius, double angle) {
