@@ -43,7 +43,26 @@ class GroundDataRegistryTest {
         for (GroundData data : new TamiasGroundDataRegistry().getGroundData()) {
             if (!data.hasAdditionalBlocks()) continue;
             for (Block block : data.additionalBlocks()) {
+                // Speed blocks change the movement on purpose
+                if (SpeedBlock.isSpeedBlock(block)) continue;
                 assertFalse(forbidden.contains(block), block + " changes how " + data.groundBlock() + " plays");
+                assertTrue(block.occludes(), block + " is not a full ground block");
+            }
+        }
+    }
+
+    @Test
+    void testDefaultSpeedBlocksMatchTheGround() {
+        List<GroundData> defaults = new TamiasGroundDataRegistry().getGroundData();
+        // Some rounds must stay without speed blocks, so the move listener isn't always needed
+        assertTrue(defaults.stream().anyMatch(GroundData::hasSpeedBlocks));
+        assertTrue(defaults.stream().anyMatch(data -> !data.hasSpeedBlocks()));
+
+        for (GroundData data : defaults) {
+            if (!data.hasSpeedBlocks()) continue;
+            for (Block block : data.additionalBlocks()) {
+                if (!SpeedBlock.isSpeedBlock(block)) continue;
+                assertFalse(block.compare(data.groundBlock()), block + " looks like the ground " + data.groundBlock());
                 assertTrue(block.occludes(), block + " is not a full ground block");
             }
         }

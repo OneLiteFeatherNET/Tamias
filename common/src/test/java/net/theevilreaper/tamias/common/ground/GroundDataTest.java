@@ -37,6 +37,13 @@ class GroundDataTest {
     }
 
     @Test
+    void testHasSpeedBlocks() {
+        assertFalse(new GroundData(Block.AMETHYST_BLOCK, null).hasSpeedBlocks());
+        assertFalse(new GroundData(Block.AMETHYST_BLOCK, List.of(Block.GLASS)).hasSpeedBlocks());
+        assertTrue(new GroundData(Block.AMETHYST_BLOCK, List.of(Block.GLASS, SpeedBlock.of(Block.SEA_LANTERN))).hasSpeedBlocks());
+    }
+
+    @Test
     void testGroundDataWithAdditionalBlocks() {
         List<Block> additionalBlocks = List.of(Block.GLASS, Block.ACACIA_DOOR, Block.SAND);
         GroundData groundData = new GroundData(Block.AMETHYST_BLOCK, additionalBlocks);

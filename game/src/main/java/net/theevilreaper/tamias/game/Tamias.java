@@ -65,6 +65,8 @@ import net.theevilreaper.tamias.game.listener.game.BomberReviveListener;
 import net.theevilreaper.tamias.game.listener.game.PlayerInteractItemListener;
 import net.theevilreaper.tamias.game.listener.game.ProjectileEntityListener;
 import net.theevilreaper.tamias.game.listener.game.RoleToBomberChangeListener;
+import net.theevilreaper.tamias.game.listener.game.SpeedBlockHandler;
+import net.theevilreaper.tamias.game.listener.game.SpeedBlockListener;
 import net.theevilreaper.tamias.game.listener.round.RoundEndListener;
 import net.theevilreaper.tamias.game.listener.round.RoundPrepareListener;
 import net.theevilreaper.tamias.game.listener.round.RoundStartListener;
@@ -113,6 +115,9 @@ public class Tamias implements ListenerHandling {
     private volatile Scoreboard activeScoreboard;
     private RoundProvider roundProvider;
     private CyclicPhaseSeries<Phase> gameSeries;
+    private SpeedBlockHandler speedBlockHandler;
+    // The ground of the current round, decides if the speed block listener is needed
+    private volatile GroundData currentGround;
     private int playedRounds;
 
     public Tamias() {
@@ -187,6 +192,7 @@ public class Tamias implements ListenerHandling {
         this.roundProvider = new RoundProvider(gameSeries);
         gameSeries.add(new GroundBuildPhase(() -> {
             GroundData randomData = GroundDataRegistry.instance().getRandomData();
+            this.currentGround = randomData;
             this.mapProvider.getGamePlacement().triggerPlacement(randomData);
             return () -> {
                 this.mapProvider.getGamePlacement().stopPlacements();
@@ -213,6 +219,7 @@ public class Tamias implements ListenerHandling {
             }
             this.refreshWins();
             this.staminaService.start();
+            this.speedBlockHandler.enable(this.currentGround);
         };
 
         gameSeries.add(
@@ -337,6 +344,10 @@ public class Tamias implements ListenerHandling {
         // Listener for rounds
         node.addListener(RoundStartEvent.class, _ -> this.hideScoreboards());
         node.addListener(RoundStartEvent.class, new RoundStartListener(this.gameScoreboard, this.roundProvider));
+
+        // The move listener for speed blocks is only registered in rounds which have them
+        this.speedBlockHandler = new SpeedBlockHandler(node, new SpeedBlockListener());
+        node.addListener(RoundEndEvent.class, _ -> this.speedBlockHandler.disable());
 
         //Stamina listeners
         node.addListener(StaminaCreateEvent.class, _ ->

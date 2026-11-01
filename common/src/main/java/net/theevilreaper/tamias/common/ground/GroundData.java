@@ -44,6 +44,15 @@ public record GroundData(Block groundBlock, @Nullable List<Block> additionalBloc
     }
 
     /**
+     * Checks if the ground data contains at least one {@link SpeedBlock}.
+     *
+     * @return {@code true} if one of the additional blocks is a speed block
+     */
+    public boolean hasSpeedBlocks() {
+        return additionalBlocks != null && additionalBlocks.stream().anyMatch(SpeedBlock::isSpeedBlock);
+    }
+
+    /**
      * Returns a random additional block from the list.
      *
      * @return the additional block
