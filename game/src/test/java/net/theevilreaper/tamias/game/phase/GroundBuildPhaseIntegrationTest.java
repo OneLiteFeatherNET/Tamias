@@ -1,10 +1,14 @@
 package net.theevilreaper.tamias.game.phase;
 
+import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventListener;
+import net.minestom.server.instance.Instance;
 import net.minestom.testing.Env;
 import net.minestom.testing.extension.MicrotusExtension;
+import net.theevilreaper.tamias.common.event.AreaBuildProgressEvent;
 import net.theevilreaper.tamias.common.event.AreaFinishBuildEvent;
 import net.theevilreaper.tamias.common.event.AreaSpawnTriggerEvent;
 import net.theevilreaper.tamias.game.round.event.RoundPrepareEvent;
@@ -94,6 +98,23 @@ class GroundBuildPhaseIntegrationTest {
         env.tickWhile(() -> !groundStarted.get(), Duration.ofMillis(500));
 
         assertFalse(groundStarted.get());
+    }
+
+    @Test
+    void testBuildProgressIsShownInTheExpBar(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player player = env.createPlayer(instance, Pos.ZERO);
+        GroundBuildPhase phase = new GroundBuildPhase(() -> () -> {}, () -> CompletableFuture.completedFuture(null),
+                Duration.ofMinutes(1), Duration.ZERO);
+
+        phase.start();
+        EventDispatcher.call(new AreaBuildProgressEvent(0.5));
+
+        assertEquals(50, player.getLevel());
+        assertEquals(0.5f, player.getExp());
+
+        phase.finish();
+        env.destroyInstance(instance, true);
     }
 
     private <T extends Event> void trackEvent(@NotNull Env env, @NotNull List<Class<? extends Event>> calledEvents, @NotNull Class<T> eventClass) {

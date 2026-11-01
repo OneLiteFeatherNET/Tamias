@@ -8,6 +8,7 @@ import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockSoundType;
+import net.theevilreaper.tamias.common.event.AreaBuildProgressEvent;
 import net.theevilreaper.tamias.common.event.AreaFinishBuildEvent;
 import net.theevilreaper.tamias.common.ground.GroundData;
 
@@ -26,6 +27,7 @@ import static net.theevilreaper.tamias.common.area.GameAreaHelper.GROUND_SOUND_I
 /**
  * Places ground blocks batched over ticks. The fill order is passed per run, so one placement serves every
  * {@link net.theevilreaper.tamias.common.area.GroundFillPattern} - the batching/tracking logic stays the same for all of them.
+ * After each step an {@link AreaBuildProgressEvent} is called, so the game decides how to show the progress.
  */
 public final class SweepAreaPlacement extends AreaBasePlacement {
 
@@ -64,6 +66,7 @@ public final class SweepAreaPlacement extends AreaBasePlacement {
         if (!tryStart()) return;
         List<Vec> posList = new ArrayList<>(this.blockPositions);
         posList.sort(fillOrder);
+        int total = posList.size();
         LinkedBlockingDeque<Vec> queue = new LinkedBlockingDeque<>(posList);
         int[] steps = new int[1];
 
@@ -84,7 +87,7 @@ public final class SweepAreaPlacement extends AreaBasePlacement {
             if (steps[0]++ % GROUND_SOUND_INTERVAL == 0) {
                 playPlaceSound(positions.getLast(), groundData.groundBlock());
             }
-            sendExpCount(queue.size());
+            EventDispatcher.call(new AreaBuildProgressEvent(1 - (double) queue.size() / total));
         }).repeat(TaskSchedule.tick(1)).schedule();
     }
 

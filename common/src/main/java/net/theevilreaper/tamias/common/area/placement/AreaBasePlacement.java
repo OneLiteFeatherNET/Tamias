@@ -1,9 +1,7 @@
 package net.theevilreaper.tamias.common.area.placement;
 
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.timer.Task;
 import net.minestom.server.instance.block.Block;
@@ -52,14 +50,6 @@ public abstract non-sealed class AreaBasePlacement implements AreaPlacement {
     protected final void doPlaceBlock(Vec position, Block block) {
         this.instance.setBlock(position, block);
         this.placedPositions.add(position);
-    }
-
-    protected void sendExpCount(int currentSize) {
-        for (Player onlinePlayer : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
-            float progress = (float) currentSize / this.blockPositions.size();
-            onlinePlayer.setLevel(100 - (int) (progress * 100));
-            onlinePlayer.setExp(1 - progress);
-        }
     }
 
     /**

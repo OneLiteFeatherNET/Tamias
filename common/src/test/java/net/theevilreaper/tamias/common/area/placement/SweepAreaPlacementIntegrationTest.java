@@ -7,12 +7,14 @@ import net.minestom.testing.Env;
 import net.minestom.testing.FlexibleListener;
 import net.minestom.testing.extension.MicrotusExtension;
 import net.theevilreaper.tamias.common.area.GroundFillPattern;
+import net.theevilreaper.tamias.common.event.AreaBuildProgressEvent;
 import net.theevilreaper.tamias.common.event.AreaFinishBuildEvent;
 import net.theevilreaper.tamias.common.ground.GroundData;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -50,6 +52,30 @@ class SweepAreaPlacementIntegrationTest {
 
         assertEquals(Block.GRASS_BLOCK, instance.getBlock(groundPos));
         assertEquals(Block.GOLD_BLOCK, instance.getBlock(specialPos));
+
+        env.destroyInstance(instance);
+    }
+
+    @Test
+    void testProgressIsReportedUntilComplete(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        List<Vec> positions = new ArrayList<>();
+        for (int x = 0; x < 50; x++) {
+            positions.add(new Vec(x, 0, 0));
+        }
+        List<Double> progress = new ArrayList<>();
+        env.process().eventHandler().addListener(AreaBuildProgressEvent.class, event -> progress.add(event.progress()));
+        SweepAreaPlacement placement = new SweepAreaPlacement(instance, positions, List.of());
+
+        placement.place(new GroundData(Block.DIRT, null), GroundFillPattern.LINE.comparator(Vec.ZERO));
+        for (int i = 0; i < 10 && placement.isRunning(); i++) {
+            env.tick();
+        }
+
+        assertFalse(placement.isRunning());
+        assertEquals(3, progress.size(), "50 blocks are placed in three steps of up to 20 blocks");
+        assertEquals(0.4, progress.getFirst(), 1e-9);
+        assertEquals(1.0, progress.getLast(), 1e-9);
 
         env.destroyInstance(instance);
     }
