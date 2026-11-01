@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Random;
@@ -108,6 +110,62 @@ class GroundFillPatternTest {
         List<Vec> positions = new ArrayList<>(List.of(new Vec(5, 0, 0), new Vec(1, 0, 0)));
         positions.sort(GroundFillPattern.dropsComparator(List.of(), Vec.ZERO));
         assertEquals(new Vec(1, 0, 0), positions.getFirst());
+    }
+
+    @Test
+    void testOrganicGrowthSpreadsFromBlockToBlock() {
+        List<Vec> positions = grid(20);
+        Vec center = new Vec(10, 0, 10);
+        positions.sort(GroundFillPattern.organicComparator(new GroundFillPattern.Context(center, positions, new Random(5))));
+
+        assertEquals(center, positions.getFirst());
+        assertGrowsFromNeighbours(positions, 1);
+    }
+
+    @Test
+    void testOrganicGrowthFillsSeparatePartsOneAfterAnother() {
+        List<Vec> near = new ArrayList<>();
+        List<Vec> far = new ArrayList<>();
+        for (int x = 0; x < 5; x++) {
+            for (int z = 0; z < 5; z++) {
+                near.add(new Vec(x, 0, z));
+                far.add(new Vec(x + 10, 0, z));
+            }
+        }
+        List<Vec> positions = new ArrayList<>(far);
+        positions.addAll(near);
+        positions.sort(GroundFillPattern.organicComparator(new GroundFillPattern.Context(Vec.ZERO, positions, new Random(5))));
+
+        assertEquals(Set.copyOf(near), Set.copyOf(positions.subList(0, 25)), "The part closest to the center grows first");
+        assertEquals(Set.copyOf(far), Set.copyOf(positions.subList(25, 50)));
+        assertGrowsFromNeighbours(positions, 2);
+    }
+
+    @Test
+    void testOrganicGrowthIgnoresTheHeight() {
+        List<Vec> ground = grid(10);
+        Comparator<Vec> comparator = GroundFillPattern.organicComparator(new GroundFillPattern.Context(Vec.ZERO, ground, new Random(9)));
+        List<Vec> sortedGround = new ArrayList<>(ground);
+        sortedGround.sort(comparator);
+        List<Vec> above = new ArrayList<>(ground.stream().map(pos -> pos.add(0, 1, 0)).toList());
+        above.sort(comparator);
+
+        assertEquals(sortedGround, above.stream().map(pos -> pos.sub(0, 1, 0)).toList(), "TNT above the ground follows the same order");
+    }
+
+    /**
+     * Checks that every position except the start of each part has a neighbour which was placed before.
+     */
+    private static void assertGrowsFromNeighbours(List<Vec> order, int parts) {
+        Set<Vec> placed = new HashSet<>();
+        int starts = 0;
+        for (Vec pos : order) {
+            boolean hasPlacedNeighbour = placed.contains(pos.add(1, 0, 0)) || placed.contains(pos.sub(1, 0, 0))
+                    || placed.contains(pos.add(0, 0, 1)) || placed.contains(pos.sub(0, 0, 1));
+            if (!hasPlacedNeighbour) starts++;
+            placed.add(pos);
+        }
+        assertEquals(parts, starts, "Every part should grow from a single start");
     }
 
     private static List<Vec> grid(int size) {
