@@ -276,7 +276,7 @@ class GamePlacementIntegrationTest {
 
         GroundData groundData = new GroundData(Block.STONE, null);
         gamePlacement.triggerPlacement(groundData);
-        gamePlacement.dropTnt(() -> GameAreaHelper.MAX_TNT_AMOUNT);
+        gamePlacement.dropTnt(() -> 35);
 
         boolean groundUnfinishedWhileTntLanded = false;
         for (int i = 0; i < 200; i++) {
@@ -292,7 +292,7 @@ class GamePlacementIntegrationTest {
         }
 
         assertTrue(groundUnfinishedWhileTntLanded, "The TNT should drop while the ground is still placed");
-        assertEquals(GameAreaHelper.MAX_TNT_AMOUNT, findTnt(instance, gameArea).size());
+        assertEquals(35, findTnt(instance, gameArea).size());
 
         env.destroyInstance(instance);
     }
