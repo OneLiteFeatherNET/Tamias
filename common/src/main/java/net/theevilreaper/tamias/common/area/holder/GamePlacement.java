@@ -253,7 +253,7 @@ public final class GamePlacement implements Placement {
      */
     private boolean isDropPathFree(Vec target) {
         for (int y = 0; y <= GameAreaHelper.TNT_DROP_HEIGHT; y++) {
-            if (!instance.getBlock(target.add(0, y, 0)).registry().isAir()) return false;
+            if (!instance.getBlock(target.add(0, y, 0)).air()) return false;
         }
         return true;
     }

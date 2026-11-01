@@ -112,7 +112,7 @@ public final class SweepAreaPlacement extends AreaBasePlacement {
      * @param block    the placed block
      */
     private void playPlaceSound(Vec position, Block block) {
-        BlockSoundType soundType = block.registry().getBlockSoundType();
+        BlockSoundType soundType = block.blockSoundType();
         if (soundType == null) return;
         Point center = position.add(0.5);
         Sound sound = Sound.sound(soundType.placeSound(), Sound.Source.BLOCK, (soundType.volume() + 1f) / 2f, soundType.pitch() * 0.8f);
