@@ -79,7 +79,14 @@ class GamePlacementIntegrationTest {
 
         env.tickWhile(placement::isRunning, Duration.ofSeconds(60));
 
-        assertBlock(instance, randomData.groundBlock(), gameArea.getPositions());
+        // Special positions get one of the additional blocks of the ground, every other position the ground block
+        Set<Vec> specialPositions = Set.copyOf(gameArea.getSpecialPositions());
+        Set<Vec> groundPositions = new HashSet<>(gameArea.getPositions());
+        groundPositions.removeAll(specialPositions);
+        assertBlock(instance, randomData.groundBlock(), groundPositions);
+        for (Vec special : specialPositions) {
+            assertTrue(randomData.additionalBlocks().contains(instance.getBlock(special)), "The special block at " + special + " is no additional block");
+        }
 
         env.destroyInstance(instance);
     }
@@ -123,11 +130,12 @@ class GamePlacementIntegrationTest {
 
         assertEquals(Set.of(markerPosition), gameArea.getPositions());
 
-        GroundData randomData = GroundDataRegistry.instance().getRandomData();
-        gamePlacement.triggerPlacement(randomData);
+        // A ground without additional blocks, otherwise the only position could become a special block
+        GroundData groundData = new GroundData(Block.STONE, null);
+        gamePlacement.triggerPlacement(groundData);
         env.tickWhile(gamePlacement::isRunning, Duration.ofSeconds(10));
 
-        assertEquals(randomData.groundBlock(), instance.getBlock(markerPosition));
+        assertEquals(groundData.groundBlock(), instance.getBlock(markerPosition));
         assertEquals(Block.AIR, instance.getBlock(new Vec(0, 0, 0)));
 
         env.destroyInstance(instance);
