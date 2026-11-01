@@ -1,6 +1,5 @@
 package net.theevilreaper.tamias.common.area;
 
-import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.theevilreaper.tamias.common.map.layer.AreaData;
@@ -13,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
@@ -76,7 +76,9 @@ public final class GameArea implements PlayingArea {
 
     @Override
     public void reset() {
-        this.tntPositions.clear();
+        synchronized (this.tntPositions) {
+            this.tntPositions.clear();
+        }
         this.specialBlocks.clear();
     }
 
@@ -138,18 +140,18 @@ public final class GameArea implements PlayingArea {
      *
      * @return a random position or null if the list is empty
      */
-    public synchronized @Nullable Pos getRandomPosition() {
+    public @Nullable Pos getRandomPosition() {
         synchronized (this.tntPositions) {
             if (this.tntPositions.isEmpty()) return null;
 
-            List<Point> internalPositions = new ArrayList<>(this.tntPositions);
-
-            int randomId = ThreadLocalRandom.current().nextInt(0, this.tntPositions.size());
-
-            // Thread-safe removal from the list
-            Point pos = internalPositions.remove(randomId);
-            this.tntPositions.remove(pos);
-            return pos.asPos();
+            int skip = ThreadLocalRandom.current().nextInt(this.tntPositions.size());
+            Iterator<Vec> iterator = this.tntPositions.iterator();
+            for (int i = 0; i < skip; i++) {
+                iterator.next();
+            }
+            Vec position = iterator.next();
+            iterator.remove();
+            return position.asPos();
         }
     }
 
