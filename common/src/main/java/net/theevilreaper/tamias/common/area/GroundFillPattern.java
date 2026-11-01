@@ -8,12 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.function.ToDoubleFunction;
@@ -80,15 +75,6 @@ public enum GroundFillPattern {
      * Drop spots are only picked within this share of the largest distance to the center, so no circle starts at the edge.
      */
     private static final double DROP_INNER_SHARE = 0.6;
-    /**
-     * The size in blocks of the patches which slow down the organic growth, so it grows tendrils around them.
-     */
-    private static final int ORGANIC_PATCH_SIZE = 5;
-    /**
-     * The highest extra cost of a block within a slow patch, a block outside of the patches costs 1.
-     */
-    private static final double ORGANIC_SLOW_COST = 15;
-    private static final int[][] NEIGHBOURS = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
     /**
      * The width of a row in the key of the line pattern, it must be larger than any x coordinate range of an area.
      */
@@ -326,112 +312,6 @@ public enum GroundFillPattern {
      */
     static ToDoubleFunction<Point> organicOrder(Context context) {
         if (context.positions().isEmpty()) return circleOrder(context.center());
-        Map<Long, Double> arrival = organicArrival(context.positions(), context.center(), context.random());
-        return pos -> arrival.getOrDefault(columnKey(pos.blockX(), pos.blockZ()), Double.MAX_VALUE);
+        return OrganicGrowth.grow(context.positions(), context.center(), context.random());
     }
-
-    /**
-     * Calculates when the growth reaches each position. The growth starts at the position closest to the center and
-     * spreads to the neighbours, each block has a cost to grow onto it from a random field (Dijkstra with random weights).
-     * Once a part of the ground is filled, the next part starts at its position closest to the center.
-     *
-     * @param positions the ground positions
-     * @param center    the center of the area
-     * @param random    the random generator for the step costs
-     * @return the arrival time per column key of the positions
-     */
-    private static Map<Long, Double> organicArrival(Collection<Vec> positions, Point center, RandomGenerator random) {
-        Set<Long> remaining = new HashSet<>();
-        for (Vec position : positions) {
-            remaining.add(columnKey(position.blockX(), position.blockZ()));
-        }
-        Map<Long, Double> arrival = new HashMap<>();
-        Map<Long, Double> lattice = new HashMap<>();
-        double offset = 0;
-        while (!remaining.isEmpty()) {
-            long start = closestTo(remaining, center);
-            PriorityQueue<Step> queue = new PriorityQueue<>(Comparator.comparingDouble(Step::time));
-            Map<Long, Double> best = new HashMap<>();
-            queue.add(new Step(start, offset));
-            best.put(start, offset);
-            while (!queue.isEmpty()) {
-                Step step = queue.poll();
-                if (!remaining.remove(step.key())) continue;
-                arrival.put(step.key(), step.time());
-                offset = Math.max(offset, step.time());
-                int x = (int) (step.key() >> 32);
-                int z = (int) step.key();
-                for (int[] neighbour : NEIGHBOURS) {
-                    long next = columnKey(x + neighbour[0], z + neighbour[1]);
-                    if (!remaining.contains(next)) continue;
-                    double time = step.time() + organicCost(x + neighbour[0], z + neighbour[1], lattice, random);
-                    if (time < best.getOrDefault(next, Double.MAX_VALUE)) {
-                        best.put(next, time);
-                        queue.add(new Step(next, time));
-                    }
-                }
-            }
-            offset += 1;
-        }
-        return arrival;
-    }
-
-    /**
-     * Returns the cost to grow onto a block. The cost follows a smooth random field (value noise), so the slow blocks
-     * form connected patches and the growth flows around them instead of leaving single blocks behind.
-     *
-     * @param x       the x coordinate of the block
-     * @param z       the z coordinate of the block
-     * @param lattice the random values of the patch corners, filled lazily
-     * @param random  the random generator for new patch corners
-     * @return the cost, at least 1
-     */
-    private static double organicCost(int x, int z, Map<Long, Double> lattice, RandomGenerator random) {
-        int cellX = Math.floorDiv(x, ORGANIC_PATCH_SIZE);
-        int cellZ = Math.floorDiv(z, ORGANIC_PATCH_SIZE);
-        double fx = smooth((double) Math.floorMod(x, ORGANIC_PATCH_SIZE) / ORGANIC_PATCH_SIZE);
-        double fz = smooth((double) Math.floorMod(z, ORGANIC_PATCH_SIZE) / ORGANIC_PATCH_SIZE);
-        double top = lerp(corner(cellX, cellZ, lattice, random), corner(cellX + 1, cellZ, lattice, random), fx);
-        double bottom = lerp(corner(cellX, cellZ + 1, lattice, random), corner(cellX + 1, cellZ + 1, lattice, random), fx);
-        double noise = lerp(top, bottom, fz);
-        // Only the upper part of the field slows the growth down, so most of the ground grows fast
-        double slow = Math.max(0, noise - 0.5) * 2;
-        return 1 + ORGANIC_SLOW_COST * slow * slow;
-    }
-
-    private static double corner(int cellX, int cellZ, Map<Long, Double> lattice, RandomGenerator random) {
-        return lattice.computeIfAbsent(columnKey(cellX, cellZ), _ -> random.nextDouble());
-    }
-
-    private static double smooth(double value) {
-        return value * value * (3 - 2 * value);
-    }
-
-    private static double lerp(double from, double to, double progress) {
-        return from + (to - from) * progress;
-    }
-
-    private static long closestTo(Set<Long> keys, Point center) {
-        long closest = 0;
-        double closestDistance = Double.MAX_VALUE;
-        for (long key : keys) {
-            double dx = (int) (key >> 32) - center.x();
-            double dz = (int) key - center.z();
-            double distance = dx * dx + dz * dz;
-            if (distance < closestDistance) {
-                closestDistance = distance;
-                closest = key;
-            }
-        }
-        return closest;
-    }
-
-    /**
-     * Packs the x and z coordinate into one key, the height is ignored so TNT above the ground maps to its column.
-     */
-    private static long columnKey(int x, int z) {
-        return ((long) x << 32) | (z & 0xFFFFFFFFL);
-    }
-
-    private record Step(long key, double time) { }
 }
