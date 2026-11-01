@@ -24,7 +24,9 @@ import java.util.Objects;
 @SuppressWarnings("java:S3252")
 public final class ExplodeBar extends StaminaBar {
 
-    private static final Sound TICK_SOUND = Sound.sound(SoundEvent.UI_BUTTON_CLICK, Sound.Source.MASTER, 1F, 10F);
+    // The client clamps the pitch to 0.5-2.0, the tick rises from a low click to the highest pitch right before the explosion
+    private static final float TICK_PITCH_START = 0.8F;
+    private static final float TICK_PITCH_END = 2.0F;
     private static final Sound EXPLODE_SOUND = Sound.sound(SoundEvent.ENTITY_GENERIC_EXPLODE, Sound.Source.MASTER, 1F, 1F);
     private static final float MAX = 10;
 
@@ -105,7 +107,7 @@ public final class ExplodeBar extends StaminaBar {
         this.player.setExp(normalize(current));
         this.player.setLevel(player.getLevel() - 1);
         if (current > 0) {
-            player.playSound(TICK_SOUND);
+            player.playSound(tickSound(current));
             return;
         }
         this.handleExplosion(false);
@@ -124,6 +126,18 @@ public final class ExplodeBar extends StaminaBar {
         this.player.setLevel(0);
         this.handleExplosion(true);
         return true;
+    }
+
+    /**
+     * Returns the tick sound for the given countdown value, the pitch rises with every tick.
+     *
+     * @param current the countdown value, from {@link #MAX} on the first tick down to 1 on the last
+     * @return the tick sound
+     */
+    private static Sound tickSound(float current) {
+        float progress = (MAX - current) / (MAX - 1);
+        float pitch = TICK_PITCH_START + (TICK_PITCH_END - TICK_PITCH_START) * progress;
+        return Sound.sound(SoundEvent.UI_BUTTON_CLICK, Sound.Source.MASTER, 1F, pitch);
     }
 
     /**
