@@ -18,6 +18,7 @@ import net.minestom.server.network.packet.server.play.EntityStatusPacket;
 import net.minestom.server.network.packet.server.play.SpawnEntityPacket;
 import net.minestom.server.network.player.GameProfile;
 import net.minestom.server.network.player.PlayerConnection;
+import net.minestom.server.property.ServerProperties;
 import net.theevilreaper.tamias.common.player.PermissionAwarePlayer;
 
 import java.util.HashMap;
@@ -39,7 +40,11 @@ public final class TamiasPlayer extends PermissionAwarePlayer {
     // Longer than the ExplodeBar countdown (2.5-2.75 s): the client discards a primed TNT on its own once the fuse
     // runs out, the server hides the bomber at the explosion anyway
     static final int PRIMED_FUSE_TIME = 60;
-    static final BoundingBox DISGUISE_BOUNDING_BOX = new BoundingBox(0.98, 0.98, 0.98);
+    public static final BoundingBox DISGUISE_BOUNDING_BOX = new BoundingBox(0.98, 0.98, 0.98);
+    /**
+     * How far the position history reaches back, see {@link #getPositionMillisAgo(long)}.
+     */
+    public static final long POSITION_HISTORY_MILLIS = 250;
 
     private final BoundingBox playerBoundingBox;
     private DisguiseState disguiseState = DisguiseState.NONE;
@@ -49,6 +54,9 @@ public final class TamiasPlayer extends PermissionAwarePlayer {
     private int hits;
     private Pos lastTickPosition;
     private Vec knownMovement = Vec.ZERO;
+    // Newest first, the position at the end of each of the last ticks
+    private final Pos[] positionHistory = new Pos[(int) (POSITION_HISTORY_MILLIS / millisPerTick()) + 1];
+    private int recordedPositions;
 
     /**
      * {@inheritDoc}
@@ -172,6 +180,23 @@ public final class TamiasPlayer extends PermissionAwarePlayer {
     }
 
     /**
+     * Returns the position this player had the given time ago, rounded to whole ticks.
+     * Requests older than the history return the oldest known position, without any recorded tick the current one.
+     *
+     * @param millis how far to look back in milliseconds
+     * @return the position at that time
+     */
+    public Pos getPositionMillisAgo(long millis) {
+        if (this.recordedPositions == 0) return getPosition();
+        int ticks = (int) Math.round(Math.max(0, millis) / (double) millisPerTick());
+        return this.positionHistory[Math.min(ticks, this.recordedPositions - 1)];
+    }
+
+    private static long millisPerTick() {
+        return 1000L / ServerProperties.SERVER_TICKS_PER_SECOND.get();
+    }
+
+    /**
      * Measures the movement of this tick. Player packets are interpreted in {@link Player#update(long)}, so the position
      * after the super call contains everything the client sent during this tick.
      */
@@ -181,6 +206,9 @@ public final class TamiasPlayer extends PermissionAwarePlayer {
         final Pos position = getPosition();
         this.knownMovement = this.lastTickPosition == null ? Vec.ZERO : position.sub(this.lastTickPosition).asVec();
         this.lastTickPosition = position;
+        System.arraycopy(this.positionHistory, 0, this.positionHistory, 1, this.positionHistory.length - 1);
+        this.positionHistory[0] = position;
+        this.recordedPositions = Math.min(this.recordedPositions + 1, this.positionHistory.length);
     }
 
     @Override
