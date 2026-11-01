@@ -193,7 +193,7 @@ public class Tamias implements ListenerHandling {
                 resetPlayerBuildProgress();
             };
         }, () -> this.mapProvider.getGamePlacement().dropTnt(
-                () -> ThreadLocalRandom.current().nextInt(GameAreaHelper.MIN_TNT_AMOUNT, GameAreaHelper.MAX_TNT_AMOUNT + 1)
+                () -> GameAreaHelper.tntAmount(MinecraftServer.getConnectionManager().getOnlinePlayers().size(), ThreadLocalRandom.current())
         )));
 
         gameSeries.add(new PrePlayingPhase(this.teamService));

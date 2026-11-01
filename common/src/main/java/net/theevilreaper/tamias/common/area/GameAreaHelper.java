@@ -29,8 +29,6 @@ public final class GameAreaHelper {
      * The height above its target from which a TNT block falls. The whole fall path must be free.
      */
     public static final int TNT_DROP_HEIGHT = 5;
-    public static final int MIN_TNT_AMOUNT = 15;
-    public static final int MAX_TNT_AMOUNT = 35;
     /**
      * The amount of TNT blocks a round gets regardless of the players.
      */
