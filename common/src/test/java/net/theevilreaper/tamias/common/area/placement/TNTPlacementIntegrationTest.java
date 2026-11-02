@@ -52,7 +52,7 @@ class TNTPlacementIntegrationTest {
         placement.place();
         assertTrue(placement.isRunning());
 
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 40; i++) {
             env.tick();
         }
 

@@ -9,6 +9,7 @@ import net.minestom.testing.Env;
 import net.minestom.testing.extension.MicrotusExtension;
 import net.theevilreaper.tamias.common.area.GameArea;
 import net.theevilreaper.tamias.common.area.GameAreaHelper;
+import net.theevilreaper.tamias.common.area.placement.animation.TntAnimationType;
 import net.theevilreaper.tamias.common.ground.GroundData;
 import net.theevilreaper.tamias.common.ground.GroundDataRegistry;
 import net.theevilreaper.tamias.common.map.layer.AreaData;
@@ -45,7 +46,7 @@ class GamePlacementIntegrationTest {
         );
         assertNotNull(gameArea);
         gameArea.calculatePositions();
-        GamePlacement placement = new GamePlacement(instance, gameArea);
+        GamePlacement placement = new GamePlacement(instance, gameArea, _ -> TntAnimationType.FALLING);
         assertNotNull(placement);
         assertInstanceOf(GamePlacement.class, placement);
 
@@ -102,7 +103,7 @@ class GamePlacementIntegrationTest {
                         .build()
         );
         gameArea.calculatePositions();
-        GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
+        GamePlacement gamePlacement = new GamePlacement(instance, gameArea, _ -> TntAnimationType.FALLING);
 
         assertDoesNotThrow(() -> gamePlacement.preloadChunks().get(10, java.util.concurrent.TimeUnit.SECONDS));
 
@@ -124,7 +125,7 @@ class GamePlacementIntegrationTest {
         Vec markerPosition = new Vec(1, 0, 1);
         prepareGround(instance, markerPosition);
 
-        GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
+        GamePlacement gamePlacement = new GamePlacement(instance, gameArea, _ -> TntAnimationType.FALLING);
 
         gamePlacement.flatten();
 
@@ -156,7 +157,7 @@ class GamePlacementIntegrationTest {
         Vec markerPosition = new Vec(1, 0, 1);
         prepareGround(instance, markerPosition);
 
-        GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
+        GamePlacement gamePlacement = new GamePlacement(instance, gameArea, _ -> TntAnimationType.FALLING);
 
         gamePlacement.prepare();
         gamePlacement.prepare();
@@ -189,14 +190,14 @@ class GamePlacementIntegrationTest {
         prepareGround(instance, overhangPosition);
         instance.setBlock(overhangPosition.add(0, GameAreaHelper.TNT_DROP_HEIGHT, 0), Block.STONE);
 
-        GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
+        GamePlacement gamePlacement = new GamePlacement(instance, gameArea, _ -> TntAnimationType.FALLING);
         gamePlacement.flatten();
 
         gamePlacement.triggerPlacement(GroundDataRegistry.instance().getRandomData());
         env.tickWhile(gamePlacement::isRunning, Duration.ofSeconds(10));
 
         gamePlacement.dropTnt(() -> 5);
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 30; i++) {
             env.tick();
         }
 
@@ -226,7 +227,7 @@ class GamePlacementIntegrationTest {
             prepareGround(instance, position);
         }
 
-        GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
+        GamePlacement gamePlacement = new GamePlacement(instance, gameArea, _ -> TntAnimationType.FALLING);
         gamePlacement.flatten();
         gamePlacement.triggerPlacement(GroundDataRegistry.instance().getRandomData());
         env.tickWhile(gamePlacement::isRunning, Duration.ofSeconds(10));
@@ -255,7 +256,7 @@ class GamePlacementIntegrationTest {
         GameArea gameArea = createArea(9);
         gameArea.getPositions().forEach(pos -> prepareGround(instance, pos));
 
-        GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
+        GamePlacement gamePlacement = new GamePlacement(instance, gameArea, _ -> TntAnimationType.FALLING);
         gamePlacement.flatten();
 
         gamePlacement.triggerPlacement(GroundDataRegistry.instance().getRandomData());
@@ -279,7 +280,7 @@ class GamePlacementIntegrationTest {
         GameArea gameArea = createArea(29);
         gameArea.getPositions().forEach(pos -> prepareGround(instance, pos));
 
-        GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
+        GamePlacement gamePlacement = new GamePlacement(instance, gameArea, _ -> TntAnimationType.FALLING);
         gamePlacement.flatten();
 
         GroundData groundData = new GroundData(Block.STONE, null);
@@ -311,7 +312,7 @@ class GamePlacementIntegrationTest {
         GameArea gameArea = createArea(14);
         gameArea.getPositions().forEach(pos -> prepareGround(instance, pos));
 
-        GamePlacement gamePlacement = new GamePlacement(instance, gameArea);
+        GamePlacement gamePlacement = new GamePlacement(instance, gameArea, _ -> TntAnimationType.FALLING);
         gamePlacement.flatten();
 
         GroundData groundData = new GroundData(Block.STONE, List.of(Block.GOLD_BLOCK));
@@ -402,7 +403,7 @@ class GamePlacementIntegrationTest {
                         .build()
         );
         gameArea.calculatePositions();
-        GamePlacement placement = new GamePlacement(instance, gameArea);
+        GamePlacement placement = new GamePlacement(instance, gameArea, _ -> TntAnimationType.FALLING);
         placement.applyPositions();
 
         placement.triggerPlacement(GroundDataRegistry.instance().getRandomData());
