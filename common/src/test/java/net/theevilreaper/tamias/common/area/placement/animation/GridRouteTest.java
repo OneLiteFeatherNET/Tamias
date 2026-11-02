@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -79,6 +80,35 @@ class GridRouteTest {
             previous = step;
         }
         assertEquals(cell(3, 2), previous, "The route must end at the target");
+    }
+
+    @Test
+    void testLongRouteOverAnOpenAreaIsFound() {
+        // A breadth-first search would visit more than 3000 cells for this route and give up
+        List<Vec> route = GridRoute.find(cell(0, 0), cell(40, 40), _ -> true, GridRoute.MAX_ROUTE_NODES);
+
+        assertNotNull(route, "A route across a large open area must be found");
+        assertEquals(80, route.size(), "The route must be as short as the distance");
+    }
+
+    @Test
+    void testOpenAreaOnlyChecksCellsAlongTheRoute() {
+        AtomicInteger checks = new AtomicInteger();
+
+        GridRoute.find(cell(0, 0), cell(40, 40), _ -> checks.incrementAndGet() > 0, GridRoute.MAX_ROUTE_NODES);
+
+        assertTrue(checks.get() < 500, "The search must not spread over the whole area, but checked " + checks.get() + " cells");
+    }
+
+    @Test
+    void testRouteAroundAWallIsTheShortest() {
+        // The wall at x = 1 reaches from z = -2 to z = 3, so the way around it at z = -3 is the shortest
+        Set<Vec> wall = Set.of(cell(1, -2), cell(1, -1), cell(1, 0), cell(1, 1), cell(1, 2), cell(1, 3));
+
+        List<Vec> route = GridRoute.find(cell(0, 0), cell(2, 0), notIn(wall), GridRoute.MAX_ROUTE_NODES);
+
+        assertNotNull(route);
+        assertEquals(8, route.size(), "Three steps down, two across and three back up");
     }
 
     @Test

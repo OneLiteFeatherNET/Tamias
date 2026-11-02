@@ -5,13 +5,13 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Deque;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.function.Predicate;
 
 /**
@@ -37,7 +37,8 @@ final class GridRoute {
     }
 
     /**
-     * Finds the shortest route of cells from the start to the target with a breadth-first search.
+     * Finds the shortest route of cells from the start to the target with an A* search. The search is led by the
+     * remaining distance to the target, so on an open area it only visits about as many cells as the route is long.
      * The start cell itself is not part of the route, the target is reachable even when it is not passable.
      *
      * @param from     the cell to start at
@@ -53,22 +54,48 @@ final class GridRoute {
         if (start.x() == goal.x() && start.z() == goal.z()) return List.of();
 
         Map<Vec, Vec> parents = new HashMap<>();
+        Map<Vec, Integer> costs = new HashMap<>();
         parents.put(start, start);
-        Deque<Vec> queue = new ArrayDeque<>();
-        queue.add(start);
-        while (!queue.isEmpty()) {
-            Vec current = queue.poll();
-            for (Vec next : neighbours(current)) {
-                if (parents.containsKey(next)) continue;
+        costs.put(start, 0);
+        // Equal estimates prefer the cell closer to the target, so an open area is crossed straight instead of in width
+        PriorityQueue<Node> open = new PriorityQueue<>(Comparator.comparingInt(Node::estimate)
+                .thenComparingInt(Node::remaining));
+        open.add(new Node(start, 0, distance(start, goal)));
+        while (!open.isEmpty()) {
+            Node current = open.poll();
+            if (current.cost() > costs.get(current.cell())) continue;
+            for (Vec next : neighbours(current.cell())) {
+                int cost = current.cost() + 1;
+                Integer known = costs.get(next);
+                if (known != null && known <= cost) continue;
                 boolean isGoal = next.equals(goal);
                 if (!isGoal && !passable.test(next)) continue;
-                parents.put(next, current);
+                parents.put(next, current.cell());
+                costs.put(next, cost);
+                // Every step costs the same and the estimate never overshoots, so the first route to the goal is the shortest
                 if (isGoal) return reconstruct(parents, start, goal);
                 if (parents.size() > maxNodes) return null;
-                queue.add(next);
+                open.add(new Node(next, cost, distance(next, goal)));
             }
         }
         return null;
+    }
+
+    /**
+     * Returns the number of steps between two cells on the same height when nothing is in the way.
+     */
+    private static int distance(Vec a, Vec b) {
+        return (int) (Math.abs(a.x() - b.x()) + Math.abs(a.z() - b.z()));
+    }
+
+    /**
+     * A cell of the open search with the steps it took to get there and the steps which are at least left.
+     */
+    private record Node(Vec cell, int cost, int remaining) {
+
+        int estimate() {
+            return this.cost + this.remaining;
+        }
     }
 
     /**

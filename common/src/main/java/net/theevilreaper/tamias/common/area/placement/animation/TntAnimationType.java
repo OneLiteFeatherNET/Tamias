@@ -27,6 +27,11 @@ public enum TntAnimationType {
     GROWING(GrowingTntAnimation::new),
 
     /**
+     * Villagers rush around and place the TNT on the ground.
+     */
+    VILLAGERS(VillagerTntAnimation::new),
+
+    /**
      * The TNT is shot from the middle of the game area in an arc onto its position.
      */
     SHOOTING(ShootingTntAnimation::new);
