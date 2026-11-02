@@ -2,16 +2,29 @@ package net.theevilreaper.tamias.game.util;
 
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.Point;
+import net.theevilreaper.tamias.game.player.TamiasPlayer;
 
 /**
  * Decides which players an explosion reaches. The radius is measured from the middle of the TNT to the nearest point
  * of a player's hit box, so a survivor whose body touches the radius is hit regardless of the height difference.
+ * <p>
+ * The bomber sees the other players delayed by the latency and the client interpolation. The check therefore also
+ * looks at the position a player had that long ago, capped at {@link #MAX_REWIND_MILLIS}.
  *
  * @author theEvilReaper
  * @version 1.0.0
  * @since 1.0.0
  */
 public final class ExplosionRange {
+
+    /**
+     * The client interpolates other players over 3 ticks, on average they lag about 2 ticks behind.
+     */
+    static final long INTERPOLATION_MILLIS = 100;
+    /**
+     * The furthest an explosion reaches back in time, otherwise a high latency would hit players who are long gone.
+     */
+    public static final long MAX_REWIND_MILLIS = TamiasPlayer.POSITION_HISTORY_MILLIS;
 
     /**
      * Returns the middle of the bomber's box, the point the explosion is measured from.
@@ -22,6 +35,16 @@ public final class ExplosionRange {
      */
     public static Point center(Point feet, BoundingBox box) {
         return feet.add(0, box.minY() + box.height() / 2, 0);
+    }
+
+    /**
+     * Returns how far the explosion reaches back in time for a bomber with the given latency.
+     *
+     * @param latency the latency of the bomber in milliseconds
+     * @return the rewind in milliseconds, between the interpolation and {@link #MAX_REWIND_MILLIS}
+     */
+    public static long rewindMillis(int latency) {
+        return Math.clamp(Math.max(0, latency) + INTERPOLATION_MILLIS, 0, MAX_REWIND_MILLIS);
     }
 
     /**

@@ -41,4 +41,19 @@ class ExplosionRangeTest {
         // The feet are sqrt(2.5² + 2²) = 3.2 blocks away, the nearest point of the hit box is closer
         assertTrue(ExplosionRange.reaches(CENTER, RADIUS, new Vec(2.5, 2, 0), PLAYER_BOX));
     }
+
+    @Test
+    void testRewindAddsTheInterpolationToTheLatency() {
+        assertEquals(50 + ExplosionRange.INTERPOLATION_MILLIS, ExplosionRange.rewindMillis(50));
+    }
+
+    @Test
+    void testRewindIsCapped() {
+        assertEquals(ExplosionRange.MAX_REWIND_MILLIS, ExplosionRange.rewindMillis(1000));
+    }
+
+    @Test
+    void testRewindIsNeverNegative() {
+        assertEquals(ExplosionRange.INTERPOLATION_MILLIS, ExplosionRange.rewindMillis(-50));
+    }
 }
