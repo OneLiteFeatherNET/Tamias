@@ -63,7 +63,7 @@ public class TNTPlacement extends AreaBasePlacement {
      * @param landingConsumer receives the position of each TNT block once it is placed
      */
     public TNTPlacement(Instance instance, Consumer<Vec> landingConsumer) {
-        super(instance, List.of());
+        super(instance);
         this.landingConsumer = landingConsumer;
         this.groups = new ArrayList<>();
         this.pendingTasks = ConcurrentHashMap.newKeySet();
@@ -84,8 +84,6 @@ public class TNTPlacement extends AreaBasePlacement {
         this.groups.clear();
         this.groups.addAll(groups);
         this.groundCheck = groundCheck;
-        this.blockPositions.clear();
-        groups.forEach(group -> this.blockPositions.addAll(group.positions()));
     }
 
     /**
@@ -93,7 +91,6 @@ public class TNTPlacement extends AreaBasePlacement {
      *
      * @param positions the positions of the TNT blocks
      */
-    @Override
     public void updatePositions(List<Vec> positions) {
         this.updateGroups(positions.stream().map(position -> new TntGroup(position, List.of())).toList(), _ -> true);
     }

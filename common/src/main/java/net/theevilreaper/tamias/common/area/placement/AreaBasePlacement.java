@@ -7,21 +7,17 @@ import net.minestom.server.timer.Task;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public abstract non-sealed class AreaBasePlacement implements AreaPlacement {
 
     protected final Instance instance;
-    protected final List<Vec> blockPositions;
     protected final Set<Vec> placedPositions = ConcurrentHashMap.newKeySet();
     protected @Nullable Task buildTask;
 
-    AreaBasePlacement(Instance instance, List<Vec> blockPositions) {
+    AreaBasePlacement(Instance instance) {
         this.instance = instance;
-        this.blockPositions = new ArrayList<>(blockPositions);
     }
 
     /**
@@ -77,15 +73,6 @@ public abstract non-sealed class AreaBasePlacement implements AreaPlacement {
     @Override
     public @Nullable Task getTask() {
         return this.buildTask;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void updatePositions(List<Vec> positions) {
-        this.blockPositions.clear();
-        this.blockPositions.addAll(positions);
     }
 
     /**
