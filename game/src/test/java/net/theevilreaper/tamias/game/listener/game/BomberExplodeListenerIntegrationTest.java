@@ -63,6 +63,37 @@ class BomberExplodeListenerIntegrationTest extends TamiasPlayerTestBase {
     }
 
     @Test
+    void testExplosionReachesTheHitBoxOfASurvivor(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        instance.setExplosionSupplier(new ExplosionCreator());
+        Player bomber = createPlayer(env, instance, new Pos(0, 40, 0), GameConfig.BOMBER_KEY.asString());
+        // The feet are out of the radius, the side of the hit box is not
+        Player survivor = createPlayer(env, instance, new Pos(3.2, 40, 0), GameConfig.SURVIVOR_KEY.asString());
+
+        List<Player> converted = new ArrayList<>();
+        new BomberExplodeListener(converted::add, () -> {}).accept(new BomberExplodeEvent(bomber, bomber.getPosition().asVec()));
+
+        assertEquals(List.of(survivor), converted);
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testExplosionReachesASurvivorOnAHigherBlock(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        instance.setExplosionSupplier(new ExplosionCreator());
+        Player bomber = createPlayer(env, instance, new Pos(0, 40, 0), GameConfig.BOMBER_KEY.asString());
+        Player survivor = createPlayer(env, instance, new Pos(2.5, 42, 0), GameConfig.SURVIVOR_KEY.asString());
+
+        List<Player> converted = new ArrayList<>();
+        new BomberExplodeListener(converted::add, () -> {}).accept(new BomberExplodeEvent(bomber, bomber.getPosition().asVec()));
+
+        assertEquals(List.of(survivor), converted);
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
     void testShotExplosionConvertsNoSurvivor(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
         instance.setExplosionSupplier(new ExplosionCreator());
