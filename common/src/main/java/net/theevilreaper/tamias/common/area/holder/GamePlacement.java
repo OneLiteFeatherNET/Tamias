@@ -46,6 +46,7 @@ public final class GamePlacement implements Placement {
     private final Function<@Nullable TntAnimationType, TntAnimationType> animationPicker;
     private @Nullable TntAnimationType lastTntAnimation;
     private List<Vec> tntCandidates;
+    private Set<Vec> groundPositions;
     private boolean prepared;
 
     public GamePlacement(Instance instance, GameArea area) {
@@ -65,6 +66,7 @@ public final class GamePlacement implements Placement {
         this.area = area;
         this.tntPlacement = new TNTPlacement(instance, area::addTntPosition);
         this.tntCandidates = List.of();
+        this.groundPositions = Set.of();
         this.center = getCenter(area);
         this.groundPlacement = new SweepAreaPlacement(instance, List.copyOf(area.getPositions()), List.of());
         this.activeFillOrder = GroundFillPattern.CIRCLE.order(GroundFillPattern.Context.of(this.center));
@@ -167,6 +169,7 @@ public final class GamePlacement implements Placement {
         this.area.flattenPositions(positionsToRemove);
         List<Vec> filteredPositions = List.copyOf(this.area.getPositions());
         this.groundPlacement.updatePositions(filteredPositions);
+        this.groundPositions = Set.copyOf(filteredPositions);
         // The structures on the map are static, so the free drop paths only have to be found once
         this.tntCandidates = filteredPositions.stream()
                 .map(pos -> pos.add(0, 1, 0))
@@ -255,7 +258,7 @@ public final class GamePlacement implements Placement {
         groups.sort(Comparator.comparingDouble(group -> fillOrder.applyAsDouble(group.center())));
 
         this.area.setTntPositions(List.of());
-        this.tntPlacement.updateGroups(groups, this.groundPlacement::isPlaced);
+        this.tntPlacement.updateGroups(groups, this.groundPlacement::isPlaced, this.groundPositions::contains);
         TntAnimationType animationType = this.animationPicker.apply(this.lastTntAnimation);
         this.lastTntAnimation = animationType;
         this.tntPlacement.place(animationType.create());

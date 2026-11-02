@@ -134,16 +134,14 @@ public final class VillagerTntAnimation implements TntAnimation {
             sumZ += position.z();
         }
         double y = groups.getFirst().center().y();
-        Predicate<Vec> passable = cell -> GridRoute.isPassable(context.instance(), cell);
         Vec average = GridRoute.cell(sumX / allPositions.size(), y, sumZ / allPositions.size());
-        Vec base = GridRoute.nearestPassable(average, passable, GridRoute.MAX_SPAWN_RADIUS);
+        Vec base = GridRoute.nearestStandable(average, context, _ -> true);
 
         // Every worker gets its own cell, so they don't stand inside each other at the start
         Set<Vec> used = new HashSet<>();
         int count = Math.min(WORKER_COUNT, allPositions.size());
         for (int i = 0; i < count; i++) {
-            Vec cell = GridRoute.nearestPassable(base, candidate -> passable.test(candidate) && !used.contains(candidate),
-                    GridRoute.MAX_SPAWN_RADIUS);
+            Vec cell = GridRoute.nearestStandable(base, context, candidate -> !used.contains(candidate));
             used.add(cell);
             Vec home = centre(cell);
             Entity entity = new Entity(EntityType.VILLAGER);
@@ -178,11 +176,12 @@ public final class VillagerTntAnimation implements TntAnimation {
     private void step(Worker worker, TntAnimationContext context) {
         if (this.finished) return;
         worker.ticks++;
-        Predicate<Vec> passable = cell -> GridRoute.isPassable(context.instance(), cell);
+        // The workers never step out of the area, the routes prefer the placed ground
+        Predicate<Vec> passable = GridRoute.inArea(context);
         if (worker.target == null) {
             worker.target = takeNearestOpen(worker.entity.getPosition());
             if (worker.target != null) {
-                worker.route = planRoute(worker, passable);
+                worker.route = planRoute(worker, context);
                 worker.closestDistance = Double.MAX_VALUE;
             }
         }
@@ -270,13 +269,12 @@ public final class VillagerTntAnimation implements TntAnimation {
     /**
      * Plans the route of the worker to its target over passable cells, null if there is no route.
      *
-     * @param worker   the worker with its target
-     * @param passable checks if a cell can be walked on
+     * @param worker  the worker with its target
+     * @param context the context of the run
      * @return the cells from the next step to the target, null if there is no route
      */
-    private static List<Vec> planRoute(Worker worker, Predicate<Vec> passable) {
-        return GridRoute.find(GridRoute.cellOf(worker.entity.getPosition()), worker.target, passable,
-                GridRoute.MAX_ROUTE_NODES);
+    private static List<Vec> planRoute(Worker worker, TntAnimationContext context) {
+        return GridRoute.findRoute(GridRoute.cellOf(worker.entity.getPosition()), worker.target, context);
     }
 
     /**
@@ -293,7 +291,7 @@ public final class VillagerTntAnimation implements TntAnimation {
             return;
         }
         if (!passable.test(worker.route.getFirst())) {
-            worker.route = planRoute(worker, passable);
+            worker.route = planRoute(worker, context);
             worker.closestDistance = Double.MAX_VALUE;
             if (worker.route == null || worker.route.isEmpty() || !passable.test(worker.route.getFirst())) {
                 land(worker, context);
