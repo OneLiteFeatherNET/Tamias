@@ -34,7 +34,12 @@ public enum TntAnimationType {
     /**
      * The TNT is shot from the middle of the game area in an arc onto its position.
      */
-    SHOOTING(ShootingTntAnimation::new);
+    SHOOTING(ShootingTntAnimation::new),
+
+    /**
+     * A minecart drives over short-lived rails to every position and leaves the TNT behind it.
+     */
+    MINECART(MinecartTntAnimation::new);
 
     private final Supplier<TntAnimation> factory;
 
