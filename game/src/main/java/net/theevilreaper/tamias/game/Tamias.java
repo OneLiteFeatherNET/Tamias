@@ -193,14 +193,13 @@ public class Tamias implements ListenerHandling {
         gameSeries.add(new GroundBuildPhase(() -> {
             GroundData randomData = GroundDataRegistry.instance().getRandomData();
             this.currentGround = randomData;
-            this.mapProvider.getGamePlacement().triggerPlacement(randomData);
-            return () -> {
-                this.mapProvider.getGamePlacement().stopPlacements();
-                resetPlayerBuildProgress();
-            };
+            return this.mapProvider.getGamePlacement().triggerPlacement(randomData);
         }, () -> this.mapProvider.getGamePlacement().dropTnt(
                 () -> GameAreaHelper.tntAmount(MinecraftServer.getConnectionManager().getOnlinePlayers().size(), ThreadLocalRandom.current())
-        )));
+        ), () -> {
+            this.mapProvider.getGamePlacement().stopPlacements();
+            resetPlayerBuildProgress();
+        }));
 
         gameSeries.add(new PrePlayingPhase(this.teamService));
 

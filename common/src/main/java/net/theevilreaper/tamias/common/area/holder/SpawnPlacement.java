@@ -8,6 +8,7 @@ import net.theevilreaper.tamias.common.ground.GroundData;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.concurrent.CompletableFuture;
 
 import static net.minestom.server.MinecraftServer.getConnectionManager;
 import static net.theevilreaper.tamias.common.area.SpawnArea.SPAWN_BLOCK;
@@ -31,7 +32,7 @@ public final class SpawnPlacement implements Placement {
     }
 
     @Override
-    public void triggerPlacement(GroundData groundData) {
+    public CompletableFuture<Void> triggerPlacement(GroundData groundData) {
         Iterator<Point> positionIterator = this.area.getPositions().iterator();
         int maxPositionsToBuild = getConnectionManager().getOnlinePlayerCount();
 
@@ -39,5 +40,6 @@ public final class SpawnPlacement implements Placement {
             Point point = positionIterator.next();
             instance.setBlock(point, SPAWN_BLOCK);
         }
+        return CompletableFuture.completedFuture(null);
     }
 }
