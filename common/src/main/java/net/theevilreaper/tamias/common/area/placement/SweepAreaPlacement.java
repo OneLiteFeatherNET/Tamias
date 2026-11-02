@@ -32,6 +32,7 @@ import static net.theevilreaper.tamias.common.area.GameAreaHelper.GROUND_SOUND_I
  */
 public final class SweepAreaPlacement extends AreaBasePlacement {
 
+    private final List<Vec> blockPositions;
     private final Set<Vec> specialPositions;
 
     /**
@@ -42,9 +43,22 @@ public final class SweepAreaPlacement extends AreaBasePlacement {
      * @param specialPositions the positions which get an additional block of the ground data
      */
     public SweepAreaPlacement(Instance instance, List<Vec> blockPositions, List<Vec> specialPositions) {
-        super(instance, blockPositions);
+        super(instance);
+        this.blockPositions = new ArrayList<>(blockPositions);
         this.specialPositions = ConcurrentHashMap.newKeySet();
         this.specialPositions.addAll(specialPositions);
+    }
+
+    /**
+     * Replaces the positions of the ground.
+     * Used to refresh the placement once the area has been scanned against the live instance,
+     * since the positions supplied at construction time may not yet reflect the actual terrain.
+     *
+     * @param positions the new positions of the ground
+     */
+    public void updatePositions(List<Vec> positions) {
+        this.blockPositions.clear();
+        this.blockPositions.addAll(positions);
     }
 
     /**

@@ -4,7 +4,6 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.timer.Task;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -29,15 +28,6 @@ public sealed interface AreaPlacement permits AreaBasePlacement {
      * Stops the active placement task if running.
      */
     void stop();
-
-    /**
-     * Replaces the positions this placement operates on.
-     * Used to refresh the placement once the area has been scanned against the live instance,
-     * since the positions supplied at construction time may not yet reflect the actual terrain.
-     *
-     * @param positions the new positions to use
-     */
-    void updatePositions(List<Vec> positions);
 
     /**
      * Returns the positions that have already been placed by the current (or last finished) run.
