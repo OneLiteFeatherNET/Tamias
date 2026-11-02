@@ -108,6 +108,57 @@ final class GridRoute {
     }
 
     /**
+     * Returns a check for cells which are free and stand on ground which is already placed.
+     *
+     * @param context the context of the run
+     * @return the check for cells with placed ground
+     */
+    static Predicate<Vec> onGround(TntAnimationContext context) {
+        return cell -> isPassable(context.instance(), cell) && context.hasGround(cell);
+    }
+
+    /**
+     * Returns a check for cells which are free and lie over the game area, the ground below may still be missing.
+     *
+     * @param context the context of the run
+     * @return the check for cells inside the area
+     */
+    static Predicate<Vec> inArea(TntAnimationContext context) {
+        return cell -> isPassable(context.instance(), cell) && context.isInArea(cell);
+    }
+
+    /**
+     * Finds a route which only crosses placed ground. Without one the route may cross ground which is still missing,
+     * but it never leaves the game area.
+     *
+     * @param from    the cell to start at
+     * @param to      the cell to reach
+     * @param context the context of the run
+     * @return the route as {@link #find(Vec, Vec, Predicate, int)} returns it, null if there is none in the area
+     */
+    static @Nullable List<Vec> findRoute(Vec from, Vec to, TntAnimationContext context) {
+        List<Vec> route = find(from, to, onGround(context), MAX_ROUTE_NODES);
+        if (route != null) return route;
+        return find(from, to, inArea(context), MAX_ROUTE_NODES);
+    }
+
+    /**
+     * Returns the nearest free cell with placed ground around the cell. Without one the nearest free cell inside the
+     * game area is used, and without that the cell itself.
+     *
+     * @param cell    the cell to start from
+     * @param context the context of the run
+     * @param allowed an extra check a cell must pass, e.g. that no other entity uses it yet
+     * @return the nearest cell to stand on
+     */
+    static Vec nearestStandable(Vec cell, TntAnimationContext context, Predicate<Vec> allowed) {
+        Predicate<Vec> withGround = onGround(context).and(allowed);
+        Vec nearest = nearestPassable(cell, withGround, MAX_SPAWN_RADIUS);
+        if (withGround.test(nearest)) return nearest;
+        return nearestPassable(cell, inArea(context).and(allowed), MAX_SPAWN_RADIUS);
+    }
+
+    /**
      * Returns the cell itself if it is passable, otherwise the passable cell which is nearest to it on the same y.
      * The cells are searched ring by ring around the cell, so the nearest ring wins.
      *
