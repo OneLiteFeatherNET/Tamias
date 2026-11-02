@@ -116,6 +116,35 @@ class FlyingDeliveryTntAnimationIntegrationTest {
     }
 
     @Test
+    void testCarrierTakesTheNextPositionWithoutFlyingBackToTheDepot(@NotNull Env env) {
+        Instance instance = createInstance(env);
+        // More positions than carriers, so a carrier has to deliver a second time
+        List<Vec> positions = row(FlyingDeliveryTntAnimation.MIN_CARRIERS + 1);
+        List<Vec> landed = new ArrayList<>();
+
+        TNTPlacement placement = new TNTPlacement(instance, landed::add);
+        placement.updateGroups(singleGroups(positions), _ -> true);
+        placement.place(new FlyingDeliveryTntAnimation(EntityType.PARROT));
+
+        // A carrier at the depot would hold its TNT block above the cruise height
+        double highestParcel = Double.NEGATIVE_INFINITY;
+        for (int i = 0; i < MAX_TICKS && !placement.landed().isDone(); i++) {
+            env.tick();
+            if (landed.isEmpty()) continue;
+            for (Entity parcel : findEntities(instance, EntityType.BLOCK_DISPLAY)) {
+                highestParcel = Math.max(highestParcel, parcel.getPosition().y());
+            }
+        }
+
+        assertTrue(placement.landed().isDone(), "The run must complete");
+        assertTrue(highestParcel > Double.NEGATIVE_INFINITY, "A second delivery must have been carried");
+        assertTrue(highestParcel <= Y + FlyingDeliveryTntAnimation.CRUISE_HEIGHT,
+                "The second TNT block must be picked up above the last position, not at the depot, but was at " + highestParcel);
+
+        env.destroyInstance(instance);
+    }
+
+    @Test
     void testParcelIsRemovedWhenItsBlockLands(@NotNull Env env) {
         Instance instance = createInstance(env);
         List<Vec> landed = new ArrayList<>();

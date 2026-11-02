@@ -24,8 +24,9 @@ import java.util.Map;
  * A {@link TntAnimation} in which flying animals deliver the TNT like drones. A few carriers wait above a depot in the
  * middle of the game area. Each carrier takes the nearest open position and hangs a block of TNT below itself on a
  * leash. The carrier flies up to a cruise height, then level to above the position and down to the position. The
- * TNT swings on the leash behind the carrier. Once the TNT is placed the leash is removed, the carrier flies back to
- * the depot and takes the next position. The flight stays above the target, so walls are passed and never need a route.
+ * TNT swings on the leash behind the carrier. Once the TNT is placed the leash is removed and the carrier takes the
+ * next open position right away with a new block of TNT. Only when no position is open, it flies back to the depot.
+ * The flight stays above the target, so walls are passed and never need a route.
  *
  * @author theEvilReaper
  * @version 1.0.0
@@ -282,7 +283,8 @@ public final class FlyingDeliveryTntAnimation implements TntAnimation {
 
         Vec cruise = cruisePoint(target);
         carrier.route.clear();
-        carrier.route.add(new Vec(this.depot.x(), cruise.y(), this.depot.z()));
+        // The carrier first climbs straight up from where it is, at the depot or above its last position
+        carrier.route.add(new Vec(carrier.position.x(), cruise.y(), carrier.position.z()));
         carrier.route.add(cruise);
         carrier.route.add(landingPoint(target));
         carrier.legTicks = 0;
@@ -322,6 +324,13 @@ public final class FlyingDeliveryTntAnimation implements TntAnimation {
 
         if (this.landedCount == this.totalPositions) {
             finish(context);
+            return;
+        }
+
+        // The carrier takes the next position right away instead of flying back to the depot first
+        Vec next = takeNearestOpen(target);
+        if (next != null) {
+            pickUp(carrier, next, context);
             return;
         }
 
