@@ -217,12 +217,13 @@ class FlyingDeliveryTntAnimationTest {
 
     @Test
     void testCarrierCountGrowsWithPositions() {
-        assertEquals(6, FlyingDeliveryTntAnimation.carrierCount(24), "Every fourth position must add a carrier");
+        assertEquals(8, FlyingDeliveryTntAnimation.carrierCount(48), "Every sixth position must add a carrier");
+        assertEquals(14, FlyingDeliveryTntAnimation.carrierCount(88), "A full round of TNT must get many carriers");
     }
 
     @Test
     void testCarrierCountIsCappedAtMaximum() {
-        assertEquals(FlyingDeliveryTntAnimation.MAX_CARRIERS, FlyingDeliveryTntAnimation.carrierCount(32),
+        assertEquals(FlyingDeliveryTntAnimation.MAX_CARRIERS, FlyingDeliveryTntAnimation.carrierCount(96),
                 "Many positions must not exceed the maximum carrier count");
         assertEquals(FlyingDeliveryTntAnimation.MAX_CARRIERS, FlyingDeliveryTntAnimation.carrierCount(400),
                 "Very many positions must not exceed the maximum carrier count");

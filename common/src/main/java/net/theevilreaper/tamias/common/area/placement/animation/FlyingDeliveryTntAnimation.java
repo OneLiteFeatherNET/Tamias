@@ -37,7 +37,7 @@ public final class FlyingDeliveryTntAnimation implements TntAnimation {
     /**
      * The number of positions which are served by one carrier, the carrier count grows with the positions.
      */
-    static final int POSITIONS_PER_CARRIER = 4;
+    static final int POSITIONS_PER_CARRIER = 6;
     /**
      * The fewest carriers which deliver the TNT, fewer are spawned only if the run has fewer positions.
      */
@@ -45,7 +45,7 @@ public final class FlyingDeliveryTntAnimation implements TntAnimation {
     /**
      * The most carriers which deliver the TNT.
      */
-    static final int MAX_CARRIERS = 8;
+    static final int MAX_CARRIERS = 16;
     /**
      * The height in blocks of the depot above the first group of the run.
      */
