@@ -105,10 +105,11 @@ public final class GamePlacement implements Placement {
     public CompletableFuture<Void> clearAsync() {
         stopPlacements();
 
-        // The placed ground positions and the special positions are part of the area positions
+        // The placed ground positions and the special positions are part of the area positions. Every TNT block which
+        // is still in the instance was placed by the TNT placement, the TNT positions of the area are only the respawn
+        // tickets which are left of it
         Set<Point> positions = new HashSet<>(this.area.getPositions());
         positions.addAll(this.tntPlacement.getPlacedPositions());
-        positions.addAll(this.area.getTntPositions());
         this.area.reset();
 
         AbsoluteBlockBatch batch = new AbsoluteBlockBatch();
