@@ -41,6 +41,7 @@ public class TNTPlacement extends AreaBasePlacement {
     private final Set<Vec> remainingPositions;
     private final TntAnimationContext animationContext = new AnimationContext();
     private Predicate<Point> groundCheck;
+    private Predicate<Point> areaCheck;
     private CompletableFuture<Void> landed;
     private volatile boolean stopped;
 
@@ -70,6 +71,7 @@ public class TNTPlacement extends AreaBasePlacement {
         this.fallingEntities = ConcurrentHashMap.newKeySet();
         this.remainingPositions = ConcurrentHashMap.newKeySet();
         this.groundCheck = _ -> true;
+        this.areaCheck = _ -> true;
         this.landed = CompletableFuture.completedFuture(null);
     }
 
@@ -81,9 +83,23 @@ public class TNTPlacement extends AreaBasePlacement {
      *                    below all of its blocks
      */
     public void updateGroups(List<TntGroup> groups, Predicate<Point> groundCheck) {
+        this.updateGroups(groups, groundCheck, _ -> true);
+    }
+
+    /**
+     * Sets the groups which are dropped on the next run and the ground positions of the area.
+     *
+     * @param groups      the groups in the order they should be dropped
+     * @param groundCheck checks if the ground at a position is placed, a group waits until it is true for the ground
+     *                    below all of its blocks
+     * @param areaCheck   checks if a position belongs to the ground of the area, whether it is placed yet or not; the
+     *                    animations use it to stay inside the area
+     */
+    public void updateGroups(List<TntGroup> groups, Predicate<Point> groundCheck, Predicate<Point> areaCheck) {
         this.groups.clear();
         this.groups.addAll(groups);
         this.groundCheck = groundCheck;
+        this.areaCheck = areaCheck;
     }
 
     /**
@@ -207,6 +223,16 @@ public class TNTPlacement extends AreaBasePlacement {
         @Override
         public Instance instance() {
             return TNTPlacement.this.instance;
+        }
+
+        @Override
+        public boolean hasGround(Vec cell) {
+            return TNTPlacement.this.groundCheck.test(cell.sub(0, 1, 0));
+        }
+
+        @Override
+        public boolean isInArea(Vec cell) {
+            return TNTPlacement.this.areaCheck.test(cell.sub(0, 1, 0));
         }
 
         @Override

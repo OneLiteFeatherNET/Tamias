@@ -22,6 +22,22 @@ public interface TntAnimationContext {
     Instance instance();
 
     /**
+     * Checks if the ground below the cell is already placed. A cell on the height of the TNT stands on the ground.
+     *
+     * @param cell the cell on the height of the TNT
+     * @return true if the ground below the cell is placed
+     */
+    boolean hasGround(Vec cell);
+
+    /**
+     * Checks if the cell lies over the ground of the game area, whether the ground below it is placed yet or not.
+     *
+     * @param cell the cell on the height of the TNT
+     * @return true if the ground below the cell belongs to the game area
+     */
+    boolean isInArea(Vec cell);
+
+    /**
      * Runs the action after the given delay. The action is cancelled when the placement stops.
      *
      * @param delayTicks the delay in ticks
