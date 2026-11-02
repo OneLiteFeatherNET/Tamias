@@ -14,7 +14,9 @@ import net.minestom.server.sound.SoundEvent;
 import net.theevilreaper.tamias.common.area.placement.TntGroup;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Predicate;
 import java.util.random.RandomGenerator;
@@ -73,10 +75,21 @@ public final class VillagerTntAnimation implements TntAnimation {
      */
     static final int SOUND_INTERVAL = 3;
     /**
-     * The safety limit in ticks a worker with a target may stand still. A worker which doesn't get any further places
-     * its TNT from where it stands, so a run can never hang.
+     * The safety limit in ticks a worker with a target may go without getting closer to it, e.g. because it stands
+     * still or two workers keep pushing each other away. Such a worker places its TNT from where it stands, so a run
+     * can never hang.
      */
     static final int MAX_STUCK_TICKS = 40;
+    /**
+     * The distance in blocks the workers try to keep to each other, so two villagers hardly overlap.
+     */
+    static final double SEPARATION_DISTANCE = 1.0;
+    /**
+     * The largest step in blocks per tick a worker makes to get away from a worker which is too close.
+     */
+    static final double SEPARATION_PUSH = 0.4;
+    private static final double PROGRESS_EPSILON = 0.05;
+    private static final double GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
 
     private final RandomGenerator random;
     private final List<Vec> openPositions = new ArrayList<>();
@@ -123,10 +136,16 @@ public final class VillagerTntAnimation implements TntAnimation {
         double y = groups.getFirst().center().y();
         Predicate<Vec> passable = cell -> GridRoute.isPassable(context.instance(), cell);
         Vec average = GridRoute.cell(sumX / allPositions.size(), y, sumZ / allPositions.size());
-        Vec home = centre(GridRoute.nearestPassable(average, passable, GridRoute.MAX_SPAWN_RADIUS));
+        Vec base = GridRoute.nearestPassable(average, passable, GridRoute.MAX_SPAWN_RADIUS);
 
+        // Every worker gets its own cell, so they don't stand inside each other at the start
+        Set<Vec> used = new HashSet<>();
         int count = Math.min(WORKER_COUNT, allPositions.size());
         for (int i = 0; i < count; i++) {
+            Vec cell = GridRoute.nearestPassable(base, candidate -> passable.test(candidate) && !used.contains(candidate),
+                    GridRoute.MAX_SPAWN_RADIUS);
+            used.add(cell);
+            Vec home = centre(cell);
             Entity entity = new Entity(EntityType.VILLAGER);
             entity.setNoGravity(true);
             entity.setInstance(context.instance(), home);
@@ -164,6 +183,7 @@ public final class VillagerTntAnimation implements TntAnimation {
             worker.target = takeNearestOpen(worker.entity.getPosition());
             if (worker.target != null) {
                 worker.route = planRoute(worker, passable);
+                worker.closestDistance = Double.MAX_VALUE;
             }
         }
 
@@ -192,6 +212,7 @@ public final class VillagerTntAnimation implements TntAnimation {
         worker.target = null;
         worker.route = null;
         worker.stuckTicks = 0;
+        worker.closestDistance = Double.MAX_VALUE;
         context.land(position);
         this.landedCount++;
 
@@ -273,6 +294,7 @@ public final class VillagerTntAnimation implements TntAnimation {
         }
         if (!passable.test(worker.route.getFirst())) {
             worker.route = planRoute(worker, passable);
+            worker.closestDistance = Double.MAX_VALUE;
             if (worker.route == null || worker.route.isEmpty() || !passable.test(worker.route.getFirst())) {
                 land(worker, context);
                 return;
@@ -280,26 +302,28 @@ public final class VillagerTntAnimation implements TntAnimation {
         }
         // The last step stops at the approach point, so the worker never stands inside the target cell it places on
         boolean last = worker.route.size() == 1;
-        Pos before = worker.entity.getPosition();
-        Point goal = last ? approachPoint(before, centre(worker.route.getFirst()))
+        Point goal = last ? approachPoint(worker.entity.getPosition(), centre(worker.route.getFirst()))
                 : centre(worker.route.getFirst());
         if (moveTowards(worker, goal, WORKER_SPEED, passable) && !last) {
             worker.route.removeFirst();
         }
-        trackProgress(worker, before, context);
+        trackProgress(worker, context);
     }
 
     /**
-     * Counts the ticks in which the worker didn't move. After {@link #MAX_STUCK_TICKS} of them it places its TNT from
-     * where it stands.
+     * Counts the ticks in which the worker didn't get closer to its target along its route than ever before. After
+     * {@link #MAX_STUCK_TICKS} of them it places its TNT from where it stands. The way left is measured along the
+     * route, so a detour around a wall still counts as progress.
      *
      * @param worker  the worker which walked
-     * @param before  the position of the worker before the step
      * @param context the context of the run
      */
-    private void trackProgress(Worker worker, Pos before, TntAnimationContext context) {
-        Pos now = worker.entity.getPosition();
-        if (now.x() != before.x() || now.z() != before.z()) {
+    private void trackProgress(Worker worker, TntAnimationContext context) {
+        if (worker.target == null || worker.route == null || worker.route.isEmpty()) return;
+        double distance = worker.route.size() - 1
+                + horizontalDistance(worker.entity.getPosition(), centre(worker.route.getFirst()));
+        if (distance < worker.closestDistance - PROGRESS_EPSILON) {
+            worker.closestDistance = distance;
             worker.stuckTicks = 0;
             return;
         }
@@ -397,6 +421,9 @@ public final class VillagerTntAnimation implements TntAnimation {
             x = straightX;
             z = straightZ;
         }
+        Vec pushed = separate(worker, x, z, passable);
+        x = pushed.x();
+        z = pushed.z();
         double y = worker.home.y() + HOP_HEIGHT * Math.abs(Math.sin(worker.ticks * HOP_FREQUENCY));
         float yaw = (float) Math.toDegrees(Math.atan2(-directionX, directionZ));
         worker.entity.teleport(new Pos(x, y, z, yaw, 0f));
@@ -406,6 +433,47 @@ public final class VillagerTntAnimation implements TntAnimation {
     /**
      * Checks if a position may be entered: it is walkable when it stays on the cell it is on or the cell is passable.
      */
+    /**
+     * Moves the given point away from every other worker which is closer than {@link #SEPARATION_DISTANCE}, the
+     * closer the other worker, the stronger the push. A push into a cell which can't be walked on is skipped.
+     *
+     * @param worker   the worker which moves
+     * @param x        the x the worker wants to move to
+     * @param z        the z the worker wants to move to
+     * @param passable checks if a cell can be walked on
+     * @return the point the worker moves to
+     */
+    private Vec separate(Worker worker, double x, double z, Predicate<Vec> passable) {
+        double pushX = 0;
+        double pushZ = 0;
+        for (int i = 0; i < this.workers.size(); i++) {
+            Worker other = this.workers.get(i);
+            if (other == worker) continue;
+            Pos position = other.entity.getPosition();
+            double dx = x - position.x();
+            double dz = z - position.z();
+            double distance = Math.hypot(dx, dz);
+            if (distance >= SEPARATION_DISTANCE) continue;
+            if (distance < 1e-6) {
+                // Two workers on the same spot are pushed apart in a direction which differs per worker
+                double angle = this.workers.indexOf(worker) * GOLDEN_ANGLE;
+                dx = Math.cos(angle);
+                dz = Math.sin(angle);
+                distance = 1;
+            }
+            double strength = SEPARATION_PUSH * (1 - Math.hypot(x - position.x(), z - position.z()) / SEPARATION_DISTANCE);
+            pushX += dx / distance * strength;
+            pushZ += dz / distance * strength;
+        }
+        if (pushX == 0 && pushZ == 0) return new Vec(x, 0, z);
+        Pos current = worker.entity.getPosition();
+        Vec here = GridRoute.cell(current.x(), worker.home.y(), current.z());
+        double pushedX = x + pushX;
+        double pushedZ = z + pushZ;
+        if (!isWalkable(pushedX, pushedZ, here, passable)) return new Vec(x, 0, z);
+        return new Vec(pushedX, 0, pushedZ);
+    }
+
     private boolean isWalkable(double x, double z, Vec here, Predicate<Vec> passable) {
         Vec cell = GridRoute.cell(x, here.y(), z);
         return cell.equals(here) || passable.test(cell);
@@ -431,6 +499,7 @@ public final class VillagerTntAnimation implements TntAnimation {
         private Vec wanderGoal;
         private int ticks;
         private int stuckTicks;
+        private double closestDistance = Double.MAX_VALUE;
 
         private Worker(Entity entity, Vec home) {
             this.entity = entity;

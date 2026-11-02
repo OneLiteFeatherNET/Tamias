@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -29,6 +30,7 @@ class VillagerTntAnimationIntegrationTest {
     private static final long SEED = 42L;
     private static final int MAX_TICKS = 2000;
     private static final double Y = 50;
+    private static final double MIN_WORKER_DISTANCE = 0.45;
 
     @Test
     void testSpawnsWorkerCountVillagers(@NotNull Env env) {
@@ -58,6 +60,52 @@ class VillagerTntAnimationIntegrationTest {
         assertEquals(2, findVillagers(instance).size(), "The run must not spawn more workers than positions");
 
         placement.stop();
+        env.destroyInstance(instance);
+    }
+
+    @Test
+    void testWorkersSpawnOnDifferentCells(@NotNull Env env) {
+        Instance instance = createInstance(env);
+
+        TNTPlacement placement = new TNTPlacement(instance, _ -> {});
+        // The ground stays unready, so the workers stay at their spawn
+        placement.updateGroups(singleGroups(row(9)), _ -> false);
+        placement.place(new VillagerTntAnimation(new Random(SEED)));
+        tick(env, 1);
+
+        Set<Vec> cells = new HashSet<>();
+        for (Entity villager : findVillagers(instance)) {
+            cells.add(GridRoute.cellOf(villager.getPosition()));
+        }
+        assertEquals(VillagerTntAnimation.WORKER_COUNT, cells.size(), "Every worker must spawn on its own cell");
+
+        placement.stop();
+        env.destroyInstance(instance);
+    }
+
+    @Test
+    void testWorkersKeepTheirDistanceWhileTheyWork(@NotNull Env env) {
+        Instance instance = createInstance(env);
+        // Two columns on opposite sides, so the workers cross each other's way from the middle
+        List<Vec> positions = new ArrayList<>();
+        for (int i = 0; i < 6; i++) {
+            positions.add(new Vec(1, Y, 2 + i * 2));
+            positions.add(new Vec(13, Y, 2 + i * 2));
+        }
+
+        TNTPlacement placement = new TNTPlacement(instance, _ -> {});
+        placement.updateGroups(singleGroups(positions), _ -> true);
+        placement.place(new VillagerTntAnimation(new Random(SEED)));
+
+        double closest = Double.MAX_VALUE;
+        for (int i = 0; i < MAX_TICKS && !placement.landed().isDone(); i++) {
+            env.tick();
+            closest = Math.min(closest, closestPair(findVillagers(instance)));
+        }
+
+        assertTrue(placement.landed().isDone(), "The run must still complete");
+        assertTrue(closest > MIN_WORKER_DISTANCE, "The workers must not walk into each other, but came " + closest + " close");
+
         env.destroyInstance(instance);
     }
 
@@ -201,6 +249,18 @@ class VillagerTntAnimationIntegrationTest {
         return instance.getEntities().stream()
                 .filter(entity -> entity.getEntityType() == EntityType.VILLAGER)
                 .toList();
+    }
+
+    private static double closestPair(List<Entity> villagers) {
+        double closest = Double.MAX_VALUE;
+        for (int i = 0; i < villagers.size(); i++) {
+            for (int j = i + 1; j < villagers.size(); j++) {
+                Point a = villagers.get(i).getPosition();
+                Point b = villagers.get(j).getPosition();
+                closest = Math.min(closest, Math.hypot(a.x() - b.x(), a.z() - b.z()));
+            }
+        }
+        return closest;
     }
 
     private static int countTnt(Instance instance, List<Vec> positions) {
