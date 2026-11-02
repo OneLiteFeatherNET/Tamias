@@ -1,5 +1,6 @@
 package net.theevilreaper.tamias.common.area.placement.animation;
 
+import net.minestom.server.entity.EntityType;
 import net.theevilreaper.tamias.common.util.RandomPick;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,7 +40,22 @@ public enum TntAnimationType {
     /**
      * A minecart drives over short-lived rails to every position and leaves the TNT behind it.
      */
-    MINECART(MinecartTntAnimation::new);
+    MINECART(MinecartTntAnimation::new),
+
+    /**
+     * Parrots deliver the TNT from a depot above the game area.
+     */
+    PARROTS(() -> new FlyingDeliveryTntAnimation(EntityType.PARROT)),
+
+    /**
+     * Bats deliver the TNT from a depot above the game area.
+     */
+    BATS(() -> new FlyingDeliveryTntAnimation(EntityType.BAT)),
+
+    /**
+     * Phantoms deliver the TNT from a depot above the game area.
+     */
+    PHANTOMS(() -> new FlyingDeliveryTntAnimation(EntityType.PHANTOM));
 
     private final Supplier<TntAnimation> factory;
 
