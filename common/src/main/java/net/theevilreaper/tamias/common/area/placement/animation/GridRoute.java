@@ -39,6 +39,7 @@ final class GridRoute {
     /**
      * Finds the shortest route of cells from the start to the target with an A* search. The search is led by the
      * remaining distance to the target, so on an open area it only visits about as many cells as the route is long.
+     * Of the shortest routes it prefers one with few turns, so the route runs in long straight parts.
      * The start cell itself is not part of the route, the target is reachable even when it is not passable.
      *
      * @param from     the cell to start at
@@ -54,28 +55,35 @@ final class GridRoute {
         if (start.x() == goal.x() && start.z() == goal.z()) return List.of();
 
         Map<Vec, Vec> parents = new HashMap<>();
-        Map<Vec, Integer> costs = new HashMap<>();
+        Map<Vec, Node> best = new HashMap<>();
+        Node first = new Node(start, 0, distance(start, goal), 0);
         parents.put(start, start);
-        costs.put(start, 0);
-        // Equal estimates prefer the cell closer to the target, so an open area is crossed straight instead of in width
+        best.put(start, first);
+        // Equal estimates prefer the cell closer to the target, so an open area is crossed straight instead of in width.
+        // After that fewer turns win, so of all shortest routes one with long straight parts is taken
         PriorityQueue<Node> open = new PriorityQueue<>(Comparator.comparingInt(Node::estimate)
-                .thenComparingInt(Node::remaining));
-        open.add(new Node(start, 0, distance(start, goal)));
+                .thenComparingInt(Node::remaining)
+                .thenComparingInt(Node::turns));
+        open.add(first);
         while (!open.isEmpty()) {
             Node current = open.poll();
-            if (current.cost() > costs.get(current.cell())) continue;
+            if (best.get(current.cell()) != current) continue;
+            Vec heading = current.cell().sub(parents.get(current.cell()));
             for (Vec next : neighbours(current.cell())) {
                 int cost = current.cost() + 1;
-                Integer known = costs.get(next);
-                if (known != null && known <= cost) continue;
+                boolean turns = !heading.isZero() && !next.sub(current.cell()).equals(heading);
+                int turnCount = current.turns() + (turns ? 1 : 0);
+                Node known = best.get(next);
+                if (known != null && (known.cost() < cost || (known.cost() == cost && known.turns() <= turnCount))) continue;
                 boolean isGoal = next.equals(goal);
                 if (!isGoal && !passable.test(next)) continue;
                 parents.put(next, current.cell());
-                costs.put(next, cost);
+                Node node = new Node(next, cost, distance(next, goal), turnCount);
+                best.put(next, node);
                 // Every step costs the same and the estimate never overshoots, so the first route to the goal is the shortest
                 if (isGoal) return reconstruct(parents, start, goal);
                 if (parents.size() > maxNodes) return null;
-                open.add(new Node(next, cost, distance(next, goal)));
+                open.add(node);
             }
         }
         return null;
@@ -89,9 +97,10 @@ final class GridRoute {
     }
 
     /**
-     * A cell of the open search with the steps it took to get there and the steps which are at least left.
+     * A cell of the open search with the steps it took to get there, the steps which are at least left and the turns
+     * of the route so far.
      */
-    private record Node(Vec cell, int cost, int remaining) {
+    private record Node(Vec cell, int cost, int remaining, int turns) {
 
         int estimate() {
             return this.cost + this.remaining;

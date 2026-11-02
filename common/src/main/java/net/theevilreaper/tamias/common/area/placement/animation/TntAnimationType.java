@@ -51,7 +51,12 @@ public enum TntAnimationType {
     /**
      * Endermen teleport next to a position, place the TNT and teleport away.
      */
-    ENDERMEN(EndermanTntAnimation::new);
+    ENDERMEN(EndermanTntAnimation::new),
+
+    /**
+     * The TNT races from the middle of the game area over the ground to its position and leaves a light trail.
+     */
+    TRON(TronTntAnimation::new);
 
     private final Supplier<TntAnimation> factory;
 
