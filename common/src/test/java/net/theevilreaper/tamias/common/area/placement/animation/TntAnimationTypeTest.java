@@ -1,8 +1,10 @@
 package net.theevilreaper.tamias.common.area.placement.animation;
 
+import net.minestom.server.entity.EntityType;
 import org.junit.jupiter.api.Test;
 
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 import java.util.random.RandomGenerator;
@@ -41,5 +43,18 @@ class TntAnimationTypeTest {
     void testCreateReturnsTheAnimationOfTheType() {
         assertInstanceOf(FallingTntAnimation.class, TntAnimationType.FALLING.create());
         assertInstanceOf(GrowingTntAnimation.class, TntAnimationType.GROWING.create());
+        assertInstanceOf(FlyingDeliveryTntAnimation.class, TntAnimationType.FLYING.create());
+    }
+
+    @Test
+    void testFlyingPicksEveryCarrierType() {
+        RandomGenerator random = new Random(SEED);
+        Set<EntityType> picked = new HashSet<>();
+
+        for (int i = 0; i < DRAWS; i++) {
+            picked.add(FlyingDeliveryTntAnimation.withRandomCarrier(random).carrierType());
+        }
+
+        assertEquals(Set.copyOf(FlyingDeliveryTntAnimation.CARRIER_TYPES), picked, "Every animal must be picked at some point");
     }
 }

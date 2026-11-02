@@ -1,9 +1,9 @@
 package net.theevilreaper.tamias.common.area.placement.animation;
 
-import net.minestom.server.entity.EntityType;
 import net.theevilreaper.tamias.common.util.RandomPick;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
 import java.util.random.RandomGenerator;
 
@@ -43,19 +43,10 @@ public enum TntAnimationType {
     MINECART(MinecartTntAnimation::new),
 
     /**
-     * Parrots deliver the TNT from a depot above the game area.
+     * Flying animals deliver the TNT from a depot above the game area. The animal is picked at random for every run,
+     * so the flying animation is picked as often as any other animation.
      */
-    PARROTS(() -> new FlyingDeliveryTntAnimation(EntityType.PARROT)),
-
-    /**
-     * Bats deliver the TNT from a depot above the game area.
-     */
-    BATS(() -> new FlyingDeliveryTntAnimation(EntityType.BAT)),
-
-    /**
-     * Phantoms deliver the TNT from a depot above the game area.
-     */
-    PHANTOMS(() -> new FlyingDeliveryTntAnimation(EntityType.PHANTOM));
+    FLYING(() -> FlyingDeliveryTntAnimation.withRandomCarrier(ThreadLocalRandom.current()));
 
     private final Supplier<TntAnimation> factory;
 

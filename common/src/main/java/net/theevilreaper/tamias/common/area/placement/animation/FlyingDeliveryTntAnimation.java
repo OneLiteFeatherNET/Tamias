@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
+import java.util.random.RandomGenerator;
 
 /**
  * A {@link TntAnimation} in which flying animals deliver the TNT like drones. A few carriers wait above a depot in the
@@ -122,6 +123,11 @@ public final class FlyingDeliveryTntAnimation implements TntAnimation {
             EntityType.PHANTOM, SoundEvent.ENTITY_PHANTOM_AMBIENT
     );
 
+    /**
+     * The animals which can carry the TNT, one of them is picked for a run.
+     */
+    static final List<EntityType> CARRIER_TYPES = List.of(EntityType.PARROT, EntityType.BAT, EntityType.PHANTOM);
+
     private final EntityType carrierType;
     private final List<Vec> openPositions = new ArrayList<>();
     private final List<Carrier> carriers = new ArrayList<>();
@@ -137,6 +143,25 @@ public final class FlyingDeliveryTntAnimation implements TntAnimation {
      */
     public FlyingDeliveryTntAnimation(EntityType carrierType) {
         this.carrierType = carrierType;
+    }
+
+    /**
+     * Creates the animation with a random animal of the {@link #CARRIER_TYPES} as carriers.
+     *
+     * @param random the random generator which picks the animal
+     * @return the animation with the picked carriers
+     */
+    public static FlyingDeliveryTntAnimation withRandomCarrier(RandomGenerator random) {
+        return new FlyingDeliveryTntAnimation(CARRIER_TYPES.get(random.nextInt(CARRIER_TYPES.size())));
+    }
+
+    /**
+     * Returns the type of the animals which carry the TNT.
+     *
+     * @return the entity type of the carriers
+     */
+    EntityType carrierType() {
+        return this.carrierType;
     }
 
     /**
