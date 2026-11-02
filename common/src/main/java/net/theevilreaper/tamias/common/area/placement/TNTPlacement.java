@@ -121,7 +121,7 @@ public class TNTPlacement extends AreaBasePlacement {
         this.buildTask = MinecraftServer.getSchedulerManager().buildTask(() -> {
             if (queue.isEmpty()) {
                 // Only the queue is done, the pending landings must still run
-                super.stop();
+                finish();
                 completeIfLanded();
                 return;
             }

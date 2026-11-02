@@ -96,7 +96,7 @@ public final class SweepAreaPlacement extends AreaBasePlacement {
                 positions.add(queue.poll());
             }
             if (positions.isEmpty()) {
-                stop();
+                finish();
                 run.complete(null);
                 return;
             }

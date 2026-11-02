@@ -25,7 +25,7 @@ public sealed interface AreaPlacement permits AreaBasePlacement {
     boolean isRunning();
 
     /**
-     * Stops the active placement task if running.
+     * Cancels the active placement run if one is running. A cancelled run is not completed.
      */
     void stop();
 
