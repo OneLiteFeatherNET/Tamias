@@ -13,6 +13,7 @@ import net.theevilreaper.tamias.common.area.placement.SweepAreaPlacement;
 import net.theevilreaper.tamias.common.area.placement.TNTPlacement;
 import net.theevilreaper.tamias.common.area.placement.TntGroup;
 import net.theevilreaper.tamias.common.area.placement.TntLayout;
+import net.theevilreaper.tamias.common.area.placement.animation.TntAnimationType;
 import net.theevilreaper.tamias.common.ground.GroundData;
 import net.theevilreaper.tamias.common.map.layer.AreaData;
 import org.jetbrains.annotations.Nullable;
@@ -27,6 +28,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
 import java.util.function.IntSupplier;
 import java.util.function.ToDoubleFunction;
 
@@ -41,10 +43,24 @@ public final class GamePlacement implements Placement {
     private final Vec center;
     private ToDoubleFunction<Point> activeFillOrder;
     private @Nullable GroundFillPattern lastPattern;
+    private final Function<@Nullable TntAnimationType, TntAnimationType> animationPicker;
+    private @Nullable TntAnimationType lastTntAnimation;
     private List<Vec> tntCandidates;
     private boolean prepared;
 
     public GamePlacement(Instance instance, GameArea area) {
+        this(instance, area, previous -> TntAnimationType.next(previous, ThreadLocalRandom.current()));
+    }
+
+    /**
+     * Creates the placement with the given picker for the TNT animation of each round.
+     *
+     * @param instance       the instance where the game area is placed
+     * @param area           the game area
+     * @param animationPicker picks the animation of a round, receives the animation of the last round
+     */
+    GamePlacement(Instance instance, GameArea area, Function<@Nullable TntAnimationType, TntAnimationType> animationPicker) {
+        this.animationPicker = animationPicker;
         this.instance = instance;
         this.area = area;
         this.tntPlacement = new TNTPlacement(instance, area::addTntPosition);
@@ -239,9 +255,11 @@ public final class GamePlacement implements Placement {
 
         this.area.setTntPositions(List.of());
         this.tntPlacement.updateGroups(groups, this.groundPlacement::isPlaced);
-        this.tntPlacement.place();
-        LOGGER.info("Dropping {} TNT blocks in {} groups onto the game area",
-                groups.stream().mapToInt(group -> group.members().size() + 1).sum(), groups.size());
+        TntAnimationType animationType = this.animationPicker.apply(this.lastTntAnimation);
+        this.lastTntAnimation = animationType;
+        this.tntPlacement.place(animationType.create());
+        LOGGER.info("Dropping {} TNT blocks in {} groups onto the game area with the {} animation",
+                groups.stream().mapToInt(group -> group.members().size() + 1).sum(), groups.size(), animationType);
         return this.tntPlacement.landed();
     }
 
