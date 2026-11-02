@@ -2,6 +2,7 @@ package net.theevilreaper.tamias.common.area;
 
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
+import net.theevilreaper.tamias.common.util.RandomPick;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -139,11 +140,7 @@ public enum GroundFillPattern {
      * @return the picked pattern
      */
     public static GroundFillPattern next(@Nullable GroundFillPattern previous, RandomGenerator random) {
-        GroundFillPattern[] patterns = values();
-        if (previous == null || patterns.length == 1) return patterns[random.nextInt(patterns.length)];
-        // Skips the previous pattern by drawing from the remaining ones and shifting past it
-        int index = random.nextInt(patterns.length - 1);
-        return patterns[index >= previous.ordinal() ? index + 1 : index];
+        return RandomPick.nextDifferent(values(), previous, random);
     }
 
     /**

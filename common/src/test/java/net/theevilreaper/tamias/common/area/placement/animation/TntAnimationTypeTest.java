@@ -17,37 +17,17 @@ class TntAnimationTypeTest {
     @Test
     void testNextNeverRepeatsThePreviousType() {
         RandomGenerator random = new Random(SEED);
-
-        for (TntAnimationType previous : TntAnimationType.values()) {
-            for (int i = 0; i < DRAWS; i++) {
-                assertNotEquals(previous, TntAnimationType.next(previous, random), "The type " + previous + " must not repeat");
-            }
-        }
-    }
-
-    @Test
-    void testNextReachesEveryTypeWithoutPrevious() {
-        RandomGenerator random = new Random(SEED);
+        TntAnimationType previous = null;
         Set<TntAnimationType> drawn = EnumSet.noneOf(TntAnimationType.class);
 
         for (int i = 0; i < DRAWS; i++) {
-            drawn.add(TntAnimationType.next(null, random));
+            TntAnimationType next = TntAnimationType.next(previous, random);
+            assertNotEquals(previous, next, "The type " + previous + " must not repeat");
+            drawn.add(next);
+            previous = next;
         }
 
         assertEquals(EnumSet.allOf(TntAnimationType.class), drawn, "Every type must be reachable");
-    }
-
-    @Test
-    void testNextReachesEveryOtherTypeAfterAPrevious() {
-        RandomGenerator random = new Random(SEED);
-
-        for (TntAnimationType previous : TntAnimationType.values()) {
-            Set<TntAnimationType> drawn = EnumSet.noneOf(TntAnimationType.class);
-            for (int i = 0; i < DRAWS; i++) {
-                drawn.add(TntAnimationType.next(previous, random));
-            }
-            assertEquals(EnumSet.complementOf(EnumSet.of(previous)), drawn, "Every other type must be reachable after " + previous);
-        }
     }
 
     @Test

@@ -1,5 +1,6 @@
 package net.theevilreaper.tamias.common.area.placement.animation;
 
+import net.theevilreaper.tamias.common.util.RandomPick;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
@@ -48,10 +49,6 @@ public enum TntAnimationType {
      * @return the picked type
      */
     public static TntAnimationType next(@Nullable TntAnimationType previous, RandomGenerator random) {
-        TntAnimationType[] types = values();
-        if (previous == null || types.length == 1) return types[random.nextInt(types.length)];
-        // Skips the previous type by drawing from the remaining ones and shifting past it
-        int index = random.nextInt(types.length - 1);
-        return types[index >= previous.ordinal() ? index + 1 : index];
+        return RandomPick.nextDifferent(values(), previous, random);
     }
 }
