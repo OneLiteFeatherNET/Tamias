@@ -12,6 +12,7 @@ import net.minestom.server.network.packet.server.play.ParticlePacket;
 import net.minestom.server.particle.Particle;
 import net.minestom.server.sound.SoundEvent;
 import net.theevilreaper.tamias.common.area.placement.TntGroup;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -37,9 +38,13 @@ public final class TronTntAnimation implements TntAnimation {
      */
     static final double RACE_SPEED = 1.2;
     /**
-     * The number of ticks a trail part stays before it is removed.
+     * The number of ticks a straight trail part stays after the racer left it before it is removed.
      */
     static final int TRAIL_LIFETIME = 24;
+    /**
+     * The number of ticks the client takes to grow a trail part by the cells the racer passed in one tick.
+     */
+    static final int TRAIL_GROW_TICKS = 1;
     /**
      * The scale of the racer, the racer is centred on its cell.
      */
@@ -186,7 +191,7 @@ public final class TronTntAnimation implements TntAnimation {
                 arrive(racer, context);
                 return;
             }
-            trail(next, context);
+            trail(racer, next, context);
             if (!isNextCellOpen(racer, context)) {
                 arrive(racer, context);
                 return;
@@ -226,6 +231,7 @@ public final class TronTntAnimation implements TntAnimation {
     private static void arrive(Racer racer, TntAnimationContext context) {
         placeAt(racer.target, context);
         context.release(racer.entity);
+        closeTrail(racer, context);
     }
 
     /**
@@ -243,22 +249,82 @@ public final class TronTntAnimation implements TntAnimation {
     }
 
     /**
-     * Leaves a flat trail part on the cell which the racer passed. The part is removed after {@link #TRAIL_LIFETIME}.
+     * Leaves the trail on the cell which the racer passed. While the racer drives straight, the current trail part
+     * grows by the cell, so a straight line is a single entity. A turn closes the part and starts a new one.
      *
+     * @param racer   the racer which passed the cell
      * @param cell    the cell which was passed
      * @param context the context of the run
      */
-    private static void trail(Vec cell, TntAnimationContext context) {
+    private static void trail(Racer racer, Vec cell, TntAnimationContext context) {
+        Vec direction = cell.sub(racer.lastCell);
+        racer.lastCell = cell;
+        if (racer.trail != null && direction.equals(racer.trailDirection)) {
+            racer.trailLength++;
+            int length = racer.trailLength;
+            racer.trail.editEntityMeta(BlockDisplayMeta.class, meta -> shapeTrail(meta, direction, length, TRAIL_GROW_TICKS));
+            return;
+        }
+
+        closeTrail(racer, context);
         Entity entity = new Entity(EntityType.BLOCK_DISPLAY);
         entity.setNoGravity(true);
         entity.editEntityMeta(BlockDisplayMeta.class, meta -> {
             meta.setBlockState(TRAIL_BLOCK);
-            meta.setScale(new Vec(1, TRAIL_THICKNESS, 1));
             meta.setBrightness(MAX_LIGHT, MAX_LIGHT);
+            shapeTrail(meta, direction, 1, 0);
         });
         entity.setInstance(context.instance(), cell);
         context.track(entity);
-        context.schedule(TRAIL_LIFETIME, () -> context.release(entity));
+        racer.trail = entity;
+        racer.trailDirection = direction;
+        racer.trailLength = 1;
+    }
+
+    /**
+     * Ends the current trail part of the racer, it is removed after {@link #TRAIL_LIFETIME}.
+     *
+     * @param racer   the racer whose trail part ends
+     * @param context the context of the run
+     */
+    private static void closeTrail(Racer racer, TntAnimationContext context) {
+        Entity trail = racer.trail;
+        if (trail == null) return;
+        racer.trail = null;
+        context.schedule(TRAIL_LIFETIME, () -> context.release(trail));
+    }
+
+    /**
+     * Stretches a flat trail part over the given number of cells. The part starts on the cell of its entity and
+     * reaches in the direction the racer drives, so it is moved back when the racer drives towards negative x or z.
+     *
+     * @param meta     the display of the trail part
+     * @param direction the direction of the racer, one step on the x or the z axis
+     * @param length   the number of cells the part covers
+     * @param duration the number of ticks the client takes to get to the new shape, 0 to show it at once
+     */
+    private static void shapeTrail(BlockDisplayMeta meta, Vec direction, int length, int duration) {
+        Vec[] shape = trailShape(direction, length);
+        meta.setTransformationInterpolationStartDelta(0);
+        meta.setTransformationInterpolationDuration(duration);
+        meta.setScale(shape[0]);
+        meta.setTranslation(shape[1]);
+    }
+
+    /**
+     * Returns the scale and the translation of a trail part which covers the given number of cells from the cell of
+     * its entity in the given direction.
+     *
+     * @param direction the direction of the racer, one step on the x or the z axis
+     * @param length    the number of cells the part covers
+     * @return the scale at index 0 and the translation at index 1
+     */
+    static Vec[] trailShape(Vec direction, int length) {
+        double scaleX = direction.x() != 0 ? length : 1;
+        double scaleZ = direction.z() != 0 ? length : 1;
+        double moveX = direction.x() < 0 ? -(length - 1) : 0;
+        double moveZ = direction.z() < 0 ? -(length - 1) : 0;
+        return new Vec[]{new Vec(scaleX, TRAIL_THICKNESS, scaleZ), new Vec(moveX, 0, moveZ)};
     }
 
     private static Point centre(Point cell) {
@@ -275,12 +341,17 @@ public final class TronTntAnimation implements TntAnimation {
         private List<Vec> route;
         private int index;
         private Vec position;
+        private Vec lastCell;
+        private @Nullable Entity trail;
+        private @Nullable Vec trailDirection;
+        private int trailLength;
 
         private Racer(Entity entity, Vec target, List<Vec> route, Vec start) {
             this.entity = entity;
             this.target = target;
             this.route = route;
             this.position = start;
+            this.lastCell = start;
         }
     }
 }

@@ -117,6 +117,45 @@ class TronTntAnimationIntegrationTest {
     }
 
     @Test
+    void testStraightRouteLeavesASingleTrailPart(@NotNull Env env) {
+        Instance instance = createInstance(env);
+
+        TNTPlacement placement = new TNTPlacement(instance, _ -> {});
+        // Both routes run straight from the start, the centre to positive x and the member to negative x
+        placement.updateGroups(List.of(new TntGroup(CENTRE, List.of(MEMBER))), _ -> true);
+        placement.place(new TronTntAnimation());
+
+        int mostTrails = 0;
+        for (int i = 0; i < MAX_TICKS && !placement.landed().isDone(); i++) {
+            env.tick();
+            mostTrails = Math.max(mostTrails, findTrails(instance).size());
+        }
+
+        assertTrue(placement.landed().isDone(), "The run must complete");
+        assertEquals(2, mostTrails, "Every straight route must leave one trail part instead of one per cell");
+        env.destroyInstance(instance);
+    }
+
+    @Test
+    void testTrailShapeReachesInTheDrivingDirection() {
+        Vec[] east = TronTntAnimation.trailShape(new Vec(1, 0, 0), 3);
+        assertEquals(new Vec(3, TronTntAnimation.TRAIL_THICKNESS, 1), east[0]);
+        assertEquals(Vec.ZERO, east[1], "A part to positive x starts on its own cell");
+
+        Vec[] west = TronTntAnimation.trailShape(new Vec(-1, 0, 0), 3);
+        assertEquals(new Vec(3, TronTntAnimation.TRAIL_THICKNESS, 1), west[0]);
+        assertEquals(new Vec(-2, 0, 0), west[1], "A part to negative x must reach back over the cells behind it");
+
+        Vec[] south = TronTntAnimation.trailShape(new Vec(0, 0, 1), 4);
+        assertEquals(new Vec(1, TronTntAnimation.TRAIL_THICKNESS, 4), south[0]);
+        assertEquals(Vec.ZERO, south[1]);
+
+        Vec[] north = TronTntAnimation.trailShape(new Vec(0, 0, -1), 4);
+        assertEquals(new Vec(1, TronTntAnimation.TRAIL_THICKNESS, 4), north[0]);
+        assertEquals(new Vec(0, 0, -3), north[1]);
+    }
+
+    @Test
     void testTrailVanishesAfterItsLifetime(@NotNull Env env) {
         Instance instance = createInstance(env);
 
