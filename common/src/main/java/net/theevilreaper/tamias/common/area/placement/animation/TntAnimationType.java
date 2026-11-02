@@ -3,6 +3,7 @@ package net.theevilreaper.tamias.common.area.placement.animation;
 import net.theevilreaper.tamias.common.util.RandomPick;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
 import java.util.random.RandomGenerator;
 
@@ -39,7 +40,13 @@ public enum TntAnimationType {
     /**
      * A minecart drives over short-lived rails to every position and leaves the TNT behind it.
      */
-    MINECART(MinecartTntAnimation::new);
+    MINECART(MinecartTntAnimation::new),
+
+    /**
+     * Flying animals deliver the TNT from a depot above the game area. The animal is picked at random for every run,
+     * so the flying animation is picked as often as any other animation.
+     */
+    FLYING(() -> FlyingDeliveryTntAnimation.withRandomCarrier(ThreadLocalRandom.current()));
 
     private final Supplier<TntAnimation> factory;
 
