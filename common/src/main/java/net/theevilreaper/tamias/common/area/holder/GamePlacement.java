@@ -121,8 +121,8 @@ public final class GamePlacement implements Placement {
     }
 
     @Override
-    public void triggerPlacement(GroundData groundData) {
-        if (this.groundPlacement.isRunning()) return;
+    public CompletableFuture<Void> triggerPlacement(GroundData groundData) {
+        if (this.groundPlacement.isRunning()) return this.groundPlacement.built();
         GroundFillPattern chosen = GroundFillPattern.next(this.lastPattern, ThreadLocalRandom.current());
         this.lastPattern = chosen;
         this.activeFillOrder = chosen.order(
@@ -130,7 +130,7 @@ public final class GamePlacement implements Placement {
         );
         LOGGER.info("Using ground fill pattern {}", chosen);
         this.updateSpecialPositions(groundData);
-        this.groundPlacement.place(groundData, this.activeFillOrder);
+        return this.groundPlacement.place(groundData, this.activeFillOrder);
     }
 
     /**

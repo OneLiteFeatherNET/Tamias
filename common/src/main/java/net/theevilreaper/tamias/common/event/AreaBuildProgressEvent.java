@@ -9,7 +9,7 @@ import org.jetbrains.annotations.ApiStatus;
  * @param progress the share of placed ground blocks from 0 to 1
  * @author theEvilReaper
  * @version 1.0.0
- * @see AreaFinishBuildEvent
+ * @see net.theevilreaper.tamias.common.area.placement.SweepAreaPlacement#built()
  * @since 1.0.0
  */
 @ApiStatus.NonExtendable

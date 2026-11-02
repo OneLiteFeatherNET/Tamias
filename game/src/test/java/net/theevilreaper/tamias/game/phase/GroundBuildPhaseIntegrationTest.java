@@ -9,7 +9,6 @@ import net.minestom.server.instance.Instance;
 import net.minestom.testing.Env;
 import net.minestom.testing.extension.MicrotusExtension;
 import net.theevilreaper.tamias.common.event.AreaBuildProgressEvent;
-import net.theevilreaper.tamias.common.event.AreaFinishBuildEvent;
 import net.theevilreaper.tamias.common.event.AreaSpawnTriggerEvent;
 import net.theevilreaper.tamias.game.round.event.RoundPrepareEvent;
 import net.theevilreaper.tamias.game.round.event.RoundStartEvent;
@@ -36,7 +35,7 @@ class GroundBuildPhaseIntegrationTest {
         trackEvent(env, calledEvents, AreaSpawnTriggerEvent.class);
         trackEvent(env, calledEvents, RoundPrepareEvent.class);
         trackEvent(env, calledEvents, RoundStartEvent.class);
-        GroundBuildPhase phase = new GroundBuildPhase(() -> () -> {}, null);
+        GroundBuildPhase phase = new GroundBuildPhase(CompletableFuture::new, null, () -> {});
 
         phase.start();
         phase.finish();
@@ -53,16 +52,17 @@ class GroundBuildPhaseIntegrationTest {
     void testPhaseWaitsForTheTntAfterTheGround(@NotNull Env env) {
         CompletableFuture<Void> tntLanded = new CompletableFuture<>();
         AtomicBoolean tntDropped = new AtomicBoolean();
-        GroundBuildPhase phase = new GroundBuildPhase(() -> () -> {}, () -> {
+        CompletableFuture<Void> groundBuilt = new CompletableFuture<>();
+        GroundBuildPhase phase = new GroundBuildPhase(() -> groundBuilt, () -> {
             tntDropped.set(true);
             return tntLanded;
-        }, Duration.ZERO, Duration.ZERO);
+        }, () -> {}, Duration.ZERO, Duration.ZERO);
 
         phase.start();
         env.tickWhile(() -> !tntDropped.get(), Duration.ofSeconds(5));
         assertTrue(tntDropped.get());
 
-        EventDispatcher.call(new AreaFinishBuildEvent());
+        groundBuilt.complete(null);
         assertFalse(phase.isFinished(), "The phase must wait until every TNT block has landed");
 
         tntLanded.complete(null);
@@ -72,40 +72,59 @@ class GroundBuildPhaseIntegrationTest {
     @Test
     void testPhaseWaitsForTheGroundAfterTheTnt(@NotNull Env env) {
         AtomicBoolean tntDropped = new AtomicBoolean();
-        GroundBuildPhase phase = new GroundBuildPhase(() -> () -> {}, () -> {
+        CompletableFuture<Void> groundBuilt = new CompletableFuture<>();
+        GroundBuildPhase phase = new GroundBuildPhase(() -> groundBuilt, () -> {
             tntDropped.set(true);
             return CompletableFuture.completedFuture(null);
-        }, Duration.ZERO, Duration.ZERO);
+        }, () -> {}, Duration.ZERO, Duration.ZERO);
 
         phase.start();
         env.tickWhile(() -> !tntDropped.get(), Duration.ofSeconds(5));
         assertFalse(phase.isFinished(), "The phase must wait until the ground is built");
 
-        EventDispatcher.call(new AreaFinishBuildEvent());
+        groundBuilt.complete(null);
         assertTrue(phase.isFinished());
     }
 
     @Test
     void testFinishCancelsTheDelayedPlacements(@NotNull Env env) {
         AtomicBoolean groundStarted = new AtomicBoolean();
+        AtomicBoolean groundReset = new AtomicBoolean();
         GroundBuildPhase phase = new GroundBuildPhase(() -> {
             groundStarted.set(true);
-            return () -> {};
-        }, () -> CompletableFuture.completedFuture(null), Duration.ofMillis(100), Duration.ZERO);
+            return new CompletableFuture<>();
+        }, () -> CompletableFuture.completedFuture(null), () -> groundReset.set(true), Duration.ofMillis(100), Duration.ZERO);
 
         phase.start();
         phase.finish();
         env.tickWhile(() -> !groundStarted.get(), Duration.ofMillis(500));
 
         assertFalse(groundStarted.get());
+        assertFalse(groundReset.get(), "The ground was never started, so there is nothing to reset");
+    }
+
+    @Test
+    void testFinishResetsTheStartedGround(@NotNull Env env) {
+        AtomicBoolean groundStarted = new AtomicBoolean();
+        AtomicBoolean groundReset = new AtomicBoolean();
+        GroundBuildPhase phase = new GroundBuildPhase(() -> {
+            groundStarted.set(true);
+            return new CompletableFuture<>();
+        }, CompletableFuture::new, () -> groundReset.set(true), Duration.ZERO, Duration.ZERO);
+
+        phase.start();
+        env.tickWhile(() -> !groundStarted.get(), Duration.ofSeconds(5));
+        phase.finish();
+
+        assertTrue(groundReset.get());
     }
 
     @Test
     void testBuildProgressIsShownInTheExpBar(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
         Player player = env.createPlayer(instance, Pos.ZERO);
-        GroundBuildPhase phase = new GroundBuildPhase(() -> () -> {}, () -> CompletableFuture.completedFuture(null),
-                Duration.ofMinutes(1), Duration.ZERO);
+        GroundBuildPhase phase = new GroundBuildPhase(CompletableFuture::new, () -> CompletableFuture.completedFuture(null),
+                () -> {}, Duration.ofMinutes(1), Duration.ZERO);
 
         phase.start();
         EventDispatcher.call(new AreaBuildProgressEvent(0.5));

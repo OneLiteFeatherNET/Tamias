@@ -10,7 +10,6 @@ import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.timer.Task;
 import net.theevilreaper.tamias.common.event.AreaBuildProgressEvent;
-import net.theevilreaper.tamias.common.event.AreaFinishBuildEvent;
 import net.theevilreaper.tamias.common.event.AreaSpawnTriggerEvent;
 import net.theevilreaper.tamias.game.round.event.RoundPrepareEvent;
 import net.theevilreaper.tamias.game.round.event.RoundStartEvent;
@@ -42,72 +41,73 @@ public final class GroundBuildPhase extends GamePhase {
     private static final Duration GROUND_DELAY = Duration.ofSeconds(10);
     private static final Duration TNT_DELAY = Duration.ofSeconds(2);
 
-    private final Supplier<VoidConsumer> mapPlacementTaskTrigger;
+    private final Supplier<CompletableFuture<Void>> groundTrigger;
     private final Supplier<CompletableFuture<Void>> tntDropTrigger;
+    private final VoidConsumer groundReset;
     private final Duration groundDelay;
     private final Duration tntDelay;
-    private @Nullable VoidConsumer taskReset;
     private @Nullable Task groundTask;
     private @Nullable Task tntTask;
-    private boolean groundBuilt;
-    private boolean tntLanded;
+    private boolean groundStarted;
 
     /**
      * Creates a new {@link GroundBuildPhase}.
      *
-     * @param mapPlacementTaskTrigger starts the ground placement and returns the reset for the build progress
-     * @param tntDropTrigger          drops the TNT and returns a future which completes once every TNT block has landed
+     * @param groundTrigger  starts the ground placement and returns a future which completes once the ground is built
+     * @param tntDropTrigger drops the TNT and returns a future which completes once every TNT block has landed
+     * @param groundReset    stops the placements and resets the build progress when the phase finishes
      */
-    public GroundBuildPhase(Supplier<VoidConsumer> mapPlacementTaskTrigger, Supplier<CompletableFuture<Void>> tntDropTrigger) {
-        this(mapPlacementTaskTrigger, tntDropTrigger, GROUND_DELAY, TNT_DELAY);
+    public GroundBuildPhase(
+            Supplier<CompletableFuture<Void>> groundTrigger,
+            Supplier<CompletableFuture<Void>> tntDropTrigger,
+            VoidConsumer groundReset
+    ) {
+        this(groundTrigger, tntDropTrigger, groundReset, GROUND_DELAY, TNT_DELAY);
     }
 
     /**
      * Creates a new {@link GroundBuildPhase} with custom delays.
      *
-     * @param mapPlacementTaskTrigger starts the ground placement and returns the reset for the build progress
-     * @param tntDropTrigger          drops the TNT and returns a future which completes once every TNT block has landed
-     * @param groundDelay             the delay between the start of the phase and the ground placement
-     * @param tntDelay                the delay between the ground placement and the TNT drop
+     * @param groundTrigger  starts the ground placement and returns a future which completes once the ground is built
+     * @param tntDropTrigger drops the TNT and returns a future which completes once every TNT block has landed
+     * @param groundReset    stops the placements and resets the build progress when the phase finishes
+     * @param groundDelay    the delay between the start of the phase and the ground placement
+     * @param tntDelay       the delay between the ground placement and the TNT drop
      */
     GroundBuildPhase(
-            Supplier<VoidConsumer> mapPlacementTaskTrigger,
+            Supplier<CompletableFuture<Void>> groundTrigger,
             Supplier<CompletableFuture<Void>> tntDropTrigger,
+            VoidConsumer groundReset,
             Duration groundDelay,
             Duration tntDelay
     ) {
         super("MapBuild");
-        addListener(AreaFinishBuildEvent.class, _ -> {
-            this.groundBuilt = true;
-            this.finishIfBuilt();
-        });
         addListener(AreaBuildProgressEvent.class, event -> showBuildProgress(event.progress()));
-        this.mapPlacementTaskTrigger = mapPlacementTaskTrigger;
+        this.groundTrigger = groundTrigger;
         this.tntDropTrigger = tntDropTrigger;
+        this.groundReset = groundReset;
         this.groundDelay = groundDelay;
         this.tntDelay = tntDelay;
     }
 
     @Override
     protected void onStart() {
-        this.groundBuilt = false;
-        this.tntLanded = false;
+        this.groundStarted = false;
         prepareRound();
         this.groundTask = MinecraftServer.getSchedulerManager().buildTask(() -> {
             Audience players = Audience.audience(MinecraftServer.getConnectionManager().getOnlinePlayers());
             players.sendMessage(MAP_BUILDING);
             players.playSound(BUILD_START_SOUND, Sound.Emitter.self());
             LOGGER.info("Map is building up...");
-            this.taskReset = this.mapPlacementTaskTrigger.get();
+            this.groundStarted = true;
+            CompletableFuture<Void> groundBuilt = this.groundTrigger.get();
             LOGGER.info("Map placement task started");
 
             // The ground starts first, so the TNT doesn't drop into the air
-            this.tntTask = MinecraftServer.getSchedulerManager().buildTask(() ->
-                    this.tntDropTrigger.get().thenRun(() -> {
-                        this.tntLanded = true;
-                        this.finishIfBuilt();
-                    })
-            ).delay(this.tntDelay).schedule();
+            this.tntTask = MinecraftServer.getSchedulerManager().buildTask(() -> {
+                CompletableFuture<Void> tntLanded = this.tntDropTrigger.get();
+                CompletableFuture.allOf(groundBuilt, tntLanded).thenRun(this::finishIfBuilt);
+            }).delay(this.tntDelay).schedule();
         }).delay(this.groundDelay).schedule();
     }
 
@@ -115,7 +115,7 @@ public final class GroundBuildPhase extends GamePhase {
      * Finishes the phase once the ground is built and every TNT block has landed.
      */
     private void finishIfBuilt() {
-        if (isFinished() || !this.groundBuilt || !this.tntLanded) return;
+        if (isFinished()) return;
         Audience players = Audience.audience(MinecraftServer.getConnectionManager().getOnlinePlayers());
         players.sendMessage(MAP_READY);
         players.playSound(BUILD_FINISH_SOUND, Sound.Emitter.self());
@@ -150,8 +150,8 @@ public final class GroundBuildPhase extends GamePhase {
         cancelTask(this.groundTask);
         cancelTask(this.tntTask);
         super.finish();
-        if (this.taskReset == null) return;
-        this.taskReset.apply();
+        if (!this.groundStarted) return;
+        this.groundReset.apply();
     }
 
     private static void cancelTask(@Nullable Task task) {

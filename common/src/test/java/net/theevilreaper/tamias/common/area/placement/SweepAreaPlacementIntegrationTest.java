@@ -4,11 +4,9 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.testing.Env;
-import net.minestom.testing.FlexibleListener;
 import net.minestom.testing.extension.MicrotusExtension;
 import net.theevilreaper.tamias.common.area.GroundFillPattern;
 import net.theevilreaper.tamias.common.event.AreaBuildProgressEvent;
-import net.theevilreaper.tamias.common.event.AreaFinishBuildEvent;
 import net.theevilreaper.tamias.common.ground.GroundData;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -16,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -36,17 +35,18 @@ class SweepAreaPlacementIntegrationTest {
 
         GroundData groundData = new GroundData(Block.GRASS_BLOCK, List.of(Block.GOLD_BLOCK));
 
-        FlexibleListener<AreaFinishBuildEvent> listener = env.listen(AreaFinishBuildEvent.class);
-
-        placement.place(groundData, GroundFillPattern.CIRCLE.order(GroundFillPattern.Context.of(Vec.ZERO)));
+        CompletableFuture<Void> built = placement.place(groundData, GroundFillPattern.CIRCLE.order(GroundFillPattern.Context.of(Vec.ZERO)));
         assertTrue(placement.isRunning());
         assertNotNull(placement.getTask());
+        assertFalse(built.isDone());
+        assertSame(built, placement.built());
 
-        // Tick until placement completes and event is dispatched
+        // Tick until placement completes
         for (int i = 0; i < 10 && placement.isRunning(); i++) {
             env.tick();
         }
 
+        assertTrue(built.isDone(), "The future must complete once every ground block is placed");
         assertFalse(placement.isRunning());
         assertNull(placement.getTask());
 
@@ -88,12 +88,14 @@ class SweepAreaPlacementIntegrationTest {
         SweepAreaPlacement placement = new SweepAreaPlacement(instance, List.of(pos), List.of());
         GroundData groundData = new GroundData(Block.DIRT, null);
 
-        placement.place(groundData, GroundFillPattern.LINE.order(GroundFillPattern.Context.of(Vec.ZERO)));
+        CompletableFuture<Void> built = placement.place(groundData, GroundFillPattern.LINE.order(GroundFillPattern.Context.of(Vec.ZERO)));
         assertTrue(placement.isRunning());
 
         placement.stop();
         assertFalse(placement.isRunning());
         assertNull(placement.getTask());
+        env.tick();
+        assertFalse(built.isDone(), "A stopped run must not complete its future");
 
         env.destroyInstance(instance);
     }

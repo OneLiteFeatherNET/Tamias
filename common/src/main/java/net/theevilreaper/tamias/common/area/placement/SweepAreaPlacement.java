@@ -10,7 +10,6 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockSoundType;
 import net.theevilreaper.tamias.common.area.GroundFillPattern;
 import net.theevilreaper.tamias.common.event.AreaBuildProgressEvent;
-import net.theevilreaper.tamias.common.event.AreaFinishBuildEvent;
 import net.theevilreaper.tamias.common.ground.GroundData;
 
 import net.minestom.server.timer.TaskSchedule;
@@ -18,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.function.ToDoubleFunction;
@@ -29,10 +29,12 @@ import static net.theevilreaper.tamias.common.area.GameAreaHelper.GROUND_SOUND_I
  * Places ground blocks batched over ticks. The fill order is passed per run, so one placement serves every
  * {@link net.theevilreaper.tamias.common.area.GroundFillPattern} - the batching/tracking logic stays the same for all of them.
  * After each step an {@link AreaBuildProgressEvent} is called, so the game decides how to show the progress.
+ * The end of a run is reported by the future which {@link #place(GroundData, ToDoubleFunction)} returns.
  */
 public final class SweepAreaPlacement extends AreaBasePlacement {
 
     private final Set<Vec> specialPositions;
+    private CompletableFuture<Void> built = CompletableFuture.completedFuture(null);
 
     /**
      * Creates a new placement.
@@ -62,9 +64,13 @@ public final class SweepAreaPlacement extends AreaBasePlacement {
      *
      * @param groundData the data which defines the ground and the special blocks
      * @param fillOrder  the key per position which defines the order of the ground blocks, a lower key is placed earlier
+     * @return a future which completes once every ground block is placed, the future of the running run if one is
+     * already running; it doesn't complete when the run is stopped before
      */
-    public void place(GroundData groundData, ToDoubleFunction<? super Vec> fillOrder) {
-        if (!tryStart()) return;
+    public CompletableFuture<Void> place(GroundData groundData, ToDoubleFunction<? super Vec> fillOrder) {
+        if (!tryStart()) return this.built;
+        CompletableFuture<Void> run = new CompletableFuture<>();
+        this.built = run;
         List<Vec> posList = GroundFillPattern.sort(this.blockPositions, fillOrder);
         int total = posList.size();
         LinkedBlockingDeque<Vec> queue = new LinkedBlockingDeque<>(posList);
@@ -77,7 +83,7 @@ public final class SweepAreaPlacement extends AreaBasePlacement {
             }
             if (positions.isEmpty()) {
                 stop();
-                EventDispatcher.call(new AreaFinishBuildEvent());
+                run.complete(null);
                 return;
             }
             for (Vec pos : positions) {
@@ -89,6 +95,17 @@ public final class SweepAreaPlacement extends AreaBasePlacement {
             }
             EventDispatcher.call(new AreaBuildProgressEvent(1 - (double) queue.size() / total));
         }).repeat(TaskSchedule.tick(1)).schedule();
+        return run;
+    }
+
+    /**
+     * Returns the future of the current run.
+     *
+     * @return a future which completes once every ground block of the current run is placed, a completed one if no
+     * run was started
+     */
+    public CompletableFuture<Void> built() {
+        return this.built;
     }
 
     /**
