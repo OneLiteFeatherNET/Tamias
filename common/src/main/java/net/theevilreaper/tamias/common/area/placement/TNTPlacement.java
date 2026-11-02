@@ -1,20 +1,17 @@
 package net.theevilreaper.tamias.common.area.placement;
 
-import net.kyori.adventure.sound.Sound;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.EntityType;
-import net.minestom.server.entity.metadata.other.FallingBlockMeta;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.network.packet.server.play.ParticlePacket;
-import net.minestom.server.particle.Particle;
-import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.timer.Task;
 
 import net.minestom.server.timer.TaskSchedule;
+import net.theevilreaper.tamias.common.area.placement.animation.FallingTntAnimation;
+import net.theevilreaper.tamias.common.area.placement.animation.TntAnimation;
+import net.theevilreaper.tamias.common.area.placement.animation.TntAnimationContext;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -22,18 +19,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-
-import static net.theevilreaper.tamias.common.area.GameAreaHelper.TNT_DROP_HEIGHT;
-import static net.theevilreaper.tamias.common.area.GameAreaHelper.TNT_POP_DELAY;
 
 /**
  * TNTPlacement is responsible for placing TNT blocks in the specified positions.
  * The TNT is dropped in {@link TntGroup}s: the center of a group falls down and the members pop up around it once it
  * has landed. A group is only dropped when the ground below all of its blocks is placed, so the TNT follows the
- * ground placement.
+ * ground placement. How a group visually reaches its position is decided by a {@link TntAnimation}.
  *
  * @author theEvilReaper
  * @version 1.0.0
@@ -41,16 +34,12 @@ import static net.theevilreaper.tamias.common.area.GameAreaHelper.TNT_POP_DELAY;
  */
 public class TNTPlacement extends AreaBasePlacement {
 
-    private static final int FALL_TICKS = 5;
-    private static final float LANDING_VOLUME = 0.6f;
-    private static final float LANDING_MIN_PITCH = 0.7f;
-    private static final float LANDING_MAX_PITCH = 0.95f;
-    private static final Sound POP_SOUND = Sound.sound(SoundEvent.ENTITY_CHICKEN_EGG, Sound.Source.BLOCK, 0.8f, 1.2f);
-
     private final Consumer<Vec> landingConsumer;
     private final List<TntGroup> groups;
     private final Set<Task> pendingTasks;
     private final Set<Entity> fallingEntities;
+    private final Set<Vec> remainingPositions;
+    private final TntAnimationContext animationContext = new AnimationContext();
     private Predicate<Point> groundCheck;
     private CompletableFuture<Void> landed;
     private volatile boolean stopped;
@@ -79,6 +68,7 @@ public class TNTPlacement extends AreaBasePlacement {
         this.groups = new ArrayList<>();
         this.pendingTasks = ConcurrentHashMap.newKeySet();
         this.fallingEntities = ConcurrentHashMap.newKeySet();
+        this.remainingPositions = ConcurrentHashMap.newKeySet();
         this.groundCheck = _ -> true;
         this.landed = CompletableFuture.completedFuture(null);
     }
@@ -109,14 +99,28 @@ public class TNTPlacement extends AreaBasePlacement {
     }
 
     /**
-     * Starts dropping the TNT groups.
+     * Starts dropping the TNT groups with the {@link FallingTntAnimation}.
      * Each tick every group whose ground is placed is dropped, so the TNT keeps up with the ground placement.
      */
     public void place() {
+        place(new FallingTntAnimation());
+    }
+
+    /**
+     * Starts dropping the TNT groups with the given animation. The animation instance must not be used for another run.
+     * Each tick every group whose ground is placed is handed to the animation, so the TNT keeps up with the ground
+     * placement.
+     *
+     * @param animation the animation which brings the TNT to its positions
+     */
+    public void place(TntAnimation animation) {
         if (!tryStart()) return;
         this.stopped = false;
         this.landed = new CompletableFuture<>();
+        this.remainingPositions.clear();
+        this.groups.forEach(group -> this.remainingPositions.addAll(group.positions()));
         List<TntGroup> queue = new ArrayList<>(this.groups);
+        animation.begin(List.copyOf(this.groups), this.animationContext);
         this.buildTask = MinecraftServer.getSchedulerManager().buildTask(() -> {
             if (queue.isEmpty()) {
                 // Only the queue is done, the pending landings must still run
@@ -129,7 +133,7 @@ public class TNTPlacement extends AreaBasePlacement {
                 TntGroup group = iterator.next();
                 if (!isGroundReady(group)) continue;
                 iterator.remove();
-                dropGroup(group);
+                animation.play(group, this.animationContext);
             }
         }).repeat(TaskSchedule.tick(1)).schedule();
     }
@@ -158,11 +162,10 @@ public class TNTPlacement extends AreaBasePlacement {
     }
 
     /**
-     * Completes the future of the current run when all groups are dropped and no TNT block is falling or waiting
-     * to pop up anymore.
+     * Completes the future of the current run when every position of the run has landed.
      */
     private void completeIfLanded() {
-        if (this.stopped || this.buildTask != null || !this.pendingTasks.isEmpty()) return;
+        if (this.stopped || !this.remainingPositions.isEmpty()) return;
         this.landed.complete(null);
     }
 
@@ -174,54 +177,6 @@ public class TNTPlacement extends AreaBasePlacement {
     }
 
     /**
-     * Lets the center of the group fall down. Once it has landed, the members pop up one after another.
-     *
-     * @param group the group to drop
-     */
-    private void dropGroup(TntGroup group) {
-        Entity tntEntity = new Entity(EntityType.FALLING_BLOCK);
-        FallingBlockMeta fallingBlockMeta = (FallingBlockMeta) tntEntity.getEntityMeta();
-        fallingBlockMeta.setBlock(Block.TNT);
-
-        Point entityPos = group.center().add(0, TNT_DROP_HEIGHT, 0);
-        tntEntity.setInstance(instance, entityPos);
-        this.fallingEntities.add(tntEntity);
-        instance.sendGroupedPacket(new ParticlePacket(Particle.CLOUD, entityPos, Vec.ZERO, 0f, 5));
-
-        schedule(FALL_TICKS, () -> {
-            this.fallingEntities.remove(tntEntity);
-            tntEntity.remove();
-            land(group.center());
-            Point center = group.center().add(0.5);
-            instance.playSound(landingSound(), center.x(), center.y(), center.z());
-
-            List<Vec> members = group.members();
-            for (int i = 0; i < members.size(); i++) {
-                Vec member = members.get(i);
-                schedule((i + 1) * TNT_POP_DELAY, () -> popUp(member));
-            }
-        });
-    }
-
-    /**
-     * Creates the soft plop which is played when a TNT block lands.
-     * The pitch varies a bit, so several blocks which land at the same time don't merge into one sound.
-     *
-     * @return the sound for the landing
-     */
-    private static Sound landingSound() {
-        float pitch = ThreadLocalRandom.current().nextFloat(LANDING_MIN_PITCH, LANDING_MAX_PITCH);
-        return Sound.sound(SoundEvent.ENTITY_ITEM_PICKUP, Sound.Source.BLOCK, LANDING_VOLUME, pitch);
-    }
-
-    private void popUp(Vec position) {
-        land(position);
-        Point center = position.add(0.5, 0.5, 0.5);
-        instance.sendGroupedPacket(new ParticlePacket(Particle.POOF, center, new Vec(0.2), 0.02f, 8));
-        instance.playSound(POP_SOUND, center.x(), center.y(), center.z());
-    }
-
-    /**
      * Places the TNT block and reports its position. Nothing happens once the placement is stopped, because a
      * landing can still be triggered by a block which lands during the stop.
      *
@@ -230,7 +185,9 @@ public class TNTPlacement extends AreaBasePlacement {
     private void land(Vec position) {
         if (this.stopped) return;
         doPlaceBlock(position, Block.TNT);
+        this.remainingPositions.remove(position);
         this.landingConsumer.accept(position);
+        completeIfLanded();
     }
 
     private void schedule(int delay, Runnable runnable) {
@@ -240,8 +197,40 @@ public class TNTPlacement extends AreaBasePlacement {
         task[0] = MinecraftServer.getSchedulerManager().buildTask(() -> {
             this.pendingTasks.remove(task[0]);
             runnable.run();
-            completeIfLanded();
         }).delay(TaskSchedule.tick(delay)).schedule();
         this.pendingTasks.add(task[0]);
+    }
+
+    /**
+     * The context which is handed to the animations. It delegates to the placement, so the animations can't bypass
+     * the stop guards.
+     */
+    private final class AnimationContext implements TntAnimationContext {
+
+        @Override
+        public Instance instance() {
+            return TNTPlacement.this.instance;
+        }
+
+        @Override
+        public void schedule(int delayTicks, Runnable action) {
+            TNTPlacement.this.schedule(delayTicks, action);
+        }
+
+        @Override
+        public void track(Entity entity) {
+            TNTPlacement.this.fallingEntities.add(entity);
+        }
+
+        @Override
+        public void release(Entity entity) {
+            TNTPlacement.this.fallingEntities.remove(entity);
+            entity.remove();
+        }
+
+        @Override
+        public void land(Vec position) {
+            TNTPlacement.this.land(position);
+        }
     }
 }
