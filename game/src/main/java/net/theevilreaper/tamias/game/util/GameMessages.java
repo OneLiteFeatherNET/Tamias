@@ -42,19 +42,19 @@ public final class GameMessages extends Messages {
     public static final Component PHASE_FORCE_STARTED;
 
     static {
-        TNT_MESSAGE = PREFIX.append(Component.space()).append(MINI_MESSAGE.deserialize("<red>You are now a TNT! <yellow>Right click <red>your TNT near players to blow them up!"));
+        TNT_MESSAGE = PREFIX.append(MINI_MESSAGE.deserialize("<red>You are now a TNT! <yellow>Right click <red>your TNT near players to blow them up!"));
         SEPARATOR = Component.space().append(Component.text(">>")).append(Component.space());
         LEAVE_PART = withMini("<gray>left the game!");
         JOIN_PART = withMini("<gray>joined the game!");
         DEATH_PART = withMini("<yellow>was blown up by");
-        SHOT_PART = withMini("<yellow> You were shot by");
+        SHOT_PART = withMini("<yellow>You were shot by");
         SPECTATOR_PART = withMini("<gray>has no TNT left and is now spectating!");
         NEW_BOMBER_PART = withMini("<yellow>replaces the bomber who left the game!");
         CHOOSING_NEW_TNT = withMiniPrefix("<red>Choosing new tnt<gold>....");
         TITLE_TIME = Component.text("Time:", NamedTextColor.GOLD).append(Component.space());
         GAME_END_KICK_MESSAGE = Component.text("The game is over. Thanks for playing it. <3", NamedTextColor.RED);
-        MAP_READY = Component.text("Map is ready!", NamedTextColor.GREEN);
-        MAP_BUILDING = Component.text("Map is building up...", NamedTextColor.GREEN);
+        MAP_READY = withPrefix(Component.text("The map is ready!", NamedTextColor.GREEN));
+        MAP_BUILDING = withPrefix(Component.text("The map is being built...", NamedTextColor.GRAY));
         int forceStartTime = GameConfig.FORCE_START_TIME;
         ALREADY_FORCE_STARTED = withMiniPrefix("<red>The game has already been force started!");
         PHASE_NOT_RUNNING = withMiniPrefix("<red>The lobby countdown is not running!");
@@ -74,7 +74,10 @@ public final class GameMessages extends Messages {
      */
     @Contract(value = "_ -> new", pure = true)
     public static Component getLobbyTime(int time) {
-        return withMiniPrefix("<gold>Starting in... <red>" + time);
+        if (time == 1) {
+            return withMiniPrefix("<gold>The game starts in <red>" + time + " <gold>second!");
+        }
+        return withMiniPrefix("<gold>The game starts in <red>" + time + " <gold>seconds!");
     }
 
     /**
@@ -133,13 +136,13 @@ public final class GameMessages extends Messages {
 
     @Contract(value = "_ -> new", pure = true)
     public static Component getJoinMessage(Player player) {
-        return PREFIX.append(Component.space()).append(withMini("<color:#249D9F>" + player.getUsername() + "</color>"))
+        return PREFIX.append(withMini("<color:#249D9F>" + player.getUsername() + "</color>"))
                 .append(Component.space()).append(JOIN_PART);
     }
 
     @Contract(value = "_ -> new", pure = true)
     public static Component getLeaveMessage(Player player) {
-        return PREFIX.append(Component.space()).append(withMini("<color:#249D9F>" + player.getUsername() + "</color>"))
+        return PREFIX.append(withMini("<color:#249D9F>" + player.getUsername() + "</color>"))
                 .append(Component.space()).append(LEAVE_PART);
     }
 
@@ -156,7 +159,7 @@ public final class GameMessages extends Messages {
 
     @Contract(value = "_ -> new", pure = true)
     public static Component getSpectatorMessage(Player player) {
-        return PREFIX.append(Component.space()).append(withMini("<color:#249D9F>" + player.getUsername() + "</color>"))
+        return PREFIX.append(withMini("<color:#249D9F>" + player.getUsername() + "</color>"))
                 .append(Component.space()).append(SPECTATOR_PART);
     }
 
@@ -179,12 +182,12 @@ public final class GameMessages extends Messages {
     @Contract(value = "_, _ -> new", pure = true)
     public static Component getDeathMessage(Player target, Player killer) {
         return withPrefix(getName(target).append(Component.space()).append(DEATH_PART).append(Component.space())
-                .append(getName(killer)));
+                .append(getName(killer)).append(Component.text("!", NamedTextColor.YELLOW)));
     }
 
     @Contract(value = "_ -> new", pure = true)
     public static Component getShotMessage(Player killer) {
-        return withPrefix(SHOT_PART.append(Component.space()).append(getName(killer)));
+        return withPrefix(SHOT_PART.append(Component.space()).append(getName(killer)).append(Component.text("!", NamedTextColor.YELLOW)));
     }
 
     @Contract
