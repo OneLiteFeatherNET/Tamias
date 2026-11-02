@@ -3,7 +3,9 @@ package net.theevilreaper.tamias.common.area.placement.animation;
 import net.minestom.server.coordinate.Vec;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
@@ -112,6 +114,37 @@ class GridRouteTest {
     }
 
     @Test
+    void testOpenRouteTurnsOnlyOnce() {
+        List<Vec> route = GridRoute.find(cell(0, 0), cell(12, 7), _ -> true, GridRoute.MAX_ROUTE_NODES);
+
+        assertNotNull(route);
+        assertEquals(19, route.size(), "The route must still be one of the shortest");
+        assertEquals(1, countTurns(cell(0, 0), route), "Over an open area the route must only turn once");
+    }
+
+    @Test
+    void testRoutesBetweenScatteredBlocksKeepTheTurnsLow() {
+        // Scattered blocks like placed TNT on an area of 58 x 55 cells, the routes start in the middle
+        Random random = new Random(1);
+        Set<Vec> blocked = new HashSet<>();
+        for (int i = 0; i < 80; i++) {
+            blocked.add(cell(random.nextInt(58), random.nextInt(55)));
+        }
+        Vec start = cell(29, 27);
+        blocked.remove(start);
+
+        int mostTurns = 0;
+        for (int i = 0; i < 200; i++) {
+            Vec target = cell(random.nextInt(58), random.nextInt(55));
+            List<Vec> route = GridRoute.find(start, target, notIn(blocked), GridRoute.MAX_ROUTE_NODES);
+            if (route == null) continue;
+            mostTurns = Math.max(mostTurns, countTurns(start, route));
+        }
+
+        assertTrue(mostTurns <= 4, "The routes must not zigzag between the blocks, but one turned " + mostTurns + " times");
+    }
+
+    @Test
     void testNearestPassablePassableCellIsReturnedUnchanged() {
         Vec start = cell(4, 4);
 
@@ -137,6 +170,19 @@ class GridRouteTest {
         Vec result = GridRoute.nearestPassable(start, _ -> false, 3);
 
         assertEquals(start, result, "Without a free cell in the radius the original cell must be returned");
+    }
+
+    private static int countTurns(Vec start, List<Vec> route) {
+        int turns = 0;
+        Vec previous = start;
+        Vec direction = null;
+        for (Vec step : route) {
+            Vec next = step.sub(previous);
+            if (direction != null && !next.equals(direction)) turns++;
+            direction = next;
+            previous = step;
+        }
+        return turns;
     }
 
     private static Vec cell(int x, int z) {
