@@ -24,7 +24,12 @@ public enum TntAnimationType {
     /**
      * The TNT grows on the spot from very small to its full size.
      */
-    GROWING(GrowingTntAnimation::new);
+    GROWING(GrowingTntAnimation::new),
+
+    /**
+     * The TNT is shot from the middle of the game area in an arc onto its position.
+     */
+    SHOOTING(ShootingTntAnimation::new);
 
     private final Supplier<TntAnimation> factory;
 
