@@ -15,7 +15,6 @@ import net.theevilreaper.tamias.common.area.placement.TntGroup;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.function.Predicate;
 
 /**
  * A {@link TntAnimation} in which the TNT races like a light cycle from the middle of the game area across the ground
@@ -91,8 +90,7 @@ public final class TronTntAnimation implements TntAnimation {
         }
         double y = groups.getFirst().center().y();
         Vec average = GridRoute.cell(sumX / allPositions.size(), y, sumZ / allPositions.size());
-        this.start = GridRoute.nearestPassable(average, cell -> GridRoute.isPassable(context.instance(), cell),
-                GridRoute.MAX_SPAWN_RADIUS);
+        this.start = GridRoute.nearestStandable(average, context, _ -> true);
     }
 
     /**
@@ -148,8 +146,7 @@ public final class TronTntAnimation implements TntAnimation {
                     LAUNCH_PITCH), launchCentre.x(), launchCentre.y(), launchCentre.z());
         }
 
-        List<Vec> route = GridRoute.find(this.start, target, cell -> GridRoute.isPassable(instance, cell),
-                GridRoute.MAX_ROUTE_NODES);
+        List<Vec> route = GridRoute.findRoute(this.start, target, context);
         if (route == null || route.isEmpty()) {
             placeAt(target, context);
             return;
@@ -210,12 +207,10 @@ public final class TronTntAnimation implements TntAnimation {
      * @return false if the racer has no way left to its target
      */
     private boolean isNextCellOpen(Racer racer, TntAnimationContext context) {
-        Instance instance = context.instance();
-        Predicate<Vec> passable = cell -> GridRoute.isPassable(instance, cell);
         boolean isTarget = racer.index == racer.route.size() - 1;
-        if (isTarget || passable.test(racer.route.get(racer.index))) return true;
+        if (isTarget || GridRoute.inArea(context).test(racer.route.get(racer.index))) return true;
 
-        List<Vec> route = GridRoute.find(racer.position, racer.target, passable, GridRoute.MAX_ROUTE_NODES);
+        List<Vec> route = GridRoute.findRoute(racer.position, racer.target, context);
         if (route == null || route.isEmpty()) return false;
         racer.route = route;
         racer.index = 0;
