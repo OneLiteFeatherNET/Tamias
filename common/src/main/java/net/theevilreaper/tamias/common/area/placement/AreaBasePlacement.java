@@ -57,10 +57,22 @@ public abstract non-sealed class AreaBasePlacement implements AreaPlacement {
     }
 
     /**
-     * {@inheritDoc}
+     * Cancels the placement before it is done. Subclasses which keep more work running override this to cancel it too.
      */
     @Override
     public void stop() {
+        endTask();
+    }
+
+    /**
+     * Ends the build task when a run is done on its own, so the next run may start.
+     * Unlike {@link #stop()} it doesn't cancel anything which still belongs to the run.
+     */
+    protected final void finish() {
+        endTask();
+    }
+
+    private void endTask() {
         if (this.buildTask != null) {
             this.buildTask.cancel();
             this.buildTask = null;
