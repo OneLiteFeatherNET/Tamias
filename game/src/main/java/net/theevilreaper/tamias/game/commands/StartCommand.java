@@ -30,7 +30,7 @@ public class StartCommand extends Command {
 
     private final Supplier<Phase> phaseSupplier;
     private final Component unableToStart = Messages.withPrefix(
-            Component.text("Unable to start the game because the timer is to low!", NamedTextColor.RED)
+            Component.text("The countdown is already too low to force a start!", NamedTextColor.RED)
     );
 
     public StartCommand(@NotNull Supplier<Phase> phaseSupplier) {

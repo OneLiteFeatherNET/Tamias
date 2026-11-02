@@ -1,6 +1,7 @@
 package net.theevilreaper.tamias.common.util;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.jetbrains.annotations.Contract;
@@ -17,7 +18,8 @@ public abstract class Messages {
     private static final Component SEPARATOR;
 
     static {
-        PREFIX = MINI_MESSAGE.deserialize("<color:#FF6347>SuicideTNT</color>").append(Component.space());
+        PREFIX = MINI_MESSAGE.deserialize("<color:#FF6347>SuicideTNT</color>").append(Component.space())
+                .append(Component.text("»", NamedTextColor.DARK_GRAY)).append(Component.space());
         SEPARATOR = Component.space().append(Component.text(">>")).append(Component.space());
     }
 
@@ -30,7 +32,7 @@ public abstract class Messages {
 
     @Contract(value = "_ -> new", pure = true)
     public static Component withPrefix(Component component) {
-        return PREFIX.append(Component.space()).append(component);
+        return PREFIX.append(component);
     }
 
     @Contract(value = "_ -> new", pure = true)
@@ -45,11 +47,11 @@ public abstract class Messages {
 
     @Contract(value = "_ -> new", pure = true)
     public static Component withMiniPrefix(String text) {
-        return PREFIX.append(Component.space()).append(MINI_MESSAGE.deserialize(text));
+        return PREFIX.append(MINI_MESSAGE.deserialize(text));
     }
 
     @Contract(value = "_, _ -> new", pure = true)
     public static Component withMiniPrefix(String text, TagResolver... resolvers) {
-        return PREFIX.append(Component.space()).append(MINI_MESSAGE.deserialize(text, resolvers));
+        return PREFIX.append(MINI_MESSAGE.deserialize(text, resolvers));
     }
 }

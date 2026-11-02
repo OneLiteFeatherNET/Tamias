@@ -57,7 +57,7 @@ public class SetupMessages extends Messages {
     public static Component getInvalidFace(String face) {
         PreProcess facePreProcess = Tag.preProcessParsed(face);
         TagResolver faceTag = TagResolver.builder().tag("face", (argumentQueue, context) -> facePreProcess).build();
-        return Messages.withMini("<red>You are looking in an invalid direction! <gray>(<gold><face><gray>)", faceTag);
+        return Messages.withMiniPrefix("<red>You are looking in an invalid direction! <gray>(<gold><face><gray>)", faceTag);
     }
 
     /**
