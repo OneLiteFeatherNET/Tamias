@@ -46,7 +46,12 @@ public enum TntAnimationType {
      * Flying animals deliver the TNT from a depot above the game area. The animal is picked at random for every run,
      * so the flying animation is picked as often as any other animation.
      */
-    FLYING(() -> FlyingDeliveryTntAnimation.withRandomCarrier(ThreadLocalRandom.current()));
+    FLYING(() -> FlyingDeliveryTntAnimation.withRandomCarrier(ThreadLocalRandom.current())),
+
+    /**
+     * Endermen teleport next to a position, place the TNT and teleport away.
+     */
+    ENDERMEN(EndermanTntAnimation::new);
 
     private final Supplier<TntAnimation> factory;
 
