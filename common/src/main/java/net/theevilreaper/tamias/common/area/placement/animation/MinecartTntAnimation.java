@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Predicate;
 
 /**
  * A {@link TntAnimation} in which TNT minecarts drive over short-lived rails to every position and leave the TNT
@@ -96,14 +95,12 @@ public final class MinecartTntAnimation implements TntAnimation {
             sumZ += position.z();
         }
         double y = groups.getFirst().center().y();
-        Predicate<Vec> passable = cell -> GridRoute.isPassable(context.instance(), cell);
         Vec average = GridRoute.cell(sumX / allPositions.size(), y, sumZ / allPositions.size());
-        Vec base = GridRoute.nearestPassable(average, passable, GridRoute.MAX_SPAWN_RADIUS);
+        Vec base = GridRoute.nearestStandable(average, context, _ -> true);
 
         Set<Vec> used = new HashSet<>();
         for (int i = 0; i < cartCount(allPositions.size()); i++) {
-            Vec startCell = GridRoute.nearestPassable(base, cell -> passable.test(cell) && !used.contains(cell),
-                    GridRoute.MAX_SPAWN_RADIUS);
+            Vec startCell = GridRoute.nearestStandable(base, context, cell -> !used.contains(cell));
             used.add(startCell);
             Cart cart = spawnCart(centre(startCell), context);
             this.carts.add(cart);
@@ -161,8 +158,7 @@ public final class MinecartTntAnimation implements TntAnimation {
      * @param context the context of the run
      */
     private void startRoute(Cart cart, Vec target, TntAnimationContext context) {
-        Predicate<Vec> passable = cell -> GridRoute.isPassable(context.instance(), cell);
-        List<Vec> cells = plan(cart, target, passable);
+        List<Vec> cells = plan(cart, target, context);
         if (cells == null) {
             landTnt(target, context);
             return;
@@ -184,9 +180,9 @@ public final class MinecartTntAnimation implements TntAnimation {
      * Plans the cells from the cart to the target. Null if there is no route or the target itself can't be walked on,
      * so the cart never drives into a block.
      */
-    private static List<Vec> plan(Cart cart, Vec target, Predicate<Vec> passable) {
-        List<Vec> cells = GridRoute.find(GridRoute.cellOf(cart.position), target, passable, GridRoute.MAX_ROUTE_NODES);
-        if (cells == null || (!cells.isEmpty() && !passable.test(cells.getLast()))) return null;
+    private static List<Vec> plan(Cart cart, Vec target, TntAnimationContext context) {
+        List<Vec> cells = GridRoute.findRoute(GridRoute.cellOf(cart.position), target, context);
+        if (cells == null || (!cells.isEmpty() && !GridRoute.inArea(context).test(cells.getLast()))) return null;
         return cells;
     }
 
@@ -198,9 +194,8 @@ public final class MinecartTntAnimation implements TntAnimation {
      * @param context the context of the run
      */
     private void drive(Cart cart, TntAnimationContext context) {
-        Predicate<Vec> passable = cell -> GridRoute.isPassable(context.instance(), cell);
-        if (!passable.test(cart.route.cells.get(cart.route.index))) {
-            List<Vec> replanned = plan(cart, cart.route.target, passable);
+        if (!GridRoute.inArea(context).test(cart.route.cells.get(cart.route.index))) {
+            List<Vec> replanned = plan(cart, cart.route.target, context);
             if (replanned == null) {
                 Vec target = cart.route.target;
                 cart.route = null;
