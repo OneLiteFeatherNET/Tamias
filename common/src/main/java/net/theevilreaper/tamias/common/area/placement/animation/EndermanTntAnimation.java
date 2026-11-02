@@ -11,9 +11,11 @@ import net.minestom.server.network.packet.server.play.ParticlePacket;
 import net.minestom.server.particle.Particle;
 import net.minestom.server.sound.SoundEvent;
 import net.theevilreaper.tamias.common.area.placement.TntGroup;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Predicate;
 import java.util.random.RandomGenerator;
 
 /**
@@ -100,7 +102,7 @@ public final class EndermanTntAnimation implements TntAnimation {
      */
     private void appear(Vec position, TntAnimationContext context) {
         Instance instance = context.instance();
-        Vec spawnCell = spawnCell(position, instance);
+        Vec spawnCell = spawnCell(position, context);
         Vec spawn = centre(spawnCell);
 
         Entity enderman = new Entity(EntityType.ENDERMAN);
@@ -118,22 +120,29 @@ public final class EndermanTntAnimation implements TntAnimation {
 
     /**
      * Picks the cell where the enderman appears. A random cell within {@link #APPEAR_RADIUS} on the height of the
-     * position is picked up to {@link #RANDOM_TRIES} times, the first passable one is used. Without one the position
-     * itself is used.
+     * position is picked up to {@link #RANDOM_TRIES} times, the first free one with placed ground is used. Without
+     * one a free cell inside the game area is tried the same way, and without that the position itself is used.
      *
      * @param position the position of the TNT
-     * @param instance the instance with the blocks
+     * @param context  the context of the run
      * @return the cell of the spawn
      */
-    private Vec spawnCell(Vec position, Instance instance) {
+    private Vec spawnCell(Vec position, TntAnimationContext context) {
         Vec origin = GridRoute.cellOf(position);
+        Vec onGround = randomCell(origin, GridRoute.onGround(context));
+        if (onGround != null) return onGround;
+        Vec inArea = randomCell(origin, GridRoute.inArea(context));
+        return inArea != null ? inArea : origin;
+    }
+
+    private @Nullable Vec randomCell(Vec origin, Predicate<Vec> allowed) {
         for (int i = 0; i < RANDOM_TRIES; i++) {
             int dx = this.random.nextInt(-APPEAR_RADIUS, APPEAR_RADIUS + 1);
             int dz = this.random.nextInt(-APPEAR_RADIUS, APPEAR_RADIUS + 1);
             Vec cell = origin.add(dx, 0, dz);
-            if (GridRoute.isPassable(instance, cell)) return cell;
+            if (allowed.test(cell)) return cell;
         }
-        return origin;
+        return null;
     }
 
     /**
