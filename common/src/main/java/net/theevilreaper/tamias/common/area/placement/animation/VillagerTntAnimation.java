@@ -72,6 +72,11 @@ public final class VillagerTntAnimation implements TntAnimation {
      * A villager sound is played every this many landings.
      */
     static final int SOUND_INTERVAL = 3;
+    /**
+     * The safety limit in ticks a worker with a target may stand still. A worker which doesn't get any further places
+     * its TNT from where it stands, so a run can never hang.
+     */
+    static final int MAX_STUCK_TICKS = 40;
 
     private final RandomGenerator random;
     private final List<Vec> openPositions = new ArrayList<>();
@@ -186,6 +191,7 @@ public final class VillagerTntAnimation implements TntAnimation {
         Vec position = worker.target;
         worker.target = null;
         worker.route = null;
+        worker.stuckTicks = 0;
         context.land(position);
         this.landedCount++;
 
@@ -274,10 +280,32 @@ public final class VillagerTntAnimation implements TntAnimation {
         }
         // The last step stops at the approach point, so the worker never stands inside the target cell it places on
         boolean last = worker.route.size() == 1;
-        Point goal = last ? approachPoint(worker.entity.getPosition(), centre(worker.route.getFirst()))
+        Pos before = worker.entity.getPosition();
+        Point goal = last ? approachPoint(before, centre(worker.route.getFirst()))
                 : centre(worker.route.getFirst());
         if (moveTowards(worker, goal, WORKER_SPEED, passable) && !last) {
             worker.route.removeFirst();
+        }
+        trackProgress(worker, before, context);
+    }
+
+    /**
+     * Counts the ticks in which the worker didn't move. After {@link #MAX_STUCK_TICKS} of them it places its TNT from
+     * where it stands.
+     *
+     * @param worker  the worker which walked
+     * @param before  the position of the worker before the step
+     * @param context the context of the run
+     */
+    private void trackProgress(Worker worker, Pos before, TntAnimationContext context) {
+        Pos now = worker.entity.getPosition();
+        if (now.x() != before.x() || now.z() != before.z()) {
+            worker.stuckTicks = 0;
+            return;
+        }
+        worker.stuckTicks++;
+        if (worker.stuckTicks >= MAX_STUCK_TICKS) {
+            land(worker, context);
         }
     }
 
@@ -402,6 +430,7 @@ public final class VillagerTntAnimation implements TntAnimation {
         private List<Vec> route;
         private Vec wanderGoal;
         private int ticks;
+        private int stuckTicks;
 
         private Worker(Entity entity, Vec home) {
             this.entity = entity;
