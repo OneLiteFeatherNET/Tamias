@@ -4,8 +4,10 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.minimessage.tag.Tag;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.minestom.server.entity.Player;
+import net.onelitefeather.tamias.stats.player.PlayerStatsView;
 import net.theevilreaper.aves.util.Strings;
 import net.theevilreaper.aves.util.TimeFormat;
 import net.theevilreaper.tamias.common.config.GameConfig;
@@ -41,6 +43,10 @@ public final class GameMessages extends Messages {
     public static final Component PHASE_NOT_RUNNING;
     public static final Component PHASE_FORCE_STARTED;
 
+    public static final Component STATS_DISABLED;
+    public static final Component STATS_FAILED;
+    public static final Component STATS_PLAYER_ONLY;
+
     static {
         TNT_MESSAGE = PREFIX.append(Component.space()).append(MINI_MESSAGE.deserialize("<red>You are now a TNT! <yellow>Right click <red>your TNT near players to blow them up!"));
         SEPARATOR = Component.space().append(Component.text(">>")).append(Component.space());
@@ -55,6 +61,9 @@ public final class GameMessages extends Messages {
         GAME_END_KICK_MESSAGE = Component.text("The game is over. Thanks for playing it. <3", NamedTextColor.RED);
         MAP_READY = Component.text("Map is ready!", NamedTextColor.GREEN);
         MAP_BUILDING = Component.text("Map is building up...", NamedTextColor.GREEN);
+        STATS_DISABLED = withMiniPrefix("<red>Statistics are not available on this server!");
+        STATS_FAILED = withMiniPrefix("<red>The statistics could not be loaded, please try again later!");
+        STATS_PLAYER_ONLY = withMiniPrefix("<red>Only players have statistics of their own, add a player name!");
         int forceStartTime = GameConfig.FORCE_START_TIME;
         ALREADY_FORCE_STARTED = withMiniPrefix("<red>The game has already been force started!");
         PHASE_NOT_RUNNING = withMiniPrefix("<red>The lobby countdown is not running!");
@@ -129,6 +138,39 @@ public final class GameMessages extends Messages {
     public static Component getPersonalResult(int wins, int rounds, int kills, int hits) {
         return withMiniPrefix("<gray>You won <green>" + wins + " <gray>/ <aqua>" + rounds + " <gray>rounds · <red>"
                 + kills + " <gray>kills · <yellow>" + hits + " <gray>hits");
+    }
+
+    /**
+     * Creates the message which shows the statistics of a player over all stored rounds.
+     *
+     * @param stats the statistics to show
+     * @return a component with the statistics
+     */
+    @Contract(value = "_ -> new", pure = true)
+    public static Component getStatsMessage(PlayerStatsView stats) {
+        return withMiniPrefix("<gray>Statistics of <color:#249D9F><name></color>"
+                        + "<newline><gray>Rounds: <aqua><rounds> <gray>· Wins: <green><wins> "
+                        + "<gray>(<survivor_wins> as survivor, <bomber_wins> as bomber)"
+                        + "<newline><gray>Kills: <red><kills> <gray>· Hits: <yellow><hits>",
+                Placeholder.unparsed("name", stats.player().name()),
+                Placeholder.unparsed("rounds", String.valueOf(stats.roundsPlayed())),
+                Placeholder.unparsed("wins", String.valueOf(stats.roundWins())),
+                Placeholder.unparsed("survivor_wins", String.valueOf(stats.survivorWins())),
+                Placeholder.unparsed("bomber_wins", String.valueOf(stats.bomberWins())),
+                Placeholder.unparsed("kills", String.valueOf(stats.kills())),
+                Placeholder.unparsed("hits", String.valueOf(stats.hits())));
+    }
+
+    /**
+     * Creates the message for a player without stored statistics.
+     *
+     * @param name the name which was looked up
+     * @return a component with the message
+     */
+    @Contract(value = "_ -> new", pure = true)
+    public static Component getStatsNotFoundMessage(String name) {
+        return withMiniPrefix("<gray>No statistics found for <color:#249D9F><name></color>!",
+                Placeholder.unparsed("name", name));
     }
 
     @Contract(value = "_ -> new", pure = true)
