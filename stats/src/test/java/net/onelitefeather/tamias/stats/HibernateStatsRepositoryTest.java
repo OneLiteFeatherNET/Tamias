@@ -1,5 +1,6 @@
 package net.onelitefeather.tamias.stats;
 
+import net.onelitefeather.tamias.stats.player.PlayerStatsView;
 import net.onelitefeather.tamias.stats.player.TamiasStatsPlayer;
 import net.onelitefeather.tamias.stats.round.FinishedRound;
 import net.onelitefeather.tamias.stats.round.StatsRole;
@@ -111,6 +112,26 @@ class HibernateStatsRepositoryTest {
     }
 
     @Test
+    void testFindTotalsSumsAllRounds() {
+        UUID uuid = UUID.randomUUID();
+        this.repository.saveRound(round(START,
+                new FinishedRound.PlayerResult(uuid, "Alice", StatsRole.SURVIVOR, true, false, 0, 3))).join();
+        this.repository.saveRound(round(START.plusSeconds(600),
+                new FinishedRound.PlayerResult(uuid, "Alice", StatsRole.BOMBER, true, false, 2, 0))).join();
+        this.repository.saveRound(round(START.plusSeconds(1200),
+                new FinishedRound.PlayerResult(uuid, "Alice", StatsRole.SURVIVOR, false, true, 0, 1))).join();
+
+        PlayerStatsView totals = this.repository.findTotals(uuid).join().orElseThrow();
+        assertEquals(new PlayerStatsView(new TamiasStatsPlayer(uuid, "Alice"), 3, 2, 1, 1, 2, 4), totals);
+        assertEquals("Alice", totals.player().name());
+    }
+
+    @Test
+    void testFindTotalsIsEmptyWithoutRounds() {
+        assertFalse(this.repository.findTotals(UUID.randomUUID()).join().isPresent());
+    }
+
+    @Test
     void testDeleteByPlayerRemovesOnlyThatPlayer() throws SQLException {
         UUID alice = UUID.randomUUID();
         UUID bob = UUID.randomUUID();
@@ -121,6 +142,7 @@ class HibernateStatsRepositoryTest {
         assertEquals(1, count("tamias_round_stats"));
         assertEquals(1, count("tamias_player"));
         assertFalse(this.repository.findPlayerByName("Alice").join().isPresent());
+        assertFalse(this.repository.findTotals(alice).join().isPresent());
     }
 
     @Test

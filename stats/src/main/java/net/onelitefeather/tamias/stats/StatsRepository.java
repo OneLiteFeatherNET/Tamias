@@ -1,5 +1,6 @@
 package net.onelitefeather.tamias.stats;
 
+import net.onelitefeather.tamias.stats.player.PlayerStatsView;
 import net.onelitefeather.tamias.stats.player.TamiasStatsPlayer;
 import net.onelitefeather.tamias.stats.round.FinishedRound;
 
@@ -35,6 +36,14 @@ public interface StatsRepository extends AutoCloseable {
      * @return the player, empty when no player was seen with that name
      */
     CompletableFuture<Optional<TamiasStatsPlayer>> findPlayerByName(String name);
+
+    /**
+     * Sums up the statistics of a player over every stored round.
+     *
+     * @param playerUuid the player
+     * @return the statistics, empty when the player has no rounds
+     */
+    CompletableFuture<Optional<PlayerStatsView>> findTotals(UUID playerUuid);
 
     /**
      * Deletes every round record and the stored name of a player in one transaction.

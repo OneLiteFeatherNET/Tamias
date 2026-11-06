@@ -1,5 +1,6 @@
 package net.onelitefeather.tamias.stats;
 
+import net.onelitefeather.tamias.stats.player.PlayerStatsView;
 import net.onelitefeather.tamias.stats.player.TamiasStatsPlayer;
 import net.onelitefeather.tamias.stats.round.FinishedRound;
 
@@ -32,6 +33,11 @@ final class DisabledStatsRepository implements StatsRepository {
 
     @Override
     public CompletableFuture<Optional<TamiasStatsPlayer>> findPlayerByName(String name) {
+        return CompletableFuture.completedFuture(Optional.empty());
+    }
+
+    @Override
+    public CompletableFuture<Optional<PlayerStatsView>> findTotals(UUID playerUuid) {
         return CompletableFuture.completedFuture(Optional.empty());
     }
 

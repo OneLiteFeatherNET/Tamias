@@ -2,10 +2,12 @@ package net.onelitefeather.tamias.stats;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import net.onelitefeather.tamias.stats.player.PlayerStatsView;
 import net.onelitefeather.tamias.stats.player.StatsPlayerEntity;
 import net.onelitefeather.tamias.stats.player.TamiasStatsPlayer;
 import net.onelitefeather.tamias.stats.round.FinishedRound;
 import net.onelitefeather.tamias.stats.round.PlayerRoundStats;
+import net.onelitefeather.tamias.stats.round.StatsRole;
 import net.onelitefeather.tamias.stats.round.TamiasRound;
 import org.flywaydb.core.Flyway;
 import org.hibernate.Session;
@@ -157,6 +159,39 @@ final class HibernateStatsRepository implements StatsRepository {
                 .getResultStream()
                 .findFirst()
                 .map(StatsPlayerEntity::toPlayer)));
+    }
+
+    @Override
+    public CompletableFuture<Optional<PlayerStatsView>> findTotals(UUID playerUuid) {
+        return submit(() -> this.sessionFactory.fromSession(session -> {
+            StatsPlayerEntity player = session.find(StatsPlayerEntity.class, playerUuid);
+            if (player == null) {
+                return Optional.<PlayerStatsView>empty();
+            }
+            Object[] totals = session.createSelectionQuery("""
+                            select count(*),
+                                   sum(case when s.won then 1 else 0 end),
+                                   sum(case when s.won and s.startRole = :survivor then 1 else 0 end),
+                                   sum(case when s.won and s.startRole = :bomber then 1 else 0 end),
+                                   sum(s.kills),
+                                   sum(s.hits)
+                            from PlayerRoundStats s
+                            where s.key.playerUuid = :uuid""", Object[].class)
+                    .setParameter("uuid", playerUuid)
+                    .setParameter("survivor", StatsRole.SURVIVOR)
+                    .setParameter("bomber", StatsRole.BOMBER)
+                    .getSingleResult();
+            long rounds = number(totals[0]);
+            if (rounds == 0) {
+                return Optional.<PlayerStatsView>empty();
+            }
+            return Optional.of(new PlayerStatsView(player.toPlayer(), rounds, number(totals[1]), number(totals[2]),
+                    number(totals[3]), number(totals[4]), number(totals[5])));
+        }));
+    }
+
+    private static long number(@Nullable Object value) {
+        return value instanceof Number number ? number.longValue() : 0;
     }
 
     @Override
