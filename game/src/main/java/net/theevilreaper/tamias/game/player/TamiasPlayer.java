@@ -19,10 +19,12 @@ import net.minestom.server.network.packet.server.play.SpawnEntityPacket;
 import net.minestom.server.network.player.GameProfile;
 import net.minestom.server.network.player.PlayerConnection;
 import net.theevilreaper.tamias.common.player.PermissionAwarePlayer;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * The {@link TamiasPlayer} can be disguised for its viewers without changing the server-side entity type.
@@ -40,6 +42,9 @@ public final class TamiasPlayer extends PermissionAwarePlayer {
     // runs out, the server hides the bomber at the explosion anyway
     static final int PRIMED_FUSE_TIME = 60;
     static final BoundingBox DISGUISE_BOUNDING_BOX = new BoundingBox(0.98, 0.98, 0.98);
+    // A running client sends a position packet every tick, a late packet may leave one server tick without any.
+    // The age counts from the tick the packet was handled in, the tick counter of that tick has already advanced by one.
+    static final long MAX_MOVEMENT_AGE_TICKS = 2;
 
     private final BoundingBox playerBoundingBox;
     private DisguiseState disguiseState = DisguiseState.NONE;
@@ -49,8 +54,8 @@ public final class TamiasPlayer extends PermissionAwarePlayer {
     private int hits;
     private int roundKills;
     private int roundHits;
-    private Pos lastTickPosition;
     private Vec knownMovement = Vec.ZERO;
+    private long knownMovementTick;
 
     /**
      * {@inheritDoc}
@@ -192,25 +197,41 @@ public final class TamiasPlayer extends PermissionAwarePlayer {
     }
 
     /**
-     * Returns how far this player moved during the last tick, in blocks per tick.
+     * Returns the movement of the last position packet, in blocks per client tick.
      * Projectiles use it as the movement of their shooter, the way vanilla uses the movement the client reported.
+     * A packet counts per client tick, so packets which arrive bunched in one server tick don't add up.
+     * One server tick without a position packet keeps the movement, after two ticks without one it is zero:
+     * a client which stands still sends no position packets.
      *
-     * @return the movement of the last tick
+     * @return the movement of the last position packet
      */
     public Vec getKnownMovement() {
+        if (getAliveTicks() - this.knownMovementTick > MAX_MOVEMENT_AGE_TICKS) return Vec.ZERO;
         return this.knownMovement;
     }
 
     /**
-     * Measures the movement of this tick. Player packets are interpreted in {@link Player#update(long)}, so the position
-     * after the super call contains everything the client sent during this tick.
+     * Measures the movement of every position packet. Minestom moves a player with this method only for the packets
+     * of the client, teleports and the server physics set the position without it.
      */
     @Override
-    public void update(long time) {
-        super.update(time);
-        final Pos position = getPosition();
-        this.knownMovement = this.lastTickPosition == null ? Vec.ZERO : position.sub(this.lastTickPosition).asVec();
-        this.lastTickPosition = position;
+    public void refreshPosition(Pos newPosition, boolean ignoreView, boolean sendPackets) {
+        final Pos previous = getPosition();
+        super.refreshPosition(newPosition, ignoreView, sendPackets);
+        final Pos current = getPosition();
+        // A rotation packet keeps the movement of the last position packet
+        if (current.samePoint(previous)) return;
+        this.knownMovement = current.sub(previous).asVec();
+        this.knownMovementTick = getAliveTicks();
+    }
+
+    /**
+     * A teleport is no movement of the client, the movement before it does not count afterwards.
+     */
+    @Override
+    public CompletableFuture<Void> teleport(Pos position, Vec velocity, long @Nullable [] chunks, int flags, boolean shouldConfirm) {
+        this.knownMovement = Vec.ZERO;
+        return super.teleport(position, velocity, chunks, flags, shouldConfirm);
     }
 
     @Override
