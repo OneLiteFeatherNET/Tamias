@@ -13,7 +13,6 @@ import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.common.util.Messages;
 import net.theevilreaper.tamias.game.phase.LobbyPhase;
 import net.theevilreaper.tamias.game.util.GameMessages;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
 
@@ -33,14 +32,14 @@ public class StartCommand extends Command {
             Component.text("Unable to start the game because the timer is to low!", NamedTextColor.RED)
     );
 
-    public StartCommand(@NotNull Supplier<Phase> phaseSupplier) {
+    public StartCommand(Supplier<Phase> phaseSupplier) {
         super("start");
         this.phaseSupplier = phaseSupplier;
         this.setCondition((sender, commandString) -> Conditions.playerOnly(sender, commandString) && hasStartPermission(sender));
         addSyntax(this::forceStart);
     }
 
-    private void forceStart(@NotNull CommandSender sender, @NotNull CommandContext commandContext) {
+    private void forceStart(CommandSender sender, CommandContext commandContext) {
         Phase phase = phaseSupplier.get();
 
         if (!(phase instanceof LobbyPhase lobbyPhase)) return;
