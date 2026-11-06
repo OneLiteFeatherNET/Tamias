@@ -7,6 +7,8 @@ plugins {
 
 dependencies {
     implementation(project(":common"))
+    // Round statistics, only stored when stats.jdbc-url is configured
+    implementation(project(":stats"))
     implementation(platform(libs.game.bom))
     implementation(platform(libs.falco.bom))
     implementation(libs.adventure)
@@ -60,6 +62,8 @@ tasks {
 
     shadowJar {
         archiveClassifier.set("")
+        // Flyway and Hibernate find their database support through service files
+        mergeServiceFiles()
         // Read back by Tamias as the release reported to Sentry.
         manifest.attributes("Implementation-Version" to rootProject.version)
     }

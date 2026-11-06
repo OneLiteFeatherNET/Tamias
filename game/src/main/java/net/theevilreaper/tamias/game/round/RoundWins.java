@@ -17,7 +17,7 @@ import net.theevilreaper.xerus.api.team.Team;
 public final class RoundWins {
 
     /**
-     * Stores the current role of each team member as its start role.
+     * Stores the current role of each team member as its start role and resets their kills and hits of the round.
      * Must be called after the teams are allocated and before any player can be converted.
      *
      * @param survivorTeam the survivor team
@@ -49,6 +49,7 @@ public final class RoundWins {
         for (Player player : team.getPlayers()) {
             if (player instanceof TamiasPlayer tamiasPlayer) {
                 tamiasPlayer.setStartRole(role);
+                tamiasPlayer.resetRoundStats();
             }
         }
     }

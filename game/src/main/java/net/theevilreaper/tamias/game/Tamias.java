@@ -47,6 +47,7 @@ import net.theevilreaper.tamias.common.map.event.MapPrepareEvent;
 import net.theevilreaper.tamias.game.round.event.RoundPrepareEvent;
 import net.theevilreaper.tamias.game.attribute.AttributeHelper;
 import net.theevilreaper.tamias.game.commands.StartCommand;
+import net.theevilreaper.tamias.game.commands.StatsCommand;
 import net.theevilreaper.tamias.game.event.BomberExplodeEvent;
 import net.theevilreaper.tamias.game.event.RoleToBomberChangeEvent;
 import net.theevilreaper.tamias.game.event.BomberRequireSpawnEvent;
@@ -83,12 +84,17 @@ import net.theevilreaper.tamias.game.round.RoundConditions;
 import net.theevilreaper.tamias.game.round.RoundProvider;
 import net.theevilreaper.tamias.game.round.RoundWins;
 import net.theevilreaper.tamias.game.stamina.StaminaService;
+import net.theevilreaper.tamias.game.stats.RoundStatsRecorder;
+import net.onelitefeather.tamias.stats.StatsConfig;
+import net.onelitefeather.tamias.stats.StatsRepositories;
+import net.onelitefeather.tamias.stats.StatsRepository;
 import net.theevilreaper.tamias.game.team.TeamHelper;
 import net.theevilreaper.tamias.game.util.FileChecker;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.InstantSource;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
@@ -111,10 +117,12 @@ public class Tamias implements ListenerHandling {
     private final LobbyScoreboard lobbyScoreboard;
     private final GameScoreboard gameScoreboard;
     private final GameMapProvider mapProvider;
+    private final StatsRepository statsRepository;
 
     private volatile Scoreboard activeScoreboard;
     private RoundProvider roundProvider;
     private CyclicPhaseSeries<Phase> gameSeries;
+    private RoundStatsRecorder statsRecorder;
     private SpeedBlockHandler speedBlockHandler;
     // The ground of the current round, decides if the speed block listener is needed
     private volatile GroundData currentGround;
@@ -127,6 +135,8 @@ public class Tamias implements ListenerHandling {
         // game is wired up is already covered. Stays off entirely when no DSN is configured.
         SentrySupport.init(this.gameConfig.sentryDsn(), serviceVersion(),
                 SentrySupport.serviceName(path), MinecraftServer.getExceptionManager());
+        // Off without a stats.jdbc-url in the config, a database that can't be reached keeps them off as well
+        this.statsRepository = StatsRepositories.open(StatsConfig.load(path.resolve("config"), System::getenv));
         this.phaseSeries = new LinearPhaseSeries<>("game");
         this.teamService = TeamService.of();
         this.mapProvider = new GameMapProvider(path, gameConfig.maxPlayers());
@@ -156,6 +166,7 @@ public class Tamias implements ListenerHandling {
         registerCancelListener(MinecraftServer.getGlobalEventHandler());
 
         MinecraftServer.getCommandManager().register(new StartCommand(this.phaseSeries::getCurrentPhase));
+        MinecraftServer.getCommandManager().register(new StatsCommand(this.statsRepository));
 
         this.lobbyScoreboard.initDefaults();
         this.createPhaseStructure();
@@ -166,6 +177,7 @@ public class Tamias implements ListenerHandling {
 
     public void terminate() {
         closeMapProvider(this.mapProvider);
+        this.statsRepository.close();
     }
 
     /**
@@ -190,6 +202,8 @@ public class Tamias implements ListenerHandling {
         CyclicPhaseSeries<Phase> gameSeries = new CyclicPhaseSeries<>("game");
         this.gameSeries = gameSeries;
         this.roundProvider = new RoundProvider(gameSeries);
+        this.statsRecorder = new RoundStatsRecorder(this.statsRepository, () -> this.mapProvider.getActiveMap().name(),
+                this.roundProvider::getCurrentRound, InstantSource.system());
         gameSeries.add(new GroundBuildPhase(() -> {
             GroundData randomData = GroundDataRegistry.instance().getRandomData();
             this.currentGround = randomData;
@@ -208,6 +222,7 @@ public class Tamias implements ListenerHandling {
                     TeamHelper.getTeam(this.teamService, GameConfig.SURVIVOR_KEY),
                     TeamHelper.getTeam(this.teamService, GameConfig.BOMBER_KEY)
             );
+            this.statsRecorder.roundStarted();
             this.refreshSharedScores();
             for (Player bomber : TeamHelper.getTeam(this.teamService, GameConfig.BOMBER_KEY).getPlayers()) {
                 bomber.teleport(this.mapProvider.getBomberSpawn(), Vec.ZERO);
@@ -242,6 +257,7 @@ public class Tamias implements ListenerHandling {
         Map<Class<? extends Event>, Consumer<? extends Event>> listenerMap = new HashMap<>();
         listenerMap.put(RoundEndEvent.class, new RoundEndListener(this.teamService::getTeams, this.staminaService::cleanUp, (survivors, bombers) -> {
             RoundWins.credit(survivors, bombers);
+            this.statsRecorder.roundEnded(survivors, bombers);
             this.playedRounds++;
             this.refreshWins();
         }));
