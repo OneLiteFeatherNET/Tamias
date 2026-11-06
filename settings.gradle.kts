@@ -35,6 +35,21 @@ dependencyResolutionManagement {
             version("guava", "33.7.2-jre")
             version("sentry", "8.62.0")
 
+            version("hibernate", "7.4.14.Final")
+            version("hikari", "7.1.0")
+            version("flyway", "13.12.1")
+            version("postgresql", "42.7.14")
+            version("h2", "2.5.252")
+            version("jetbrains-annotations", "26.1.0")
+
+            library("hibernate.core", "org.hibernate.orm", "hibernate-core").versionRef("hibernate")
+            library("hikari", "com.zaxxer", "HikariCP").versionRef("hikari")
+            library("flyway.core", "org.flywaydb", "flyway-core").versionRef("flyway")
+            library("flyway.postgresql", "org.flywaydb", "flyway-database-postgresql").versionRef("flyway")
+            library("postgresql", "org.postgresql", "postgresql").versionRef("postgresql")
+            library("h2", "com.h2database", "h2").versionRef("h2")
+            library("jetbrains.annotations", "org.jetbrains", "annotations").versionRef("jetbrains-annotations")
+
             library("game.bom", "net.onelitefeather", "aonyx-bom").versionRef("aonyx")
             library("guava", "com.google.guava", "guava").versionRef("guava")
             library("sentry", "io.sentry", "sentry").versionRef("sentry")
@@ -87,3 +102,5 @@ include("common")
 include("game")
 include("setup")
 include("bridge")
+
+include("stats")
