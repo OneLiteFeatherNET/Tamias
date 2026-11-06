@@ -47,6 +47,8 @@ public final class TamiasPlayer extends PermissionAwarePlayer {
     private int roundWins;
     private int kills;
     private int hits;
+    private int roundKills;
+    private int roundHits;
     private Pos lastTickPosition;
     private Vec knownMovement = Vec.ZERO;
 
@@ -134,6 +136,7 @@ public final class TamiasPlayer extends PermissionAwarePlayer {
      */
     public void addKill() {
         this.kills++;
+        this.roundKills++;
     }
 
     /**
@@ -150,6 +153,7 @@ public final class TamiasPlayer extends PermissionAwarePlayer {
      */
     public void addHit() {
         this.hits++;
+        this.roundHits++;
     }
 
     /**
@@ -159,6 +163,32 @@ public final class TamiasPlayer extends PermissionAwarePlayer {
      */
     public int getHits() {
         return this.hits;
+    }
+
+    /**
+     * Resets the kills and hits of the current round. The totals of the game are kept.
+     */
+    public void resetRoundStats() {
+        this.roundKills = 0;
+        this.roundHits = 0;
+    }
+
+    /**
+     * Returns the amount of survivors this player has converted in the current round.
+     *
+     * @return the kills of the current round
+     */
+    public int getRoundKills() {
+        return this.roundKills;
+    }
+
+    /**
+     * Returns the amount of bombers this player has hit in the current round.
+     *
+     * @return the hits of the current round
+     */
+    public int getRoundHits() {
+        return this.roundHits;
     }
 
     /**
