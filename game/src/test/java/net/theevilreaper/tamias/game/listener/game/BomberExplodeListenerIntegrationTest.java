@@ -63,6 +63,81 @@ class BomberExplodeListenerIntegrationTest extends TamiasPlayerTestBase {
     }
 
     @Test
+    void testExplosionReachesTheHitBoxOfASurvivor(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        instance.setExplosionSupplier(new ExplosionCreator());
+        Player bomber = createPlayer(env, instance, new Pos(0, 40, 0), GameConfig.BOMBER_KEY.asString());
+        // The feet are out of the radius, the side of the hit box is not
+        Player survivor = createPlayer(env, instance, new Pos(3.2, 40, 0), GameConfig.SURVIVOR_KEY.asString());
+
+        List<Player> converted = new ArrayList<>();
+        new BomberExplodeListener(converted::add, () -> {}).accept(new BomberExplodeEvent(bomber, bomber.getPosition().asVec()));
+
+        assertEquals(List.of(survivor), converted);
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testExplosionReachesASurvivorOnAHigherBlock(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        instance.setExplosionSupplier(new ExplosionCreator());
+        Player bomber = createPlayer(env, instance, new Pos(0, 40, 0), GameConfig.BOMBER_KEY.asString());
+        Player survivor = createPlayer(env, instance, new Pos(2.5, 42, 0), GameConfig.SURVIVOR_KEY.asString());
+
+        List<Player> converted = new ArrayList<>();
+        new BomberExplodeListener(converted::add, () -> {}).accept(new BomberExplodeEvent(bomber, bomber.getPosition().asVec()));
+
+        assertEquals(List.of(survivor), converted);
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testExplosionReachesASurvivorWhereTheBomberSawThem(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        instance.setExplosionSupplier(new ExplosionCreator());
+        Player bomber = createPlayer(env, instance, new Pos(0, 40, 0), GameConfig.BOMBER_KEY.asString());
+        Player survivor = createPlayer(env, instance, new Pos(2, 40, 0), GameConfig.SURVIVOR_KEY.asString());
+        bomber.refreshLatency(100);
+        env.tick();
+        // The survivor runs away, the bomber still sees them at the old position for latency + interpolation
+        for (double x = 3; x <= 6; x++) {
+            survivor.teleport(new Pos(x, 40, 0)).join();
+            env.tick();
+        }
+
+        List<Player> converted = new ArrayList<>();
+        new BomberExplodeListener(converted::add, () -> {}).accept(new BomberExplodeEvent(bomber, bomber.getPosition().asVec()));
+
+        assertEquals(List.of(survivor), converted);
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testExplosionRewindIsCapped(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        instance.setExplosionSupplier(new ExplosionCreator());
+        Player bomber = createPlayer(env, instance, new Pos(0, 40, 0), GameConfig.BOMBER_KEY.asString());
+        Player survivor = createPlayer(env, instance, new Pos(2, 40, 0), GameConfig.SURVIVOR_KEY.asString());
+        // A huge latency must not reach back further than the cap
+        bomber.refreshLatency(2000);
+        env.tick();
+        for (int tick = 0; tick < 10; tick++) {
+            survivor.teleport(new Pos(8, 40, 0)).join();
+            env.tick();
+        }
+
+        List<Player> converted = new ArrayList<>();
+        new BomberExplodeListener(converted::add, () -> {}).accept(new BomberExplodeEvent(bomber, bomber.getPosition().asVec()));
+
+        assertEquals(List.of(), converted);
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
     void testShotExplosionConvertsNoSurvivor(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
         instance.setExplosionSupplier(new ExplosionCreator());
