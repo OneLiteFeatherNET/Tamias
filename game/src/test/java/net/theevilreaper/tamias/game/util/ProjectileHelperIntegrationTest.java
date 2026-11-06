@@ -2,6 +2,7 @@ package net.theevilreaper.tamias.game.util;
 
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.EntityPose;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.item.ThrownEggMeta;
@@ -25,6 +26,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * The shooter is a {@link net.theevilreaper.tamias.game.player.TamiasPlayer}, its known movement feeds the launch.
  */
 class ProjectileHelperIntegrationTest extends TamiasPlayerTestBase {
+
+    private static final double EPSILON = 1e-6;
 
     @Test
     void testCreationWithoutAPlayerInstance(@NotNull Env env) {
@@ -87,6 +90,32 @@ class ProjectileHelperIntegrationTest extends TamiasPlayerTestBase {
 
         // A horizontal shot keeps flying horizontally, only the uncertainty may tilt it a bit
         assertTrue(Math.abs(projectile.getVelocity().y()) < 1, "Vertical velocity was " + projectile.getVelocity().y());
+    }
+
+    @Test
+    void testEggStartsBelowTheEyesOfAStandingShooter(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player player = env.createPlayer(instance, new Pos(0, 40, 0));
+
+        VanillaProjectile projectile = ProjectileHelper.createProjectile(player);
+        ProjectileHelper.spawnProjectile(player, ignored -> projectile);
+
+        assertEquals(EntityPose.STANDING, player.getPose());
+        assertEquals(40 + 1.62 - 0.1, projectile.getPosition().y(), EPSILON);
+    }
+
+    @Test
+    void testEggStartsBelowTheEyesOfASneakingShooter(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player player = env.createPlayer(instance, new Pos(0, 40, 0));
+        player.setSneaking(true);
+
+        VanillaProjectile projectile = ProjectileHelper.createProjectile(player);
+        ProjectileHelper.spawnProjectile(player, ignored -> projectile);
+
+        // The camera of a sneaking player is at 1.27, an egg from the standing eyes would start above the crosshair
+        assertEquals(EntityPose.SNEAKING, player.getPose());
+        assertEquals(40 + 1.27 - 0.1, projectile.getPosition().y(), EPSILON);
     }
 
     @Test
