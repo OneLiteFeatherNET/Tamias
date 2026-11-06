@@ -20,6 +20,7 @@ import net.theevilreaper.tamias.game.stamina.StaminaFactory;
 import net.theevilreaper.tamias.game.player.TamiasPlayer;
 import net.theevilreaper.tamias.game.player.TamiasPlayerTestBase;
 import net.theevilreaper.tamias.game.projectile.VanillaProjectile;
+import net.theevilreaper.tamias.game.util.EntityHelper;
 import net.theevilreaper.tamias.game.util.ProjectileHelper;
 import net.theevilreaper.tamias.game.util.SpawnProtection;
 import net.theevilreaper.tamias.game.util.SpectatorHelper;
@@ -196,6 +197,24 @@ class ProjectileEntityListenerIntegrationTest extends TamiasPlayerTestBase {
         assertFalse(hit.getEntity().isRemoved());
         assertFalse(exploded.get());
         assertEquals(0, ((TamiasPlayer) shooter).getHits());
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testEggFliesThroughHiddenBomber(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Player shooter = env.createPlayer(instance);
+        Player bomber = env.createPlayer(instance);
+        bomber.setTag(Tags.TEAM_KEY, GameConfig.BOMBER_KEY.asString());
+        EntityHelper.hide(bomber);
+
+        ProjectileEntityListener listener = new ProjectileEntityListener(_ -> null);
+
+        ProjectileCollideWithEntityEvent hit = createHit(shooter, bomber);
+        listener.accept(hit);
+
+        assertTrue(hit.isCancelled(), "A hidden bomber is invisible, the egg must not break on them");
 
         env.destroyInstance(instance, true);
     }
