@@ -241,13 +241,13 @@ class FlyingDeliveryTntAnimationIntegrationTest {
         for (int i = 0; i < MAX_TICKS && !trailed; i++) {
             env.tick();
             for (Entity carrier : findEntities(instance, EntityType.PARROT)) {
-                Vec now = Vec.fromPoint(carrier.getPosition());
+                Vec now = carrier.getPosition().asVec();
                 Vec before = previous.put(carrier, now);
                 Entity parcel = carrier.getLeashHolder();
                 if (parcel == null || before == null) continue;
 
                 Vec motion = horizontal(now.sub(before));
-                Vec lag = horizontal(Vec.fromPoint(parcel.getPosition()).sub(now));
+                Vec lag = horizontal(parcel.getPosition().asVec().sub(now));
                 double alongMotion = lag.x() * motion.x() + lag.z() * motion.z();
                 if (motion.length() > LEVEL_SPEED && lag.length() > LEVEL_SPEED && alongMotion < 0) {
                     trailed = true;
@@ -302,7 +302,7 @@ class FlyingDeliveryTntAnimationIntegrationTest {
         for (int i = 0; i < MAX_TICKS && !placement.landed().isDone(); i++) {
             env.tick();
             for (Entity carrier : findEntities(instance, EntityType.PHANTOM)) {
-                Vec now = Vec.fromPoint(carrier.getPosition());
+                Vec now = carrier.getPosition().asVec();
                 Vec before = previous.put(carrier, now);
                 if (carrier.getLeashHolder() == null || before == null) continue;
 

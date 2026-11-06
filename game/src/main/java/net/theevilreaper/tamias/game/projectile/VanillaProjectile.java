@@ -363,7 +363,7 @@ public abstract class VanillaProjectile extends Entity {
      * @return the margin in blocks
      */
     static double hitMargin(long tick) {
-        return Math.max(0.0, Math.min(MAX_HIT_MARGIN, (tick - 2) / 20.0));
+        return Math.clamp((tick - 2) / 20.0, 0.0, MAX_HIT_MARGIN);
     }
 
     /**
