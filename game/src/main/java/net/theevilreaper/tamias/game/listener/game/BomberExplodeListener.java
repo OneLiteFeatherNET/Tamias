@@ -3,6 +3,8 @@ package net.theevilreaper.tamias.game.listener.game;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.collision.BoundingBox;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
@@ -17,13 +19,15 @@ import net.theevilreaper.tamias.game.player.TamiasPlayer;
 import net.theevilreaper.tamias.game.attribute.AttributeHelper;
 import net.theevilreaper.tamias.game.event.BomberExplodeEvent;
 import net.theevilreaper.tamias.game.util.EntityHelper;
+import net.theevilreaper.tamias.game.util.ExplosionRange;
 import net.theevilreaper.tamias.game.util.GameMessages;
 
 import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * Handles the explosion of a bomber. Every survivor within {@link #INFECTION_RADIUS} becomes a bomber.
+ * Handles the explosion of a bomber. Every survivor whose hit box is within {@link #INFECTION_RADIUS} of the TNT
+ * becomes a bomber, with the lag of the bomber compensated, see {@link ExplosionRange}.
  * A bomber who was shot infects nobody, otherwise the shooter would be blown up by a close hit.
  * The bomber hears a hit sound and every player gets told who was blown up.
  */
@@ -59,12 +63,13 @@ public class BomberExplodeListener implements Consumer<BomberExplodeEvent> {
         AttributeHelper.disableMovement(player);
         if (event.isShot()) return;
 
-        // Collect first, converting a survivor teleports them and changes the nearby entities
-        List<Player> survivors = instance.getNearbyEntities(event.getPosition(), INFECTION_RADIUS).stream()
-                .filter(entity -> entity != player)
-                .filter(Player.class::isInstance)
-                .map(Player.class::cast)
+        // Collect first, converting a survivor teleports them
+        Point center = ExplosionRange.center(event.getPosition(), TamiasPlayer.DISGUISE_BOUNDING_BOX);
+        long rewindMillis = ExplosionRange.rewindMillis(player.getLatency());
+        List<Player> survivors = instance.getPlayers().stream()
+                .filter(target -> target != player)
                 .filter(target -> GameConfig.SURVIVOR_KEY.asString().equals(target.getTag(Tags.TEAM_KEY)))
+                .filter(target -> isReached(center, target, rewindMillis))
                 .toList();
         if (survivors.isEmpty()) return;
 
@@ -77,5 +82,15 @@ public class BomberExplodeListener implements Consumer<BomberExplodeEvent> {
         }
         survivors.forEach(this.survivorConverter::accept);
         this.roundEndCheck.apply();
+    }
+
+    /**
+     * A survivor is reached at the current position or where the bomber saw them, see {@link ExplosionRange}.
+     */
+    private static boolean isReached(Point center, Player target, long rewindMillis) {
+        BoundingBox box = target.getBoundingBox();
+        if (ExplosionRange.reaches(center, INFECTION_RADIUS, target.getPosition(), box)) return true;
+        return target instanceof TamiasPlayer tamiasTarget
+                && ExplosionRange.reaches(center, INFECTION_RADIUS, tamiasTarget.getPositionMillisAgo(rewindMillis), box);
     }
 }
