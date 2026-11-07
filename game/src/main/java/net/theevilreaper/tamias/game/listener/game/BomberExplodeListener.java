@@ -25,6 +25,8 @@ import net.theevilreaper.tamias.game.util.GameMessages;
 import net.theevilreaper.xerus.api.team.TeamService;
 
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.function.BooleanSupplier;
@@ -49,6 +51,7 @@ public class BomberExplodeListener implements Consumer<BomberExplodeEvent> {
     static final double INFECTION_RADIUS = 3.0;
 
     private static final int RING_POINTS_PER_BLOCK = 2;
+    private static final Logger LOGGER = LoggerFactory.getLogger(BomberExplodeListener.class);
 
     private final TeamService teamService;
     private final BooleanSupplier roundEndCheck;
@@ -124,6 +127,10 @@ public class BomberExplodeListener implements Consumer<BomberExplodeEvent> {
         survivors.forEach(survivor -> players.sendMessage(GameMessages.getDeathMessage(survivor, player)));
         if (player instanceof TamiasPlayer bomber) {
             survivors.forEach(_ -> bomber.addKill());
+        }
+        if (radius > INFECTION_RADIUS) {
+            // Only for tuning the assist settings, remove once the values are settled
+            LOGGER.info("Assisted kill of {} with radius {} ({} survivors)", player.getUsername(), radius, survivors.size());
         }
         survivors.forEach(survivor -> TeamHelper.moveToTNTTeam(this.teamService, survivor));
         // The round ends when the last survivor was blown up, nobody has to spawn on a TNT then
