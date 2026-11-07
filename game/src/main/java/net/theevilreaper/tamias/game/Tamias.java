@@ -275,10 +275,7 @@ public class Tamias implements ListenerHandling {
                 player -> this.staminaService.removeStaminaBar(player.getUuid()),
                 this::checkRoundEnd
         ));
-        listenerMap.put(BomberExplodeEvent.class, new BomberExplodeListener(
-                player -> TeamHelper.switchToTNTTeam(this.teamService, player),
-                this::checkRoundEnd
-        ));
+        listenerMap.put(BomberExplodeEvent.class, new BomberExplodeListener(this.teamService, this::checkRoundEnd));
         listenerMap.put(RoleToBomberChangeEvent.class, new RoleToBomberChangeListener(
                 this.teamService,
                 this.staminaService,
@@ -324,10 +321,12 @@ public class Tamias implements ListenerHandling {
 
     /**
      * Refreshes the shared scores, because a survivor or a TNT ticket may be gone, and checks if the round is over.
+     *
+     * @return true if the round was finished by this check
      */
-    private void checkRoundEnd() {
+    private boolean checkRoundEnd() {
         this.refreshSharedScores();
-        RoundConditions.checkRoundEnd(this.phaseSeries, this.teamService);
+        return RoundConditions.checkRoundEnd(this.phaseSeries, this.teamService);
     }
 
     void registerListener(@NotNull EventNode<Event> node) {

@@ -14,17 +14,25 @@ import java.util.Optional;
 @ApiStatus.Internal
 public final class RoundConditions {
 
-    public static void checkRoundEnd(LinearPhaseSeries<Phase> phaseSeries, TeamService teamService) {
+    /**
+     * Finishes the playing phase if the round is over.
+     *
+     * @param phaseSeries the series which contains the playing phase
+     * @param teamService the team service providing teams
+     * @return true if the round was finished by this check
+     */
+    public static boolean checkRoundEnd(LinearPhaseSeries<Phase> phaseSeries, TeamService teamService) {
         Phase currentPhase = phaseSeries.getCurrentPhase();
-        if (!(currentPhase instanceof PlayingPhase)) return;
+        if (!(currentPhase instanceof PlayingPhase)) return false;
 
         Optional<Team> survivorTeamOpt = teamService.getTeam(GameConfig.SURVIVOR_KEY);
         Optional<Team> bomberTeamOpt = teamService.getTeam(GameConfig.BOMBER_KEY);
 
-        if (survivorTeamOpt.isEmpty() || bomberTeamOpt.isEmpty()) return;
+        if (survivorTeamOpt.isEmpty() || bomberTeamOpt.isEmpty()) return false;
 
-        if (!isRoundOver(survivorTeamOpt.get(), bomberTeamOpt.get())) return;
+        if (!isRoundOver(survivorTeamOpt.get(), bomberTeamOpt.get())) return false;
         currentPhase.finish();
+        return true;
     }
 
     /**
