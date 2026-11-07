@@ -40,6 +40,9 @@ public class PlayerRoundStats {
     @Column(name = "hits", nullable = false)
     private int hits;
 
+    @Column(name = "explosions", nullable = false)
+    private int explosions;
+
     protected PlayerRoundStats() {
         // for hibernate
     }
@@ -51,6 +54,7 @@ public class PlayerRoundStats {
         this.converted = result.converted();
         this.kills = result.kills();
         this.hits = result.hits();
+        this.explosions = result.explosions();
     }
 
     public Key getKey() {
@@ -75,6 +79,10 @@ public class PlayerRoundStats {
 
     public int getHits() {
         return hits;
+    }
+
+    public int getExplosions() {
+        return explosions;
     }
 
     @Embeddable

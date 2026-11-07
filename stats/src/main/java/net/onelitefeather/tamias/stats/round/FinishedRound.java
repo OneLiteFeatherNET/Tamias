@@ -43,6 +43,7 @@ public record FinishedRound(
      * @param converted  whether the player started as survivor and was turned into a bomber
      * @param kills      kills as bomber in this round
      * @param hits       hits as survivor in this round
+     * @param explosions    explosions as bomber in this round, including the ones where the bomber was shot
      */
     public record PlayerResult(
             UUID playerUuid,
@@ -51,7 +52,8 @@ public record FinishedRound(
             boolean won,
             boolean converted,
             int kills,
-            int hits
+            int hits,
+            int explosions
     ) {
     }
 }

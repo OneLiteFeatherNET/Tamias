@@ -49,7 +49,7 @@ class HibernateStatsRepositoryTest {
     }
 
     private static FinishedRound.PlayerResult result(UUID uuid, String name) {
-        return new FinishedRound.PlayerResult(uuid, name, StatsRole.SURVIVOR, true, false, 0, 3);
+        return new FinishedRound.PlayerResult(uuid, name, StatsRole.SURVIVOR, true, false, 0, 3, 0);
     }
 
     private long count(String table) throws SQLException {
@@ -69,6 +69,21 @@ class HibernateStatsRepositoryTest {
         assertEquals(2, count("tamias_round_stats"));
         assertEquals(2, count("tamias_player"));
         assertEquals(0, this.repository.failedWrites());
+    }
+
+    @Test
+    void testSaveRoundStoresExplosions() throws SQLException {
+        UUID uuid = UUID.randomUUID();
+        this.repository.saveRound(round(START,
+                new FinishedRound.PlayerResult(uuid, "Alice", StatsRole.BOMBER, true, false, 3, 0, 5))).join();
+
+        try (Connection connection = DriverManager.getConnection(this.jdbcUrl);
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery(
+                     "SELECT explosions FROM tamias_stats.tamias_round_stats")) {
+            assertTrue(resultSet.next());
+            assertEquals(5, resultSet.getInt("explosions"));
+        }
     }
 
     @Test
@@ -115,11 +130,11 @@ class HibernateStatsRepositoryTest {
     void testFindTotalsSumsAllRounds() {
         UUID uuid = UUID.randomUUID();
         this.repository.saveRound(round(START,
-                new FinishedRound.PlayerResult(uuid, "Alice", StatsRole.SURVIVOR, true, false, 0, 3))).join();
+                new FinishedRound.PlayerResult(uuid, "Alice", StatsRole.SURVIVOR, true, false, 0, 3, 0))).join();
         this.repository.saveRound(round(START.plusSeconds(600),
-                new FinishedRound.PlayerResult(uuid, "Alice", StatsRole.BOMBER, true, false, 2, 0))).join();
+                new FinishedRound.PlayerResult(uuid, "Alice", StatsRole.BOMBER, true, false, 2, 0, 0))).join();
         this.repository.saveRound(round(START.plusSeconds(1200),
-                new FinishedRound.PlayerResult(uuid, "Alice", StatsRole.SURVIVOR, false, true, 0, 1))).join();
+                new FinishedRound.PlayerResult(uuid, "Alice", StatsRole.SURVIVOR, false, true, 0, 1, 0))).join();
 
         PlayerStatsView totals = this.repository.findTotals(uuid).join().orElseThrow();
         assertEquals(new PlayerStatsView(new TamiasStatsPlayer(uuid, "Alice"), 3, 2, 1, 1, 2, 4), totals);

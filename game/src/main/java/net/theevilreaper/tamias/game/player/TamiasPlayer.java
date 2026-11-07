@@ -49,6 +49,7 @@ public final class TamiasPlayer extends PermissionAwarePlayer {
     private int hits;
     private int roundKills;
     private int roundHits;
+    private int roundExplosions;
     private Pos lastTickPosition;
     private Vec knownMovement = Vec.ZERO;
     private final BomberAssistState bomberAssist = new BomberAssistState();
@@ -173,7 +174,24 @@ public final class TamiasPlayer extends PermissionAwarePlayer {
     public void resetRoundStats() {
         this.roundKills = 0;
         this.roundHits = 0;
+        this.roundExplosions = 0;
         this.bomberAssist.reset();
+    }
+
+    /**
+     * Counts an explosion of this player as bomber, also when the bomber was shot.
+     */
+    public void addExplosion() {
+        this.roundExplosions++;
+    }
+
+    /**
+     * Returns the amount of explosions of this player in the current round.
+     *
+     * @return the explosions of the current round
+     */
+    public int getRoundExplosions() {
+        return this.roundExplosions;
     }
 
     /**

@@ -65,6 +65,23 @@ class BomberAssistIntegrationTest extends TamiasPlayerTestBase {
     }
 
     @Test
+    void testEveryExplosionIsCounted(@NotNull Env env) {
+        Instance instance = createInstance(env);
+        Player bomber = createPlayer(env, instance, new Pos(0, 40, 0), GameConfig.BOMBER_KEY);
+        createPlayer(env, instance, JUST_OUT_OF_RANGE, GameConfig.SURVIVOR_KEY);
+        TamiasPlayer tamiasBomber = (TamiasPlayer) bomber;
+
+        explode(bomber, true);
+        explode(bomber, false);
+        explode(bomber, false);
+
+        assertEquals(3, tamiasBomber.getRoundExplosions());
+        assertEquals(1, tamiasBomber.getRoundKills());
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
     void testKillRemovesTheBonus(@NotNull Env env) {
         Instance instance = createInstance(env);
         Player bomber = createPlayer(env, instance, new Pos(0, 40, 0), GameConfig.BOMBER_KEY);

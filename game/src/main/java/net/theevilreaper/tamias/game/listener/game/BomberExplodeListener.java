@@ -92,7 +92,11 @@ public class BomberExplodeListener implements Consumer<BomberExplodeEvent> {
         AttributeHelper.disableMovement(player);
 
         long now = this.clock.getAsLong();
-        @Nullable BomberAssistState assist = player instanceof TamiasPlayer tamiasPlayer ? tamiasPlayer.getBomberAssist() : null;
+        @Nullable BomberAssistState assist = null;
+        if (player instanceof TamiasPlayer tamiasPlayer) {
+            tamiasPlayer.addExplosion();
+            assist = tamiasPlayer.getBomberAssist();
+        }
         if (event.isShot()) {
             // A bomber who is shot right next to a survivor tried hard enough, being shot far away doesn't count
             recordNearMiss(instance, player, event.getPosition(), assist, now);

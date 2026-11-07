@@ -104,7 +104,8 @@ public final class RoundStatsRecorder {
                     startRole == winner && endRole == winner,
                     startRole == StatsRole.SURVIVOR && bomberTeam,
                     tamiasPlayer.getRoundKills(),
-                    tamiasPlayer.getRoundHits()
+                    tamiasPlayer.getRoundHits(),
+                    tamiasPlayer.getRoundExplosions()
             ));
         }
     }
