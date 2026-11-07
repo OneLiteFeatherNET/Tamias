@@ -51,6 +51,7 @@ public final class TamiasPlayer extends PermissionAwarePlayer {
     private int roundHits;
     private Pos lastTickPosition;
     private Vec knownMovement = Vec.ZERO;
+    private final BomberAssistState bomberAssist = new BomberAssistState();
 
     /**
      * {@inheritDoc}
@@ -166,11 +167,22 @@ public final class TamiasPlayer extends PermissionAwarePlayer {
     }
 
     /**
-     * Resets the kills and hits of the current round. The totals of the game are kept.
+     * Resets the kills and hits and the near misses of the bomber assist of the current round.
+     * The totals of the game are kept.
      */
     public void resetRoundStats() {
         this.roundKills = 0;
         this.roundHits = 0;
+        this.bomberAssist.reset();
+    }
+
+    /**
+     * Returns the near misses of this player as bomber, see {@link BomberAssistState}.
+     *
+     * @return the assist state
+     */
+    public BomberAssistState getBomberAssist() {
+        return this.bomberAssist;
     }
 
     /**
