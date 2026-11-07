@@ -9,14 +9,15 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.potion.Potion;
 import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.sound.SoundEvent;
-import net.theevilreaper.aves.util.functional.PlayerConsumer;
 import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.common.util.Tags;
 import net.theevilreaper.tamias.game.player.TamiasPlayer;
 import net.theevilreaper.tamias.game.attribute.AttributeHelper;
 import net.theevilreaper.tamias.game.event.BomberExplodeEvent;
+import net.theevilreaper.tamias.game.team.TeamHelper;
 import net.theevilreaper.tamias.game.util.EntityHelper;
 import net.theevilreaper.tamias.game.util.GameMessages;
+import net.theevilreaper.xerus.api.team.TeamService;
 
 import java.util.List;
 import java.util.function.BooleanSupplier;
@@ -35,20 +36,17 @@ public class BomberExplodeListener implements Consumer<BomberExplodeEvent> {
     static final Sound HIT_SOUND = Sound.sound(SoundEvent.ENTITY_ARROW_HIT_PLAYER, Sound.Source.MASTER, 1f, 1f);
     static final double INFECTION_RADIUS = 3.0;
 
-    private final PlayerConsumer survivorConverter;
-    private final PlayerConsumer bomberSpawner;
+    private final TeamService teamService;
     private final BooleanSupplier roundEndCheck;
 
     /**
      * Creates a new listener.
      *
-     * @param survivorConverter moves a survivor in the explosion radius to the bomber team
-     * @param bomberSpawner     lets a converted survivor spawn on a TNT
-     * @param roundEndCheck     checks if the round can end after survivors were converted, returns true if it ended
+     * @param teamService   the team service which contains the survivor and the bomber team
+     * @param roundEndCheck checks if the round can end after survivors were converted, returns true if it ended
      */
-    public BomberExplodeListener(PlayerConsumer survivorConverter, PlayerConsumer bomberSpawner, BooleanSupplier roundEndCheck) {
-        this.survivorConverter = survivorConverter;
-        this.bomberSpawner = bomberSpawner;
+    public BomberExplodeListener(TeamService teamService, BooleanSupplier roundEndCheck) {
+        this.teamService = teamService;
         this.roundEndCheck = roundEndCheck;
     }
 
@@ -79,9 +77,9 @@ public class BomberExplodeListener implements Consumer<BomberExplodeEvent> {
         if (player instanceof TamiasPlayer bomber) {
             survivors.forEach(_ -> bomber.addKill());
         }
-        survivors.forEach(this.survivorConverter::accept);
+        survivors.forEach(survivor -> TeamHelper.moveToTNTTeam(this.teamService, survivor));
         // The round ends when the last survivor was blown up, nobody has to spawn on a TNT then
         if (this.roundEndCheck.getAsBoolean()) return;
-        survivors.forEach(this.bomberSpawner::accept);
+        survivors.forEach(TeamHelper::spawnAsBomber);
     }
 }
