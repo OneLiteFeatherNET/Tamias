@@ -34,7 +34,7 @@ class BomberExplodeListenerIntegrationTest extends TamiasPlayerTestBase {
         Player player = env.createPlayer(instance, new Pos(0, 40, 0));
         ((TamiasPlayer) player).setDisguise(DisguiseState.PRIMED_TNT);
 
-        new BomberExplodeListener(_ -> {}, () -> {}).accept(new BomberExplodeEvent(player, player.getPosition().asVec()));
+        new BomberExplodeListener(_ -> {}, _ -> {}, () -> false).accept(new BomberExplodeEvent(player, player.getPosition().asVec()));
 
         assertEquals(DisguiseState.HIDDEN, ((TamiasPlayer) player).getDisguiseState());
 
@@ -52,12 +52,48 @@ class BomberExplodeListenerIntegrationTest extends TamiasPlayerTestBase {
 
         List<Player> converted = new ArrayList<>();
         AtomicInteger roundEndChecks = new AtomicInteger();
-        BomberExplodeListener listener = new BomberExplodeListener(converted::add, roundEndChecks::incrementAndGet);
+        BomberExplodeListener listener = new BomberExplodeListener(converted::add, _ -> {}, () -> roundEndChecks.incrementAndGet() < 0);
 
         listener.accept(new BomberExplodeEvent(bomber, bomber.getPosition().asVec()));
 
         assertEquals(List.of(nearSurvivor), converted);
         assertEquals(1, roundEndChecks.get());
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testConvertedSurvivorsSpawnWhenRoundGoesOn(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        instance.setExplosionSupplier(new ExplosionCreator());
+        Player bomber = createPlayer(env, instance, new Pos(0, 40, 0), GameConfig.BOMBER_KEY.asString());
+        Player nearSurvivor = createPlayer(env, instance, new Pos(2, 40, 0), GameConfig.SURVIVOR_KEY.asString());
+
+        List<Player> spawned = new ArrayList<>();
+        BomberExplodeListener listener = new BomberExplodeListener(_ -> {}, spawned::add, () -> false);
+
+        listener.accept(new BomberExplodeEvent(bomber, bomber.getPosition().asVec()));
+
+        assertEquals(List.of(nearSurvivor), spawned);
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testLastSurvivorDoesNotSpawnWhenRoundEnds(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        instance.setExplosionSupplier(new ExplosionCreator());
+        Player bomber = createPlayer(env, instance, new Pos(0, 40, 0), GameConfig.BOMBER_KEY.asString());
+        Player lastSurvivor = createPlayer(env, instance, new Pos(2, 40, 0), GameConfig.SURVIVOR_KEY.asString());
+
+        List<Player> converted = new ArrayList<>();
+        List<Player> spawned = new ArrayList<>();
+        BomberExplodeListener listener = new BomberExplodeListener(converted::add, spawned::add, () -> true);
+
+        listener.accept(new BomberExplodeEvent(bomber, bomber.getPosition().asVec()));
+
+        assertEquals(List.of(lastSurvivor), converted);
+        assertEquals(List.of(), spawned);
 
         env.destroyInstance(instance, true);
     }
@@ -71,7 +107,7 @@ class BomberExplodeListenerIntegrationTest extends TamiasPlayerTestBase {
 
         List<Player> converted = new ArrayList<>();
         AtomicInteger roundEndChecks = new AtomicInteger();
-        BomberExplodeListener listener = new BomberExplodeListener(converted::add, roundEndChecks::incrementAndGet);
+        BomberExplodeListener listener = new BomberExplodeListener(converted::add, _ -> {}, () -> roundEndChecks.incrementAndGet() < 0);
 
         listener.accept(new BomberExplodeEvent(bomber, bomber.getPosition().asVec(), true));
 
@@ -94,7 +130,7 @@ class BomberExplodeListenerIntegrationTest extends TamiasPlayerTestBase {
         Collector<SoundEffectPacket> bomberSounds = bomberConnection.trackIncoming(SoundEffectPacket.class);
         Collector<SystemChatPacket> bomberMessages = bomberConnection.trackIncoming(SystemChatPacket.class);
 
-        new BomberExplodeListener(_ -> {}, () -> {}).accept(new BomberExplodeEvent(bomber, bomber.getPosition().asVec()));
+        new BomberExplodeListener(_ -> {}, _ -> {}, () -> false).accept(new BomberExplodeEvent(bomber, bomber.getPosition().asVec()));
 
         bomberSounds.assertSingle(packet -> assertEquals(SoundEvent.ENTITY_ARROW_HIT_PLAYER, packet.soundEvent()));
         bomberMessages.assertSingle();
@@ -111,7 +147,7 @@ class BomberExplodeListenerIntegrationTest extends TamiasPlayerTestBase {
 
         List<Player> converted = new ArrayList<>();
         AtomicInteger roundEndChecks = new AtomicInteger();
-        BomberExplodeListener listener = new BomberExplodeListener(converted::add, roundEndChecks::incrementAndGet);
+        BomberExplodeListener listener = new BomberExplodeListener(converted::add, _ -> {}, () -> roundEndChecks.incrementAndGet() < 0);
 
         listener.accept(new BomberExplodeEvent(bomber, bomber.getPosition().asVec()));
 
@@ -129,7 +165,7 @@ class BomberExplodeListenerIntegrationTest extends TamiasPlayerTestBase {
         createPlayer(env, instance, new Pos(2, 40, 0), GameConfig.SURVIVOR_KEY.asString());
         createPlayer(env, instance, new Pos(0, 40, 2), GameConfig.SURVIVOR_KEY.asString());
 
-        new BomberExplodeListener(_ -> {}, () -> {}).accept(new BomberExplodeEvent(bomber, bomber.getPosition().asVec()));
+        new BomberExplodeListener(_ -> {}, _ -> {}, () -> false).accept(new BomberExplodeEvent(bomber, bomber.getPosition().asVec()));
 
         assertEquals(2, ((TamiasPlayer) bomber).getKills());
 
@@ -143,7 +179,7 @@ class BomberExplodeListenerIntegrationTest extends TamiasPlayerTestBase {
         Player bomber = createPlayer(env, instance, new Pos(0, 40, 0), GameConfig.BOMBER_KEY.asString());
         createPlayer(env, instance, new Pos(10, 40, 0), GameConfig.SURVIVOR_KEY.asString());
 
-        new BomberExplodeListener(_ -> {}, () -> {}).accept(new BomberExplodeEvent(bomber, bomber.getPosition().asVec()));
+        new BomberExplodeListener(_ -> {}, _ -> {}, () -> false).accept(new BomberExplodeEvent(bomber, bomber.getPosition().asVec()));
 
         assertEquals(0, ((TamiasPlayer) bomber).getKills());
 
