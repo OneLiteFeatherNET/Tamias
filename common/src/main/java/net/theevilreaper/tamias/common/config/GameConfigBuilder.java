@@ -17,6 +17,7 @@ public final class GameConfigBuilder implements GameConfig.Builder {
     private int teamSize;
     private int maxRounds;
     private @Nullable String sentryDsn;
+    private BomberAssistConfig bomberAssist = BomberAssistConfig.DEFAULT;
 
     @Override
     public GameConfig.Builder minPlayers(int minPlayers) {
@@ -67,9 +68,15 @@ public final class GameConfigBuilder implements GameConfig.Builder {
     }
 
     @Override
+    public GameConfig.Builder bomberAssist(BomberAssistConfig bomberAssist) {
+        this.bomberAssist = bomberAssist;
+        return this;
+    }
+
+    @Override
     public GameConfig build() {
         // Every player can end up in the same team, e.g. when all survivors are converted to bombers
         Check.argCondition(teamSize < maxPlayers, "The team size must be at least the max players");
-        return new GameConfigImpl(minPlayers, maxPlayers, lobbyTime, maxGameTime, teamSize, maxRounds, sentryDsn);
+        return new GameConfigImpl(minPlayers, maxPlayers, lobbyTime, maxGameTime, teamSize, maxRounds, sentryDsn, bomberAssist);
     }
 }

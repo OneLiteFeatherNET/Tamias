@@ -40,4 +40,21 @@ class GameConfigReaderTest {
     void testBlankSentryDsnIsNull() throws IOException {
         assertNull(read("sentryDsn=\nminPlayers=2\n").sentryDsn(), "a blank DSN means reporting stays off");
     }
+
+    @Test
+    void testMissingAssistKeysUseTheDefault() throws IOException {
+        assertEquals(BomberAssistConfig.DEFAULT, read("minPlayers=2\n").bomberAssist());
+    }
+
+    @Test
+    void testReadsTheAssistSettings() throws IOException {
+        GameConfig config = read("""
+                bomberAssistStep=0.5
+                bomberAssistMaxBonus=1.0
+                bomberAssistNearMissDistance=8
+                bomberAssistDecaySeconds=20
+                """);
+
+        assertEquals(new BomberAssistConfig(0.5, 1.0, 8, 20), config.bomberAssist());
+    }
 }

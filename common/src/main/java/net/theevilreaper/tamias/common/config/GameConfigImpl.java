@@ -13,7 +13,8 @@ import org.jetbrains.annotations.Nullable;
  * @param gameTime   the duration of a round in seconds
  * @param teamSize   the general size of each team
  * @param maxRounds  the maximum rounds for the game
- * @param sentryDsn  the DSN Sentry reports to, or {@code null} to keep the error reporting off
+ * @param sentryDsn    the DSN Sentry reports to, or {@code null} to keep the error reporting off
+ * @param bomberAssist the settings of the bomber assist
  * @author theEvilReaper
  * @version 1.0.0
  * @since 1.0.0
@@ -25,7 +26,8 @@ public record GameConfigImpl(
         int gameTime,
         int teamSize,
         int maxRounds,
-        @Nullable String sentryDsn
+        @Nullable String sentryDsn,
+        BomberAssistConfig bomberAssist
 ) implements GameConfig {
 
 }

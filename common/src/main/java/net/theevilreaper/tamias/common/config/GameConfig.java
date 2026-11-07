@@ -93,6 +93,13 @@ public sealed interface GameConfig permits GameConfigImpl, InternalGameConfig {
     @Nullable String sentryDsn();
 
     /**
+     * Returns the settings of the bomber assist.
+     *
+     * @return the assist settings
+     */
+    BomberAssistConfig bomberAssist();
+
+    /**
      * The {@link Builder} interface is used to create a new game configuration.
      * It provides methods to set the values for the configuration.
      *
@@ -158,6 +165,14 @@ public sealed interface GameConfig permits GameConfigImpl, InternalGameConfig {
          * @return the builder instance
          */
         Builder sentryDsn(@Nullable String sentryDsn);
+
+        /**
+         * Sets the settings of the bomber assist. Defaults to {@link BomberAssistConfig#DEFAULT}.
+         *
+         * @param bomberAssist the assist settings
+         * @return the builder instance
+         */
+        Builder bomberAssist(BomberAssistConfig bomberAssist);
 
         /**
          * Builds the game configuration.

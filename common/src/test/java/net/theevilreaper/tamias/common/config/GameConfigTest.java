@@ -74,4 +74,10 @@ class GameConfigTest {
         assertEquals(12, config.teamSize());
     }
 
+    @Test
+    void testBuilderUsesTheDefaultAssist() {
+        GameConfig config = GameConfig.builder().minPlayers(2).maxPlayers(12).teamSize(12).build();
+
+        assertEquals(BomberAssistConfig.DEFAULT, config.bomberAssist());
+    }
 }

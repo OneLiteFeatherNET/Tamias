@@ -22,6 +22,8 @@ import java.util.Properties;
  *     <li>teamSize</li>
  *     <li>maxRounds</li>
  *     <li>sentryDsn (optional, no default: without it the error reporting stays off)</li>
+ *     <li>bomberAssistStep, bomberAssistMaxBonus, bomberAssistNearMissDistance, bomberAssistDecaySeconds
+ *     (see {@link BomberAssistConfig}, a max bonus of 0 turns the assist off)</li>
  * </ul>
  * <p>
  * If a property cannot be found in the file, the default value will be used.
@@ -111,13 +113,32 @@ public final class GameConfigReader {
             maxRounds = Integer.parseInt(properties.getProperty("maxRounds"));
         }
 
+        BomberAssistConfig assist = BomberAssistConfig.DEFAULT;
+        BomberAssistConfig bomberAssist = new BomberAssistConfig(
+                readDouble(properties, "bomberAssistStep", assist.step()),
+                readDouble(properties, "bomberAssistMaxBonus", assist.maxBonus()),
+                readDouble(properties, "bomberAssistNearMissDistance", assist.nearMissDistance()),
+                readInt(properties, "bomberAssistDecaySeconds", assist.decaySeconds())
+        );
+
         configBuilder.minPlayers(minPlayers)
                 .maxPlayers(maxPlayers)
                 .lobbyTime(lobbyTime)
                 .gameTime(maxGameTime)
                 .teamSize(teamSize)
                 .maxRounds(maxRounds)
-                .sentryDsn(properties.getProperty("sentryDsn"));
+                .sentryDsn(properties.getProperty("sentryDsn"))
+                .bomberAssist(bomberAssist);
         return configBuilder.build();
+    }
+
+    private static double readDouble(Properties properties, String key, double fallback) {
+        String value = properties.getProperty(key);
+        return value == null ? fallback : Double.parseDouble(value.strip());
+    }
+
+    private static int readInt(Properties properties, String key, int fallback) {
+        String value = properties.getProperty(key);
+        return value == null ? fallback : Integer.parseInt(value.strip());
     }
 }
