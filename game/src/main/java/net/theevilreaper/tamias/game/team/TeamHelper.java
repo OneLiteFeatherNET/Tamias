@@ -107,12 +107,24 @@ public final class TeamHelper {
     }
 
     /**
-     * Switches a survivor player to the TNT/Bomber team during gameplay.
+     * Switches a survivor player to the TNT/Bomber team during gameplay and lets the new bomber spawn on a TNT.
      *
      * @param teamService the team service
      * @param player      the survivor player to convert
      */
     public static void switchToTNTTeam(TeamService teamService, Player player) {
+        moveToTNTTeam(teamService, player);
+        spawnAsBomber(player);
+    }
+
+    /**
+     * Moves a survivor player to the TNT/Bomber team without letting them spawn on a TNT.
+     * Use {@link #spawnAsBomber(Player)} afterward if the round goes on.
+     *
+     * @param teamService the team service
+     * @param player      the survivor player to convert
+     */
+    public static void moveToTNTTeam(TeamService teamService, Player player) {
         Check.argCondition(!player.hasTag(Tags.TEAM_KEY), "Need a team tag for switching teams");
         Check.argCondition(!GameConfig.SURVIVOR_KEY.asString().equals(player.getTag(Tags.TEAM_KEY)), "The player must be a survivor");
 
@@ -121,6 +133,14 @@ public final class TeamHelper {
 
         removePlayerFromTeam(survivorTeam, player);
         addPlayerToTeam(bomberTeam, player);
+    }
+
+    /**
+     * Lets a converted bomber spawn on a free TNT block.
+     *
+     * @param player the bomber to spawn
+     */
+    public static void spawnAsBomber(Player player) {
         EventDispatcher.call(new RoleToBomberChangeEvent(player));
     }
 
