@@ -121,6 +121,29 @@ class BomberExplodeRoundEndIntegrationTest extends TamiasPlayerTestBase {
     }
 
     @Test
+    void testLastSurvivorGetsNoSpectatorMessageWithoutFreeTnt(@NotNull Env env) {
+        Instance instance = createInstance(env);
+        this.tntPositions.clear();
+        Player bomber = createPlayer(env, instance, new Pos(0, 40, 0), GameConfig.BOMBER_KEY);
+        TestConnection survivorConnection = env.createConnection();
+        Player lastSurvivor = survivorConnection.connect(instance, new Pos(2, 40, 0));
+        addToTeam(lastSurvivor, GameConfig.SURVIVOR_KEY);
+        Collector<SystemChatPacket> messages = survivorConnection.trackIncoming(SystemChatPacket.class);
+
+        EventDispatcher.call(new BomberExplodeEvent(bomber, bomber.getPosition().asVec()));
+
+        assertTrue(this.playingPhase.isFinished());
+        assertFalse(SpectatorHelper.isSpectator(lastSurvivor));
+        assertNull(this.staminaService.getStaminaBar(lastSurvivor));
+
+        List<String> chat = messages.collect().stream().map(packet -> plainText(packet.message())).toList();
+        assertFalse(chat.contains(plainText(GameMessages.getSpectatorMessage(lastSurvivor))));
+        assertTrue(chat.contains(plainText(GameMessages.getDeathMessage(lastSurvivor, bomber))));
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
     void testBlownUpSurvivorSpawnsOnTntWhileTheRoundGoesOn(@NotNull Env env) {
         Instance instance = createInstance(env);
         Player bomber = createPlayer(env, instance, new Pos(0, 40, 0), GameConfig.BOMBER_KEY);
