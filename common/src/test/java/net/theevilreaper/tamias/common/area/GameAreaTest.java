@@ -72,6 +72,39 @@ class GameAreaTest {
     }
 
     @Test
+    void testRandomPositionLooksToAreaCenter() {
+        GameArea gameArea = new GameArea(areaData);
+
+        // The area spans 0..10, so its middle is the centre of block 5
+        gameArea.setTntPositions(List.of(new Vec(0, 1, 5)));
+        assertEquals(-90f, gameArea.getRandomPosition().yaw(), 0.01f);
+
+        gameArea.setTntPositions(List.of(new Vec(10, 1, 5)));
+        assertEquals(90f, gameArea.getRandomPosition().yaw(), 0.01f);
+
+        gameArea.setTntPositions(List.of(new Vec(5, 1, 0)));
+        assertEquals(0f, gameArea.getRandomPosition().yaw(), 0.01f);
+
+        gameArea.setTntPositions(List.of(new Vec(5, 1, 10)));
+        Pos north = gameArea.getRandomPosition();
+        assertEquals(180f, Math.abs(north.yaw()), 0.01f);
+        assertEquals(0f, north.pitch(), 0.01f);
+        assertEquals(new Vec(5, 1, 10), north.asVec());
+    }
+
+    @Test
+    void testRandomPositionInAreaCenterLooksSouth() {
+        GameArea gameArea = new GameArea(areaData);
+
+        // Block 5 is the exact middle of the 0..10 area, so there is no direction to look at
+        gameArea.setTntPositions(List.of(new Vec(5, 1, 5)));
+        Pos center = gameArea.getRandomPosition();
+        assertEquals(0f, center.yaw(), 0.01f);
+        assertEquals(0f, center.pitch(), 0.01f);
+        assertEquals(new Vec(5, 1, 5), center.asVec());
+    }
+
+    @Test
     void testSetTntPositionsReplacesOldPositions() {
         GameArea gameArea = new GameArea(areaData);
         gameArea.setTntPositions(List.of(new Vec(1, 1, 1)));
