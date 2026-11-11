@@ -93,6 +93,18 @@ class GameAreaTest {
     }
 
     @Test
+    void testRandomPositionInAreaCenterLooksSouth() {
+        GameArea gameArea = new GameArea(areaData);
+
+        // Block 5 is the exact middle of the 0..10 area, so there is no direction to look at
+        gameArea.setTntPositions(List.of(new Vec(5, 1, 5)));
+        Pos center = gameArea.getRandomPosition();
+        assertEquals(0f, center.yaw(), 0.01f);
+        assertEquals(0f, center.pitch(), 0.01f);
+        assertEquals(new Vec(5, 1, 5), center.asVec());
+    }
+
+    @Test
     void testSetTntPositionsReplacesOldPositions() {
         GameArea gameArea = new GameArea(areaData);
         gameArea.setTntPositions(List.of(new Vec(1, 1, 1)));
