@@ -1,7 +1,11 @@
 package net.theevilreaper.tamias.game.round;
 
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.network.packet.server.play.SystemChatPacket;
+import net.minestom.testing.Collector;
 import net.minestom.testing.Env;
+import net.minestom.testing.TestConnection;
 import net.theevilreaper.tamias.common.config.GameConfig;
 import net.theevilreaper.tamias.game.player.RoundRole;
 import net.theevilreaper.tamias.game.player.TamiasPlayer;
@@ -13,7 +17,10 @@ import net.theevilreaper.xerus.api.team.TeamService;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RoundWinsIntegrationTest extends TamiasPlayerTestBase {
 
@@ -102,6 +109,34 @@ class RoundWinsIntegrationTest extends TamiasPlayerTestBase {
         RoundWins.credit(survivorTeam, bomberTeam);
 
         assertEquals(0, player.getRoundWins());
+
+        env.destroyInstance(instance, true);
+    }
+
+    @Test
+    void testConvertedSurvivorIsToldWhyTheWinDoesNotCount(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        TeamService teamService = createTeams();
+        Team survivorTeam = teamService.getTeam(GameConfig.SURVIVOR_KEY).orElseThrow();
+        Team bomberTeam = teamService.getTeam(GameConfig.BOMBER_KEY).orElseThrow();
+        TestConnection survivorConnection = env.createConnection();
+        TestConnection bomberConnection = env.createConnection();
+        TamiasPlayer survivor = (TamiasPlayer) survivorConnection.connect(instance);
+        TamiasPlayer bomber = (TamiasPlayer) bomberConnection.connect(instance);
+        TeamHelper.addPlayerToTeam(survivorTeam, survivor);
+        TeamHelper.addPlayerToTeam(bomberTeam, bomber);
+
+        RoundWins.snapshotRoles(survivorTeam, bomberTeam);
+        TeamHelper.moveToTNTTeam(teamService, survivor);
+        Collector<SystemChatPacket> survivorMessages = survivorConnection.trackIncoming(SystemChatPacket.class);
+        Collector<SystemChatPacket> bomberMessages = bomberConnection.trackIncoming(SystemChatPacket.class);
+        RoundWins.credit(survivorTeam, bomberTeam);
+
+        List<SystemChatPacket> packets = survivorMessages.collect();
+        assertEquals(1, packets.size());
+        String text = PlainTextComponentSerializer.plainText().serialize(packets.getFirst().message());
+        assertTrue(text.contains("started this round as a survivor"), text);
+        bomberMessages.assertEmpty();
 
         env.destroyInstance(instance, true);
     }

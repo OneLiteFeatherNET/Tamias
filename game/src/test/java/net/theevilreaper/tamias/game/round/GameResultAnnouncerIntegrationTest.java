@@ -40,8 +40,8 @@ class GameResultAnnouncerIntegrationTest extends TamiasPlayerTestBase {
         secondMessages.assertSingle();
         String firstText = plainText(firstMessages);
         String secondText = plainText(secondMessages);
-        assertTrue(firstText.contains("You won 2 / 3 rounds · 4 kills · 7 hits"), firstText);
-        assertTrue(secondText.contains("You won 1 / 3 rounds · 0 kills · 0 hits"), secondText);
+        assertTrue(firstText.contains("Game statistics\nWins: 2 / 3\nKills: 4\nHits: 7"), firstText);
+        assertTrue(secondText.contains("Game statistics\nWins: 1 / 3\nKills: 0\nHits: 0"), secondText);
         assertFalse(firstText.contains(second.getUsername()), firstText);
         assertFalse(secondText.contains(first.getUsername()), secondText);
 
