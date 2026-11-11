@@ -43,6 +43,9 @@ public final class GameMessages extends Messages {
     public static final Component PHASE_NOT_RUNNING;
     public static final Component PHASE_FORCE_STARTED;
 
+    public static final Component STATS_LINE;
+    public static final Component CONVERTED_NO_WIN;
+
     public static final Component STATS_DISABLED;
     public static final Component STATS_FAILED;
     public static final Component STATS_PLAYER_ONLY;
@@ -61,6 +64,9 @@ public final class GameMessages extends Messages {
         GAME_END_KICK_MESSAGE = Component.text("The game is over. Thanks for playing it. <3", NamedTextColor.RED);
         MAP_READY = Component.text("Map is ready!", NamedTextColor.GREEN);
         MAP_BUILDING = Component.text("Map is building up...", NamedTextColor.GREEN);
+        STATS_LINE = Component.text("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", NamedTextColor.GRAY);
+        CONVERTED_NO_WIN = withMiniPrefix("<gray>You started this round as a <green>survivor<gray>, "
+                + "so the win of the bombers doesn't count for you!");
         STATS_DISABLED = withMiniPrefix("<red>Statistics are not available on this server!");
         STATS_FAILED = withMiniPrefix("<red>The statistics could not be loaded, please try again later!");
         STATS_PLAYER_ONLY = withMiniPrefix("<red>Only players have statistics of their own, add a player name!");
@@ -136,8 +142,22 @@ public final class GameMessages extends Messages {
      */
     @Contract(value = "_, _, _, _ -> new", pure = true)
     public static Component getPersonalResult(int wins, int rounds, int kills, int hits) {
-        return withMiniPrefix("<gray>You won <green>" + wins + " <gray>/ <aqua>" + rounds + " <gray>rounds · <red>"
-                + kills + " <gray>kills · <yellow>" + hits + " <gray>hits");
+        return STATS_LINE
+                .append(Component.newline())
+                .append(Component.text("Game statistics", NamedTextColor.YELLOW))
+                .append(Component.newline())
+                .append(Component.text("Wins: ", NamedTextColor.GRAY)
+                        .append(Component.text(wins, NamedTextColor.GREEN))
+                        .append(Component.text(" / ", NamedTextColor.GRAY))
+                        .append(Component.text(rounds, NamedTextColor.AQUA)))
+                .append(Component.newline())
+                .append(Component.text("Kills: ", NamedTextColor.GRAY)
+                        .append(Component.text(kills, NamedTextColor.RED)))
+                .append(Component.newline())
+                .append(Component.text("Hits: ", NamedTextColor.GRAY)
+                        .append(Component.text(hits, NamedTextColor.YELLOW)))
+                .append(Component.newline())
+                .append(STATS_LINE);
     }
 
     /**

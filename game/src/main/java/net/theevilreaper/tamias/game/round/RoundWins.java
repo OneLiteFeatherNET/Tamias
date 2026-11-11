@@ -3,6 +3,7 @@ package net.theevilreaper.tamias.game.round;
 import net.minestom.server.entity.Player;
 import net.theevilreaper.tamias.game.player.RoundRole;
 import net.theevilreaper.tamias.game.player.TamiasPlayer;
+import net.theevilreaper.tamias.game.util.GameMessages;
 import net.theevilreaper.xerus.api.team.Team;
 
 /**
@@ -30,6 +31,7 @@ public final class RoundWins {
 
     /**
      * Credits a round win to the players of the winning team which also started the round in that team.
+     * Survivors which were converted to bombers are told why the win of the bombers doesn't count for them.
      * Must be called before the teams are cleared.
      *
      * @param survivorTeam the survivor team
@@ -39,8 +41,11 @@ public final class RoundWins {
         Team winner = RoundConditions.getWinner(survivorTeam, bomberTeam);
         RoundRole winnerRole = winner == survivorTeam ? RoundRole.SURVIVOR : RoundRole.BOMBER;
         for (Player player : winner.getPlayers()) {
-            if (player instanceof TamiasPlayer tamiasPlayer && tamiasPlayer.getStartRole() == winnerRole) {
+            if (!(player instanceof TamiasPlayer tamiasPlayer)) continue;
+            if (tamiasPlayer.getStartRole() == winnerRole) {
                 tamiasPlayer.addRoundWin();
+            } else if (tamiasPlayer.getStartRole() == RoundRole.SURVIVOR) {
+                tamiasPlayer.sendMessage(GameMessages.CONVERTED_NO_WIN);
             }
         }
     }
