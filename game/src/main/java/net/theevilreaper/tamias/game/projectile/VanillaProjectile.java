@@ -390,7 +390,7 @@ public abstract class VanillaProjectile extends Entity {
         return !shooterBox.intersectBox(shooterOffset, new BoundingBox(min, max));
     }
 
-    private static BoundingBox hitBox(long tick) {
+    static BoundingBox hitBox(long tick) {
         return HIT_BOXES[(int) Math.round(hitMargin(tick) * 20)];
     }
 
@@ -400,7 +400,9 @@ public abstract class VanillaProjectile extends Entity {
         for (int step = 0; step < boxes.length; step++) {
             double margin = step / 20.0;
             double diameter = Math.max(margin * 2.0, 1.0E-6);
-            boxes[step] = new BoundingBox(diameter, diameter, diameter, new Vec(0.0, -margin, 0.0));
+            // The offset is the min corner of the box, the box has to be centered on the projectile on every axis
+            double half = diameter / 2.0;
+            boxes[step] = new BoundingBox(diameter, diameter, diameter, new Vec(-half, -half, -half));
         }
         return boxes;
     }
