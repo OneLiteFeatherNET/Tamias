@@ -23,6 +23,7 @@ import net.theevilreaper.tamias.common.player.PermissionAwarePlayer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * The {@link TamiasPlayer} can be disguised for its viewers without changing the server-side entity type.
@@ -40,6 +41,8 @@ public final class TamiasPlayer extends PermissionAwarePlayer {
     // runs out, the server hides the bomber at the explosion anyway
     static final int PRIMED_FUSE_TIME = 60;
     static final BoundingBox DISGUISE_BOUNDING_BOX = new BoundingBox(0.98, 0.98, 0.98);
+    // The tick of the packet and one late tick
+    private static final int MOVEMENT_EXPIRY_TICKS = 2;
 
     private final BoundingBox playerBoundingBox;
     private DisguiseState disguiseState = DisguiseState.NONE;
@@ -49,8 +52,8 @@ public final class TamiasPlayer extends PermissionAwarePlayer {
     private int hits;
     private int roundKills;
     private int roundHits;
-    private Pos lastTickPosition;
     private Vec knownMovement = Vec.ZERO;
+    private int ticksWithoutMovement;
 
     /**
      * {@inheritDoc}
@@ -192,25 +195,47 @@ public final class TamiasPlayer extends PermissionAwarePlayer {
     }
 
     /**
-     * Returns how far this player moved during the last tick, in blocks per tick.
+     * Returns the movement of the last movement packet, in blocks per client tick.
      * Projectiles use it as the movement of their shooter, the way vanilla uses the movement the client reported.
      *
-     * @return the movement of the last tick
+     * @return the movement of the last movement packet, zero after a teleport or without recent movement
      */
     public Vec getKnownMovement() {
         return this.knownMovement;
     }
 
     /**
-     * Measures the movement of this tick. Player packets are interpreted in {@link Player#update(long)}, so the position
-     * after the super call contains everything the client sent during this tick.
+     * Minestom moves a player through this method for every movement packet, teleports set the position directly.
+     * The difference of one packet is the movement of one client tick. Measuring per server tick instead would double
+     * or lose the movement whenever the network delivers two packets in one tick and none in the next.
+     * A packet which only changes the view (using an item does that too) keeps the known movement.
+     */
+    @Override
+    public void refreshPosition(Pos newPosition, boolean ignoreView, boolean sendPackets) {
+        final Pos previousPosition = getPosition();
+        super.refreshPosition(newPosition, ignoreView, sendPackets);
+        final Pos position = getPosition();
+        if (position.samePoint(previousPosition)) return;
+        this.knownMovement = position.sub(previousPosition).asVec();
+        this.ticksWithoutMovement = 0;
+    }
+
+    @Override
+    public CompletableFuture<Void> teleport(Pos position, Vec velocity, long[] chunks, int flags, boolean shouldConfirm) {
+        this.knownMovement = Vec.ZERO;
+        return super.teleport(position, velocity, chunks, flags, shouldConfirm);
+    }
+
+    /**
+     * Forgets the known movement once the client sent no movement for a whole tick. A tick without a packet alone is
+     * kept, the packets of the next tick can still be delayed by the network.
      */
     @Override
     public void update(long time) {
         super.update(time);
-        final Pos position = getPosition();
-        this.knownMovement = this.lastTickPosition == null ? Vec.ZERO : position.sub(this.lastTickPosition).asVec();
-        this.lastTickPosition = position;
+        if (++this.ticksWithoutMovement > MOVEMENT_EXPIRY_TICKS) {
+            this.knownMovement = Vec.ZERO;
+        }
     }
 
     @Override
