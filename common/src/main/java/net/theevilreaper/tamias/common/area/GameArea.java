@@ -151,8 +151,28 @@ public final class GameArea implements PlayingArea {
             }
             Vec position = iterator.next();
             iterator.remove();
-            return position.asPos();
+            return lookToCenter(position);
         }
+    }
+
+    /**
+     * Returns the given block position with a view towards the middle of the area. Without it the view would always
+     * point south, so a player on a TNT block at the edge could look out of the area.
+     *
+     * @param position the block position of the TNT
+     * @return the position with a horizontal view towards the middle of the area
+     */
+    private Pos lookToCenter(Vec position) {
+        Vec lower = this.areaData.lowerCorner();
+        Vec upper = this.areaData.upperCorner();
+        Vec areaCenter = new Vec(
+                (lower.blockX() + upper.blockX()) / 2.0 + 0.5,
+                position.y(),
+                (lower.blockZ() + upper.blockZ()) / 2.0 + 0.5
+        );
+        // The player stands in the middle of the block, so the view is computed from there
+        Pos blockCenter = new Pos(position.x() + 0.5, position.y(), position.z() + 0.5);
+        return position.asPos().withView(blockCenter.withLookAt(areaCenter).yaw(), 0);
     }
 
     @Override
