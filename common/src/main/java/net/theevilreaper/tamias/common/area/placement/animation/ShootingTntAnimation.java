@@ -97,7 +97,7 @@ public final class ShootingTntAnimation implements TntAnimation {
      */
     static int flightTicks(double distance) {
         long ticks = Math.round(distance / FLIGHT_SPEED);
-        return (int) Math.clamp(ticks, MIN_FLIGHT_TICKS, MAX_FLIGHT_TICKS);
+        return Math.clamp(ticks, MIN_FLIGHT_TICKS, MAX_FLIGHT_TICKS);
     }
 
     /**
