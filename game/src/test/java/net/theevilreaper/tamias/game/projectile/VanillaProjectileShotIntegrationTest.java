@@ -7,6 +7,8 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.entity.EntityShootEvent;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.network.packet.client.play.ClientPlayerPositionPacket;
+import net.minestom.server.network.packet.client.play.ClientTeleportConfirmPacket;
 import net.minestom.testing.Env;
 import net.theevilreaper.tamias.game.player.TamiasPlayerTestBase;
 import org.jetbrains.annotations.NotNull;
@@ -81,8 +83,10 @@ class VanillaProjectileShotIntegrationTest extends TamiasPlayerTestBase {
     void testTamiasPlayerKnownMovementIsAddedToTheLaunch(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
         Player player = env.createPlayer(instance, new Pos(0, 60, 0));
+        // Minestom ignores movement packets until the client confirmed the spawn teleport
+        player.addPacketToQueue(new ClientTeleportConfirmPacket(player.getLastSentTeleportId()));
         env.tick();
-        player.teleport(new Pos(0.5, 60, 0.25)).join();
+        player.addPacketToQueue(new ClientPlayerPositionPacket(new Pos(0.5, 60, 0.25), true, false));
         env.tick();
         ThrownProjectile egg = new ThrownProjectile(EntityType.EGG, player);
 
