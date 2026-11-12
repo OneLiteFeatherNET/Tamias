@@ -37,7 +37,7 @@ dependencyResolutionManagement {
 
             version("hibernate", "7.4.15.Final")
             version("hikari", "7.1.0")
-            version("flyway", "13.12.1")
+            version("flyway", "13.12.2")
             version("postgresql", "42.7.14")
             version("h2", "2.5.252")
             version("jetbrains-annotations", "26.1.0")
