@@ -33,7 +33,7 @@ dependencyResolutionManagement {
             library("luckperms.api", "net.luckperms", "api").versionRef("luckperms")
             library("luckperms.minestom.loader", "net.luckperms", "minestom-loader").versionRef("luckperms-minestom-loader")
             version("guava", "33.7.2-jre")
-            version("sentry", "8.63.0")
+            version("sentry", "8.64.0")
 
             version("hibernate", "7.4.15.Final")
             version("hikari", "7.1.0")
