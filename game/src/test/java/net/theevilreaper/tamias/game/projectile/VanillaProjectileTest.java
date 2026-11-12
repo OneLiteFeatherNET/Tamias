@@ -49,6 +49,31 @@ class VanillaProjectileTest {
         assertEquals(expectedMargin, VanillaProjectile.hitMargin(tick), EPSILON, "The entity hit margin at tick " + tick);
     }
 
+    @ParameterizedTest(name = "tick {0}")
+    @CsvSource({"0", "3", "5", "8", "20"})
+    void testHitBoxIsCenteredOnTheProjectile(long tick) {
+        double margin = VanillaProjectile.hitMargin(tick);
+        BoundingBox hitBox = VanillaProjectile.hitBox(tick);
+
+        // Vanilla inflates the target box by the margin on every side, so the box must reach the margin in every direction
+        assertEquals(-margin, hitBox.minX(), EPSILON, "The hit box should reach the margin towards -x");
+        assertEquals(margin, hitBox.maxX(), EPSILON, "The hit box should reach the margin towards +x");
+        assertEquals(-margin, hitBox.minY(), EPSILON, "The hit box should reach the margin towards -y");
+        assertEquals(margin, hitBox.maxY(), EPSILON, "The hit box should reach the margin towards +y");
+        assertEquals(-margin, hitBox.minZ(), EPSILON, "The hit box should reach the margin towards -z");
+        assertEquals(margin, hitBox.maxZ(), EPSILON, "The hit box should reach the margin towards +z");
+    }
+
+    @Test
+    void testHitBoxGrazesTheTargetOnThePositiveSide() {
+        BoundingBox targetBox = new BoundingBox(0.98, 0.98, 0.98);
+
+        // 0.2 blocks beside the +x face of the TNT box, inside the 0.3 margin of a projectile alive for 20 ticks
+        Vec projectile = new Vec(0.49 + 0.2, 0.5, 0);
+        assertTrue(targetBox.intersectBox(projectile.neg(), VanillaProjectile.hitBox(20)),
+                "A projectile within the margin beside the +x face should hit");
+    }
+
     @Test
     void testShooterIsOutOfReachWhenTheProjectileIsBesideIt() {
         BoundingBox projectileBox = new BoundingBox(0.25, 0.25, 0.25);
