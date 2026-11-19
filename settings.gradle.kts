@@ -35,7 +35,7 @@ dependencyResolutionManagement {
             version("guava", "33.7.2-jre")
             version("sentry", "8.65.0")
 
-            version("hibernate", "7.4.16.Final")
+            version("hibernate", "7.4.17.Final")
             version("hikari", "7.1.0")
             version("flyway", "13.12.2")
             version("postgresql", "42.7.14")
