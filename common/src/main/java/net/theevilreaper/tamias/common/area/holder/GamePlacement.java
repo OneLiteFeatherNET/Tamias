@@ -28,9 +28,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Function;
 import java.util.function.IntSupplier;
 import java.util.function.ToDoubleFunction;
+import java.util.function.UnaryOperator;
 
 public final class GamePlacement implements Placement {
 
@@ -43,7 +43,7 @@ public final class GamePlacement implements Placement {
     private final Vec center;
     private ToDoubleFunction<Point> activeFillOrder;
     private @Nullable GroundFillPattern lastPattern;
-    private final Function<@Nullable TntAnimationType, TntAnimationType> animationPicker;
+    private final UnaryOperator<TntAnimationType> animationPicker;
     private @Nullable TntAnimationType lastTntAnimation;
     private List<Vec> tntCandidates;
     private Set<Vec> groundPositions;
@@ -60,7 +60,7 @@ public final class GamePlacement implements Placement {
      * @param area           the game area
      * @param animationPicker picks the animation of a round, receives the animation of the last round
      */
-    GamePlacement(Instance instance, GameArea area, Function<@Nullable TntAnimationType, TntAnimationType> animationPicker) {
+    GamePlacement(Instance instance, GameArea area, UnaryOperator<TntAnimationType> animationPicker) {
         this.animationPicker = animationPicker;
         this.instance = instance;
         this.area = area;
