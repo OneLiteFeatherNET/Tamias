@@ -72,7 +72,7 @@ public final class MinecartTntAnimation implements TntAnimation {
      */
     static int cartCount(int positions) {
         long carts = (long) Math.ceil(positions / (double) TNT_PER_CART);
-        return (int) Math.clamp(carts, 1, MAX_CARTS);
+        return Math.clamp(carts, 1, MAX_CARTS);
     }
 
     /**
