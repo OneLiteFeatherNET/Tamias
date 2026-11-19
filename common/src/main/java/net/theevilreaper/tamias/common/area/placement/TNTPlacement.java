@@ -190,70 +190,61 @@ public class TNTPlacement extends AreaBasePlacement {
     }
 
     /**
-     * Places the TNT block and reports its position. Nothing happens once the placement is stopped, because a
-     * landing can still be triggered by a block which lands during the stop.
-     *
-     * @param position the position where the TNT lands
-     */
-    private void land(Vec position) {
-        if (this.stopped) return;
-        doPlaceBlock(position, Block.TNT);
-        this.remainingPositions.remove(position);
-        this.landingConsumer.accept(position);
-        completeIfLanded();
-    }
-
-    private void schedule(int delay, Runnable runnable) {
-        // A stopped placement must not start new landings, e.g. the members of a group which lands during the stop
-        if (this.stopped) return;
-        Task[] task = new Task[1];
-        task[0] = MinecraftServer.getSchedulerManager().buildTask(() -> {
-            this.pendingTasks.remove(task[0]);
-            runnable.run();
-        }).delay(TaskSchedule.tick(delay)).schedule();
-        this.pendingTasks.add(task[0]);
-    }
-
-    /**
-     * The context which is handed to the animations. It delegates to the placement, so the animations can't bypass
-     * the stop guards.
+     * The context which is handed to the animations. It holds the stop guards, so the animations can't bypass them.
      */
     private final class AnimationContext implements TntAnimationContext {
 
         @Override
         public Instance instance() {
-            return TNTPlacement.this.instance;
+            return instance;
         }
 
         @Override
         public boolean hasGround(Vec cell) {
-            return TNTPlacement.this.groundCheck.test(cell.sub(0, 1, 0));
+            return groundCheck.test(cell.sub(0, 1, 0));
         }
 
         @Override
         public boolean isInArea(Vec cell) {
-            return TNTPlacement.this.areaCheck.test(cell.sub(0, 1, 0));
+            return areaCheck.test(cell.sub(0, 1, 0));
         }
 
         @Override
         public void schedule(int delayTicks, Runnable action) {
-            TNTPlacement.this.schedule(delayTicks, action);
+            // A stopped placement must not start new landings, e.g. the members of a group which lands during the stop
+            if (stopped) return;
+            Task[] task = new Task[1];
+            task[0] = MinecraftServer.getSchedulerManager().buildTask(() -> {
+                pendingTasks.remove(task[0]);
+                action.run();
+            }).delay(TaskSchedule.tick(delayTicks)).schedule();
+            pendingTasks.add(task[0]);
         }
 
         @Override
         public void track(Entity entity) {
-            TNTPlacement.this.fallingEntities.add(entity);
+            fallingEntities.add(entity);
         }
 
         @Override
         public void release(Entity entity) {
-            TNTPlacement.this.fallingEntities.remove(entity);
+            fallingEntities.remove(entity);
             entity.remove();
         }
 
+        /**
+         * Places the TNT block and reports its position. Nothing happens once the placement is stopped, because a
+         * landing can still be triggered by a block which lands during the stop.
+         *
+         * @param position the position where the TNT lands
+         */
         @Override
         public void land(Vec position) {
-            TNTPlacement.this.land(position);
+            if (stopped) return;
+            doPlaceBlock(position, Block.TNT);
+            remainingPositions.remove(position);
+            landingConsumer.accept(position);
+            completeIfLanded();
         }
     }
 }
