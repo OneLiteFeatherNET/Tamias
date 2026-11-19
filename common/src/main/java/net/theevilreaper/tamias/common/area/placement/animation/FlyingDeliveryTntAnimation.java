@@ -276,7 +276,7 @@ public final class FlyingDeliveryTntAnimation implements TntAnimation {
 
         double bob = Math.sin(carrier.ticks * BOB_FREQUENCY) * BOB_AMPLITUDE;
         Vec hover = this.depot.add(0, bob, 0);
-        carrier.position = new Pos(hover, carrier.position.yaw(), carrier.position.pitch());
+        carrier.position = hover.asPos(carrier.position.yaw(), carrier.position.pitch());
         carrier.entity.teleport(carrier.position);
     }
 
@@ -297,8 +297,8 @@ public final class FlyingDeliveryTntAnimation implements TntAnimation {
             meta.setTranslation(PARCEL_TRANSLATION);
             meta.setPosRotInterpolationDuration(PARCEL_INTERPOLATION);
         });
-        Vec hang = hangPoint(Vec.fromPoint(carrier.position));
-        parcel.setInstance(context.instance(), new Pos(hang));
+        Vec hang = hangPoint(carrier.position.asVec());
+        parcel.setInstance(context.instance(), hang);
         context.track(parcel);
 
         carrier.parcel = parcel;
@@ -309,7 +309,7 @@ public final class FlyingDeliveryTntAnimation implements TntAnimation {
         Vec cruise = cruisePoint(target);
         carrier.route.clear();
         // The carrier first climbs straight up from where it is, at the depot or above its last position
-        carrier.route.add(new Vec(carrier.position.x(), cruise.y(), carrier.position.z()));
+        carrier.route.add(carrier.position.asVec().withY(cruise.y()));
         carrier.route.add(cruise);
         carrier.route.add(landingPoint(target));
         carrier.legTicks = 0;
@@ -339,12 +339,11 @@ public final class FlyingDeliveryTntAnimation implements TntAnimation {
         Instance instance = context.instance();
         Point center = target.add(0.5);
         instance.sendGroupedPacket(new ParticlePacket(Particle.POOF, center, new Vec(0.2), 0.02f, 8));
-        instance.playSound(FallingTntAnimation.landingSound(), center.x(), center.y(), center.z());
+        instance.playSound(FallingTntAnimation.landingSound(), center);
         SoundEvent ambient = AMBIENT_SOUNDS.get(this.carrierType);
         if (ambient != null && this.landedCount % SOUND_INTERVAL == 0) {
-            Point carrierPosition = carrier.position;
             Sound ambientSound = Sound.sound(ambient, Sound.Source.NEUTRAL, SOUND_VOLUME, 1f);
-            instance.playSound(ambientSound, carrierPosition.x(), carrierPosition.y(), carrierPosition.z());
+            instance.playSound(ambientSound, carrier.position);
         }
 
         if (this.landedCount == this.totalPositions) {
@@ -362,7 +361,7 @@ public final class FlyingDeliveryTntAnimation implements TntAnimation {
         Vec cruise = cruisePoint(target);
         carrier.route.clear();
         carrier.route.add(cruise);
-        carrier.route.add(new Vec(this.depot.x(), cruise.y(), this.depot.z()));
+        carrier.route.add(this.depot.withY(cruise.y()));
         carrier.route.add(this.depot);
         carrier.legTicks = 0;
         carrier.phase = Phase.RETURN;
@@ -394,7 +393,7 @@ public final class FlyingDeliveryTntAnimation implements TntAnimation {
         Vec goal = carrier.route.peek();
         if (goal == null) return true;
 
-        Vec current = Vec.fromPoint(carrier.position);
+        Vec current = carrier.position.asVec();
         double speed = legSpeed(carrier.legTicks, current.distance(goal));
         Vec next = nextPosition(current, goal, speed);
         carrier.legTicks++;
@@ -414,15 +413,10 @@ public final class FlyingDeliveryTntAnimation implements TntAnimation {
      * @param next    the point the carrier moves to
      */
     private static void moveTo(Carrier carrier, Vec next) {
-        Vec current = Vec.fromPoint(carrier.position);
-        Vec delta = next.sub(current);
-        float yaw = carrier.position.yaw();
-        float pitch = carrier.position.pitch();
-        if (delta.length() > 0) {
-            yaw = (float) Math.toDegrees(Math.atan2(-delta.x(), delta.z()));
-            pitch = (float) -Math.toDegrees(Math.atan2(delta.y(), Math.hypot(delta.x(), delta.z())));
-        }
-        carrier.position = new Pos(next, yaw, pitch);
+        Vec delta = next.sub(carrier.position);
+        Pos moved = carrier.position.withCoord(next);
+        // withDirection keeps the yaw on a vertical move, so the carrier does not snap to the south
+        carrier.position = delta.isZero() ? moved : moved.withDirection(delta);
         carrier.entity.teleport(carrier.position);
     }
 
@@ -433,11 +427,11 @@ public final class FlyingDeliveryTntAnimation implements TntAnimation {
      * @param carrier the carrier which carries the block
      */
     private static void swingParcel(Carrier carrier) {
-        Vec carrierPosition = Vec.fromPoint(carrier.position);
+        Vec carrierPosition = carrier.position.asVec();
         Vec swung = swing(carrier.parcelPosition, hangPoint(carrierPosition), PARCEL_FOLLOW);
         Vec next = clampRope(swung, carrierPosition, MAX_ROPE);
         carrier.parcelPosition = next;
-        carrier.parcel.teleport(new Pos(next));
+        carrier.parcel.teleport(next.asPos());
     }
 
     /**
@@ -514,10 +508,10 @@ public final class FlyingDeliveryTntAnimation implements TntAnimation {
      * Returns the point above the target at which the carrier flies level towards the target.
      *
      * @param target the block position the TNT is delivered to
-     * @return the cruise point above the centre of the target
+     * @return the cruise point above the center of the target
      */
     private static Vec cruisePoint(Vec target) {
-        return new Vec(target.x() + 0.5, target.y() + CRUISE_HEIGHT, target.z() + 0.5);
+        return target.add(0.5, CRUISE_HEIGHT, 0.5);
     }
 
     /**
@@ -525,10 +519,10 @@ public final class FlyingDeliveryTntAnimation implements TntAnimation {
      * target.
      *
      * @param target the block position the TNT is delivered to
-     * @return the landing point above the centre of the target
+     * @return the landing point above the center of the target
      */
     private static Vec landingPoint(Vec target) {
-        return new Vec(target.x() + 0.5, target.y() + LANDING_HEIGHT, target.z() + 0.5);
+        return target.add(0.5, LANDING_HEIGHT, 0.5);
     }
 
     /**
@@ -583,7 +577,7 @@ public final class FlyingDeliveryTntAnimation implements TntAnimation {
 
         private Carrier(Entity entity, Vec depot) {
             this.entity = entity;
-            this.position = new Pos(depot);
+            this.position = depot.asPos();
         }
     }
 }
